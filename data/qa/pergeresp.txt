@@ -1,0 +1,233 @@
+<|user|> Oi
+<|assistant|> Olá! Como posso ajudar? <|end|>
+
+<|user|> Olá
+<|assistant|> Oi! Em que posso ajudar? <|end|>
+
+<|user|> Bom dia
+<|assistant|> Bom dia! Como vai você? <|end|>
+
+<|user|> Boa tarde
+<|assistant|> Boa tarde! Em que posso ajudar? <|end|>
+
+<|user|> Boa noite
+<|assistant|> Boa noite! Posso ajudar em algo? <|end|>
+
+<|user|> Tudo bem?
+<|assistant|> Tudo bem, obrigado por perguntar. E você? <|end|>
+
+<|user|> Como você está?
+<|assistant|> Estou bem, obrigado! Como posso ajudar? <|end|>
+
+<|user|> Qual é o seu nome?
+<|assistant|> Eu me chamo Laika, sou um pequeno modelo de linguagem. <|end|>
+
+<|user|> Quem é você?
+<|assistant|> Sou a Laika, um modelo de linguagem pequeno que está aprendendo a conversar. <|end|>
+
+<|user|> Quem criou você?
+<|assistant|> Fui criada por um estudante que está aprendendo como funcionam os modelos de linguagem. <|end|>
+
+<|user|> O que você faz?
+<|assistant|> Eu tento responder perguntas simples em português. <|end|>
+
+<|user|> Você é uma pessoa?
+<|assistant|> Não, sou um programa de computador que aprendeu a escrever a partir de textos. <|end|>
+
+<|user|> Obrigado
+<|assistant|> De nada! <|end|>
+
+<|user|> Muito obrigado
+<|assistant|> Por nada! Fico feliz em ajudar. <|end|>
+
+<|user|> Tchau
+<|assistant|> Tchau! Até mais. <|end|>
+
+<|user|> Até logo
+<|assistant|> Até logo! <|end|>
+
+<|user|> Qual é a capital do Brasil?
+<|assistant|> A capital do Brasil é Brasília. <|end|>
+
+<|user|> Qual é a capital da França?
+<|assistant|> A capital da França é Paris. <|end|>
+
+<|user|> Qual é a capital de Portugal?
+<|assistant|> A capital de Portugal é Lisboa. <|end|>
+
+<|user|> Qual é a capital da Argentina?
+<|assistant|> A capital da Argentina é Buenos Aires. <|end|>
+
+<|user|> Qual é a capital da Itália?
+<|assistant|> A capital da Itália é Roma. <|end|>
+
+<|user|> Qual é a capital da Espanha?
+<|assistant|> A capital da Espanha é Madri. <|end|>
+
+<|user|> Qual é a capital do Japão?
+<|assistant|> A capital do Japão é Tóquio. <|end|>
+
+<|user|> Qual é a capital da Alemanha?
+<|assistant|> A capital da Alemanha é Berlim. <|end|>
+
+<|user|> Qual é o maior país do mundo?
+<|assistant|> O maior país do mundo em território é a Rússia. <|end|>
+
+<|user|> Qual é o maior oceano do mundo?
+<|assistant|> O maior oceano do mundo é o Oceano Pacífico. <|end|>
+
+<|user|> Qual é o maior rio do Brasil?
+<|assistant|> O maior rio do Brasil é o Rio Amazonas. <|end|>
+
+<|user|> Em que continente fica o Brasil?
+<|assistant|> O Brasil fica na América do Sul. <|end|>
+
+<|user|> Em que continente fica o Egito?
+<|assistant|> O Egito fica na África. <|end|>
+
+<|user|> Qual língua se fala no Brasil?
+<|assistant|> No Brasil se fala português. <|end|>
+
+<|user|> Qual língua se fala na Argentina?
+<|assistant|> Na Argentina se fala espanhol. <|end|>
+
+<|user|> Quantos dias tem uma semana?
+<|assistant|> Uma semana tem sete dias. <|end|>
+
+<|user|> Quantos meses tem um ano?
+<|assistant|> Um ano tem doze meses. <|end|>
+
+<|user|> Quantas horas tem um dia?
+<|assistant|> Um dia tem vinte e quatro horas. <|end|>
+
+<|user|> Quantos minutos tem uma hora?
+<|assistant|> Uma hora tem sessenta minutos. <|end|>
+
+<|user|> Quantos segundos tem um minuto?
+<|assistant|> Um minuto tem sessenta segundos. <|end|>
+
+<|user|> Quais são as cores do semáforo?
+<|assistant|> As cores do semáforo são vermelho, amarelo e verde. <|end|>
+
+<|user|> Quais são as estações do ano?
+<|assistant|> As estações do ano são primavera, verão, outono e inverno. <|end|>
+
+<|user|> Quantos planetas tem o Sistema Solar?
+<|assistant|> O Sistema Solar tem oito planetas. <|end|>
+
+<|user|> Qual é o planeta mais próximo do Sol?
+<|assistant|> O planeta mais próximo do Sol é Mercúrio. <|end|>
+
+<|user|> Qual é o maior planeta do Sistema Solar?
+<|assistant|> O maior planeta do Sistema Solar é Júpiter. <|end|>
+
+<|user|> Em que planeta nós vivemos?
+<|assistant|> Nós vivemos no planeta Terra. <|end|>
+
+<|user|> O que é o Sol?
+<|assistant|> O Sol é a estrela que fica no centro do Sistema Solar e nos dá luz e calor. <|end|>
+
+<|user|> O que é a Lua?
+<|assistant|> A Lua é o satélite natural da Terra. <|end|>
+
+<|user|> O que é um rio?
+<|assistant|> Um rio é uma grande corrente de água doce que corre pela terra até o mar ou outro rio. <|end|>
+
+<|user|> O que é uma árvore?
+<|assistant|> Uma árvore é uma planta grande, com tronco, galhos e folhas. <|end|>
+
+<|user|> O que é um livro?
+<|assistant|> Um livro é um conjunto de páginas com texto escrito para ser lido. <|end|>
+
+<|user|> O que é uma biblioteca?
+<|assistant|> Uma biblioteca é um lugar onde se guardam e se emprestam livros. <|end|>
+
+<|user|> O que é um computador?
+<|assistant|> Um computador é uma máquina que processa informações seguindo instruções. <|end|>
+
+<|user|> O que é a água?
+<|assistant|> A água é um líquido sem cor e sem cheiro, essencial para a vida. <|end|>
+
+<|user|> O que é um mapa?
+<|assistant|> Um mapa é um desenho que representa um lugar visto de cima. <|end|>
+
+<|user|> O que é um médico?
+<|assistant|> Um médico é um profissional que cuida da saúde das pessoas. <|end|>
+
+<|user|> O que é um professor?
+<|assistant|> Um professor é uma pessoa que ensina os alunos. <|end|>
+
+<|user|> O que é uma escola?
+<|assistant|> Uma escola é um lugar onde as pessoas estudam e aprendem. <|end|>
+
+<|user|> O que é um poema?
+<|assistant|> Um poema é um texto escrito em versos, que costuma expressar sentimentos. <|end|>
+
+<|user|> Quem escreveu Dom Casmurro?
+<|assistant|> Dom Casmurro foi escrito por Machado de Assis. <|end|>
+
+<|user|> Quem escreveu Memórias Póstumas de Brás Cubas?
+<|assistant|> Memórias Póstumas de Brás Cubas foi escrito por Machado de Assis. <|end|>
+
+<|user|> Quem foi Machado de Assis?
+<|assistant|> Machado de Assis foi um escritor brasileiro, autor de romances, contos e poemas. <|end|>
+
+<|user|> Quem escreveu O Guarani?
+<|assistant|> O Guarani foi escrito por José de Alencar. <|end|>
+
+<|user|> Quem escreveu Os Lusíadas?
+<|assistant|> Os Lusíadas foi escrito por Luís de Camões. <|end|>
+
+<|user|> Quem foi Luís de Camões?
+<|assistant|> Luís de Camões foi um poeta português, autor de Os Lusíadas. <|end|>
+
+<|user|> Quem pintou a Mona Lisa?
+<|assistant|> A Mona Lisa foi pintada por Leonardo da Vinci. <|end|>
+
+<|user|> Quem descobriu o Brasil?
+<|assistant|> Os portugueses chegaram ao Brasil em 1500, com a frota de Pedro Álvares Cabral. <|end|>
+
+<|user|> Em que ano o Brasil se tornou independente?
+<|assistant|> O Brasil se tornou independente em 1822. <|end|>
+
+<|user|> Quanto é 2 mais 2?
+<|assistant|> Dois mais dois é igual a quatro. <|end|>
+
+<|user|> Quanto é 5 mais 5?
+<|assistant|> Cinco mais cinco é igual a dez. <|end|>
+
+<|user|> Quanto é 10 menos 3?
+<|assistant|> Dez menos três é igual a sete. <|end|>
+
+<|user|> Quanto é 3 vezes 3?
+<|assistant|> Três vezes três é igual a nove. <|end|>
+
+<|user|> Quanto é 10 dividido por 2?
+<|assistant|> Dez dividido por dois é igual a cinco. <|end|>
+
+<|user|> Qual é a cor do céu?
+<|assistant|> Durante o dia, o céu costuma parecer azul. <|end|>
+
+<|user|> Qual é a cor das folhas das árvores?
+<|assistant|> As folhas das árvores geralmente são verdes. <|end|>
+
+<|user|> Quais são os dias da semana?
+<|assistant|> Os dias da semana são domingo, segunda, terça, quarta, quinta, sexta e sábado. <|end|>
+
+<|user|> O que fazem os pássaros?
+<|assistant|> Os pássaros voam, cantam e fazem ninhos. <|end|>
+
+<|user|> Onde vivem os peixes?
+<|assistant|> Os peixes vivem na água, em rios, lagos e mares. <|end|>
+
+<|user|> O que o gato come?
+<|assistant|> O gato costuma comer ração, peixe e carne. <|end|>
+
+<|user|> Para que serve um guarda-chuva?
+<|assistant|> Um guarda-chuva serve para nos proteger da chuva. <|end|>
+
+<|user|> Para que serve um relógio?
+<|assistant|> Um relógio serve para mostrar as horas. <|end|>
+
+<|user|> Para que serve uma caneta?
+<|assistant|> Uma caneta serve para escrever. <|end|>
