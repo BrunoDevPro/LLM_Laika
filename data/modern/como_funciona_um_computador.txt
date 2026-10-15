@@ -1,0 +1,15 @@
+Como funciona um computador
+
+Um computador é uma máquina que recebe informações, faz cálculos com elas e mostra um resultado. Ele faz isso seguindo instruções muito precisas, chamadas programas.
+
+Um computador tem duas partes principais: o hardware e o software. O hardware é a parte física, aquilo que podemos tocar, como a tela, o teclado, o mouse e as peças de dentro da máquina. O software é a parte lógica, formada pelos programas que dizem ao hardware o que fazer.
+
+O cérebro do computador é o processador. Ele executa bilhões de operações simples por segundo, como somar números e comparar valores. A memória RAM guarda as informações que o computador está usando naquele momento. Quando o computador é desligado, a memória RAM se apaga. Para guardar arquivos por muito tempo, o computador usa um disco de armazenamento, como um HD ou um SSD.
+
+Dentro do computador, todas as informações são representadas por apenas dois números: zero e um. Cada zero ou um se chama bit. Com muitos bits juntos, é possível representar letras, imagens, músicas e vídeos.
+
+O sistema operacional é o programa principal do computador. Ele controla o hardware e permite que os outros programas funcionem. Alguns exemplos de sistemas operacionais são o Windows, o Linux, o macOS e o Android, que é usado em muitos celulares.
+
+Quando vários computadores se conectam, eles formam uma rede. A internet é a maior rede do mundo e liga bilhões de computadores e celulares. É por meio dela que enviamos mensagens, assistimos a vídeos e procuramos informações.
+
+Os computadores não pensam como as pessoas. Eles fazem exatamente o que os programas mandam. Mesmo os programas de inteligência artificial, que conseguem conversar e escrever textos, funcionam com cálculos matemáticos feitos a partir de muitos exemplos.

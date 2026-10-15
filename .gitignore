@@ -2,4 +2,6 @@ __pycache__/
 *.pyc
 checkpoints/
 data/books/
+data/wiki/
+data/qa_auto/
 .ipynb_checkpoints/

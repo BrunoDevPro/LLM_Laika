@@ -1,10 +1,12 @@
 """Fine-tuning: ensina o formato pergunta -> resposta.
 
 Para o modelo não decorar o pergeresp (e responder tudo com ele), cada lote mistura:
-  1) exemplos do data/qa/*.txt (limitados a ~15% dos exemplos de chat);
-  2) exemplos sintéticos gerados dos livros ("continue o texto", "frase com a palavra X",
-     "complete a frase"), cujas respostas vêm do que o modelo aprendeu no pré-treino;
-  3) trechos de livro puros (replay), para não esquecer o português do pré-treino.
+  1) exemplos escritos à mão do data/qa/*.txt (~25% dos exemplos de chat); o
+     identidade.txt (nome da Laika) tem peso extra;
+  2) exemplos sintéticos: "continue o texto", "frase com a palavra X", "complete a frase"
+     (de todos os textos) e "resuma o texto" (trechos dos livros do Gutenberg), mais as
+     perguntas "O que é X?" tiradas da Wikipédia (data/qa_auto/);
+  3) trechos de texto puros (replay), para não esquecer o português do pré-treino.
 
 Parte de checkpoints/pretrain_best.pt e grava em checkpoints/finetuned.pt, então o
 pré-treino nunca é sobrescrito: dá para repetir só este script à vontade.
@@ -20,19 +22,25 @@ import torch.nn.functional as F
 from tokenizers import Tokenizer
 
 from chat import generate
-from data_utils import (load_qa_examples, synthetic_examples, ASSISTANT_TOKEN, END_TOKEN,
+from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, ASSISTANT_TOKEN, END_TOKEN,
                         EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--books", default="data/books")
+parser.add_argument("--books", nargs="+", default=["data/books", "data/wiki", "data/modern"])
+parser.add_argument("--summary-books", default="data/books",
+                    help="de onde saem os trechos dos 'Resuma o texto' sintéticos")
 parser.add_argument("--qa", default="data/qa")
+parser.add_argument("--qa-auto", default="data/qa_auto", help="perguntas geradas da Wikipédia")
+parser.add_argument("--wiki-qa", type=int, default=3000, help="máximo de perguntas da Wikipédia usadas")
+parser.add_argument("--identity-boost", type=int, default=2,
+                    help="peso extra do identidade.txt (quem é a Laika)")
 parser.add_argument("--out", default="checkpoints")
 parser.add_argument("--epochs", type=int, default=4)
 parser.add_argument("--lr", type=float, default=5e-5)
 parser.add_argument("--batch-size", type=int, default=16)
 parser.add_argument("--synthetic", type=int, default=4000, help="nº de exemplos gerados dos livros")
-parser.add_argument("--qa-share", type=float, default=0.15, help="fração dos exemplos de chat vinda do pergeresp")
+parser.add_argument("--qa-share", type=float, default=0.25, help="fração dos exemplos de chat vinda do pergeresp")
 parser.add_argument("--replay", type=float, default=0.25, help="fração de cada lote com texto puro dos livros")
 parser.add_argument("--val-fraction", type=float, default=0.1)
 parser.add_argument("--patience", type=int, default=2)
@@ -61,22 +69,35 @@ eot_id = tokenizer.token_to_id(EOT_TOKEN)
 
 
 # ---------- Dados ----------
-book_files = sorted(Path(args.books).glob("*.txt"))
+book_files = [f for folder in args.books for f in sorted(Path(folder).glob("*.txt"))]
 if not book_files:
-    raise SystemExit(f"Nenhum livro em {args.books}: o fine-tuning usa os livros para gerar exemplos.")
+    raise SystemExit(f"Nenhum texto em {args.books}: o fine-tuning usa os textos para gerar exemplos.")
 book_texts = [p.read_text(encoding="utf-8") for p in book_files]
+summary_texts = [p.read_text(encoding="utf-8") for p in sorted(Path(args.summary_books).glob("*.txt"))]
 
 print("Lendo perguntas/respostas:")
 qa_texts = load_qa_examples(args.qa)
-syn_texts = synthetic_examples(book_texts, args.synthetic, seed=args.seed)
-print(f"Exemplos sintéticos gerados dos livros: {len(syn_texts)}")
-for sample in random.sample(syn_texts, min(3, len(syn_texts))):
+identity_texts = set(parse_qa_text((Path(args.qa) / "identidade.txt").read_text(encoding="utf-8"))) \
+    if (Path(args.qa) / "identidade.txt").exists() else set()
+
+syn_texts = synthetic_examples(book_texts, args.synthetic, seed=args.seed,
+                               summary_texts=summary_texts or None)
+print(f"Exemplos sintéticos gerados dos textos: {len(syn_texts)} "
+      f"(resumos de {len(summary_texts)} livros do Gutenberg incluídos)")
+if Path(args.qa_auto).exists():
+    print("Perguntas automáticas (Wikipédia):")
+    auto = load_qa_examples(args.qa_auto)
+    random.shuffle(auto)
+    syn_texts += auto[:args.wiki_qa]
+for sample in random.sample(syn_texts, min(4, len(syn_texts))):
     print("   ", sample[:160])
 
 
-def encode_chat(texts):
+def encode_chat(texts, identity=frozenset()):
     items, too_long = [], 0
     for text in texts:
+        if text in identity:
+            continue  # tratado à parte
         ids = tokenizer.encode(text).ids
         if len(ids) > block:
             too_long += 1
@@ -91,7 +112,8 @@ def encode_chat(texts):
     return items, too_long
 
 
-qa_data, qa_long = encode_chat(qa_texts)
+qa_data, qa_long = encode_chat(qa_texts, identity_texts)
+id_data, _ = encode_chat(list(identity_texts))
 syn_data, _ = encode_chat(syn_texts)
 if qa_long:
     print(f"ATENÇÃO: {qa_long} exemplos do pergeresp passam de {block} tokens e foram descartados.")
@@ -106,6 +128,8 @@ def split(items):
 
 
 qa_train, qa_val = split(qa_data)
+id_train, id_val = split(id_data)
+qa_val += id_val
 syn_train, syn_val = split(syn_data)
 
 # Repete o pergeresp só o suficiente para ele ser ~qa_share dos exemplos de chat.
@@ -113,8 +137,10 @@ qa_repeat = 0
 if qa_train:
     wanted = args.qa_share / (1 - args.qa_share) * len(syn_train)
     qa_repeat = max(1, round(wanted / len(qa_train)))
-print(f"Treino: {len(syn_train)} sintéticos + {len(qa_train)} do pergeresp (x{qa_repeat}) | "
-      f"validação: {len(syn_val)} sintéticos + {len(qa_val)} do pergeresp")
+id_repeat = qa_repeat * args.identity_boost if id_train else 0
+print(f"Treino: {len(syn_train)} sintéticos + {len(qa_train)} do pergeresp (x{qa_repeat}) + "
+      f"{len(id_train)} de identidade (x{id_repeat}) | "
+      f"validação: {len(syn_val)} sintéticos + {len(qa_val)} escritos à mão")
 
 # Texto contínuo dos livros para o replay.
 stream = []
@@ -160,9 +186,13 @@ def validate(items):
     return sum(losses) / len(losses)
 
 
-SAMPLE_PROMPTS = ["Oi", "O que é um rio?", "Escreva uma frase com a palavra noite.",
-                  "Continue o texto: Era uma manhã fria quando ele saiu de casa.",
-                  "Quem escreveu Dom Casmurro?"]
+SAMPLE_PROMPTS = [
+    "Qual é o seu nome?", "Oi", "O que é um vulcão?", "Quem foi Santos Dumont?",
+    "Complete a frase: Quem espera", "Escreva uma frase com a palavra noite.",
+    "Resuma o texto: O menino acordou cedo, tomou café e foi para a escola de bicicleta. "
+    "No caminho, viu um cachorro perdido e parou para ajudar. Por isso, chegou atrasado, "
+    "mas a professora entendeu quando ele contou o que tinha acontecido.",
+]
 
 
 @torch.no_grad()
@@ -177,7 +207,7 @@ def show_samples():
 
 # ---------- Treino ----------
 optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
-items_per_epoch = len(syn_train) + len(qa_train) * qa_repeat
+items_per_epoch = len(syn_train) + len(qa_train) * qa_repeat + len(id_train) * id_repeat
 steps_per_epoch = math.ceil(items_per_epoch / args.batch_size)
 total_steps = steps_per_epoch * args.epochs
 warmup = min(100, total_steps // 10)
@@ -200,7 +230,7 @@ best_path = out_dir / "finetuned.pt"
 model.train()
 
 for epoch in range(1, args.epochs + 1):
-    train_items = syn_train + qa_train * qa_repeat
+    train_items = syn_train + qa_train * qa_repeat + id_train * id_repeat
     random.shuffle(train_items)
     running = 0.0
     for i in range(0, len(train_items), args.batch_size):
@@ -233,5 +263,5 @@ for epoch in range(1, args.epochs + 1):
 
 print("=" * 40)
 print(f"Fine-tuning concluído. Melhor val: {best_val:.4f} -> {best_path}")
-print("Se ainda repetir o pergeresp: rode de novo com --qa-share 0.08 ou --lr 3e-5.")
+print("Se ainda repetir o pergeresp: rode de novo com --qa-share 0.12 ou --lr 3e-5.")
 print("Converse com: python chat.py")

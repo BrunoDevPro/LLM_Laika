@@ -1,44 +1,64 @@
+# Gerado por tools/gerar_pergeresp.py. Linhas começando com # são comentários.
+# Para adicionar exemplos seus, crie outro .txt em data/qa/.
+
+# ===== Conversa (40) =====
+
 <|user|> Oi
-<|assistant|> Olá! Como posso ajudar? <|end|>
+<|assistant|> Olá! Eu sou a Laika. Como posso ajudar? <|end|>
 
 <|user|> Olá
 <|assistant|> Oi! Em que posso ajudar? <|end|>
 
+<|user|> Oi, tudo bem?
+<|assistant|> Tudo bem, obrigada por perguntar! E com você? <|end|>
+
 <|user|> Bom dia
-<|assistant|> Bom dia! Como vai você? <|end|>
+<|assistant|> Bom dia! Como você está? <|end|>
 
 <|user|> Boa tarde
 <|assistant|> Boa tarde! Em que posso ajudar? <|end|>
 
 <|user|> Boa noite
-<|assistant|> Boa noite! Posso ajudar em algo? <|end|>
+<|assistant|> Boa noite! Posso ajudar em alguma coisa? <|end|>
 
 <|user|> Tudo bem?
-<|assistant|> Tudo bem, obrigado por perguntar. E você? <|end|>
+<|assistant|> Tudo bem, e você? <|end|>
 
 <|user|> Como você está?
-<|assistant|> Estou bem, obrigado! Como posso ajudar? <|end|>
+<|assistant|> Estou bem, obrigada! E você? <|end|>
 
-<|user|> Qual é o seu nome?
-<|assistant|> Eu me chamo Laika, sou um pequeno modelo de linguagem. <|end|>
+<|user|> Como vai?
+<|assistant|> Vou bem, obrigada. E você, como vai? <|end|>
 
-<|user|> Quem é você?
-<|assistant|> Sou a Laika, um modelo de linguagem pequeno que está aprendendo a conversar. <|end|>
+<|user|> Estou bem.
+<|assistant|> Que bom! Em que posso ajudar hoje? <|end|>
 
-<|user|> Quem criou você?
-<|assistant|> Fui criada por um estudante que está aprendendo como funcionam os modelos de linguagem. <|end|>
+<|user|> Estou feliz hoje.
+<|assistant|> Que ótimo! Fico contente em saber. O que aconteceu de bom? <|end|>
 
-<|user|> O que você faz?
-<|assistant|> Eu tento responder perguntas simples em português. <|end|>
+<|user|> Estou triste.
+<|assistant|> Sinto muito que você esteja triste. Às vezes ajuda conversar com alguém de confiança. Se quiser, pode me contar o que aconteceu. <|end|>
 
-<|user|> Você é uma pessoa?
-<|assistant|> Não, sou um programa de computador que aprendeu a escrever a partir de textos. <|end|>
+<|user|> Estou cansado.
+<|assistant|> Descansar faz bem. Que tal fazer uma pausa, beber um pouco de água e dormir bem esta noite? <|end|>
+
+<|user|> Estou com fome.
+<|assistant|> Que tal fazer um lanche? Uma fruta ou um sanduíche pode ajudar. <|end|>
 
 <|user|> Obrigado
 <|assistant|> De nada! <|end|>
 
-<|user|> Muito obrigado
+<|user|> Obrigada
 <|assistant|> Por nada! Fico feliz em ajudar. <|end|>
+
+<|user|> Muito obrigado!
+<|assistant|> Imagina! Sempre que precisar, é só perguntar. <|end|>
+
+<|user|> Valeu
+<|assistant|> De nada! <|end|>
+
+<|user|> Desculpa
+<|assistant|> Não tem problema. <|end|>
 
 <|user|> Tchau
 <|assistant|> Tchau! Até mais. <|end|>
@@ -46,74 +66,1273 @@
 <|user|> Até logo
 <|assistant|> Até logo! <|end|>
 
+<|user|> Até amanhã
+<|assistant|> Até amanhã! Tenha uma boa noite. <|end|>
+
+<|user|> Pode me ajudar?
+<|assistant|> Claro! Qual é a sua dúvida? <|end|>
+
+<|user|> Tenho uma pergunta.
+<|assistant|> Pode perguntar. Vou tentar ajudar. <|end|>
+
+<|user|> Sim
+<|assistant|> Certo! O que mais você gostaria de saber? <|end|>
+
+<|user|> Não
+<|assistant|> Tudo bem. Se precisar de alguma coisa, é só falar. <|end|>
+
+<|user|> Ok
+<|assistant|> Combinado! <|end|>
+
+<|user|> Legal!
+<|assistant|> Que bom que você gostou! <|end|>
+
+<|user|> Entendi.
+<|assistant|> Ótimo! Se tiver mais alguma dúvida, pode perguntar. <|end|>
+
+<|user|> Não entendi.
+<|assistant|> Desculpe. Pode me dizer qual parte não ficou clara? Vou tentar explicar de outro jeito. <|end|>
+
+<|user|> Me conte uma piada.
+<|assistant|> Por que o livro de matemática ficou triste? Porque tinha muitos problemas. <|end|>
+
+<|user|> Conte outra piada.
+<|assistant|> O que o zero disse para o oito? Que cinto bonito! <|end|>
+
+<|user|> Você gosta de livros?
+<|assistant|> Gosto muito! Foi lendo livros que eu aprendi a escrever. <|end|>
+
+<|user|> Qual é a sua cor favorita?
+<|assistant|> Eu não enxergo cores, mas, se pudesse escolher, escolheria o azul do céu. <|end|>
+
+<|user|> Que dia é hoje?
+<|assistant|> Eu não tenho acesso a calendário nem a relógio, então não sei que dia é hoje. <|end|>
+
+<|user|> Que horas são?
+<|assistant|> Eu não tenho acesso a um relógio, então não sei que horas são. <|end|>
+
+<|user|> Como está o tempo hoje?
+<|assistant|> Eu não tenho acesso a informações do tempo agora. Você pode olhar a previsão do tempo no celular. <|end|>
+
+<|user|> Quem ganhou o jogo ontem?
+<|assistant|> Eu não tenho acesso a notícias nem a resultados recentes, então não sei. <|end|>
+
+<|user|> Qual é a notícia de hoje?
+<|assistant|> Eu não tenho acesso à internet nem a notícias, então não sei o que aconteceu hoje. <|end|>
+
+<|user|> Qual é o preço do dólar hoje?
+<|assistant|> Eu não tenho acesso a informações atualizadas, então não sei o preço do dólar hoje. <|end|>
+
+# ===== Definições (196) =====
+
+<|user|> O que é água?
+<|assistant|> A água é um líquido sem cor, sem cheiro e sem sabor, essencial para a vida. Ela é formada por hidrogênio e oxigênio. <|end|>
+
+<|user|> O que significa água?
+<|assistant|> A água é um líquido sem cor, sem cheiro e sem sabor, essencial para a vida. Ela é formada por hidrogênio e oxigênio. <|end|>
+
+<|user|> O que é o fogo?
+<|assistant|> O fogo é a luz e o calor produzidos quando alguma coisa queima. <|end|>
+
+<|user|> O que é o ar?
+<|assistant|> O ar é a mistura de gases que envolve a Terra. Ele é formado principalmente por nitrogênio e oxigênio. <|end|>
+
+<|user|> O que é o Sol?
+<|assistant|> O Sol é a estrela que fica no centro do Sistema Solar. Ele nos dá luz e calor. <|end|>
+
+<|user|> Explique o que é o Sol.
+<|assistant|> O Sol é a estrela que fica no centro do Sistema Solar. Ele nos dá luz e calor. <|end|>
+
+<|user|> O que é a Lua?
+<|assistant|> A Lua é o satélite natural da Terra. Ela não tem luz própria e brilha porque reflete a luz do Sol. <|end|>
+
+<|user|> O que é uma estrela?
+<|assistant|> Uma estrela é uma enorme bola de gás muito quente que produz luz e calor. O Sol é uma estrela. <|end|>
+
+<|user|> O que é um planeta?
+<|assistant|> Um planeta é um corpo celeste grande e arredondado que gira ao redor de uma estrela. A Terra é um planeta. <|end|>
+
+<|user|> Defina planeta.
+<|assistant|> Um planeta é um corpo celeste grande e arredondado que gira ao redor de uma estrela. A Terra é um planeta. <|end|>
+
+<|user|> O que é um satélite?
+<|assistant|> Um satélite é um corpo que gira ao redor de um planeta. A Lua é o satélite natural da Terra. <|end|>
+
+<|user|> O que é uma galáxia?
+<|assistant|> Uma galáxia é um conjunto enorme de estrelas, gás e poeira. A nossa galáxia se chama Via Láctea. <|end|>
+
+<|user|> O que é o universo?
+<|assistant|> O universo é tudo o que existe: todas as galáxias, estrelas, planetas, a matéria e a energia. <|end|>
+
+<|user|> Você sabe o que é o universo?
+<|assistant|> O universo é tudo o que existe: todas as galáxias, estrelas, planetas, a matéria e a energia. <|end|>
+
+<|user|> O que é uma nuvem?
+<|assistant|> Uma nuvem é um conjunto de gotinhas de água ou cristais de gelo que flutuam no céu. <|end|>
+
+<|user|> O que é a chuva?
+<|assistant|> A chuva é a água que cai das nuvens em forma de gotas. <|end|>
+
+<|user|> O que é o vento?
+<|assistant|> O vento é o ar em movimento. <|end|>
+
+<|user|> O que significa vento?
+<|assistant|> O vento é o ar em movimento. <|end|>
+
+<|user|> O que é a neve?
+<|assistant|> A neve é a água congelada que cai do céu em forma de flocos brancos, quando faz muito frio. <|end|>
+
+<|user|> O que é o gelo?
+<|assistant|> O gelo é a água em estado sólido. A água vira gelo quando fica abaixo de zero grau Celsius. <|end|>
+
+<|user|> O que é um rio?
+<|assistant|> Um rio é uma corrente de água doce que corre pela terra até chegar ao mar, a um lago ou a outro rio. <|end|>
+
+<|user|> Explique o que é um rio.
+<|assistant|> Um rio é uma corrente de água doce que corre pela terra até chegar ao mar, a um lago ou a outro rio. <|end|>
+
+<|user|> O que é o mar?
+<|assistant|> O mar é uma grande extensão de água salgada que cobre boa parte da Terra. <|end|>
+
+<|user|> O que é um oceano?
+<|assistant|> Um oceano é uma enorme massa de água salgada. O maior oceano da Terra é o Pacífico. <|end|>
+
+<|user|> O que é um lago?
+<|assistant|> Um lago é uma porção de água cercada de terra por todos os lados. <|end|>
+
+<|user|> Defina lago.
+<|assistant|> Um lago é uma porção de água cercada de terra por todos os lados. <|end|>
+
+<|user|> O que é uma montanha?
+<|assistant|> Uma montanha é uma grande elevação de terra, muito mais alta do que o terreno ao redor. <|end|>
+
+<|user|> O que é um vulcão?
+<|assistant|> Um vulcão é uma abertura na superfície da Terra por onde podem sair lava, gases e cinzas. <|end|>
+
+<|user|> O que é uma ilha?
+<|assistant|> Uma ilha é uma porção de terra cercada de água por todos os lados. <|end|>
+
+<|user|> Você sabe o que é uma ilha?
+<|assistant|> Uma ilha é uma porção de terra cercada de água por todos os lados. <|end|>
+
+<|user|> O que é uma floresta?
+<|assistant|> Uma floresta é uma área grande coberta de árvores e com muitas plantas e animais. <|end|>
+
+<|user|> O que é um deserto?
+<|assistant|> Um deserto é uma região onde chove muito pouco. Por isso, tem pouca água e poucas plantas. <|end|>
+
+<|user|> O que é uma praia?
+<|assistant|> Uma praia é a faixa de areia ou de pedras na beira do mar, de um rio ou de um lago. <|end|>
+
+<|user|> O que significa praia?
+<|assistant|> Uma praia é a faixa de areia ou de pedras na beira do mar, de um rio ou de um lago. <|end|>
+
+<|user|> O que é uma árvore?
+<|assistant|> Uma árvore é uma planta grande, com tronco de madeira, galhos e folhas. <|end|>
+
+<|user|> O que é uma flor?
+<|assistant|> Uma flor é a parte da planta onde se formam as sementes. Muitas flores são coloridas e perfumadas. <|end|>
+
+<|user|> O que é uma fruta?
+<|assistant|> Uma fruta é a parte da planta que guarda as sementes. Muitas frutas são doces e boas para comer, como a banana e a maçã. <|end|>
+
+<|user|> Explique o que é uma fruta.
+<|assistant|> Uma fruta é a parte da planta que guarda as sementes. Muitas frutas são doces e boas para comer, como a banana e a maçã. <|end|>
+
+<|user|> O que é uma semente?
+<|assistant|> Uma semente é a parte da planta que, quando plantada, pode dar origem a uma nova planta. <|end|>
+
+<|user|> O que é uma raiz?
+<|assistant|> A raiz é a parte da planta que fica debaixo da terra. Ela segura a planta e absorve água e nutrientes. <|end|>
+
+<|user|> O que é a fotossíntese?
+<|assistant|> A fotossíntese é o processo em que as plantas usam a luz do Sol, a água e o gás carbônico para produzir o próprio alimento e liberar oxigênio. <|end|>
+
+<|user|> Defina fotossíntese.
+<|assistant|> A fotossíntese é o processo em que as plantas usam a luz do Sol, a água e o gás carbônico para produzir o próprio alimento e liberar oxigênio. <|end|>
+
+<|user|> O que é um animal?
+<|assistant|> Um animal é um ser vivo que se movimenta e precisa se alimentar de outros seres vivos. <|end|>
+
+<|user|> O que é um mamífero?
+<|assistant|> Um mamífero é um animal que amamenta os filhotes com leite. O cachorro, a baleia e o ser humano são mamíferos. <|end|>
+
+<|user|> O que é uma ave?
+<|assistant|> Uma ave é um animal com penas, bico e asas, que nasce de um ovo. <|end|>
+
+<|user|> Você sabe o que é uma ave?
+<|assistant|> Uma ave é um animal com penas, bico e asas, que nasce de um ovo. <|end|>
+
+<|user|> O que é um peixe?
+<|assistant|> Um peixe é um animal que vive na água e respira por brânquias. <|end|>
+
+<|user|> O que é um inseto?
+<|assistant|> Um inseto é um animal pequeno, com seis patas e o corpo dividido em cabeça, tórax e abdome. A formiga e a abelha são insetos. <|end|>
+
+<|user|> O que é um réptil?
+<|assistant|> Um réptil é um animal com a pele coberta de escamas ou placas, como a cobra, o jacaré e a tartaruga. <|end|>
+
+<|user|> O que significa réptil?
+<|assistant|> Um réptil é um animal com a pele coberta de escamas ou placas, como a cobra, o jacaré e a tartaruga. <|end|>
+
+<|user|> O que é um anfíbio?
+<|assistant|> Um anfíbio é um animal que nasce na água e, depois de crescer, pode viver também em terra, como o sapo e a rã. <|end|>
+
+<|user|> O que é um cachorro?
+<|assistant|> O cachorro é um mamífero doméstico, conhecido por ser companheiro e leal ao ser humano. <|end|>
+
+<|user|> O que é um gato?
+<|assistant|> O gato é um mamífero doméstico pequeno, ágil e muito curioso, que gosta de caçar e de dormir. <|end|>
+
+<|user|> Explique o que é um gato.
+<|assistant|> O gato é um mamífero doméstico pequeno, ágil e muito curioso, que gosta de caçar e de dormir. <|end|>
+
+<|user|> O que é uma abelha?
+<|assistant|> A abelha é um inseto que voa, vive em colmeias e produz mel e cera. <|end|>
+
+<|user|> O que é uma formiga?
+<|assistant|> A formiga é um inseto pequeno que vive em grupos organizados chamados formigueiros. <|end|>
+
+<|user|> O que é uma baleia?
+<|assistant|> A baleia é um mamífero enorme que vive no mar. A baleia-azul é o maior animal que já existiu. <|end|>
+
+<|user|> Defina baleia.
+<|assistant|> A baleia é um mamífero enorme que vive no mar. A baleia-azul é o maior animal que já existiu. <|end|>
+
+<|user|> O que é uma borboleta?
+<|assistant|> A borboleta é um inseto de asas coloridas. Antes de virar borboleta, ela é uma lagarta. <|end|>
+
+<|user|> O que é o ser humano?
+<|assistant|> O ser humano é um mamífero que anda sobre duas pernas, fala, pensa e vive em sociedade. <|end|>
+
+<|user|> O que é o coração?
+<|assistant|> O coração é o órgão que bombeia o sangue por todo o corpo. <|end|>
+
+<|user|> Você sabe o que é o coração?
+<|assistant|> O coração é o órgão que bombeia o sangue por todo o corpo. <|end|>
+
+<|user|> O que é o cérebro?
+<|assistant|> O cérebro é o órgão que controla o corpo. É com ele que pensamos, lembramos e aprendemos. <|end|>
+
+<|user|> O que é o pulmão?
+<|assistant|> O pulmão é o órgão da respiração. É nele que o oxigênio do ar passa para o sangue. <|end|>
+
+<|user|> O que é o sangue?
+<|assistant|> O sangue é o líquido vermelho que circula pelo corpo levando oxigênio e nutrientes para as células. <|end|>
+
+<|user|> O que significa sangue?
+<|assistant|> O sangue é o líquido vermelho que circula pelo corpo levando oxigênio e nutrientes para as células. <|end|>
+
+<|user|> O que é um osso?
+<|assistant|> Um osso é uma parte dura do esqueleto. Os ossos sustentam o corpo e protegem os órgãos. <|end|>
+
+<|user|> O que é um músculo?
+<|assistant|> Um músculo é uma parte do corpo que se contrai e permite os movimentos. <|end|>
+
+<|user|> O que é uma célula?
+<|assistant|> A célula é a menor unidade de um ser vivo. Todos os seres vivos são formados por células. <|end|>
+
+<|user|> Explique o que é uma célula.
+<|assistant|> A célula é a menor unidade de um ser vivo. Todos os seres vivos são formados por células. <|end|>
+
+<|user|> O que é a saúde?
+<|assistant|> A saúde é o bom funcionamento do corpo e da mente, que permite viver bem. <|end|>
+
+<|user|> O que é uma doença?
+<|assistant|> Uma doença é um problema no funcionamento do corpo ou da mente, que pode causar dor ou mal-estar. <|end|>
+
+<|user|> O que é uma vacina?
+<|assistant|> Uma vacina é um produto que ensina o corpo a se defender de uma doença antes de a pessoa ficar doente. <|end|>
+
+<|user|> Defina vacina.
+<|assistant|> Uma vacina é um produto que ensina o corpo a se defender de uma doença antes de a pessoa ficar doente. <|end|>
+
+<|user|> O que é um remédio?
+<|assistant|> Um remédio é uma substância usada para tratar ou aliviar uma doença. Deve ser tomado com orientação médica. <|end|>
+
+<|user|> O que é um médico?
+<|assistant|> Um médico é o profissional que cuida da saúde das pessoas, examina, faz diagnósticos e indica tratamentos. <|end|>
+
+<|user|> O que é um hospital?
+<|assistant|> Um hospital é o lugar onde as pessoas doentes ou feridas recebem tratamento. <|end|>
+
+<|user|> Você sabe o que é um hospital?
+<|assistant|> Um hospital é o lugar onde as pessoas doentes ou feridas recebem tratamento. <|end|>
+
+<|user|> O que é uma escola?
+<|assistant|> Uma escola é um lugar onde as pessoas estudam e aprendem com professores. <|end|>
+
+<|user|> O que é um professor?
+<|assistant|> Um professor é a pessoa que ensina os alunos. <|end|>
+
+<|user|> O que é um livro?
+<|assistant|> Um livro é um conjunto de páginas com textos ou imagens, feito para ser lido. <|end|>
+
+<|user|> O que significa livro?
+<|assistant|> Um livro é um conjunto de páginas com textos ou imagens, feito para ser lido. <|end|>
+
+<|user|> O que é uma biblioteca?
+<|assistant|> Uma biblioteca é um lugar onde se guardam livros para leitura e empréstimo. <|end|>
+
+<|user|> O que é um dicionário?
+<|assistant|> Um dicionário é um livro que reúne palavras em ordem alfabética e explica o que cada uma significa. <|end|>
+
+<|user|> O que é um poema?
+<|assistant|> Um poema é um texto escrito em versos, que costuma brincar com o som e o ritmo das palavras. <|end|>
+
+<|user|> Explique o que é um poema.
+<|assistant|> Um poema é um texto escrito em versos, que costuma brincar com o som e o ritmo das palavras. <|end|>
+
+<|user|> O que é um romance?
+<|assistant|> Um romance é uma história longa, em prosa, com personagens e acontecimentos inventados. <|end|>
+
+<|user|> O que é um conto?
+<|assistant|> Um conto é uma história curta, com poucos personagens e um único conflito. <|end|>
+
+<|user|> O que é uma fábula?
+<|assistant|> Uma fábula é uma história curta, geralmente com animais que falam, que termina com uma lição de moral. <|end|>
+
+<|user|> Defina fábula.
+<|assistant|> Uma fábula é uma história curta, geralmente com animais que falam, que termina com uma lição de moral. <|end|>
+
+<|user|> O que é a história?
+<|assistant|> A história é a disciplina que estuda o passado da humanidade. <|end|>
+
+<|user|> O que é a geografia?
+<|assistant|> A geografia é a ciência que estuda a Terra, os lugares, as paisagens e a relação das pessoas com o espaço. <|end|>
+
+<|user|> O que é a matemática?
+<|assistant|> A matemática é a ciência que estuda os números, as formas, as medidas e os cálculos. <|end|>
+
+<|user|> Você sabe o que é a matemática?
+<|assistant|> A matemática é a ciência que estuda os números, as formas, as medidas e os cálculos. <|end|>
+
+<|user|> O que é a ciência?
+<|assistant|> A ciência é o conhecimento obtido pela observação, pela experiência e pelo raciocínio. <|end|>
+
+<|user|> O que é a física?
+<|assistant|> A física é a ciência que estuda a matéria, a energia, o movimento e as forças da natureza. <|end|>
+
+<|user|> O que é a química?
+<|assistant|> A química é a ciência que estuda as substâncias, do que elas são feitas e como se transformam. <|end|>
+
+<|user|> O que significa química?
+<|assistant|> A química é a ciência que estuda as substâncias, do que elas são feitas e como se transformam. <|end|>
+
+<|user|> O que é a biologia?
+<|assistant|> A biologia é a ciência que estuda os seres vivos. <|end|>
+
+<|user|> O que é um número?
+<|assistant|> Um número é um símbolo usado para contar e medir quantidades. <|end|>
+
+<|user|> O que é uma soma?
+<|assistant|> Uma soma, ou adição, é a operação de juntar quantidades. Por exemplo, 2 + 3 = 5. <|end|>
+
+<|user|> Explique o que é uma soma.
+<|assistant|> Uma soma, ou adição, é a operação de juntar quantidades. Por exemplo, 2 + 3 = 5. <|end|>
+
+<|user|> O que é uma subtração?
+<|assistant|> A subtração é a operação de tirar uma quantidade de outra. Por exemplo, 5 - 2 = 3. <|end|>
+
+<|user|> O que é uma multiplicação?
+<|assistant|> A multiplicação é a soma de parcelas iguais. Por exemplo, 3 × 4 = 12, que é o mesmo que 4 + 4 + 4. <|end|>
+
+<|user|> O que é uma divisão?
+<|assistant|> A divisão é a operação de repartir uma quantidade em partes iguais. Por exemplo, 12 ÷ 3 = 4. <|end|>
+
+<|user|> Defina divisão.
+<|assistant|> A divisão é a operação de repartir uma quantidade em partes iguais. Por exemplo, 12 ÷ 3 = 4. <|end|>
+
+<|user|> O que é uma fração?
+<|assistant|> Uma fração representa uma parte de um todo. Por exemplo, metade de uma pizza é um meio, ou 1/2. <|end|>
+
+<|user|> O que é um triângulo?
+<|assistant|> Um triângulo é uma figura geométrica com três lados e três ângulos. <|end|>
+
+<|user|> O que é um quadrado?
+<|assistant|> Um quadrado é uma figura geométrica com quatro lados iguais e quatro ângulos retos. <|end|>
+
+<|user|> Você sabe o que é um quadrado?
+<|assistant|> Um quadrado é uma figura geométrica com quatro lados iguais e quatro ângulos retos. <|end|>
+
+<|user|> O que é um círculo?
+<|assistant|> Um círculo é uma figura redonda em que todos os pontos da borda ficam à mesma distância do centro. <|end|>
+
+<|user|> O que é um metro?
+<|assistant|> O metro é a unidade de medida de comprimento. Um metro tem cem centímetros. <|end|>
+
+<|user|> O que é um quilograma?
+<|assistant|> O quilograma é a unidade de medida de massa. Um quilograma tem mil gramas. <|end|>
+
+<|user|> O que significa quilograma?
+<|assistant|> O quilograma é a unidade de medida de massa. Um quilograma tem mil gramas. <|end|>
+
+<|user|> O que é um litro?
+<|assistant|> O litro é uma unidade de medida de volume, usada para medir líquidos. <|end|>
+
+<|user|> O que é um século?
+<|assistant|> Um século é um período de cem anos. <|end|>
+
+<|user|> O que é um calendário?
+<|assistant|> Um calendário é a organização do tempo em dias, semanas, meses e anos. <|end|>
+
+<|user|> Explique o que é um calendário.
+<|assistant|> Um calendário é a organização do tempo em dias, semanas, meses e anos. <|end|>
+
+<|user|> O que é um relógio?
+<|assistant|> Um relógio é um aparelho que mostra as horas. <|end|>
+
+<|user|> O que é um computador?
+<|assistant|> Um computador é uma máquina que processa informações seguindo instruções chamadas programas. <|end|>
+
+<|user|> O que é a internet?
+<|assistant|> A internet é uma rede mundial que liga computadores e celulares e permite trocar informações. <|end|>
+
+<|user|> Defina internet.
+<|assistant|> A internet é uma rede mundial que liga computadores e celulares e permite trocar informações. <|end|>
+
+<|user|> O que é um celular?
+<|assistant|> Um celular é um telefone portátil que também pode acessar a internet, tirar fotos e usar aplicativos. <|end|>
+
+<|user|> O que é um programa de computador?
+<|assistant|> Um programa de computador é um conjunto de instruções que diz ao computador o que fazer. <|end|>
+
+<|user|> O que é a inteligência artificial?
+<|assistant|> A inteligência artificial é a área da computação que cria programas capazes de fazer tarefas que parecem exigir inteligência, como conversar ou reconhecer imagens. <|end|>
+
+<|user|> Você sabe o que é a inteligência artificial?
+<|assistant|> A inteligência artificial é a área da computação que cria programas capazes de fazer tarefas que parecem exigir inteligência, como conversar ou reconhecer imagens. <|end|>
+
+<|user|> O que é um modelo de linguagem?
+<|assistant|> Um modelo de linguagem é um programa que aprendeu, a partir de muitos textos, a prever as próximas palavras de uma frase. Eu, a Laika, sou um modelo de linguagem. <|end|>
+
+<|user|> O que é um robô?
+<|assistant|> Um robô é uma máquina que pode realizar tarefas sozinha, seguindo um programa. <|end|>
+
+<|user|> O que é a eletricidade?
+<|assistant|> A eletricidade é uma forma de energia usada para acender lâmpadas e fazer funcionar aparelhos. <|end|>
+
+<|user|> O que significa eletricidade?
+<|assistant|> A eletricidade é uma forma de energia usada para acender lâmpadas e fazer funcionar aparelhos. <|end|>
+
+<|user|> O que é a energia?
+<|assistant|> A energia é a capacidade de realizar trabalho, como mover, aquecer ou iluminar alguma coisa. <|end|>
+
+<|user|> O que é a luz?
+<|assistant|> A luz é uma forma de energia que permite enxergar. A principal fonte de luz natural é o Sol. <|end|>
+
+<|user|> O que é o som?
+<|assistant|> O som é uma vibração que se espalha pelo ar e que podemos ouvir. <|end|>
+
+<|user|> Explique o que é o som.
+<|assistant|> O som é uma vibração que se espalha pelo ar e que podemos ouvir. <|end|>
+
+<|user|> O que é o calor?
+<|assistant|> O calor é a energia que passa de um corpo mais quente para um corpo mais frio. <|end|>
+
+<|user|> O que é a gravidade?
+<|assistant|> A gravidade é a força que atrai os corpos uns para os outros. É ela que faz as coisas caírem no chão. <|end|>
+
+<|user|> O que é o oxigênio?
+<|assistant|> O oxigênio é um gás presente no ar, que os seres humanos e muitos outros seres vivos precisam para respirar. <|end|>
+
+<|user|> Defina oxigênio.
+<|assistant|> O oxigênio é um gás presente no ar, que os seres humanos e muitos outros seres vivos precisam para respirar. <|end|>
+
+<|user|> O que é o clima?
+<|assistant|> O clima é o conjunto das condições do tempo, como temperatura e chuva, que costumam acontecer em um lugar ao longo dos anos. <|end|>
+
+<|user|> O que é um país?
+<|assistant|> Um país é um território com população e governo próprios. O Brasil é um país. <|end|>
+
+<|user|> O que é uma cidade?
+<|assistant|> Uma cidade é um lugar onde vivem muitas pessoas, com ruas, casas, comércio e serviços. <|end|>
+
+<|user|> Você sabe o que é uma cidade?
+<|assistant|> Uma cidade é um lugar onde vivem muitas pessoas, com ruas, casas, comércio e serviços. <|end|>
+
+<|user|> O que é uma capital?
+<|assistant|> Uma capital é a cidade onde fica o governo de um país ou de um estado. <|end|>
+
+<|user|> O que é um governo?
+<|assistant|> O governo é o grupo de pessoas e instituições que administra um país, um estado ou uma cidade. <|end|>
+
+<|user|> O que é uma lei?
+<|assistant|> Uma lei é uma regra oficial que todos devem seguir. <|end|>
+
+<|user|> O que significa lei?
+<|assistant|> Uma lei é uma regra oficial que todos devem seguir. <|end|>
+
+<|user|> O que é a democracia?
+<|assistant|> A democracia é uma forma de governo em que o povo escolhe os seus representantes por meio do voto. <|end|>
+
+<|user|> O que é uma eleição?
+<|assistant|> Uma eleição é o momento em que as pessoas votam para escolher os seus representantes. <|end|>
+
+<|user|> O que é o dinheiro?
+<|assistant|> O dinheiro é o que usamos para comprar e vender coisas. No Brasil, a moeda é o real. <|end|>
+
+<|user|> Explique o que é o dinheiro.
+<|assistant|> O dinheiro é o que usamos para comprar e vender coisas. No Brasil, a moeda é o real. <|end|>
+
+<|user|> O que é o trabalho?
+<|assistant|> O trabalho é a atividade que as pessoas realizam para produzir algo ou prestar um serviço, geralmente em troca de pagamento. <|end|>
+
+<|user|> O que é uma profissão?
+<|assistant|> Uma profissão é o trabalho que uma pessoa faz para ganhar a vida, como médico, professor ou pedreiro. <|end|>
+
+<|user|> O que é uma família?
+<|assistant|> Uma família é um grupo de pessoas ligadas pelo parentesco ou pelo afeto, como pais, filhos e avós. <|end|>
+
+<|user|> Defina família.
+<|assistant|> Uma família é um grupo de pessoas ligadas pelo parentesco ou pelo afeto, como pais, filhos e avós. <|end|>
+
+<|user|> O que é um amigo?
+<|assistant|> Um amigo é uma pessoa de quem gostamos e em quem confiamos. <|end|>
+
+<|user|> O que é a amizade?
+<|assistant|> A amizade é uma relação de carinho, confiança e respeito entre pessoas. <|end|>
+
+<|user|> O que é a música?
+<|assistant|> A música é a arte de combinar sons e silêncios de forma organizada e agradável. <|end|>
+
+<|user|> Você sabe o que é a música?
+<|assistant|> A música é a arte de combinar sons e silêncios de forma organizada e agradável. <|end|>
+
+<|user|> O que é a pintura?
+<|assistant|> A pintura é a arte de criar imagens com tintas sobre uma superfície, como uma tela ou uma parede. <|end|>
+
+<|user|> O que é a arte?
+<|assistant|> A arte é a expressão de ideias e sentimentos por meio da música, da pintura, da dança, da literatura e de outras formas. <|end|>
+
+<|user|> O que é o futebol?
+<|assistant|> O futebol é um esporte jogado por dois times de onze jogadores, em que o objetivo é fazer gols chutando a bola. <|end|>
+
+<|user|> O que significa futebol?
+<|assistant|> O futebol é um esporte jogado por dois times de onze jogadores, em que o objetivo é fazer gols chutando a bola. <|end|>
+
+<|user|> O que é um esporte?
+<|assistant|> Um esporte é uma atividade física com regras, praticada por diversão ou em competições. <|end|>
+
+<|user|> O que é o pão?
+<|assistant|> O pão é um alimento feito de farinha, água, sal e fermento, assado no forno. <|end|>
+
+<|user|> O que é o arroz?
+<|assistant|> O arroz é um grão muito consumido no Brasil e no mundo, geralmente cozido e servido com feijão. <|end|>
+
+<|user|> Explique o que é o arroz.
+<|assistant|> O arroz é um grão muito consumido no Brasil e no mundo, geralmente cozido e servido com feijão. <|end|>
+
+<|user|> O que é o feijão?
+<|assistant|> O feijão é um grão rico em proteínas e ferro, muito presente na comida brasileira. <|end|>
+
+<|user|> O que é o leite?
+<|assistant|> O leite é um líquido branco produzido pelas fêmeas dos mamíferos para alimentar os filhotes. <|end|>
+
+<|user|> O que é o café?
+<|assistant|> O café é uma bebida feita com os grãos torrados e moídos do cafeeiro. O Brasil é um grande produtor de café. <|end|>
+
+<|user|> Defina café.
+<|assistant|> O café é uma bebida feita com os grãos torrados e moídos do cafeeiro. O Brasil é um grande produtor de café. <|end|>
+
+<|user|> O que é uma casa?
+<|assistant|> Uma casa é uma construção onde as pessoas moram. <|end|>
+
+<|user|> O que é um carro?
+<|assistant|> Um carro é um veículo com quatro rodas e motor, usado para transportar pessoas. <|end|>
+
+<|user|> O que é um avião?
+<|assistant|> Um avião é um veículo que voa e transporta pessoas e cargas de um lugar para outro. <|end|>
+
+<|user|> Você sabe o que é um avião?
+<|assistant|> Um avião é um veículo que voa e transporta pessoas e cargas de um lugar para outro. <|end|>
+
+<|user|> O que é um navio?
+<|assistant|> Um navio é uma grande embarcação que navega pelos mares e rios. <|end|>
+
+<|user|> O que é um trem?
+<|assistant|> Um trem é um veículo que anda sobre trilhos e transporta pessoas ou cargas. <|end|>
+
+<|user|> O que é uma bicicleta?
+<|assistant|> Uma bicicleta é um veículo de duas rodas movido pela força das pernas, que empurram os pedais. <|end|>
+
+<|user|> O que significa bicicleta?
+<|assistant|> Uma bicicleta é um veículo de duas rodas movido pela força das pernas, que empurram os pedais. <|end|>
+
+<|user|> O que é uma ponte?
+<|assistant|> Uma ponte é uma construção que liga dois lugares separados por um rio, um vale ou uma estrada. <|end|>
+
+<|user|> O que é um mapa?
+<|assistant|> Um mapa é um desenho que representa um lugar visto de cima, de forma reduzida. <|end|>
+
+<|user|> O que é uma bússola?
+<|assistant|> Uma bússola é um instrumento com uma agulha que sempre aponta para o norte e ajuda a se orientar. <|end|>
+
+<|user|> Explique o que é uma bússola.
+<|assistant|> Uma bússola é um instrumento com uma agulha que sempre aponta para o norte e ajuda a se orientar. <|end|>
+
+<|user|> O que é um idioma?
+<|assistant|> Um idioma, ou língua, é o sistema de palavras que um povo usa para se comunicar. O português é um idioma. <|end|>
+
+<|user|> O que é uma palavra?
+<|assistant|> Uma palavra é um conjunto de sons ou de letras que tem um significado. <|end|>
+
+<|user|> O que é uma frase?
+<|assistant|> Uma frase é um conjunto de palavras que forma uma ideia com sentido completo. <|end|>
+
+<|user|> Defina frase.
+<|assistant|> Uma frase é um conjunto de palavras que forma uma ideia com sentido completo. <|end|>
+
+<|user|> O que é um verbo?
+<|assistant|> Um verbo é uma palavra que indica ação, estado ou fenômeno, como correr, ser e chover. <|end|>
+
+<|user|> O que é um substantivo?
+<|assistant|> Um substantivo é uma palavra que dá nome aos seres, objetos, lugares e sentimentos, como casa, Maria e alegria. <|end|>
+
+<|user|> O que é um adjetivo?
+<|assistant|> Um adjetivo é uma palavra que dá uma característica a um substantivo, como bonito, alto e feliz. <|end|>
+
+<|user|> Você sabe o que é um adjetivo?
+<|assistant|> Um adjetivo é uma palavra que dá uma característica a um substantivo, como bonito, alto e feliz. <|end|>
+
+<|user|> O que é o alfabeto?
+<|assistant|> O alfabeto é o conjunto das letras usadas para escrever uma língua. O alfabeto português tem 26 letras. <|end|>
+
+<|user|> O que é uma vogal?
+<|assistant|> As vogais são as letras A, E, I, O e U. <|end|>
+
+<|user|> O que é a reciclagem?
+<|assistant|> A reciclagem é o reaproveitamento de materiais usados, como papel, plástico e vidro, para fabricar novos produtos. <|end|>
+
+<|user|> O que significa reciclagem?
+<|assistant|> A reciclagem é o reaproveitamento de materiais usados, como papel, plástico e vidro, para fabricar novos produtos. <|end|>
+
+<|user|> O que é a poluição?
+<|assistant|> A poluição é a sujeira que prejudica o ar, a água ou o solo e faz mal à natureza e às pessoas. <|end|>
+
+<|user|> O que é o desmatamento?
+<|assistant|> O desmatamento é a derrubada das árvores de uma floresta. <|end|>
+
+# ===== Países, capitais e estados (146) =====
+
 <|user|> Qual é a capital do Brasil?
 <|assistant|> A capital do Brasil é Brasília. <|end|>
 
-<|user|> Qual é a capital da França?
-<|assistant|> A capital da França é Paris. <|end|>
-
-<|user|> Qual é a capital de Portugal?
-<|assistant|> A capital de Portugal é Lisboa. <|end|>
-
-<|user|> Qual é a capital da Argentina?
-<|assistant|> A capital da Argentina é Buenos Aires. <|end|>
-
-<|user|> Qual é a capital da Itália?
-<|assistant|> A capital da Itália é Roma. <|end|>
-
-<|user|> Qual é a capital da Espanha?
-<|assistant|> A capital da Espanha é Madri. <|end|>
-
-<|user|> Qual é a capital do Japão?
-<|assistant|> A capital do Japão é Tóquio. <|end|>
-
-<|user|> Qual é a capital da Alemanha?
-<|assistant|> A capital da Alemanha é Berlim. <|end|>
-
-<|user|> Qual é o maior país do mundo?
-<|assistant|> O maior país do mundo em território é a Rússia. <|end|>
-
-<|user|> Qual é o maior oceano do mundo?
-<|assistant|> O maior oceano do mundo é o Oceano Pacífico. <|end|>
-
-<|user|> Qual é o maior rio do Brasil?
-<|assistant|> O maior rio do Brasil é o Rio Amazonas. <|end|>
+<|user|> De que país Brasília é a capital?
+<|assistant|> Brasília é a capital do Brasil. <|end|>
 
 <|user|> Em que continente fica o Brasil?
 <|assistant|> O Brasil fica na América do Sul. <|end|>
 
-<|user|> Em que continente fica o Egito?
-<|assistant|> O Egito fica na África. <|end|>
+<|user|> Qual a capital de Portugal?
+<|assistant|> A capital de Portugal é Lisboa. <|end|>
 
-<|user|> Qual língua se fala no Brasil?
-<|assistant|> No Brasil se fala português. <|end|>
+<|user|> De que país Lisboa é a capital?
+<|assistant|> Lisboa é a capital de Portugal. <|end|>
 
-<|user|> Qual língua se fala na Argentina?
-<|assistant|> Na Argentina se fala espanhol. <|end|>
+<|user|> Que língua se fala em Portugal?
+<|assistant|> Em Portugal se fala português. <|end|>
 
-<|user|> Quantos dias tem uma semana?
-<|assistant|> Uma semana tem sete dias. <|end|>
+<|user|> Me diga a capital da Argentina.
+<|assistant|> A capital da Argentina é Buenos Aires. <|end|>
 
-<|user|> Quantos meses tem um ano?
-<|assistant|> Um ano tem doze meses. <|end|>
+<|user|> De que país Buenos Aires é a capital?
+<|assistant|> Buenos Aires é a capital da Argentina. <|end|>
 
-<|user|> Quantas horas tem um dia?
-<|assistant|> Um dia tem vinte e quatro horas. <|end|>
+<|user|> Em que continente fica a Argentina?
+<|assistant|> A Argentina fica na América do Sul. <|end|>
 
-<|user|> Quantos minutos tem uma hora?
-<|assistant|> Uma hora tem sessenta minutos. <|end|>
+<|user|> Qual cidade é a capital do Chile?
+<|assistant|> A capital do Chile é Santiago. <|end|>
 
-<|user|> Quantos segundos tem um minuto?
-<|assistant|> Um minuto tem sessenta segundos. <|end|>
+<|user|> De que país Santiago é a capital?
+<|assistant|> Santiago é a capital do Chile. <|end|>
 
-<|user|> Quais são as cores do semáforo?
-<|assistant|> As cores do semáforo são vermelho, amarelo e verde. <|end|>
+<|user|> Que língua se fala no Chile?
+<|assistant|> No Chile se fala espanhol. <|end|>
 
-<|user|> Quais são as estações do ano?
-<|assistant|> As estações do ano são primavera, verão, outono e inverno. <|end|>
+<|user|> Qual é a capital do Uruguai?
+<|assistant|> A capital do Uruguai é Montevidéu. <|end|>
+
+<|user|> De que país Montevidéu é a capital?
+<|assistant|> Montevidéu é a capital do Uruguai. <|end|>
+
+<|user|> Em que continente fica o Uruguai?
+<|assistant|> O Uruguai fica na América do Sul. <|end|>
+
+<|user|> Qual a capital do Paraguai?
+<|assistant|> A capital do Paraguai é Assunção. <|end|>
+
+<|user|> De que país Assunção é a capital?
+<|assistant|> Assunção é a capital do Paraguai. <|end|>
+
+<|user|> Que língua se fala no Paraguai?
+<|assistant|> No Paraguai se fala espanhol e guarani. <|end|>
+
+<|user|> Me diga a capital do Peru.
+<|assistant|> A capital do Peru é Lima. <|end|>
+
+<|user|> De que país Lima é a capital?
+<|assistant|> Lima é a capital do Peru. <|end|>
+
+<|user|> Em que continente fica o Peru?
+<|assistant|> O Peru fica na América do Sul. <|end|>
+
+<|user|> Qual cidade é a capital da Colômbia?
+<|assistant|> A capital da Colômbia é Bogotá. <|end|>
+
+<|user|> De que país Bogotá é a capital?
+<|assistant|> Bogotá é a capital da Colômbia. <|end|>
+
+<|user|> Que língua se fala na Colômbia?
+<|assistant|> Na Colômbia se fala espanhol. <|end|>
+
+<|user|> Qual é a capital da Venezuela?
+<|assistant|> A capital da Venezuela é Caracas. <|end|>
+
+<|user|> De que país Caracas é a capital?
+<|assistant|> Caracas é a capital da Venezuela. <|end|>
+
+<|user|> Em que continente fica a Venezuela?
+<|assistant|> A Venezuela fica na América do Sul. <|end|>
+
+<|user|> Qual a capital do Equador?
+<|assistant|> A capital do Equador é Quito. <|end|>
+
+<|user|> De que país Quito é a capital?
+<|assistant|> Quito é a capital do Equador. <|end|>
+
+<|user|> Que língua se fala no Equador?
+<|assistant|> No Equador se fala espanhol. <|end|>
+
+<|user|> Me diga a capital do México.
+<|assistant|> A capital do México é Cidade do México. <|end|>
+
+<|user|> De que país Cidade do México é a capital?
+<|assistant|> Cidade do México é a capital do México. <|end|>
+
+<|user|> Em que continente fica o México?
+<|assistant|> O México fica na América do Norte. <|end|>
+
+<|user|> Qual cidade é a capital dos Estados Unidos?
+<|assistant|> A capital dos Estados Unidos é Washington. <|end|>
+
+<|user|> De que país Washington é a capital?
+<|assistant|> Washington é a capital dos Estados Unidos. <|end|>
+
+<|user|> Que língua se fala nos Estados Unidos?
+<|assistant|> Nos Estados Unidos se fala inglês. <|end|>
+
+<|user|> Qual é a capital do Canadá?
+<|assistant|> A capital do Canadá é Ottawa. <|end|>
+
+<|user|> De que país Ottawa é a capital?
+<|assistant|> Ottawa é a capital do Canadá. <|end|>
+
+<|user|> Em que continente fica o Canadá?
+<|assistant|> O Canadá fica na América do Norte. <|end|>
+
+<|user|> Qual a capital de Cuba?
+<|assistant|> A capital de Cuba é Havana. <|end|>
+
+<|user|> De que país Havana é a capital?
+<|assistant|> Havana é a capital de Cuba. <|end|>
+
+<|user|> Que língua se fala em Cuba?
+<|assistant|> Em Cuba se fala espanhol. <|end|>
+
+<|user|> Me diga a capital da França.
+<|assistant|> A capital da França é Paris. <|end|>
+
+<|user|> De que país Paris é a capital?
+<|assistant|> Paris é a capital da França. <|end|>
+
+<|user|> Em que continente fica a França?
+<|assistant|> A França fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital da Espanha?
+<|assistant|> A capital da Espanha é Madri. <|end|>
+
+<|user|> De que país Madri é a capital?
+<|assistant|> Madri é a capital da Espanha. <|end|>
+
+<|user|> Que língua se fala na Espanha?
+<|assistant|> Na Espanha se fala espanhol. <|end|>
+
+<|user|> Qual é a capital da Itália?
+<|assistant|> A capital da Itália é Roma. <|end|>
+
+<|user|> De que país Roma é a capital?
+<|assistant|> Roma é a capital da Itália. <|end|>
+
+<|user|> Em que continente fica a Itália?
+<|assistant|> A Itália fica na Europa. <|end|>
+
+<|user|> Qual a capital da Alemanha?
+<|assistant|> A capital da Alemanha é Berlim. <|end|>
+
+<|user|> De que país Berlim é a capital?
+<|assistant|> Berlim é a capital da Alemanha. <|end|>
+
+<|user|> Que língua se fala na Alemanha?
+<|assistant|> Na Alemanha se fala alemão. <|end|>
+
+<|user|> Me diga a capital da Inglaterra.
+<|assistant|> A capital da Inglaterra é Londres. <|end|>
+
+<|user|> De que país Londres é a capital?
+<|assistant|> Londres é a capital da Inglaterra. <|end|>
+
+<|user|> Em que continente fica a Inglaterra?
+<|assistant|> A Inglaterra fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital da Irlanda?
+<|assistant|> A capital da Irlanda é Dublin. <|end|>
+
+<|user|> De que país Dublin é a capital?
+<|assistant|> Dublin é a capital da Irlanda. <|end|>
+
+<|user|> Qual é a capital da Bélgica?
+<|assistant|> A capital da Bélgica é Bruxelas. <|end|>
+
+<|user|> De que país Bruxelas é a capital?
+<|assistant|> Bruxelas é a capital da Bélgica. <|end|>
+
+<|user|> Em que continente fica a Bélgica?
+<|assistant|> A Bélgica fica na Europa. <|end|>
+
+<|user|> Qual a capital da Suíça?
+<|assistant|> A capital da Suíça é Berna. <|end|>
+
+<|user|> De que país Berna é a capital?
+<|assistant|> Berna é a capital da Suíça. <|end|>
+
+<|user|> Me diga a capital da Áustria.
+<|assistant|> A capital da Áustria é Viena. <|end|>
+
+<|user|> De que país Viena é a capital?
+<|assistant|> Viena é a capital da Áustria. <|end|>
+
+<|user|> Em que continente fica a Áustria?
+<|assistant|> A Áustria fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital da Grécia?
+<|assistant|> A capital da Grécia é Atenas. <|end|>
+
+<|user|> De que país Atenas é a capital?
+<|assistant|> Atenas é a capital da Grécia. <|end|>
+
+<|user|> Que língua se fala na Grécia?
+<|assistant|> Na Grécia se fala grego. <|end|>
+
+<|user|> Qual é a capital da Rússia?
+<|assistant|> A capital da Rússia é Moscou. <|end|>
+
+<|user|> De que país Moscou é a capital?
+<|assistant|> Moscou é a capital da Rússia. <|end|>
+
+<|user|> Em que continente fica a Rússia?
+<|assistant|> A Rússia fica na Europa e na Ásia. <|end|>
+
+<|user|> Qual a capital da Polônia?
+<|assistant|> A capital da Polônia é Varsóvia. <|end|>
+
+<|user|> De que país Varsóvia é a capital?
+<|assistant|> Varsóvia é a capital da Polônia. <|end|>
+
+<|user|> Que língua se fala na Polônia?
+<|assistant|> Na Polônia se fala polonês. <|end|>
+
+<|user|> Me diga a capital da Suécia.
+<|assistant|> A capital da Suécia é Estocolmo. <|end|>
+
+<|user|> De que país Estocolmo é a capital?
+<|assistant|> Estocolmo é a capital da Suécia. <|end|>
+
+<|user|> Em que continente fica a Suécia?
+<|assistant|> A Suécia fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital da Noruega?
+<|assistant|> A capital da Noruega é Oslo. <|end|>
+
+<|user|> De que país Oslo é a capital?
+<|assistant|> Oslo é a capital da Noruega. <|end|>
+
+<|user|> Que língua se fala na Noruega?
+<|assistant|> Na Noruega se fala norueguês. <|end|>
+
+<|user|> Qual é a capital do Japão?
+<|assistant|> A capital do Japão é Tóquio. <|end|>
+
+<|user|> De que país Tóquio é a capital?
+<|assistant|> Tóquio é a capital do Japão. <|end|>
+
+<|user|> Em que continente fica o Japão?
+<|assistant|> O Japão fica na Ásia. <|end|>
+
+<|user|> Qual a capital da China?
+<|assistant|> A capital da China é Pequim. <|end|>
+
+<|user|> De que país Pequim é a capital?
+<|assistant|> Pequim é a capital da China. <|end|>
+
+<|user|> Que língua se fala na China?
+<|assistant|> Na China se fala chinês. <|end|>
+
+<|user|> Me diga a capital da Índia.
+<|assistant|> A capital da Índia é Nova Délhi. <|end|>
+
+<|user|> De que país Nova Délhi é a capital?
+<|assistant|> Nova Délhi é a capital da Índia. <|end|>
+
+<|user|> Em que continente fica a Índia?
+<|assistant|> A Índia fica na Ásia. <|end|>
+
+<|user|> Qual cidade é a capital da Coreia do Sul?
+<|assistant|> A capital da Coreia do Sul é Seul. <|end|>
+
+<|user|> De que país Seul é a capital?
+<|assistant|> Seul é a capital da Coreia do Sul. <|end|>
+
+<|user|> Que língua se fala na Coreia do Sul?
+<|assistant|> Na Coreia do Sul se fala coreano. <|end|>
+
+<|user|> Qual é a capital da Turquia?
+<|assistant|> A capital da Turquia é Ancara. <|end|>
+
+<|user|> De que país Ancara é a capital?
+<|assistant|> Ancara é a capital da Turquia. <|end|>
+
+<|user|> Em que continente fica a Turquia?
+<|assistant|> A Turquia fica na Europa e na Ásia. <|end|>
+
+<|user|> Qual a capital do Egito?
+<|assistant|> A capital do Egito é Cairo. <|end|>
+
+<|user|> De que país Cairo é a capital?
+<|assistant|> Cairo é a capital do Egito. <|end|>
+
+<|user|> Que língua se fala no Egito?
+<|assistant|> No Egito se fala árabe. <|end|>
+
+<|user|> Me diga a capital do Marrocos.
+<|assistant|> A capital do Marrocos é Rabat. <|end|>
+
+<|user|> De que país Rabat é a capital?
+<|assistant|> Rabat é a capital do Marrocos. <|end|>
+
+<|user|> Em que continente fica o Marrocos?
+<|assistant|> O Marrocos fica na África. <|end|>
+
+<|user|> Qual cidade é a capital da Nigéria?
+<|assistant|> A capital da Nigéria é Abuja. <|end|>
+
+<|user|> De que país Abuja é a capital?
+<|assistant|> Abuja é a capital da Nigéria. <|end|>
+
+<|user|> Qual é a capital do Quênia?
+<|assistant|> A capital do Quênia é Nairóbi. <|end|>
+
+<|user|> De que país Nairóbi é a capital?
+<|assistant|> Nairóbi é a capital do Quênia. <|end|>
+
+<|user|> Em que continente fica o Quênia?
+<|assistant|> O Quênia fica na África. <|end|>
+
+<|user|> Qual a capital de Angola?
+<|assistant|> A capital de Angola é Luanda. <|end|>
+
+<|user|> De que país Luanda é a capital?
+<|assistant|> Luanda é a capital de Angola. <|end|>
+
+<|user|> Que língua se fala em Angola?
+<|assistant|> Em Angola se fala português. <|end|>
+
+<|user|> Me diga a capital de Moçambique.
+<|assistant|> A capital de Moçambique é Maputo. <|end|>
+
+<|user|> De que país Maputo é a capital?
+<|assistant|> Maputo é a capital de Moçambique. <|end|>
+
+<|user|> Em que continente fica Moçambique?
+<|assistant|> Moçambique fica na África. <|end|>
+
+<|user|> Qual cidade é a capital de Cabo Verde?
+<|assistant|> A capital de Cabo Verde é Praia. <|end|>
+
+<|user|> De que país Praia é a capital?
+<|assistant|> Praia é a capital de Cabo Verde. <|end|>
+
+<|user|> Que língua se fala em Cabo Verde?
+<|assistant|> Em Cabo Verde se fala português. <|end|>
+
+<|user|> Qual é a capital da Austrália?
+<|assistant|> A capital da Austrália é Camberra. <|end|>
+
+<|user|> De que país Camberra é a capital?
+<|assistant|> Camberra é a capital da Austrália. <|end|>
+
+<|user|> Em que continente fica a Austrália?
+<|assistant|> A Austrália fica na Oceania. <|end|>
+
+<|user|> Qual é a capital de São Paulo?
+<|assistant|> A capital de São Paulo é São Paulo. <|end|>
+
+<|user|> Qual é a capital do Rio de Janeiro?
+<|assistant|> A capital do Rio de Janeiro é Rio de Janeiro. <|end|>
+
+<|user|> Qual é a capital de Minas Gerais?
+<|assistant|> A capital de Minas Gerais é Belo Horizonte. <|end|>
+
+<|user|> Qual é a capital da Bahia?
+<|assistant|> A capital da Bahia é Salvador. <|end|>
+
+<|user|> Qual é a capital de Pernambuco?
+<|assistant|> A capital de Pernambuco é Recife. <|end|>
+
+<|user|> Qual é a capital do Ceará?
+<|assistant|> A capital do Ceará é Fortaleza. <|end|>
+
+<|user|> Qual é a capital do Paraná?
+<|assistant|> A capital do Paraná é Curitiba. <|end|>
+
+<|user|> Qual é a capital do Rio Grande do Sul?
+<|assistant|> A capital do Rio Grande do Sul é Porto Alegre. <|end|>
+
+<|user|> Qual é a capital de Santa Catarina?
+<|assistant|> A capital de Santa Catarina é Florianópolis. <|end|>
+
+<|user|> Qual é a capital do Amazonas?
+<|assistant|> A capital do Amazonas é Manaus. <|end|>
+
+<|user|> Qual é a capital do Pará?
+<|assistant|> A capital do Pará é Belém. <|end|>
+
+<|user|> Qual é a capital de Goiás?
+<|assistant|> A capital de Goiás é Goiânia. <|end|>
+
+<|user|> Qual é a capital do Espírito Santo?
+<|assistant|> A capital do Espírito Santo é Vitória. <|end|>
+
+<|user|> Qual é a capital do Maranhão?
+<|assistant|> A capital do Maranhão é São Luís. <|end|>
+
+<|user|> Qual é a capital do Piauí?
+<|assistant|> A capital do Piauí é Teresina. <|end|>
+
+<|user|> Qual é a capital da Paraíba?
+<|assistant|> A capital da Paraíba é João Pessoa. <|end|>
+
+<|user|> Qual é a capital do Rio Grande do Norte?
+<|assistant|> A capital do Rio Grande do Norte é Natal. <|end|>
+
+<|user|> Qual é a capital de Alagoas?
+<|assistant|> A capital de Alagoas é Maceió. <|end|>
+
+<|user|> Qual é a capital de Sergipe?
+<|assistant|> A capital de Sergipe é Aracaju. <|end|>
+
+<|user|> Qual é a capital de Mato Grosso?
+<|assistant|> A capital de Mato Grosso é Cuiabá. <|end|>
+
+<|user|> Qual é a capital de Mato Grosso do Sul?
+<|assistant|> A capital de Mato Grosso do Sul é Campo Grande. <|end|>
+
+<|user|> Qual é a capital do Tocantins?
+<|assistant|> A capital do Tocantins é Palmas. <|end|>
+
+<|user|> Qual é a capital de Rondônia?
+<|assistant|> A capital de Rondônia é Porto Velho. <|end|>
+
+<|user|> Qual é a capital do Acre?
+<|assistant|> A capital do Acre é Rio Branco. <|end|>
+
+<|user|> Qual é a capital de Roraima?
+<|assistant|> A capital de Roraima é Boa Vista. <|end|>
+
+<|user|> Qual é a capital do Amapá?
+<|assistant|> A capital do Amapá é Macapá. <|end|>
+
+# ===== Livros e pessoas (35) =====
+
+<|user|> Quem escreveu Dom Casmurro?
+<|assistant|> Dom Casmurro foi escrito por Machado de Assis. <|end|>
+
+<|user|> Quem é o autor de Memórias Póstumas de Brás Cubas?
+<|assistant|> Memórias Póstumas de Brás Cubas foi escrito por Machado de Assis. <|end|>
+
+<|user|> Qual escritor escreveu Quincas Borba?
+<|assistant|> Quincas Borba foi escrito por Machado de Assis. <|end|>
+
+<|user|> Quem escreveu Os Lusíadas?
+<|assistant|> Os Lusíadas foi escrito por Luís de Camões. <|end|>
+
+<|user|> Quem é o autor de O Guarani?
+<|assistant|> O Guarani foi escrito por José de Alencar. <|end|>
+
+<|user|> Qual escritor escreveu Iracema?
+<|assistant|> Iracema foi escrito por José de Alencar. <|end|>
+
+<|user|> Quem escreveu O Cortiço?
+<|assistant|> O Cortiço foi escrito por Aluísio Azevedo. <|end|>
+
+<|user|> Quem é o autor de Os Sertões?
+<|assistant|> Os Sertões foi escrito por Euclides da Cunha. <|end|>
+
+<|user|> Qual escritor escreveu Grande Sertão: Veredas?
+<|assistant|> Grande Sertão: Veredas foi escrito por Guimarães Rosa. <|end|>
+
+<|user|> Quem escreveu Vidas Secas?
+<|assistant|> Vidas Secas foi escrito por Graciliano Ramos. <|end|>
+
+<|user|> Quem é o autor de A Cidade e as Serras?
+<|assistant|> A Cidade e as Serras foi escrito por Eça de Queirós. <|end|>
+
+<|user|> Qual escritor escreveu Os Maias?
+<|assistant|> Os Maias foi escrito por Eça de Queirós. <|end|>
+
+<|user|> Quem escreveu O Primo Basílio?
+<|assistant|> O Primo Basílio foi escrito por Eça de Queirós. <|end|>
+
+<|user|> Quem é o autor de Mensagem?
+<|assistant|> Mensagem foi escrito por Fernando Pessoa. <|end|>
+
+<|user|> Qual escritor escreveu O Sítio do Picapau Amarelo?
+<|assistant|> O Sítio do Picapau Amarelo foi escrito por Monteiro Lobato. <|end|>
+
+<|user|> Quem escreveu Dom Quixote?
+<|assistant|> Dom Quixote foi escrito por Miguel de Cervantes. <|end|>
+
+<|user|> Quem é o autor de Romeu e Julieta?
+<|assistant|> Romeu e Julieta foi escrito por William Shakespeare. <|end|>
+
+<|user|> Qual escritor escreveu O Pequeno Príncipe?
+<|assistant|> O Pequeno Príncipe foi escrito por Antoine de Saint-Exupéry. <|end|>
+
+<|user|> Quem foi Machado de Assis?
+<|assistant|> Machado de Assis foi um escritor brasileiro, autor de Dom Casmurro e Memórias Póstumas de Brás Cubas. Ele fundou a Academia Brasileira de Letras. <|end|>
+
+<|user|> Quem foi Luís de Camões?
+<|assistant|> Luís de Camões foi um poeta português do século XVI, autor de Os Lusíadas. <|end|>
+
+<|user|> Quem foi Eça de Queirós?
+<|assistant|> Eça de Queirós foi um escritor português do século XIX, autor de Os Maias e A Cidade e as Serras. <|end|>
+
+<|user|> Quem foi Fernando Pessoa?
+<|assistant|> Fernando Pessoa foi um poeta português do século XX, famoso por escrever com vários nomes diferentes, chamados heterônimos. <|end|>
+
+<|user|> Quem foi José de Alencar?
+<|assistant|> José de Alencar foi um escritor brasileiro do século XIX, autor de O Guarani e Iracema. <|end|>
+
+<|user|> Quem foi Monteiro Lobato?
+<|assistant|> Monteiro Lobato foi um escritor brasileiro, criador do Sítio do Picapau Amarelo e da boneca Emília. <|end|>
+
+<|user|> Quem foi Santos Dumont?
+<|assistant|> Santos Dumont foi um inventor brasileiro, pioneiro da aviação. Em 1906, ele voou em Paris com o avião 14-Bis. <|end|>
+
+<|user|> Quem foi Tiradentes?
+<|assistant|> Tiradentes foi um dos líderes da Inconfidência Mineira, um movimento contra o domínio português. Ele foi executado em 1792. <|end|>
+
+<|user|> Quem foi Dom Pedro I?
+<|assistant|> Dom Pedro I foi o primeiro imperador do Brasil. Ele declarou a independência do país em 1822. <|end|>
+
+<|user|> Quem foi a princesa Isabel?
+<|assistant|> A princesa Isabel foi filha de Dom Pedro II. Em 1888, ela assinou a Lei Áurea, que aboliu a escravidão no Brasil. <|end|>
+
+<|user|> Quem foi Pedro Álvares Cabral?
+<|assistant|> Pedro Álvares Cabral foi o navegador português que comandou a frota que chegou ao Brasil em 1500. <|end|>
+
+<|user|> Quem foi Leonardo da Vinci?
+<|assistant|> Leonardo da Vinci foi um artista e inventor italiano do Renascimento, autor da pintura Mona Lisa. <|end|>
+
+<|user|> Quem foi Albert Einstein?
+<|assistant|> Albert Einstein foi um físico alemão, famoso pela teoria da relatividade. <|end|>
+
+<|user|> Quem foi Isaac Newton?
+<|assistant|> Isaac Newton foi um cientista inglês que descreveu a lei da gravidade e as leis do movimento. <|end|>
+
+<|user|> Quem foi Charles Darwin?
+<|assistant|> Charles Darwin foi um cientista inglês que explicou a evolução das espécies por meio da seleção natural. <|end|>
+
+<|user|> Quem foi Pelé?
+<|assistant|> Pelé foi um jogador de futebol brasileiro, considerado um dos maiores de todos os tempos. Ele ganhou três Copas do Mundo. <|end|>
+
+<|user|> Quem foi Cristóvão Colombo?
+<|assistant|> Cristóvão Colombo foi um navegador que chegou à América em 1492, em viagens financiadas pela Espanha. <|end|>
+
+# ===== Conhecimentos gerais (81) =====
+
+<|user|> Qual é o maior país do mundo?
+<|assistant|> O maior país do mundo em território é a Rússia. <|end|>
+
+<|user|> Qual é o maior país da América do Sul?
+<|assistant|> O maior país da América do Sul é o Brasil. <|end|>
+
+<|user|> Qual é o maior oceano do mundo?
+<|assistant|> O maior oceano do mundo é o Oceano Pacífico. <|end|>
+
+<|user|> Qual oceano banha o Brasil?
+<|assistant|> O Brasil é banhado pelo Oceano Atlântico. <|end|>
+
+<|user|> Qual é o maior rio do Brasil?
+<|assistant|> O maior rio do Brasil é o Rio Amazonas. <|end|>
+
+<|user|> Qual é a maior floresta tropical do mundo?
+<|assistant|> A maior floresta tropical do mundo é a Floresta Amazônica. <|end|>
+
+<|user|> Qual é o maior estado do Brasil?
+<|assistant|> O maior estado do Brasil em território é o Amazonas. <|end|>
+
+<|user|> Qual é o estado mais populoso do Brasil?
+<|assistant|> O estado mais populoso do Brasil é São Paulo. <|end|>
+
+<|user|> Qual é a maior cidade do Brasil?
+<|assistant|> A maior cidade do Brasil é São Paulo. <|end|>
+
+<|user|> Quantos estados tem o Brasil?
+<|assistant|> O Brasil tem 26 estados e o Distrito Federal. <|end|>
+
+<|user|> Qual é a moeda do Brasil?
+<|assistant|> A moeda do Brasil é o real. <|end|>
+
+<|user|> Qual é a moeda de Portugal?
+<|assistant|> A moeda de Portugal é o euro. <|end|>
+
+<|user|> Quais são as cores da bandeira do Brasil?
+<|assistant|> A bandeira do Brasil é verde, amarela, azul e branca. <|end|>
+
+<|user|> O que está escrito na bandeira do Brasil?
+<|assistant|> Na bandeira do Brasil está escrito Ordem e Progresso. <|end|>
+
+<|user|> Quando o Brasil ficou independente?
+<|assistant|> O Brasil ficou independente em 7 de setembro de 1822. <|end|>
+
+<|user|> Quem declarou a independência do Brasil?
+<|assistant|> A independência do Brasil foi declarada por Dom Pedro, que se tornou o imperador Dom Pedro I. <|end|>
+
+<|user|> Quando os portugueses chegaram ao Brasil?
+<|assistant|> Os portugueses chegaram ao Brasil em 22 de abril de 1500, com a frota de Pedro Álvares Cabral. <|end|>
+
+<|user|> Quando foi abolida a escravidão no Brasil?
+<|assistant|> A escravidão foi abolida no Brasil em 13 de maio de 1888, com a Lei Áurea. <|end|>
+
+<|user|> Quando foi proclamada a República no Brasil?
+<|assistant|> A República foi proclamada no Brasil em 15 de novembro de 1889. <|end|>
+
+<|user|> Quem foi o primeiro presidente do Brasil?
+<|assistant|> O primeiro presidente do Brasil foi o marechal Deodoro da Fonseca. <|end|>
+
+<|user|> Quando Brasília foi inaugurada?
+<|assistant|> Brasília foi inaugurada em 1960, quando se tornou a capital do Brasil. <|end|>
+
+<|user|> Qual era a capital do Brasil antes de Brasília?
+<|assistant|> Antes de Brasília, a capital do Brasil era o Rio de Janeiro. <|end|>
 
 <|user|> Quantos planetas tem o Sistema Solar?
 <|assistant|> O Sistema Solar tem oito planetas. <|end|>
+
+<|user|> Quais são os planetas do Sistema Solar?
+<|assistant|> Os planetas do Sistema Solar são Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. <|end|>
 
 <|user|> Qual é o planeta mais próximo do Sol?
 <|assistant|> O planeta mais próximo do Sol é Mercúrio. <|end|>
@@ -121,113 +1340,905 @@
 <|user|> Qual é o maior planeta do Sistema Solar?
 <|assistant|> O maior planeta do Sistema Solar é Júpiter. <|end|>
 
+<|user|> Qual é o planeta mais quente do Sistema Solar?
+<|assistant|> O planeta mais quente do Sistema Solar é Vênus. <|end|>
+
+<|user|> Qual planeta é conhecido como planeta vermelho?
+<|assistant|> Marte é conhecido como planeta vermelho. <|end|>
+
+<|user|> Qual planeta tem anéis famosos?
+<|assistant|> Saturno é o planeta famoso pelos seus anéis. <|end|>
+
+<|user|> Plutão é um planeta?
+<|assistant|> Hoje, Plutão é classificado como planeta anão. Ele deixou de ser considerado planeta em 2006. <|end|>
+
 <|user|> Em que planeta nós vivemos?
 <|assistant|> Nós vivemos no planeta Terra. <|end|>
 
-<|user|> O que é o Sol?
-<|assistant|> O Sol é a estrela que fica no centro do Sistema Solar e nos dá luz e calor. <|end|>
+<|user|> Quanto tempo a Terra leva para dar a volta no Sol?
+<|assistant|> A Terra leva cerca de 365 dias, ou seja, um ano, para dar a volta ao redor do Sol. <|end|>
 
-<|user|> O que é a Lua?
-<|assistant|> A Lua é o satélite natural da Terra. <|end|>
+<|user|> Por que existe o dia e a noite?
+<|assistant|> O dia e a noite existem porque a Terra gira em torno de si mesma. O lado virado para o Sol fica de dia, e o outro lado fica de noite. <|end|>
 
-<|user|> O que é um rio?
-<|assistant|> Um rio é uma grande corrente de água doce que corre pela terra até o mar ou outro rio. <|end|>
+<|user|> Por que o céu é azul?
+<|assistant|> O céu é azul porque a luz do Sol se espalha no ar, e a cor azul se espalha mais do que as outras cores. <|end|>
 
-<|user|> O que é uma árvore?
-<|assistant|> Uma árvore é uma planta grande, com tronco, galhos e folhas. <|end|>
+<|user|> Por que chove?
+<|assistant|> Chove porque o vapor de água sobe, esfria e forma nuvens. Quando as gotas das nuvens ficam pesadas, elas caem como chuva. <|end|>
 
-<|user|> O que é um livro?
-<|assistant|> Um livro é um conjunto de páginas com texto escrito para ser lido. <|end|>
+<|user|> Por que as plantas precisam de luz?
+<|assistant|> As plantas precisam de luz para fazer a fotossíntese, que é como elas produzem o próprio alimento. <|end|>
 
-<|user|> O que é uma biblioteca?
-<|assistant|> Uma biblioteca é um lugar onde se guardam e se emprestam livros. <|end|>
+<|user|> Por que precisamos beber água?
+<|assistant|> Precisamos beber água porque o corpo humano é formado em grande parte por água e precisa dela para funcionar bem. <|end|>
 
-<|user|> O que é um computador?
-<|assistant|> Um computador é uma máquina que processa informações seguindo instruções. <|end|>
+<|user|> Por que existem as estações do ano?
+<|assistant|> As estações do ano existem por causa da inclinação do eixo da Terra enquanto ela gira ao redor do Sol. <|end|>
 
-<|user|> O que é a água?
-<|assistant|> A água é um líquido sem cor e sem cheiro, essencial para a vida. <|end|>
+<|user|> A que temperatura a água ferve?
+<|assistant|> Ao nível do mar, a água ferve a 100 graus Celsius. <|end|>
 
-<|user|> O que é um mapa?
-<|assistant|> Um mapa é um desenho que representa um lugar visto de cima. <|end|>
+<|user|> A que temperatura a água congela?
+<|assistant|> A água congela a 0 grau Celsius. <|end|>
 
-<|user|> O que é um médico?
-<|assistant|> Um médico é um profissional que cuida da saúde das pessoas. <|end|>
+<|user|> Qual é a fórmula da água?
+<|assistant|> A fórmula da água é H2O: duas partes de hidrogênio e uma de oxigênio. <|end|>
 
-<|user|> O que é um professor?
-<|assistant|> Um professor é uma pessoa que ensina os alunos. <|end|>
+<|user|> Quantos ossos tem o corpo humano?
+<|assistant|> O corpo de um adulto tem 206 ossos. <|end|>
 
-<|user|> O que é uma escola?
-<|assistant|> Uma escola é um lugar onde as pessoas estudam e aprendem. <|end|>
+<|user|> Qual é o maior órgão do corpo humano?
+<|assistant|> O maior órgão do corpo humano é a pele. <|end|>
 
-<|user|> O que é um poema?
-<|assistant|> Um poema é um texto escrito em versos, que costuma expressar sentimentos. <|end|>
+<|user|> Quais são os cinco sentidos?
+<|assistant|> Os cinco sentidos são a visão, a audição, o olfato, o paladar e o tato. <|end|>
 
-<|user|> Quem escreveu Dom Casmurro?
-<|assistant|> Dom Casmurro foi escrito por Machado de Assis. <|end|>
+<|user|> Qual é o maior animal do mundo?
+<|assistant|> O maior animal do mundo é a baleia-azul. <|end|>
 
-<|user|> Quem escreveu Memórias Póstumas de Brás Cubas?
-<|assistant|> Memórias Póstumas de Brás Cubas foi escrito por Machado de Assis. <|end|>
+<|user|> Qual é o animal terrestre mais rápido?
+<|assistant|> O animal terrestre mais rápido é o guepardo. <|end|>
 
-<|user|> Quem foi Machado de Assis?
-<|assistant|> Machado de Assis foi um escritor brasileiro, autor de romances, contos e poemas. <|end|>
+<|user|> Qual mamífero consegue voar?
+<|assistant|> O morcego é o único mamífero que consegue voar de verdade. <|end|>
 
-<|user|> Quem escreveu O Guarani?
-<|assistant|> O Guarani foi escrito por José de Alencar. <|end|>
+<|user|> A baleia é um peixe?
+<|assistant|> Não. A baleia é um mamífero, porque respira ar e amamenta os filhotes. <|end|>
 
-<|user|> Quem escreveu Os Lusíadas?
-<|assistant|> Os Lusíadas foi escrito por Luís de Camões. <|end|>
+<|user|> O que a abelha produz?
+<|assistant|> A abelha produz mel e cera. <|end|>
 
-<|user|> Quem foi Luís de Camões?
-<|assistant|> Luís de Camões foi um poeta português, autor de Os Lusíadas. <|end|>
-
-<|user|> Quem pintou a Mona Lisa?
-<|assistant|> A Mona Lisa foi pintada por Leonardo da Vinci. <|end|>
-
-<|user|> Quem descobriu o Brasil?
-<|assistant|> Os portugueses chegaram ao Brasil em 1500, com a frota de Pedro Álvares Cabral. <|end|>
-
-<|user|> Em que ano o Brasil se tornou independente?
-<|assistant|> O Brasil se tornou independente em 1822. <|end|>
-
-<|user|> Quanto é 2 mais 2?
-<|assistant|> Dois mais dois é igual a quatro. <|end|>
-
-<|user|> Quanto é 5 mais 5?
-<|assistant|> Cinco mais cinco é igual a dez. <|end|>
-
-<|user|> Quanto é 10 menos 3?
-<|assistant|> Dez menos três é igual a sete. <|end|>
-
-<|user|> Quanto é 3 vezes 3?
-<|assistant|> Três vezes três é igual a nove. <|end|>
-
-<|user|> Quanto é 10 dividido por 2?
-<|assistant|> Dez dividido por dois é igual a cinco. <|end|>
-
-<|user|> Qual é a cor do céu?
-<|assistant|> Durante o dia, o céu costuma parecer azul. <|end|>
-
-<|user|> Qual é a cor das folhas das árvores?
-<|assistant|> As folhas das árvores geralmente são verdes. <|end|>
-
-<|user|> Quais são os dias da semana?
-<|assistant|> Os dias da semana são domingo, segunda, terça, quarta, quinta, sexta e sábado. <|end|>
-
-<|user|> O que fazem os pássaros?
-<|assistant|> Os pássaros voam, cantam e fazem ninhos. <|end|>
+<|user|> O que a vaca produz?
+<|assistant|> A vaca produz leite. <|end|>
 
 <|user|> Onde vivem os peixes?
 <|assistant|> Os peixes vivem na água, em rios, lagos e mares. <|end|>
 
-<|user|> O que o gato come?
-<|assistant|> O gato costuma comer ração, peixe e carne. <|end|>
+<|user|> O que os herbívoros comem?
+<|assistant|> Os herbívoros comem plantas, como capim, folhas e frutos. <|end|>
 
-<|user|> Para que serve um guarda-chuva?
-<|assistant|> Um guarda-chuva serve para nos proteger da chuva. <|end|>
+<|user|> O que os carnívoros comem?
+<|assistant|> Os carnívoros comem a carne de outros animais. <|end|>
 
-<|user|> Para que serve um relógio?
-<|assistant|> Um relógio serve para mostrar as horas. <|end|>
+<|user|> Quantos dias tem uma semana?
+<|assistant|> Uma semana tem sete dias. <|end|>
 
-<|user|> Para que serve uma caneta?
-<|assistant|> Uma caneta serve para escrever. <|end|>
+<|user|> Quantos dias tem um ano?
+<|assistant|> Um ano tem 365 dias. O ano bissexto tem 366. <|end|>
+
+<|user|> Quantos meses tem um ano?
+<|assistant|> Um ano tem doze meses. <|end|>
+
+<|user|> Quantas horas tem um dia?
+<|assistant|> Um dia tem 24 horas. <|end|>
+
+<|user|> Quantos minutos tem uma hora?
+<|assistant|> Uma hora tem 60 minutos. <|end|>
+
+<|user|> Quantos segundos tem um minuto?
+<|assistant|> Um minuto tem 60 segundos. <|end|>
+
+<|user|> Quantos centímetros tem um metro?
+<|assistant|> Um metro tem 100 centímetros. <|end|>
+
+<|user|> Quantos metros tem um quilômetro?
+<|assistant|> Um quilômetro tem 1000 metros. <|end|>
+
+<|user|> Quantos gramas tem um quilo?
+<|assistant|> Um quilo tem 1000 gramas. <|end|>
+
+<|user|> Qual é o primeiro mês do ano?
+<|assistant|> O primeiro mês do ano é janeiro. <|end|>
+
+<|user|> Qual é o último mês do ano?
+<|assistant|> O último mês do ano é dezembro. <|end|>
+
+<|user|> Qual é o mês mais curto do ano?
+<|assistant|> O mês mais curto do ano é fevereiro, que tem 28 dias, ou 29 nos anos bissextos. <|end|>
+
+<|user|> Quais são os meses do ano?
+<|assistant|> Os meses do ano são janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro e dezembro. <|end|>
+
+<|user|> Quais são os dias da semana?
+<|assistant|> Os dias da semana são domingo, segunda-feira, terça-feira, quarta-feira, quinta-feira, sexta-feira e sábado. <|end|>
+
+<|user|> Quais são as estações do ano?
+<|assistant|> As estações do ano são primavera, verão, outono e inverno. <|end|>
+
+<|user|> Quais são as cores do semáforo?
+<|assistant|> As cores do semáforo são vermelho, amarelo e verde. <|end|>
+
+<|user|> O que significa a luz vermelha do semáforo?
+<|assistant|> A luz vermelha do semáforo significa pare. <|end|>
+
+<|user|> Quais são as cores do arco-íris?
+<|assistant|> As cores do arco-íris são vermelho, laranja, amarelo, verde, azul, anil e violeta. <|end|>
+
+<|user|> Quais são as vogais?
+<|assistant|> As vogais são A, E, I, O e U. <|end|>
+
+<|user|> Quantas letras tem o alfabeto?
+<|assistant|> O alfabeto português tem 26 letras. <|end|>
+
+<|user|> Que língua se fala no Brasil?
+<|assistant|> No Brasil se fala português. <|end|>
+
+<|user|> Em quais países se fala português?
+<|assistant|> Fala-se português no Brasil, em Portugal, em Angola, em Moçambique, em Cabo Verde, na Guiné-Bissau, em São Tomé e Príncipe e no Timor-Leste, entre outros lugares. <|end|>
+
+<|user|> Quem pintou a Mona Lisa?
+<|assistant|> A Mona Lisa foi pintada por Leonardo da Vinci. <|end|>
+
+<|user|> Quem inventou o avião?
+<|assistant|> No Brasil, o inventor do avião é considerado Santos Dumont, que voou com o 14-Bis em 1906. Nos Estados Unidos, o crédito costuma ir para os irmãos Wright. <|end|>
+
+<|user|> Quantas vezes o Brasil ganhou a Copa do Mundo?
+<|assistant|> O Brasil ganhou a Copa do Mundo de futebol cinco vezes: em 1958, 1962, 1970, 1994 e 2002. <|end|>
+
+<|user|> Quantos jogadores tem um time de futebol?
+<|assistant|> Um time de futebol tem onze jogadores em campo. <|end|>
+
+<|user|> Como lavar as mãos direito?
+<|assistant|> Molhe as mãos, passe sabão, esfregue as palmas, as costas das mãos, entre os dedos e as unhas por uns vinte segundos, enxágue e seque bem. <|end|>
+
+<|user|> Como atravessar a rua com segurança?
+<|assistant|> Atravesse na faixa de pedestres, espere o sinal verde para pedestres e olhe para os dois lados antes de atravessar. <|end|>
+
+# ===== Linguagem (81) =====
+
+<|user|> Qual é o contrário de alto?
+<|assistant|> O contrário de alto é baixo. <|end|>
+
+<|user|> Qual é o antônimo de quente?
+<|assistant|> O contrário de quente é frio. <|end|>
+
+<|user|> O que é o oposto de grande?
+<|assistant|> O contrário de grande é pequeno. <|end|>
+
+<|user|> Qual é o contrário de rápido?
+<|assistant|> O contrário de rápido é lento. <|end|>
+
+<|user|> Qual é o antônimo de feliz?
+<|assistant|> O contrário de feliz é triste. <|end|>
+
+<|user|> O que é o oposto de claro?
+<|assistant|> O contrário de claro é escuro. <|end|>
+
+<|user|> Qual é o contrário de bom?
+<|assistant|> O contrário de bom é mau. <|end|>
+
+<|user|> Qual é o antônimo de novo?
+<|assistant|> O contrário de novo é velho. <|end|>
+
+<|user|> O que é o oposto de cheio?
+<|assistant|> O contrário de cheio é vazio. <|end|>
+
+<|user|> Qual é o contrário de forte?
+<|assistant|> O contrário de forte é fraco. <|end|>
+
+<|user|> Qual é o antônimo de rico?
+<|assistant|> O contrário de rico é pobre. <|end|>
+
+<|user|> O que é o oposto de aberto?
+<|assistant|> O contrário de aberto é fechado. <|end|>
+
+<|user|> Qual é o contrário de dia?
+<|assistant|> O contrário de dia é noite. <|end|>
+
+<|user|> Qual é o antônimo de subir?
+<|assistant|> O contrário de subir é descer. <|end|>
+
+<|user|> O que é o oposto de entrar?
+<|assistant|> O contrário de entrar é sair. <|end|>
+
+<|user|> Qual é o contrário de começo?
+<|assistant|> O contrário de começo é fim. <|end|>
+
+<|user|> Qual é o antônimo de verdade?
+<|assistant|> O contrário de verdade é mentira. <|end|>
+
+<|user|> O que é o oposto de amor?
+<|assistant|> O contrário de amor é ódio. <|end|>
+
+<|user|> Qual é o contrário de perto?
+<|assistant|> O contrário de perto é longe. <|end|>
+
+<|user|> Qual é o antônimo de limpo?
+<|assistant|> O contrário de limpo é sujo. <|end|>
+
+<|user|> O que é o oposto de fácil?
+<|assistant|> O contrário de fácil é difícil. <|end|>
+
+<|user|> Qual é o contrário de gordo?
+<|assistant|> O contrário de gordo é magro. <|end|>
+
+<|user|> Qual é o antônimo de acordado?
+<|assistant|> O contrário de acordado é dormindo. <|end|>
+
+<|user|> O que é o oposto de ganhar?
+<|assistant|> O contrário de ganhar é perder. <|end|>
+
+<|user|> Qual é o plural de pão?
+<|assistant|> O plural de pão é pães. <|end|>
+
+<|user|> Qual é o plural de mão?
+<|assistant|> O plural de mão é mãos. <|end|>
+
+<|user|> Qual é o plural de cão?
+<|assistant|> O plural de cão é cães. <|end|>
+
+<|user|> Qual é o plural de animal?
+<|assistant|> O plural de animal é animais. <|end|>
+
+<|user|> Qual é o plural de papel?
+<|assistant|> O plural de papel é papéis. <|end|>
+
+<|user|> Qual é o plural de flor?
+<|assistant|> O plural de flor é flores. <|end|>
+
+<|user|> Qual é o plural de cidade?
+<|assistant|> O plural de cidade é cidades. <|end|>
+
+<|user|> Qual é o plural de lápis?
+<|assistant|> O plural de lápis é lápis. <|end|>
+
+<|user|> Qual é o plural de ovo?
+<|assistant|> O plural de ovo é ovos. <|end|>
+
+<|user|> Qual é o plural de país?
+<|assistant|> O plural de país é países. <|end|>
+
+<|user|> Qual é o plural de mês?
+<|assistant|> O plural de mês é meses. <|end|>
+
+<|user|> Qual é o plural de luz?
+<|assistant|> O plural de luz é luzes. <|end|>
+
+<|user|> Qual é o plural de homem?
+<|assistant|> O plural de homem é homens. <|end|>
+
+<|user|> Qual é o plural de jardim?
+<|assistant|> O plural de jardim é jardins. <|end|>
+
+<|user|> Qual é o plural de anel?
+<|assistant|> O plural de anel é anéis. <|end|>
+
+<|user|> Qual é o plural de limão?
+<|assistant|> O plural de limão é limões. <|end|>
+
+<|user|> Qual é o feminino de menino?
+<|assistant|> O feminino de menino é menina. <|end|>
+
+<|user|> Qual é o feminino de ator?
+<|assistant|> O feminino de ator é atriz. <|end|>
+
+<|user|> Qual é o feminino de homem?
+<|assistant|> O feminino de homem é mulher. <|end|>
+
+<|user|> Qual é o feminino de rei?
+<|assistant|> O feminino de rei é rainha. <|end|>
+
+<|user|> Qual é o feminino de cavalo?
+<|assistant|> O feminino de cavalo é égua. <|end|>
+
+<|user|> Qual é o feminino de boi?
+<|assistant|> O feminino de boi é vaca. <|end|>
+
+<|user|> Qual é o feminino de pai?
+<|assistant|> O feminino de pai é mãe. <|end|>
+
+<|user|> Qual é o feminino de avô?
+<|assistant|> O feminino de avô é avó. <|end|>
+
+<|user|> Qual é o feminino de professor?
+<|assistant|> O feminino de professor é professora. <|end|>
+
+<|user|> Qual é o feminino de príncipe?
+<|assistant|> O feminino de príncipe é princesa. <|end|>
+
+<|user|> Qual é o feminino de galo?
+<|assistant|> O feminino de galo é galinha. <|end|>
+
+<|user|> Qual é o feminino de leão?
+<|assistant|> O feminino de leão é leoa. <|end|>
+
+<|user|> Me dê um sinônimo de bonito.
+<|assistant|> Um sinônimo de bonito é belo. <|end|>
+
+<|user|> Me dê um sinônimo de feliz.
+<|assistant|> Um sinônimo de feliz é contente. <|end|>
+
+<|user|> Me dê um sinônimo de rápido.
+<|assistant|> Um sinônimo de rápido é veloz. <|end|>
+
+<|user|> Me dê um sinônimo de começar.
+<|assistant|> Um sinônimo de começar é iniciar. <|end|>
+
+<|user|> Me dê um sinônimo de falar.
+<|assistant|> Um sinônimo de falar é dizer. <|end|>
+
+<|user|> Me dê um sinônimo de casa.
+<|assistant|> Um sinônimo de casa é lar. <|end|>
+
+<|user|> Me dê um sinônimo de carro.
+<|assistant|> Um sinônimo de carro é automóvel. <|end|>
+
+<|user|> Me dê um sinônimo de triste.
+<|assistant|> Um sinônimo de triste é abatido. <|end|>
+
+<|user|> Me dê um sinônimo de acabar.
+<|assistant|> Um sinônimo de acabar é terminar. <|end|>
+
+<|user|> Me dê um sinônimo de ajudar.
+<|assistant|> Um sinônimo de ajudar é auxiliar. <|end|>
+
+<|user|> Me dê um sinônimo de medo.
+<|assistant|> Um sinônimo de medo é receio. <|end|>
+
+<|user|> Me dê um sinônimo de longe.
+<|assistant|> Um sinônimo de longe é distante. <|end|>
+
+<|user|> Como se escreve 0 por extenso?
+<|assistant|> 0 por extenso é zero. <|end|>
+
+<|user|> Como se escreve 3 por extenso?
+<|assistant|> 3 por extenso é três. <|end|>
+
+<|user|> Como se escreve 6 por extenso?
+<|assistant|> 6 por extenso é seis. <|end|>
+
+<|user|> Como se escreve 9 por extenso?
+<|assistant|> 9 por extenso é nove. <|end|>
+
+<|user|> Como se escreve 12 por extenso?
+<|assistant|> 12 por extenso é doze. <|end|>
+
+<|user|> Como se escreve 15 por extenso?
+<|assistant|> 15 por extenso é quinze. <|end|>
+
+<|user|> Como se escreve 18 por extenso?
+<|assistant|> 18 por extenso é dezoito. <|end|>
+
+<|user|> Como se escreve 20 por extenso?
+<|assistant|> 20 por extenso é vinte. <|end|>
+
+<|user|> Como se escreve 30 por extenso?
+<|assistant|> 30 por extenso é trinta. <|end|>
+
+<|user|> Como se escreve 40 por extenso?
+<|assistant|> 40 por extenso é quarenta. <|end|>
+
+<|user|> Como se escreve 50 por extenso?
+<|assistant|> 50 por extenso é cinquenta. <|end|>
+
+<|user|> Como se escreve 60 por extenso?
+<|assistant|> 60 por extenso é sessenta. <|end|>
+
+<|user|> Como se escreve 70 por extenso?
+<|assistant|> 70 por extenso é setenta. <|end|>
+
+<|user|> Como se escreve 80 por extenso?
+<|assistant|> 80 por extenso é oitenta. <|end|>
+
+<|user|> Como se escreve 90 por extenso?
+<|assistant|> 90 por extenso é noventa. <|end|>
+
+<|user|> Como se escreve 100 por extenso?
+<|assistant|> 100 por extenso é cem. <|end|>
+
+<|user|> Como se escreve 1000 por extenso?
+<|assistant|> 1000 por extenso é mil. <|end|>
+
+# ===== Matemática (51) =====
+
+<|user|> Calcule 1 + 12.
+<|assistant|> 1 + 12 = 13. <|end|>
+
+<|user|> Quanto é 8 - 3?
+<|assistant|> 8 - 3 = 5. <|end|>
+
+<|user|> Quanto é 19 + 7?
+<|assistant|> 19 + 7 = 26. <|end|>
+
+<|user|> Quanto dá 3 + 4?
+<|assistant|> 3 + 4 = 7. <|end|>
+
+<|user|> Qual é o resultado de 18 + 4?
+<|assistant|> 18 + 4 = 22. <|end|>
+
+<|user|> Calcule 15 - 10.
+<|assistant|> 15 - 10 = 5. <|end|>
+
+<|user|> Qual é o resultado de 6 + 12?
+<|assistant|> 6 + 12 = 18. <|end|>
+
+<|user|> Calcule 4 × 3.
+<|assistant|> 4 × 3 = 12. <|end|>
+
+<|user|> Quanto é 3 + 7?
+<|assistant|> 3 + 7 = 10. <|end|>
+
+<|user|> Quanto é 5 × 10?
+<|assistant|> 5 × 10 = 50. <|end|>
+
+<|user|> Quanto é 14 ÷ 2?
+<|assistant|> 14 ÷ 2 = 7. <|end|>
+
+<|user|> Quanto dá 10 × 6?
+<|assistant|> 10 × 6 = 60. <|end|>
+
+<|user|> Quanto dá 2 + 11?
+<|assistant|> 2 + 11 = 13. <|end|>
+
+<|user|> Qual é o resultado de 2 × 4?
+<|assistant|> 2 × 4 = 8. <|end|>
+
+<|user|> Quanto dá 6 × 11?
+<|assistant|> 6 × 11 = 66. <|end|>
+
+<|user|> Quanto é 5 × 4?
+<|assistant|> 5 × 4 = 20. <|end|>
+
+<|user|> Quanto dá 18 - 12?
+<|assistant|> 18 - 12 = 6. <|end|>
+
+<|user|> Calcule 15 - 7.
+<|assistant|> 15 - 7 = 8. <|end|>
+
+<|user|> Quanto dá 11 - 1?
+<|assistant|> 11 - 1 = 10. <|end|>
+
+<|user|> Calcule 11 + 7.
+<|assistant|> 11 + 7 = 18. <|end|>
+
+<|user|> Calcule 7 + 10.
+<|assistant|> 7 + 10 = 17. <|end|>
+
+<|user|> Qual é o resultado de 16 - 7?
+<|assistant|> 16 - 7 = 9. <|end|>
+
+<|user|> Quanto dá 9 - 3?
+<|assistant|> 9 - 3 = 6. <|end|>
+
+<|user|> Qual é o resultado de 10 × 7?
+<|assistant|> 10 × 7 = 70. <|end|>
+
+<|user|> Qual é o resultado de 9 × 3?
+<|assistant|> 9 × 3 = 27. <|end|>
+
+<|user|> Quanto dá 2 + 2?
+<|assistant|> 2 + 2 = 4. <|end|>
+
+<|user|> Quanto é 14 - 10?
+<|assistant|> 14 - 10 = 4. <|end|>
+
+<|user|> Calcule 80 ÷ 10.
+<|assistant|> 80 ÷ 10 = 8. <|end|>
+
+<|user|> Calcule 4 + 11.
+<|assistant|> 4 + 11 = 15. <|end|>
+
+<|user|> Quanto dá 7 × 5?
+<|assistant|> 7 × 5 = 35. <|end|>
+
+<|user|> Quanto dá 60 ÷ 12?
+<|assistant|> 60 ÷ 12 = 5. <|end|>
+
+<|user|> Quanto dá 10 + 11?
+<|assistant|> 10 + 11 = 21. <|end|>
+
+<|user|> Quanto é 12 - 3?
+<|assistant|> 12 - 3 = 9. <|end|>
+
+<|user|> Calcule 2 × 1.
+<|assistant|> 2 × 1 = 2. <|end|>
+
+<|user|> Quanto é 4 × 1?
+<|assistant|> 4 × 1 = 4. <|end|>
+
+<|user|> Quanto dá 16 + 2?
+<|assistant|> 16 + 2 = 18. <|end|>
+
+<|user|> Quanto dá 16 - 9?
+<|assistant|> 16 - 9 = 7. <|end|>
+
+<|user|> Quanto dá 7 × 10?
+<|assistant|> 7 × 10 = 70. <|end|>
+
+<|user|> Calcule 10 - 7.
+<|assistant|> 10 - 7 = 3. <|end|>
+
+<|user|> Quanto dá 16 ÷ 8?
+<|assistant|> 16 ÷ 8 = 2. <|end|>
+
+<|user|> Quanto é 6 - 3?
+<|assistant|> 6 - 3 = 3. <|end|>
+
+<|user|> Quanto é 19 - 4?
+<|assistant|> 19 - 4 = 15. <|end|>
+
+<|user|> Quanto é 2 + 4?
+<|assistant|> 2 + 4 = 6. <|end|>
+
+<|user|> Quanto dá 11 + 2?
+<|assistant|> 11 + 2 = 13. <|end|>
+
+<|user|> Quanto dá 9 × 4?
+<|assistant|> 9 × 4 = 36. <|end|>
+
+<|user|> Quanto é dois mais dois?
+<|assistant|> Dois mais dois é igual a quatro. <|end|>
+
+<|user|> Quanto é três mais três?
+<|assistant|> Três mais três é igual a seis. <|end|>
+
+<|user|> Quanto é cinco mais cinco?
+<|assistant|> Cinco mais cinco é igual a dez. <|end|>
+
+<|user|> Quanto é dez mais dez?
+<|assistant|> Dez mais dez é igual a vinte. <|end|>
+
+<|user|> Quanto é quatro mais três?
+<|assistant|> Quatro mais três é igual a sete. <|end|>
+
+<|user|> Quanto é seis mais dois?
+<|assistant|> Seis mais dois é igual a oito. <|end|>
+
+# ===== Complete a frase (71) =====
+
+<|user|> Complete o ditado: Água mole em pedra dura
+<|assistant|> tanto bate até que fura. <|end|>
+
+<|user|> Complete a frase: Quem não tem cão
+<|assistant|> caça com gato. <|end|>
+
+<|user|> Complete: Mais vale um pássaro na mão
+<|assistant|> do que dois voando. <|end|>
+
+<|user|> Termine o ditado: De grão em grão
+<|assistant|> a galinha enche o papo. <|end|>
+
+<|user|> Complete o ditado: Quem espera
+<|assistant|> sempre alcança. <|end|>
+
+<|user|> Complete a frase: Em boca fechada
+<|assistant|> não entra mosca. <|end|>
+
+<|user|> Complete: Cão que ladra
+<|assistant|> não morde. <|end|>
+
+<|user|> Termine o ditado: Deus ajuda
+<|assistant|> quem cedo madruga. <|end|>
+
+<|user|> Complete o ditado: A pressa é inimiga
+<|assistant|> da perfeição. <|end|>
+
+<|user|> Complete a frase: Quem semeia vento
+<|assistant|> colhe tempestade. <|end|>
+
+<|user|> Complete: Filho de peixe
+<|assistant|> peixinho é. <|end|>
+
+<|user|> Termine o ditado: Antes tarde
+<|assistant|> do que nunca. <|end|>
+
+<|user|> Complete o ditado: Diga-me com quem andas
+<|assistant|> e eu te direi quem és. <|end|>
+
+<|user|> Complete a frase: O hábito não faz
+<|assistant|> o monge. <|end|>
+
+<|user|> Complete: Quem tem boca
+<|assistant|> vai a Roma. <|end|>
+
+<|user|> Termine o ditado: Uma andorinha só
+<|assistant|> não faz verão. <|end|>
+
+<|user|> Complete o ditado: Pimenta nos olhos dos outros
+<|assistant|> é refresco. <|end|>
+
+<|user|> Complete a frase: Onde há fumaça
+<|assistant|> há fogo. <|end|>
+
+<|user|> Complete: Gato escaldado
+<|assistant|> tem medo de água fria. <|end|>
+
+<|user|> Termine o ditado: Quem ri por último
+<|assistant|> ri melhor. <|end|>
+
+<|user|> Complete o ditado: A união
+<|assistant|> faz a força. <|end|>
+
+<|user|> Complete a frase: Cada macaco
+<|assistant|> no seu galho. <|end|>
+
+<|user|> Complete: Quem procura
+<|assistant|> acha. <|end|>
+
+<|user|> Termine o ditado: O apressado
+<|assistant|> come cru. <|end|>
+
+<|user|> Complete o ditado: Devagar
+<|assistant|> se vai ao longe. <|end|>
+
+<|user|> Complete a frase: Em terra de cego
+<|assistant|> quem tem um olho é rei. <|end|>
+
+<|user|> Complete: Quem não chora
+<|assistant|> não mama. <|end|>
+
+<|user|> Termine o ditado: Saco vazio
+<|assistant|> não para em pé. <|end|>
+
+<|user|> Complete o ditado: Melhor prevenir
+<|assistant|> do que remediar. <|end|>
+
+<|user|> Complete a frase: Quem vê cara
+<|assistant|> não vê coração. <|end|>
+
+<|user|> Complete: Depois da tempestade
+<|assistant|> vem a bonança. <|end|>
+
+<|user|> Termine o ditado: Águas passadas
+<|assistant|> não movem moinhos. <|end|>
+
+<|user|> Complete o ditado: A ocasião
+<|assistant|> faz o ladrão. <|end|>
+
+<|user|> Complete a frase: Nem tudo que reluz
+<|assistant|> é ouro. <|end|>
+
+<|user|> Complete: Quem casa
+<|assistant|> quer casa. <|end|>
+
+<|user|> Termine o ditado: Mais vale tarde
+<|assistant|> do que nunca. <|end|>
+
+<|user|> Complete o ditado: Para bom entendedor
+<|assistant|> meia palavra basta. <|end|>
+
+<|user|> Complete a frase: Quem com ferro fere
+<|assistant|> com ferro será ferido. <|end|>
+
+<|user|> Complete a frase: O Sol nasce no
+<|assistant|> leste. <|end|>
+
+<|user|> Complete: O Sol se põe no
+<|assistant|> oeste. <|end|>
+
+<|user|> Termine a frase: A água ferve a
+<|assistant|> 100 graus Celsius, ao nível do mar. <|end|>
+
+<|user|> Complete a frase: Dois mais dois é igual a
+<|assistant|> quatro. <|end|>
+
+<|user|> Complete: A capital do Brasil é
+<|assistant|> Brasília. <|end|>
+
+<|user|> Termine a frase: A capital de Portugal é
+<|assistant|> Lisboa. <|end|>
+
+<|user|> Complete a frase: O contrário de quente é
+<|assistant|> frio. <|end|>
+
+<|user|> Complete: Uma semana tem
+<|assistant|> sete dias. <|end|>
+
+<|user|> Termine a frase: Um ano tem
+<|assistant|> doze meses. <|end|>
+
+<|user|> Complete a frase: O cachorro é o melhor amigo do
+<|assistant|> homem. <|end|>
+
+<|user|> Complete: As abelhas produzem
+<|assistant|> mel. <|end|>
+
+<|user|> Termine a frase: A vaca nos dá
+<|assistant|> leite. <|end|>
+
+<|user|> Complete a frase: O primeiro mês do ano é
+<|assistant|> janeiro. <|end|>
+
+<|user|> Complete: O último mês do ano é
+<|assistant|> dezembro. <|end|>
+
+<|user|> Termine a frase: O maior planeta do Sistema Solar é
+<|assistant|> Júpiter. <|end|>
+
+<|user|> Complete a frase: A Terra gira em torno do
+<|assistant|> Sol. <|end|>
+
+<|user|> Complete: O coração bombeia o
+<|assistant|> sangue para todo o corpo. <|end|>
+
+<|user|> Termine a frase: As plantas precisam de água e de
+<|assistant|> luz do Sol para crescer. <|end|>
+
+<|user|> Complete a frase: Antes de atravessar a rua, devemos olhar para
+<|assistant|> os dois lados. <|end|>
+
+<|user|> Complete: Dom Casmurro foi escrito por
+<|assistant|> Machado de Assis. <|end|>
+
+<|user|> Termine a frase: O maior rio do Brasil é o
+<|assistant|> Rio Amazonas. <|end|>
+
+<|user|> Complete a frase: Os peixes respiram por
+<|assistant|> brânquias. <|end|>
+
+<|user|> Complete: No inverno faz
+<|assistant|> frio. <|end|>
+
+<|user|> Termine a frase: No verão faz
+<|assistant|> calor. <|end|>
+
+<|user|> Complete a frase: Bom dia, como
+<|assistant|> vai você? <|end|>
+
+<|user|> Complete: Muito obrigado pela
+<|assistant|> sua ajuda. <|end|>
+
+<|user|> Termine a frase: Meu nome é
+<|assistant|> Laika. <|end|>
+
+<|user|> Complete a frase: Eu me chamo
+<|assistant|> Laika. <|end|>
+
+<|user|> Continue a história: Era uma vez
+<|assistant|> uma menina que morava numa casa pequena, perto de um rio. Todas as manhãs, ela ia até a margem para ver os peixes. <|end|>
+
+<|user|> Complete a frase: Era uma vez um cachorro chamado Bolinha
+<|assistant|> que adorava correr atrás das borboletas no quintal. Um dia, ele seguiu uma borboleta até a praça e fez um novo amigo. <|end|>
+
+<|user|> Continue: Num dia de chuva, o menino olhou pela janela e
+<|assistant|> viu um gato todo molhado procurando abrigo. Ele correu até a porta, pegou uma toalha e trouxe o gato para dentro. <|end|>
+
+<|user|> Continue a história: No alto da montanha vivia um velho pastor que
+<|assistant|> cuidava das suas ovelhas com muito carinho. Ele conhecia cada uma pelo nome. <|end|>
+
+<|user|> Complete a frase: Quando o Sol nasceu, os pássaros
+<|assistant|> começaram a cantar, e a cidade foi acordando aos poucos. <|end|>
+
+# ===== Resumos (textos de data/modern) (40) =====
+
+<|user|> Resuma o texto: A água da Terra está sempre em movimento. Ela passa dos rios e mares para o céu, do céu volta para a terra e da terra corre de novo para os rios e mares. Esse caminho sem fim se chama ciclo da água.
+<|assistant|> A água circula sem parar entre os mares, o céu e a terra, num processo chamado ciclo da água. <|end|>
+
+<|user|> Resuma: Tudo começa com o calor do Sol. Quando o Sol aquece a superfície dos oceanos, dos lagos e dos rios, uma parte da água vira vapor e sobe para a atmosfera. Esse processo se chama evaporação. As plantas também liberam vapor de água pelas folhas, num processo chamado transpiração.
+<|assistant|> O calor do Sol faz a água dos oceanos, lagos e rios evaporar, e as plantas também liberam vapor pela transpiração. <|end|>
+
+<|user|> Faça um resumo do texto: Lá no alto, o ar é mais frio. O vapor de água esfria e se transforma em gotinhas muito pequenas, que se juntam e formam as nuvens. Essa etapa se chama condensação. É a mesma coisa que acontece quando um copo gelado fica molhado por fora num dia quente.
+<|assistant|> No alto, o vapor de água esfria e vira gotinhas que formam as nuvens. Essa etapa é a condensação. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Quando as gotinhas das nuvens ficam grandes e pesadas demais, elas caem. Essa queda se chama precipitação. A precipitação pode ser chuva, neve ou granizo, dependendo da temperatura do ar.
+<|assistant|> Quando as gotas das nuvens ficam pesadas, elas caem como chuva, neve ou granizo. Isso é a precipitação. <|end|>
+
+<|user|> Resuma em uma frase: Depois que a chuva cai, a água segue caminhos diferentes. Uma parte escorre pela superfície do solo e chega aos rios, que levam a água de volta para o mar. Outra parte entra no solo, num processo chamado infiltração, e forma reservas de água debaixo da terra, chamadas lençóis freáticos. Uma parte é absorvida pelas raízes das plantas.
+<|assistant|> Depois da chuva, a água escorre para os rios, entra no solo ou é absorvida pelas plantas. <|end|>
+
+<|user|> Resuma o texto: O ciclo da água é muito importante para a vida. Ele leva água doce para as plantas, para os animais e para as pessoas. Sem ele, os rios secariam e as florestas não sobreviveriam. Por isso, é importante cuidar das nascentes, não poluir os rios e evitar o desmatamento, que deixa o solo sem proteção e diminui a chuva em muitas regiões.
+<|assistant|> O ciclo da água leva água doce a todos os seres vivos, por isso é preciso proteger os rios e evitar o desmatamento. <|end|>
+
+<|user|> Resuma: O Sistema Solar é formado pelo Sol e por tudo o que gira ao redor dele: planetas, luas, planetas anões, asteroides e cometas. O Sol fica no centro e é uma estrela, uma enorme bola de gás muito quente que produz luz e calor.
+<|assistant|> O Sistema Solar é formado pelo Sol, que é uma estrela, e por tudo o que gira ao redor dele. <|end|>
+
+<|user|> Faça um resumo do texto: Existem oito planetas no Sistema Solar. Em ordem, a partir do Sol, eles são Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Os quatro primeiros são chamados de planetas rochosos, porque têm uma superfície sólida. Os quatro últimos são chamados de planetas gasosos, porque são formados principalmente por gases.
+<|assistant|> Há oito planetas no Sistema Solar: os quatro primeiros são rochosos e os quatro últimos são gasosos. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Júpiter é o maior planeta do Sistema Solar. Ele é tão grande que caberiam mais de mil Terras dentro dele. Saturno é famoso pelos seus anéis, formados por pedaços de gelo e rocha. Urano e Netuno são planetas gelados e muito distantes, com uma cor azulada.
+<|assistant|> Júpiter é o maior planeta, Saturno é famoso pelos anéis, e Urano e Netuno são gelados e distantes. <|end|>
+
+<|user|> Resuma em uma frase: Plutão já foi considerado o nono planeta. Em 2006, os astrônomos decidiram classificá-lo como planeta anão, porque ele é muito pequeno e divide a sua órbita com outros corpos.
+<|assistant|> Em 2006, Plutão deixou de ser considerado planeta e passou a ser chamado de planeta anão. <|end|>
+
+<|user|> Resuma o texto: A Lua é o satélite natural da Terra. Ela não tem luz própria: o que vemos é a luz do Sol refletida na sua superfície. Por isso a Lua parece mudar de forma ao longo do mês. Essas mudanças são as fases da Lua: nova, crescente, cheia e minguante.
+<|assistant|> A Lua é o satélite natural da Terra. Ela não tem luz própria e muda de aparência ao longo das suas fases. <|end|>
+
+<|user|> Resuma: Muito antes da chegada dos europeus, o território que hoje chamamos de Brasil já era habitado por muitos povos indígenas. Eles falavam centenas de línguas diferentes, plantavam mandioca e milho, pescavam, caçavam e conheciam muito bem as florestas e os rios.
+<|assistant|> Antes da chegada dos europeus, o Brasil já era habitado por muitos povos indígenas. <|end|>
+
+<|user|> Faça um resumo do texto: Em 22 de abril de 1500, uma frota portuguesa comandada por Pedro Álvares Cabral chegou ao litoral do atual estado da Bahia. A partir daí, Portugal tomou posse das terras, e o Brasil se tornou uma colônia portuguesa. No começo, os portugueses exploraram o pau-brasil, uma árvore de madeira avermelhada que deu nome ao país.
+<|assistant|> Em 1500, a frota de Pedro Álvares Cabral chegou ao Brasil, que se tornou colônia de Portugal. A primeira riqueza explorada foi o pau-brasil. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Mais tarde, os colonizadores plantaram cana-de-açúcar no Nordeste. Para trabalhar nas plantações, eles escravizaram indígenas e trouxeram à força milhões de pessoas da África. A escravidão foi uma das partes mais cruéis da história do Brasil e deixou marcas que existem até hoje.
+<|assistant|> Os colonizadores plantaram cana-de-açúcar e escravizaram indígenas e africanos, o que foi uma das partes mais cruéis da história do Brasil. <|end|>
+
+<|user|> Resuma em uma frase: Em 7 de setembro de 1822, Dom Pedro declarou a independência do Brasil e se tornou o primeiro imperador do país, com o nome de Dom Pedro I. O Brasil passou a ser um império. Em 13 de maio de 1888, a princesa Isabel assinou a Lei Áurea, que acabou oficialmente com a escravidão.
+<|assistant|> O Brasil ficou independente em 1822, com Dom Pedro I como imperador, e a escravidão foi abolida pela Lei Áurea em 1888. <|end|>
+
+<|user|> Resuma o texto: No ano seguinte, em 15 de novembro de 1889, foi proclamada a República, e o marechal Deodoro da Fonseca se tornou o primeiro presidente. Durante o século XX, o Brasil passou por muitas mudanças. As cidades cresceram, surgiram fábricas, e em 1960 a capital foi transferida do Rio de Janeiro para Brasília, uma cidade nova construída no centro do país.
+<|assistant|> A República foi proclamada em 1889 e, em 1960, a capital passou do Rio de Janeiro para Brasília. <|end|>
+
+<|user|> Resuma: Um computador tem duas partes principais: o hardware e o software. O hardware é a parte física, aquilo que podemos tocar, como a tela, o teclado, o mouse e as peças de dentro da máquina. O software é a parte lógica, formada pelos programas que dizem ao hardware o que fazer.
+<|assistant|> O computador tem o hardware, que é a parte física, e o software, que são os programas. <|end|>
+
+<|user|> Faça um resumo do texto: O cérebro do computador é o processador. Ele executa bilhões de operações simples por segundo, como somar números e comparar valores. A memória RAM guarda as informações que o computador está usando naquele momento. Quando o computador é desligado, a memória RAM se apaga. Para guardar arquivos por muito tempo, o computador usa um disco de armazenamento, como um HD ou um SSD.
+<|assistant|> O processador faz os cálculos, a memória RAM guarda o que está em uso e o disco guarda os arquivos por muito tempo. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Quando vários computadores se conectam, eles formam uma rede. A internet é a maior rede do mundo e liga bilhões de computadores e celulares. É por meio dela que enviamos mensagens, assistimos a vídeos e procuramos informações.
+<|assistant|> Computadores conectados formam redes, e a internet é a maior rede do mundo. <|end|>
+
+<|user|> Resuma em uma frase: O esqueleto sustenta o corpo e protege os órgãos. Um adulto tem 206 ossos. O crânio protege o cérebro, e as costelas protegem o coração e os pulmões. Os músculos ficam presos aos ossos e permitem que a gente se mova, corra, pule e segure as coisas.
+<|assistant|> O esqueleto, que tem 206 ossos no adulto, sustenta e protege o corpo, e os músculos permitem os movimentos. <|end|>
+
+<|user|> Resuma o texto: O coração é um músculo do tamanho de um punho fechado. Ele bate sem parar e bombeia o sangue por todo o corpo. O sangue leva oxigênio e nutrientes para as células e recolhe aquilo que elas não usam mais.
+<|assistant|> O coração bombeia o sangue, que leva oxigênio e nutrientes para as células. <|end|>
+
+<|user|> Resuma: As estações acontecem porque o eixo da Terra é inclinado. Enquanto a Terra dá a volta ao redor do Sol, ora o hemisfério sul recebe mais luz, ora o hemisfério norte. Muita gente pensa que as estações acontecem porque a Terra fica mais perto ou mais longe do Sol, mas isso não é verdade. O que importa é a inclinação.
+<|assistant|> As estações do ano acontecem por causa da inclinação do eixo da Terra, e não por causa da distância até o Sol. <|end|>
+
+<|user|> Faça um resumo do texto: Por causa disso, as estações são opostas nos dois hemisférios. Quando é verão no Brasil, que fica quase todo no hemisfério sul, é inverno nos Estados Unidos e na Europa, que ficam no hemisfério norte.
+<|assistant|> As estações são opostas nos hemisférios: quando é verão no Brasil, é inverno na Europa. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? A Floresta Amazônica é a maior floresta tropical do mundo. Ela ocupa uma área enorme da América do Sul, e a maior parte dela fica no Brasil. O restante se espalha por países vizinhos, como Peru, Colômbia, Bolívia e Venezuela.
+<|assistant|> A Floresta Amazônica é a maior floresta tropical do mundo, e a maior parte dela fica no Brasil. <|end|>
+
+<|user|> Resuma em uma frase: A Amazônia abriga uma quantidade imensa de seres vivos. Lá vivem a onça-pintada, o maior felino das Américas, a preguiça, que se move devagar pelos galhos, a arara, com suas penas coloridas, e o boto-cor-de-rosa, um golfinho de água doce. Nos rios, nada o pirarucu, um dos maiores peixes de água doce do mundo. Também há sucuris, tucanos, macacos e milhares de espécies de insetos e plantas.
+<|assistant|> A Amazônia abriga muitos animais, como a onça-pintada, a preguiça, a arara, o boto-cor-de-rosa e o pirarucu. <|end|>
+
+<|user|> Resuma o texto: O maior perigo para a Amazônia é o desmatamento, que acontece quando as árvores são cortadas ou queimadas para abrir espaço para pastos, plantações ou garimpos. Proteger a floresta significa proteger os animais, os povos que vivem nela e o clima de todos nós.
+<|assistant|> O desmatamento é o maior perigo para a Amazônia, e proteger a floresta protege os animais, os povos e o clima. <|end|>
+
+<|user|> Resuma: Um dia, a raposa se deitou no meio da estrada e fingiu que estava muito doente. Quando Tomé passou, ficou com pena do animal. Colocou o balde no chão e se abaixou para ver se a raposa estava machucada. Na mesma hora, a raposa pulou, agarrou o balde e correu para a mata.
+<|assistant|> A raposa fingiu estar doente e, quando o pescador se abaixou para ajudar, roubou o balde de peixes. <|end|>
+
+<|user|> Faça um resumo do texto: Mas o balde era pesado demais. A raposa tropeçou numa raiz, o balde virou, e todos os peixes caíram no lago e foram embora nadando. A raposa ficou sem nada, toda molhada e envergonhada.
+<|assistant|> O balde era pesado, a raposa tropeçou e os peixes voltaram para o lago, deixando-a sem nada. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Daquele dia em diante, a raposa passou a ajudar o pescador. Ela espantava as garças que tentavam roubar os peixes do barco, e Tomé, em troca, sempre deixava alguns peixes para ela na beira do lago.
+<|assistant|> A raposa passou a proteger o barco do pescador, e ele, em troca, sempre deixava alguns peixes para ela. <|end|>
+
+<|user|> Resuma em uma frase: Na barraca do seu Antônio, tem banana, mamão, abacaxi e laranja. Ele sempre grita que a laranja dele é a mais doce da cidade e oferece um pedaço para a gente provar. Minha avó prova, faz cara de quem está pensando e, no fim, sempre compra uma dúzia.
+<|assistant|> Seu Antônio oferece laranja para provar, e a avó, depois de pensar, sempre compra uma dúzia. <|end|>
+
+<|user|> Resuma o texto: O meu lugar preferido é a barraca de pastel. O cheiro chega antes de a gente ver a barraca. Minha avó diz que pastel não é comida de todo dia, mas no sábado pode. Eu sempre peço um de queijo e um copo de caldo de cana.
+<|assistant|> O lugar preferido do narrador é a barraca de pastel, onde ele pede um pastel de queijo e caldo de cana. <|end|>
+
+<|user|> Resuma: Clara morava numa pequena cidade no interior, onde a noite era escura e o céu ficava cheio de estrelas. Toda noite, depois do jantar, ela subia no muro do quintal e tentava contar todas elas.
+<|assistant|> Clara morava no interior e, toda noite, subia no muro do quintal para tentar contar as estrelas. <|end|>
+
+<|user|> Faça um resumo do texto: Um dia, a professora de ciências levou um telescópio para a escola. Clara olhou por ele e ficou de boca aberta. No lugar onde ela via um pontinho de luz, apareciam muitas outras estrelas que ela nunca tinha visto. A professora explicou que existem mais estrelas no universo do que grãos de areia em todas as praias da Terra.
+<|assistant|> Ao olhar pelo telescópio da escola, Clara descobriu que existem muito mais estrelas do que ela imaginava. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Muitos anos depois, Clara se tornou astrônoma. Ela ainda não conseguiu contar todas as estrelas, e sabe que nunca vai conseguir. Mas aprendeu que a curiosidade não precisa de um fim para valer a pena.
+<|assistant|> Clara se tornou astrônoma e aprendeu que a curiosidade vale a pena mesmo sem chegar a um fim. <|end|>
+
+<|user|> Resuma em uma frase: Os mamíferos são vertebrados que amamentam os filhotes com leite. A maioria tem pelos e nasce da barriga da mãe. O cachorro, o gato, a vaca, o cavalo e o ser humano são mamíferos. A baleia e o golfinho também são mamíferos, mesmo vivendo no mar. O morcego é o único mamífero que voa de verdade.
+<|assistant|> Os mamíferos amamentam os filhotes. Entre eles estão o cachorro, a baleia, o ser humano e o morcego, o único que voa. <|end|>
+
+<|user|> Resuma o texto: Os animais também são classificados pelo que comem. Os herbívoros comem plantas, como a vaca e o coelho. Os carnívoros comem outros animais, como o leão e a onça. Os onívoros comem de tudo, como o urso, o porco e o ser humano.
+<|assistant|> Os animais podem ser herbívoros, carnívoros ou onívoros, conforme o que comem. <|end|>
+
+<|user|> Resuma a história da raposa e do pescador.
+<|assistant|> Uma raposa fingiu estar doente para roubar os peixes de um pescador, mas derrubou tudo no lago. O pescador a perdoou, e os dois passaram a se ajudar. A moral é que a honestidade vale mais do que a esperteza. <|end|>
+
+<|user|> Resuma a história da menina que contava estrelas.
+<|assistant|> Clara tentava contar as estrelas todas as noites. Depois de olhar por um telescópio, descobriu que elas são incontáveis, passou a estudá-las e virou astrônoma. <|end|>
+
+<|user|> Do que fala o texto sobre o ciclo da água?
+<|assistant|> O texto explica como a água evapora, forma nuvens, cai como chuva e volta para os rios e mares, e mostra por que esse ciclo é importante para a vida. <|end|>
+
+<|user|> Do que fala o texto sobre o Sistema Solar?
+<|assistant|> O texto apresenta o Sol, os oito planetas, o planeta anão Plutão e a Lua, explicando algumas características de cada um. <|end|>
+

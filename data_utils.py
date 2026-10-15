@@ -42,7 +42,8 @@ def parse_qa_text(text):
         if not block or USER_TOKEN not in block or ASSISTANT_TOKEN not in block:
             continue
         user_part, answer = block.split(ASSISTANT_TOKEN, 1)
-        question = user_part.replace(USER_TOKEN, "").strip()
+        # Só o que vem depois do último <|user|>: ignora comentários (# ...) antes dele.
+        question = user_part.rsplit(USER_TOKEN, 1)[-1].strip()
         answer = answer.strip()
         if not question or not answer:
             continue
@@ -101,23 +102,123 @@ def _chat(question, answer):
     return f"{USER_TOKEN} {question} {ASSISTANT_TOKEN} {answer} {END_TOKEN}"
 
 
-def synthetic_examples(book_texts, n, seed=0):
+SUMMARY_REQUESTS = ["Resuma o texto: {}", "Resuma: {}", "Faça um resumo do texto: {}",
+                    "Qual é a ideia principal deste texto? {}", "Resuma em uma frase: {}"]
+
+
+def extractive_summary(sentences):
+    """Escolhe a(s) frase(s) mais representativa(s) do parágrafo (resumo extrativo).
+
+    Cada frase ganha pontos pelas palavras que ela compartilha com o resto do texto;
+    a primeira frase ganha um pequeno bônus, porque costuma apresentar o assunto.
+    """
+    from collections import Counter
+
+    bags = [{w.lower().strip(_STRIP) for w in s.split() if len(w.strip(_STRIP)) >= 4}
+            for s in sentences]
+    freq = Counter(w for bag in bags for w in bag)
+    scores = []
+    for i, bag in enumerate(bags):
+        shared = sum(freq[w] - 1 for w in bag)  # palavras que aparecem em outras frases
+        score = shared / (len(bag) + 3) + (0.3 if i == 0 else 0.0)
+        scores.append((score, i))
+    keep = 2 if len(sentences) >= 5 else 1
+    chosen = sorted(i for _, i in sorted(scores, reverse=True)[:keep])
+    return " ".join(sentences[i] for i in chosen)
+
+
+def summary_examples(texts, n, seed=0, min_words=40, max_words=90):
+    """'Resuma o texto: <parágrafo>' -> resumo extrativo, a partir dos livros."""
+    import random
+
+    rng = random.Random(seed)
+    candidates = []
+    for text in texts:
+        for para in book_paragraphs(text):
+            words = sum(len(s.split()) for s in para)
+            if 3 <= len(para) <= 6 and min_words <= words <= max_words:
+                candidates.append(para)
+    rng.shuffle(candidates)
+    return [_chat(rng.choice(SUMMARY_REQUESTS).format(" ".join(p)), extractive_summary(p))
+            for p in candidates[:n]]
+
+
+# ---------- Wikipédia ----------
+
+_PAREN = re.compile(r"\s*\([^()]*\)")
+_WIKI_STOP = ("Ver também", "Referências", "Ligações externas", "Bibliografia", "Notas",
+              "Fontes", "Leitura adicional")
+
+
+def clean_wiki(text, max_paragraphs=8):
+    """Fica só com os parágrafos de prosa do começo do artigo (sem títulos e listas)."""
+    paragraphs = []
+    for line in text.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if len(line) < 40 and line.startswith(_WIKI_STOP):
+            break
+        if len(line) < 60 or line[-1] not in ".!?…":
+            continue
+        paragraphs.append(re.sub(r"\s+", " ", line))
+        if len(paragraphs) >= max_paragraphs:
+            break
+    return paragraphs
+
+
+def wiki_definition(title, first_paragraph):
+    """Transforma a 1ª frase de um artigo em 'O que é X?' / 'Quem foi X?'."""
+    title = _PAREN.sub("", title).strip()
+    if not title or title.startswith("Lista") or len(title) > 50:
+        return None
+    first = _SENTENCE_SPLIT.split(first_paragraph, 1)[0]
+    has_dates = bool(re.search(r"\([^()]*\d{3,4}[^()]*\)", first))
+    sentence = re.sub(r"\s+", " ", _PAREN.sub("", first)).strip()
+    sentence = sentence.replace(" ,", ",")
+    if "(" in sentence or ")" in sentence or not sentence.endswith("."):
+        return None
+    if not 5 <= len(sentence.split()) <= 40:
+        return None
+    match = re.match(r"^(?:(o|a|os|as)\s+)?" + re.escape(title.lower()) + r",?\s+(é|foi|são|foram)\s",
+                     sentence.lower())
+    if not match:
+        return None
+    article, verb = match.groups()
+    subject = f"{article} {title}" if article else title
+    if verb == "é":
+        question = f"Quem é {subject}?" if has_dates else f"O que é {subject}?"
+    elif verb == "foi":
+        question = f"Quem foi {subject}?" if has_dates else f"O que foi {subject}?"
+    else:
+        question = f"O que são {subject}?" if verb == "são" else f"O que foram {subject}?"
+    return _chat(question, sentence)
+
+
+def synthetic_examples(book_texts, n, seed=0, summary_texts=None, summary_share=0.2):
     """Cria pares pergunta/resposta cujas respostas saem dos próprios livros.
 
     Isso ensina o modelo a responder usando o que aprendeu no pré-treino, em vez
-    de devolver sempre alguma resposta decorada do pergeresp.
+    de devolver sempre alguma resposta decorada do pergeresp. Uma parte
+    (summary_share) são pedidos de resumo com trechos de summary_texts.
     """
     import random
 
     rng = random.Random(seed)
+    n_summary = int(n * summary_share)
+    summaries = summary_examples(summary_texts if summary_texts is not None else book_texts,
+                                 n_summary, seed=seed)
+    n -= len(summaries)
+
     paragraphs = [p for text in book_texts for p in book_paragraphs(text)]
     multi = [p for p in paragraphs if len(p) >= 2]
     if not paragraphs:
-        return []
+        return summaries
 
-    examples, seen = [], set()
+    examples, seen = list(summaries), set(summaries)
+    target = len(examples) + n
     attempts = 0
-    while len(examples) < n and attempts < n * 10:
+    while len(examples) < target and attempts < n * 10:
         attempts += 1
         kind = rng.random()
 

@@ -15,7 +15,10 @@ from model import build_model
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--preset", default="tiny", choices=PRESETS.keys())
-parser.add_argument("--books", default="data/books")
+parser.add_argument("--books", nargs="+", default=["data/books", "data/wiki", "data/modern"],
+                    help="pastas com .txt para o pré-treino")
+parser.add_argument("--modern-repeat", type=int, default=3,
+                    help="quantas vezes os textos de data/modern entram no treino (são poucos e modernos)")
 parser.add_argument("--qa", default="data/qa")
 parser.add_argument("--out", default="checkpoints")
 parser.add_argument("--max-steps", type=int, default=None)
@@ -36,10 +39,14 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 use_cuda = device == "cuda"
 print("Dispositivo:", device)
 
-book_files = sorted(Path(args.books).glob("*.txt"))
+book_files = []
+for folder in args.books:
+    found = sorted(Path(folder).glob("*.txt"))
+    size = sum(f.stat().st_size for f in found) / 1e6
+    print(f"{folder}: {len(found)} arquivos ({size:.1f} MB)")
+    book_files.extend(found)
 if not book_files:
     raise SystemExit(f"Nenhum .txt em {args.books}. Rode prepare_data.py ou coloque seus livros lá.")
-print(f"{len(book_files)} livros em {args.books}")
 
 
 # ---------- Tokenizer ----------
@@ -72,7 +79,8 @@ train_ids, val_ids = [], []
 for path in book_files:
     book_ids = tokenizer.encode(path.read_text(encoding="utf-8")).ids + [eot_id]
     cut = int(len(book_ids) * 0.95)
-    train_ids.extend(book_ids[:cut])
+    repeat = args.modern_repeat if path.parent.name == "modern" else 1
+    train_ids.extend(book_ids[:cut] * max(1, repeat))
     val_ids.extend(book_ids[cut:])
 train_data = torch.tensor(train_ids, dtype=torch.long)
 val_data = torch.tensor(val_ids, dtype=torch.long)

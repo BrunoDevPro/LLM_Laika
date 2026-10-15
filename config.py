@@ -12,12 +12,12 @@ PRESETS = {
     "colab": dict(
         block_size=256, embed_size=256, heads=8, layers=6, dropout=0.2,
         vocab_size=8000, batch_size=64, learning_rate=8e-4,
-        max_steps=15000, warmup_steps=300, eval_every=500, eval_iters=40, patience=6,
+        max_steps=10000, warmup_steps=300, eval_every=500, eval_iters=40, patience=6,
     ),
-    # Modelo maior: use só com 400+ livros (≈25M+ tokens).
+    # Modelo maior (~14M): use se o train.py mostrar 30M+ tokens.
     "colab_big": dict(
         block_size=256, embed_size=384, heads=6, layers=6, dropout=0.15,
         vocab_size=8000, batch_size=64, learning_rate=6e-4,
-        max_steps=20000, warmup_steps=500, eval_every=500, eval_iters=40, patience=6,
+        max_steps=15000, warmup_steps=500, eval_every=500, eval_iters=40, patience=6,
     ),
 }
