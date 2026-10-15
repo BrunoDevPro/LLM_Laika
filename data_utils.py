@@ -57,3 +57,104 @@ def load_qa_examples(qa_dir):
         print(f"  {path.name}: {len(found)} exemplos")
         examples.extend(found)
     return examples
+
+
+# ---------- Exemplos sintéticos gerados a partir dos livros ----------
+
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?…])\s+")
+_STRIP = ".,;:!?…—–-\"'«»()[]“”‘’"
+
+
+def _good_sentence(sentence):
+    words = sentence.split()
+    if not 5 <= len(words) <= 40:
+        return False
+    chars = sentence.replace(" ", "")
+    if sum(c.isalpha() for c in chars) < 0.75 * len(chars):
+        return False  # números, índices, tabelas
+    if sentence.isupper() or sentence[-1] not in ".!?…":
+        return False
+    return True
+
+
+def book_paragraphs(text):
+    """Divide o livro em parágrafos, cada um como lista de frases 'boas'."""
+    paragraphs = []
+    for block in text.split("\n\n"):
+        sentences = [s.strip() for s in _SENTENCE_SPLIT.split(block.strip())]
+        sentences = [s for s in sentences if _good_sentence(s)]
+        if sentences:
+            paragraphs.append(sentences)
+    return paragraphs
+
+
+def _content_words(sentence):
+    words = []
+    for raw in sentence.split()[1:]:
+        word = raw.strip(_STRIP)
+        if len(word) >= 5 and word.isalpha() and word.islower():
+            words.append(word)
+    return words
+
+
+def _chat(question, answer):
+    return f"{USER_TOKEN} {question} {ASSISTANT_TOKEN} {answer} {END_TOKEN}"
+
+
+def synthetic_examples(book_texts, n, seed=0):
+    """Cria pares pergunta/resposta cujas respostas saem dos próprios livros.
+
+    Isso ensina o modelo a responder usando o que aprendeu no pré-treino, em vez
+    de devolver sempre alguma resposta decorada do pergeresp.
+    """
+    import random
+
+    rng = random.Random(seed)
+    paragraphs = [p for text in book_texts for p in book_paragraphs(text)]
+    multi = [p for p in paragraphs if len(p) >= 2]
+    if not paragraphs:
+        return []
+
+    examples, seen = [], set()
+    attempts = 0
+    while len(examples) < n and attempts < n * 10:
+        attempts += 1
+        kind = rng.random()
+
+        if kind < 0.4 and multi:
+            para = rng.choice(multi)
+            i = rng.randrange(len(para) - 1)
+            answer = para[i + 1]
+            if i + 2 < len(para) and rng.random() < 0.4:
+                answer += " " + para[i + 2]
+            question = rng.choice([
+                "Continue o texto: {}", "Continue: {}", "O que vem depois de: {}",
+                "Escreva a continuação: {}",
+            ]).format(para[i])
+
+        elif kind < 0.75:
+            sentence = rng.choice(rng.choice(paragraphs))
+            words = _content_words(sentence)
+            if not words:
+                continue
+            word = rng.choice(words)
+            answer = sentence
+            question = rng.choice([
+                "Escreva uma frase com a palavra {}.", "Use a palavra \"{}\" em uma frase.",
+                "Crie uma frase com {}.", "Me dê um exemplo de frase com a palavra {}.",
+            ]).format(word)
+
+        else:
+            sentence = rng.choice(rng.choice(paragraphs))
+            words = sentence.split()
+            cut = rng.randint(3, max(3, len(words) - 3))
+            answer = " ".join(words[cut:])
+            question = rng.choice([
+                "Complete a frase: {}", "Termine a frase: {}", "Complete: {}",
+            ]).format(" ".join(words[:cut]))
+
+        example = _chat(question, answer)
+        if example not in seen:
+            seen.add(example)
+            examples.append(example)
+    return examples

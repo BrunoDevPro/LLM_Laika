@@ -35,6 +35,18 @@ Também funciona localmente: `pip install torch tokenizers`, coloque `.txt` em `
 - Mais livros ajudam mais do que mais épocas: o `train.py` mostra os *tokens por parâmetro*
   (ideal ≈ 20). Se o `val loss` parar de cair, mais passos só pioram (overfitting).
 
+## Como o fine-tuning evita "decorar" o pergeresp
+
+Cada lote mistura três coisas:
+1. Exemplos do `data/qa/` (por padrão só ~15% dos exemplos de chat, `--qa-share`).
+2. Milhares de exemplos gerados dos livros ("Continue o texto: …", "Escreva uma frase com a palavra X",
+   "Complete a frase: …"), cujas respostas vêm do pré-treino (`--synthetic`).
+3. Trechos de livro puros (`--replay`), para o modelo não esquecer o português.
+
+A cada época o script mostra respostas para 5 perguntas de teste, então dá para ver na hora se ele
+voltou a responder tudo com o pergeresp. Se isso acontecer: `python finetune.py --qa-share 0.08 --lr 3e-5`.
+Não precisa refazer o pré-treino para repetir o fine-tuning.
+
 ## Melhorando o fine-tuning
 
 - Prefira **muitas perguntas variadas e curtas** a poucas perguntas repetidas com paráfrases.
