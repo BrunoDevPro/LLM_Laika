@@ -65,17 +65,20 @@ eot_id = tokenizer.token_to_id(EOT_TOKEN)
 
 
 # ---------- Dados ----------
-ids = []
-for path in book_files:
-    ids.extend(tokenizer.encode(path.read_text(encoding="utf-8")).ids)
-    ids.append(eot_id)
-data = torch.tensor(ids, dtype=torch.long)
-
 block = cfg["block_size"]
-n_val = max(block * 40, int(len(data) * 0.05))
-if len(data) < n_val + block * 10:
-    raise SystemExit(f"Poucos dados ({len(data)} tokens). Adicione mais livros.")
-train_data, val_data = data[:-n_val], data[-n_val:]
+# Validação = os últimos 5% de CADA livro (antes era só o fim do último livro,
+# o que media um livro só e deixava o val loss enviesado).
+train_ids, val_ids = [], []
+for path in book_files:
+    book_ids = tokenizer.encode(path.read_text(encoding="utf-8")).ids + [eot_id]
+    cut = int(len(book_ids) * 0.95)
+    train_ids.extend(book_ids[:cut])
+    val_ids.extend(book_ids[cut:])
+train_data = torch.tensor(train_ids, dtype=torch.long)
+val_data = torch.tensor(val_ids, dtype=torch.long)
+data = train_data
+if len(val_data) < block * 10 or len(train_data) < block * 100:
+    raise SystemExit(f"Poucos dados ({len(train_data)} tokens). Adicione mais livros.")
 
 # Parâmetros vs. tokens: regra prática ~20 tokens de treino por parâmetro.
 model = build_model(cfg).to(device)

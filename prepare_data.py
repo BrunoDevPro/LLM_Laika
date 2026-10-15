@@ -43,14 +43,14 @@ def portuguese_books():
     books = []
     for row in rows:
         if row.get("Type") == "Text" and (row.get("Language") or "").strip() == "pt":
-            books.append((row["Text#"], row.get("Title", "").replace("\n", " ")))
+            books.append((row["Text#"], " ".join(row.get("Title", "").split())))
     return books
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="data/books")
-    parser.add_argument("--max-books", type=int, default=80)
+    parser.add_argument("--max-books", type=int, default=400)
     args = parser.parse_args()
 
     out = Path(args.out)
