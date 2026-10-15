@@ -5,29 +5,46 @@ próprios .txt em data/books/ e pular este script.
 """
 
 import argparse
-import json
+import csv
+import io
 import time
-import urllib.parse
 import urllib.request
 from pathlib import Path
 
 from data_utils import clean_gutenberg
 
-API = "https://gutendex.com/books/"
+CATALOG = "https://www.gutenberg.org/cache/epub/feeds/pg_catalog.csv"
 MIN_CHARS = 30_000
 
 
-def fetch(url, timeout=60):
-    request = urllib.request.Request(url, headers={"User-Agent": "LLM_Laika/1.0"})
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        return response.read()
+def fetch(url, timeout=90, tries=3):
+    last_error = None
+    for attempt in range(tries):
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": "LLM_Laika/1.0"})
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return response.read()
+        except Exception as error:
+            last_error = error
+            time.sleep(2 * (attempt + 1))
+    raise last_error
 
 
-def text_url(book):
-    formats = book.get("formats", {})
-    candidates = [u for k, u in formats.items() if k.startswith("text/plain") and not u.endswith(".zip")]
-    utf8 = [u for u in candidates if "utf-8" in u.lower() or u.endswith(".txt.utf-8")]
-    return (utf8 or candidates or [None])[0]
+def candidate_urls(book_id):
+    return [
+        f"https://www.gutenberg.org/cache/epub/{book_id}/pg{book_id}.txt",
+        f"https://www.gutenberg.org/ebooks/{book_id}.txt.utf-8",
+    ]
+
+
+def portuguese_books():
+    raw = fetch(CATALOG, timeout=120).decode("utf-8-sig", errors="ignore")
+    rows = csv.DictReader(io.StringIO(raw))
+    books = []
+    for row in rows:
+        if row.get("Type") == "Text" and (row.get("Language") or "").strip() == "pt":
+            books.append((row["Text#"], row.get("Title", "").replace("\n", " ")))
+    return books
 
 
 def main():
@@ -38,43 +55,47 @@ def main():
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-
     saved = len(list(out.glob("*.txt")))
     print(f"{saved} livros já em {out}")
-    url = API + "?" + urllib.parse.urlencode({"languages": "pt", "copyright": "false"})
 
-    while url and saved < args.max_books:
-        try:
-            page = json.loads(fetch(url))
-        except Exception as error:  # rede/API fora do ar
-            print("Falha ao consultar o Gutenberg:", error)
-            print("Alternativa: coloque seus .txt em", out)
+    try:
+        books = portuguese_books()
+    except Exception as error:
+        print("Falha ao baixar o catálogo do Gutenberg:", error)
+        print("Alternativa: coloque seus .txt em", out)
+        return
+    print(f"{len(books)} livros em português no catálogo; baixando até {args.max_books}...")
+
+    for book_id, title in books:
+        if saved >= args.max_books:
             break
+        target = out / f"gutenberg_{book_id}.txt"
+        if target.exists():
+            continue
 
-        for book in page["results"]:
-            if saved >= args.max_books:
-                break
-            target = out / f"gutenberg_{book['id']}.txt"
-            link = text_url(book)
-            if target.exists() or not link:
-                continue
+        raw = None
+        for url in candidate_urls(book_id):
             try:
-                raw = fetch(link).decode("utf-8", errors="ignore")
-            except Exception as error:
-                print(f"  pulando {book['id']}: {error}")
+                raw = fetch(url, tries=2).decode("utf-8", errors="ignore")
+                break
+            except Exception:
                 continue
-            text = clean_gutenberg(raw)
-            if len(text) < MIN_CHARS:
-                continue
-            target.write_text(text, encoding="utf-8")
-            saved += 1
-            print(f"  [{saved}] {book['title'][:60]} ({len(text) // 1000}k caracteres)")
-            time.sleep(0.5)
+        if raw is None:
+            print(f"  pulando {book_id}: não consegui baixar")
+            continue
 
-        url = page.get("next")
+        text = clean_gutenberg(raw)
+        if len(text) < MIN_CHARS:
+            continue
+        target.write_text(text, encoding="utf-8")
+        saved += 1
+        print(f"  [{saved}] {title[:60]} ({len(text) // 1000}k caracteres)", flush=True)
+        time.sleep(0.3)
 
     total = sum(p.stat().st_size for p in out.glob("*.txt"))
     print(f"Pronto: {saved} livros, {total / 1e6:.1f} MB em {out}")
+    if saved == 0:
+        print("Nenhum livro baixado. Coloque seus .txt em", out)
 
 
 if __name__ == "__main__":
