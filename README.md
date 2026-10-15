@@ -12,6 +12,11 @@ Um pequeno modelo de linguagem (transformer estilo GPT) treinado do zero em PyTo
 
 > O repositório precisa ser **público** para o Colab conseguir clonar sem token.
 
+**Salvamento:** o notebook liga o seu Google Drive (autorize na primeira célula) e guarda livros,
+tokenizer e checkpoints em `Meu Drive/LLM_Laika/`. Se a sessão cair, rode as células de novo: ele
+reaproveita os livros e o pré-treino que já estão lá. O `train.py` salva o melhor checkpoint a cada
+avaliação, então mesmo uma queda no meio do treino não perde tudo (continue com `--resume`).
+
 ## Estrutura
 
 | Arquivo | Para quê |
