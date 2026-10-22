@@ -24,7 +24,7 @@ import sqlite3
 import tempfile
 from pathlib import Path
 
-from data_utils import _SENTENCE_SPLIT, content_words, word_tokens
+from data_utils import _SENTENCE_SPLIT, content_words, normalize, word_tokens
 
 DEFAULT_DB = "data/rag/laika_rag.db"
 SOURCES = [("data/wiki", "wiki"), ("data/modern", "texto"), ("data/books", "livro")]
@@ -175,6 +175,17 @@ def _with_stems(words):
     return {_stem(w) for w in words}
 
 
+def _proximity(tokens, words):
+    """1.0 se as palavras da pergunta aparecem juntas (janela de até 12 palavras), 0 se espalhadas."""
+    stems = [_stem(t) for t in tokens]
+    positions = [[i for i, t in enumerate(stems) if t == _stem(w)] for w in words]
+    positions = [p for p in positions if p]
+    if len(positions) < 2:
+        return 0.0
+    best = min(max(abs(min(p, key=lambda j: abs(j - i)) - i) for p in positions) for i in positions[0])
+    return 1.0 if best <= 6 else 0.5 if best <= 12 else 0.0
+
+
 class RagIndex:
     def __init__(self, db_path=DEFAULT_DB):
         path = Path(db_path)
@@ -190,42 +201,78 @@ class RagIndex:
             real = str(local)
         self.con = sqlite3.connect(f"file:{real}?mode=ro", uri=True, check_same_thread=False)
 
-    def search(self, question, k=10):
+    def _query(self, match, k):
+        try:
+            return self.con.execute(
+                "SELECT title, text, kind, pos FROM passages WHERE passages MATCH ? "
+                "ORDER BY bm25(passages, 4.0, 1.0) LIMIT ?", (match, k)).fetchall()
+        except sqlite3.OperationalError:
+            return []
+
+    def search(self, question, k=40):
         words = content_words(question)[:12]
         if not words:
             return []
-        # Palavra exata OU mesmo começo (radical simples: "pisou" acha "pisar").
+        # 1) Artigos cujo TÍTULO tem todas as palavras da pergunta ("Vulcão", "Machado de Assis").
+        title_rows = self._query(" AND ".join(f'title:"{w}"' for w in words), 15)
+        # 2) Qualquer trecho com as palavras: exata OU mesmo começo ("pisou" acha "pisar").
         terms = []
         for w in words:
             terms.append(f'"{w}"')
             if len(w) >= 6 and w.isalpha():
                 terms.append(f'"{w[:5]}"*')
-        query = " OR ".join(terms)
-        try:
-            rows = self.con.execute(
-                "SELECT title, text, kind, pos FROM passages WHERE passages MATCH ? "
-                "ORDER BY bm25(passages, 4.0, 1.0) LIMIT ?", (query, k)).fetchall()
-        except sqlite3.OperationalError:
-            return []
-        results = []
+        rows = title_rows + self._query(" OR ".join(terms), k)
+
+        query_stems = {_stem(w) for w in words}
+        raw_question = set(re.findall(r"[^\W\d_]+", question.lower()))
+        results, seen = [], set()
         for rank, (title, text, kind, pos) in enumerate(rows):
+            if (title, text) in seen:
+                continue
+            seen.add((title, text))
+            main_title = re.sub(r"\s*\(.*?\)", "", title)
             title_words = _with_stems(word_tokens(title))
-            all_words = title_words | _with_stems(word_tokens(text))
+            main_words = _with_stems(w for w in word_tokens(main_title) if w in content_words(main_title))
+            text_tokens = word_tokens(text)
+            all_words = title_words | _with_stems(text_tokens)
             coverage = sum(_stem(w) in all_words for w in words) / len(words)
             in_title = sum(_stem(w) in title_words for w in words) / len(words)
-            # O 1º trecho de um artigo costuma ter a definição ("X é ...").
-            lead = 0.1 if pos == 0 and in_title > 0 else 0.0
-            score = coverage + 0.3 * in_title + KIND_BONUS.get(kind, 0) + lead - 0.01 * rank
+
+            score = coverage + 0.3 * in_title + KIND_BONUS.get(kind, 0)
+            # Mesmas letras mas acentos diferentes ("Pele" x "Pelé") não contam como título igual.
+            raw_title = set(re.findall(r"[^\W\d_]+", main_title.lower()))
+            accent_clash = any(normalize(a) == normalize(b) and a != b for a in raw_title for b in raw_question)
+            if accent_clash:
+                score -= 0.5
+            elif main_words and main_words == query_stems:
+                score += 0.6                      # título exatamente igual ao assunto
+            elif in_title > 0 and main_words:
+                extra = len(main_words - query_stems) / len(main_words)
+                score -= 0.3 * extra              # "Prêmio Machado de Assis" < "Machado de Assis"
+            if "(" in title and not (_with_stems(word_tokens(title)) - _with_stems(word_tokens(main_title))) <= query_stems:
+                score -= 0.2                      # desambiguação: "Cristo Redentor (Porto Alegre)"
+            if pos == 0 and in_title > 0:
+                score += 0.1                      # 1º trecho do artigo costuma ter a definição
+            score += 0.2 * _proximity(text_tokens, words)
+            score -= 0.002 * rank
             results.append({"title": title, "text": text, "kind": kind,
                             "coverage": coverage, "score": score})
         results.sort(key=lambda r: r["score"], reverse=True)
         return results
 
-    def best(self, question, min_coverage=0.6):
-        """O trecho mais relevante, ou None se nenhum cobrir a maior parte das palavras da pergunta."""
+    def best(self, question, min_coverage=0.6, min_score=1.8):
+        """O trecho mais relevante, ou None se a busca não tiver confiança.
+
+        Contexto errado atrapalha mais do que nenhum contexto, então só aceita resultados
+        com nota alta (em geral, quando o assunto da pergunta é o título do artigo) ou que
+        venham dos textos de data/modern.
+        """
         results = self.search(question)
-        if results and results[0]["coverage"] >= min_coverage:
-            return results[0]
+        if not results or results[0]["coverage"] < min_coverage:
+            return None
+        top = results[0]
+        if top["score"] >= min_score or top["kind"] == "texto":
+            return top
         return None
 
 

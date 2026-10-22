@@ -274,6 +274,7 @@ me te lhe meu minha meus minhas seu sua seus suas teu tua nosso nossa dele dela 
 toda todos todas outro outra cada seja sejam pode podem posso sabe saber diga fale explique defina significa
 significado conte fala diz dizer existe existem coisa coisas entao assim aqui ali favor obrigado obrigada ola oi
 tipo vez vezes ano anos dia dias hoje ontem amanha agora sempre nunca qualquer cujo cuja onde
+fica ficam ficou funciona funcionam acontece aconteceu chama chamado chamada
 """.split())
 _PERSONAL = {"voce", "voces", "seu", "sua", "seus", "suas", "teu", "tua", "te", "laika", "eu", "meu", "minha",
              "meus", "minhas", "mim", "comigo", "contigo"}
