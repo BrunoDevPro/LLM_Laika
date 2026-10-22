@@ -51,8 +51,9 @@ def portuguese_books():
 def download_gutenberg(out, max_books):
     out.mkdir(parents=True, exist_ok=True)
     saved = len(list(out.glob("*.txt")))
+    titles_path = out / "titulos.tsv"
     print(f"{saved} livros já em {out}")
-    if saved >= max_books:
+    if saved >= max_books and titles_path.exists():
         return
 
     try:
@@ -60,6 +61,10 @@ def download_gutenberg(out, max_books):
     except Exception as error:
         print("Falha ao baixar o catálogo do Gutenberg:", error)
         print("Alternativa: coloque seus .txt em", out)
+        return
+    # Títulos dos livros (o RAG mostra de onde veio cada trecho).
+    titles_path.write_text("\n".join(f"{i}\t{t}" for i, t in books), encoding="utf-8")
+    if saved >= max_books:
         return
     print(f"{len(books)} livros em português no catálogo; baixando até {max_books}...")
 
@@ -155,8 +160,8 @@ def download_wikipedia(wiki_dir, qa_auto_dir, n_articles, per_file=2000):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="data/books")
-    parser.add_argument("--max-books", type=int, default=400)
-    parser.add_argument("--wiki", type=int, default=30000, help="nº de artigos da Wikipédia (0 = não baixar)")
+    parser.add_argument("--max-books", type=int, default=500)
+    parser.add_argument("--wiki", type=int, default=100000, help="nº de artigos da Wikipédia (0 = não baixar)")
     parser.add_argument("--wiki-dir", default="data/wiki")
     parser.add_argument("--qa-auto-dir", default="data/qa_auto")
     args = parser.parse_args()

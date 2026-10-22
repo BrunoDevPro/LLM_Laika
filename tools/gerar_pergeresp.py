@@ -6,9 +6,17 @@ crie outro arquivo em data/qa/ (por exemplo data/qa/meus_exemplos.txt).
 """
 
 import random
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from data_utils import rag_question, content_words  # noqa: E402
+import dados_extra as D1  # noqa: E402
+import dados_extra2 as D2  # noqa: E402
+import leitura as L  # noqa: E402
 QA_DIR = ROOT / "data" / "qa"
 MODERN_DIR = ROOT / "data" / "modern"
 
@@ -595,6 +603,373 @@ def paragraphs(name):
     return [p.strip() for p in (MODERN_DIR / name).read_text(encoding="utf-8").split("\n\n") if p.strip()]
 
 
+# =====================================================================
+# SEÇÕES EXTRAS (tools/dados_extra.py, dados_extra2.py, leitura.py)
+# =====================================================================
+UNIDADES = ["zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez", "onze",
+            "doze", "treze", "catorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"]
+DEZENAS = {2: "vinte", 3: "trinta", 4: "quarenta", 5: "cinquenta", 6: "sessenta", 7: "setenta",
+           8: "oitenta", 9: "noventa"}
+CENTENAS = {1: "cento", 2: "duzentos", 3: "trezentos", 4: "quatrocentos", 5: "quinhentos", 6: "seiscentos",
+            7: "setecentos", 8: "oitocentos", 9: "novecentos"}
+ORDINAIS = ["primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono", "décimo",
+            "décimo primeiro", "décimo segundo"]
+MESES = [("janeiro", "31 dias"), ("fevereiro", "28 dias, ou 29 nos anos bissextos"), ("março", "31 dias"),
+         ("abril", "30 dias"), ("maio", "31 dias"), ("junho", "30 dias"), ("julho", "31 dias"),
+         ("agosto", "31 dias"), ("setembro", "30 dias"), ("outubro", "31 dias"), ("novembro", "30 dias"),
+         ("dezembro", "31 dias")]
+DIAS = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"]
+DATAS = [
+    ("o Natal", "O Natal é comemorado em 25 de dezembro."),
+    ("o Ano-Novo", "O Ano-Novo é comemorado em 1º de janeiro."),
+    ("o Dia da Independência do Brasil", "O Dia da Independência do Brasil é 7 de setembro."),
+    ("o Dia de Tiradentes", "O Dia de Tiradentes é 21 de abril."),
+    ("o Dia do Trabalho", "O Dia do Trabalho é 1º de maio."),
+    ("a Proclamação da República", "A Proclamação da República é lembrada em 15 de novembro."),
+    ("o Dia das Crianças no Brasil", "No Brasil, o Dia das Crianças é 12 de outubro."),
+    ("o Dia da Consciência Negra", "O Dia da Consciência Negra é 20 de novembro, data da morte de Zumbi dos Palmares."),
+    ("o Dia de Finados", "O Dia de Finados é 2 de novembro."),
+    ("o Dia das Mães no Brasil", "No Brasil, o Dia das Mães é comemorado no segundo domingo de maio."),
+    ("o Dia dos Pais no Brasil", "No Brasil, o Dia dos Pais é comemorado no segundo domingo de agosto."),
+]
+NOMES = [("Maria", "Ela"), ("Ana", "Ela"), ("Júlia", "Ela"), ("Beatriz", "Ela"), ("Laura", "Ela"),
+         ("João", "Ele"), ("Pedro", "Ele"), ("Lucas", "Ele"), ("Gabriel", "Ele"), ("Rafael", "Ele")]
+COISAS = ["maçãs", "balas", "figurinhas", "livros", "lápis", "bolinhas de gude", "biscoitos", "carrinhos"]
+
+
+def por_extenso(n):
+    if n < 20:
+        return UNIDADES[n]
+    if n < 100:
+        d, u = divmod(n, 10)
+        return DEZENAS[d] + ("" if u == 0 else " e " + UNIDADES[u])
+    if n == 100:
+        return "cem"
+    c, r = divmod(n, 100)
+    return CENTENAS[c] + ("" if r == 0 else " e " + por_extenso(r))
+
+
+def romano(n):
+    valores = [(1000, "M"), (900, "CM"), (500, "D"), (400, "CD"), (100, "C"), (90, "XC"), (50, "L"),
+               (40, "XL"), (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")]
+    out = ""
+    for v, s in valores:
+        while n >= v:
+            out += s
+            n -= v
+    return out
+
+
+def artigo_estado(estado):
+    for nome, prep, _ in ESTADOS:
+        if nome == estado:
+            return {"do": "o ", "da": "a ", "de": ""}[prep], prep
+    return "", "de"
+
+
+def conjugar(verbo, tempo):
+    pron = ["Eu", "tu", "ele", "nós", "vós", "eles"]
+    radical, fim = verbo[:-2], verbo[-2:]
+    if tempo == "presente":
+        term = {"ar": ["o", "as", "a", "amos", "ais", "am"], "er": ["o", "es", "e", "emos", "eis", "em"],
+                "ir": ["o", "es", "e", "imos", "is", "em"]}[fim]
+        formas = [radical + t for t in term]
+    elif tempo == "passado":
+        term = {"ar": ["ei", "aste", "ou", "amos", "astes", "aram"], "er": ["i", "este", "eu", "emos", "estes", "eram"],
+                "ir": ["i", "iste", "iu", "imos", "istes", "iram"]}[fim]
+        formas = [radical + t for t in term]
+    else:
+        formas = [verbo + t for t in ["ei", "ás", "á", "emos", "eis", "ão"]]
+    return ", ".join(f"{p} {f}" for p, f in zip(pron, formas)) + "."
+
+
+def extra_sections(rng):
+    secs = []
+
+    # --- Definições 2 ---
+    defs = []
+    for i, (q, a) in enumerate(D1.DEFINICOES_2):
+        defs.append(ex(f"O que é {q}?", a))
+        if i % 3 == 1:
+            word = q.split(" ", 1)[1] if q.split(" ", 1)[0] in {"o", "a", "um", "uma"} else q
+            defs.append(ex(ALT_DEF[(i // 3) % len(ALT_DEF)].format(w=word, q=q), a))
+    secs.append(("Definições 2", defs))
+
+    # --- Animais ---
+    ani = []
+    for art, nome, grupo, comida, onde, som in D1.ANIMAIS:
+        A = art.capitalize()
+        ani.append(ex(rng.choice([f"Que tipo de animal é {art} {nome}?", f"{A} {nome} é que tipo de animal?"]),
+                      f"{A} {nome} é {grupo}."))
+        ani.append(ex(rng.choice([f"O que {art} {nome} come?", f"Do que {art} {nome} se alimenta?"]), comida))
+        ani.append(ex(rng.choice([f"Onde vive {art} {nome}?", f"Onde {art} {nome} mora?"]), onde))
+        if som:
+            ani.append(ex(f"Que som faz {art} {nome}?", f"{A} {nome} {som}."))
+    secs.append(("Animais", ani))
+
+    # --- Profissões ---
+    prof = []
+    for i, (p, a) in enumerate(D1.PROFISSOES):
+        q = ["O que faz um {}?", "Qual é o trabalho de um {}?", "O que um {} faz?"][i % 3].format(p)
+        prof.append(ex(q, a))
+    prof += [ex(q, a) for q, a in D1.QUEM_FAZ]
+    secs.append(("Profissões", prof))
+
+    # --- Objetos ---
+    obj = []
+    for i, (o, a) in enumerate(D1.OBJETOS):
+        q = ["Para que serve {}?", "Qual é a utilidade de {}?", "Pra que serve {}?"][i % 3].format(o)
+        obj.append(ex(q, a))
+    secs.append(("Para que serve", obj))
+
+    # --- Gentílicos, regiões, cidades ---
+    geo = []
+    for i, (loc, g) in enumerate(D1.GENTILICOS):
+        q = ["Como se chama quem nasce {}?", "Quem nasce {} é chamado de quê?",
+             "Qual é o gentílico de quem nasce {}?"][i % 3].format(loc)
+        geo.append(ex(q, f"Quem nasce {loc} é {g}."))
+        if i % 3 == 0 and " ou " not in g:
+            geo.append(ex(f"O que significa ser {g}?", f"Ser {g} significa ter nascido {loc}."))
+    regiao_de = {}
+    for reg, estados in D1.REGIOES.items():
+        lista = ", ".join(estados[:-1]) + " e " + estados[-1]
+        geo.append(ex(f"Quais estados formam a Região {reg}?", f"A Região {reg} é formada por {lista}."))
+        for e in estados:
+            regiao_de[e] = reg
+    geo.append(ex("Quais são as regiões do Brasil?", "As regiões do Brasil são Norte, Nordeste, Centro-Oeste, Sudeste e Sul."))
+    geo.append(ex("Em que região fica o Distrito Federal?", "O Distrito Federal fica na Região Centro-Oeste."))
+    for estado, prep, capital in ESTADOS:
+        art, _ = artigo_estado(estado)
+        geo.append(ex(f"Em que região do Brasil fica {art}{estado}?",
+                      f"{(art.capitalize() if art else '')}{estado} fica na Região {regiao_de[estado]}."))
+        geo.append(ex(f"{capital} é a capital de qual estado?", f"{capital} é a capital {prep} {estado}."))
+    for cidade, estado in D1.CIDADES:
+        _, prep = artigo_estado(estado)
+        geo.append(ex(f"Em que estado fica a cidade de {cidade}?", f"A cidade de {cidade} fica no estado {prep} {estado}."))
+    secs.append(("Gentílicos, regiões e cidades", geo))
+
+    # --- Cores ---
+    cores = [ex(f"De que cor é {c}?", a) for c, a in D1.CORES]
+    cores += [ex(f"Que cor dá misturar {m}?", f"Misturando {m}, obtemos {r}.") for m, r in D1.MISTURAS]
+    cores.append(ex("Quais são as cores primárias?", "Nas tintas, as cores primárias tradicionais são vermelho, amarelo e azul."))
+    secs.append(("Cores", cores))
+
+    # --- Mais conhecimentos e pessoas ---
+    secs.append(("Conhecimentos gerais 2", [ex(q, a) for q, a in D1.FATOS_2]))
+    secs.append(("Pessoas 2", [ex(rng.choice(["Quem foi {}?", "Quem foi {}? Conte um pouco."]).format(n)
+                                   if n != "Marta" else "Quem é Marta?", a) for n, a in D1.PESSOAS_2]))
+
+    # --- Números ---
+    num = []
+    for _ in range(35):
+        n = rng.randint(1, 998)
+        num.append(ex(rng.choice(["Qual número vem depois de {}?", "Que número vem depois do {}?"]).format(n),
+                      f"Depois de {n} vem o {n + 1}."))
+    for _ in range(25):
+        n = rng.randint(2, 999)
+        num.append(ex(f"Qual número vem antes de {n}?", f"Antes de {n} vem o {n - 1}."))
+    for _ in range(40):
+        n = rng.randint(0, 200)
+        num.append(ex(rng.choice(["{} é par ou ímpar?", "O número {} é par ou ímpar?"]).format(n),
+                      f"{n} é {'par' if n % 2 == 0 else 'ímpar'}."))
+    for _ in range(25):
+        n = rng.randint(2, 60)
+        num.append(ex(f"Qual é o dobro de {n}?", f"O dobro de {n} é {2 * n}."))
+    for _ in range(25):
+        n = rng.randint(1, 60) * 2
+        num.append(ex(f"Qual é a metade de {n}?", f"A metade de {n} é {n // 2}."))
+    for _ in range(10):
+        n = rng.randint(2, 30)
+        num.append(ex(f"Qual é o triplo de {n}?", f"O triplo de {n} é {3 * n}."))
+    for _ in range(30):
+        a, b = rng.sample(range(1, 500), 2)
+        if rng.random() < 0.6:
+            num.append(ex(f"Qual é maior: {a} ou {b}?", f"{max(a, b)} é maior que {min(a, b)}."))
+        else:
+            num.append(ex(f"Qual é menor: {a} ou {b}?", f"{min(a, b)} é menor que {max(a, b)}."))
+    for _ in range(45):
+        a, b = rng.randint(2, 10), rng.randint(1, 10)
+        num.append(ex(rng.choice(["Quanto é {} × {}?", "Quanto é {} vezes {}?", "Quanto dá {} x {}?"]).format(a, b),
+                      f"{a} × {b} = {a * b}."))
+    for _ in range(30):
+        a, b = rng.randint(10, 500), rng.randint(10, 500)
+        if rng.random() < 0.5:
+            num.append(ex(f"Quanto é {a} + {b}?", f"{a} + {b} = {a + b}."))
+        else:
+            a, b = max(a, b), min(a, b)
+            num.append(ex(f"Quanto é {a} - {b}?", f"{a} - {b} = {a - b}."))
+    for _ in range(20):
+        nome, pron = rng.choice(NOMES)
+        coisa = rng.choice(COISAS)
+        a, b = rng.randint(2, 30), rng.randint(2, 20)
+        num.append(ex(f"{nome} tinha {a} {coisa} e ganhou mais {b}. Com quantas {coisa} {pron.lower()} ficou?".replace(
+            "quantas livros", "quantos livros").replace("quantas lápis", "quantos lápis").replace(
+            "quantas biscoitos", "quantos biscoitos").replace("quantas carrinhos", "quantos carrinhos"),
+            f"{pron} ficou com {a + b} {coisa}, porque {a} + {b} = {a + b}."))
+    for _ in range(20):
+        nome, pron = rng.choice(NOMES)
+        coisa = rng.choice(COISAS)
+        a = rng.randint(5, 40)
+        b = rng.randint(1, a - 2)
+        q = f"{nome} tinha {a} {coisa} e deu {b} para um amigo. Quantas sobraram?"
+        if coisa in ("livros", "lápis", "biscoitos", "carrinhos"):
+            q = q.replace("Quantas sobraram", "Quantos sobraram")
+        num.append(ex(q, f"Sobraram {a - b} {coisa}, porque {a} - {b} = {a - b}."))
+    for _ in range(15):
+        a, b = rng.randint(2, 12), rng.randint(2, 10)
+        num.append(ex(f"Uma caixa tem {a} lápis. Quantos lápis há em {b} caixas?",
+                      f"Há {a * b} lápis, porque {a} × {b} = {a * b}."))
+    for _ in range(15):
+        b = rng.randint(2, 6)
+        r = rng.randint(2, 10)
+        num.append(ex(f"Dividindo {b * r} figurinhas igualmente entre {b} amigos, quantas cada um recebe?",
+                      f"Cada um recebe {r} figurinhas, porque {b * r} ÷ {b} = {r}."))
+    for _ in range(10):
+        p, n = rng.randint(2, 9), rng.randint(2, 8)
+        num.append(ex(f"Se um pão custa {p} reais, quanto custam {n} pães?", f"{n} pães custam {p * n} reais."))
+    for _ in range(10):
+        h, d = rng.randint(1, 8), rng.randint(1, 4)
+        num.append(ex(f"Se agora são {h} horas, que horas serão daqui a {d} horas?", f"Serão {h + d} horas."))
+    for i in range(1, 11):
+        num.append(ex(f"Qual é o ordinal de {i}?", f"O ordinal de {i} é {ORDINAIS[i - 1]}."))
+    for n in sorted(set(rng.sample(range(21, 100), 25) + rng.sample(range(101, 1000), 15))):
+        num.append(ex(rng.choice(["Como se escreve {} por extenso?", "Escreva {} por extenso."]).format(n),
+                      f"{n} por extenso é {por_extenso(n)}."))
+    for n in sorted(rng.sample(range(1, 100), 18)) + [2026, 1500, 1822]:
+        num.append(ex(f"Como se escreve {n} em algarismos romanos?", f"{n} em algarismos romanos é {romano(n)}."))
+    secs.append(("Números e problemas", num))
+
+    # --- Calendário ---
+    cal = []
+    for i, (mes, dias) in enumerate(MESES):
+        cal.append(ex(f"Quantos dias tem o mês de {mes}?", f"O mês de {mes} tem {dias}."))
+        cal.append(ex(f"Que mês vem depois de {mes}?", f"Depois de {mes} vem {MESES[(i + 1) % 12][0]}."))
+        cal.append(ex(f"Que mês vem antes de {mes}?", f"Antes de {mes} vem {MESES[i - 1][0]}."))
+        cal.append(ex(f"Qual é o {ORDINAIS[i]} mês do ano?", f"O {ORDINAIS[i]} mês do ano é {mes}."))
+    for i, dia in enumerate(DIAS):
+        cal.append(ex(f"Que dia vem depois de {dia}?", f"Depois de {dia} vem {DIAS[(i + 1) % 7]}."))
+        cal.append(ex(f"Que dia vem antes de {dia}?", f"Antes de {dia} vem {DIAS[i - 1]}."))
+    for festa, a in DATAS:
+        cal.append(ex(f"Quando é {festa}?", a))
+    secs.append(("Calendário", cal))
+
+    # --- Gramática ---
+    gram = []
+    for i, (a, b) in enumerate(D2.ANTONIMOS_2):
+        q = ["Qual é o contrário de {}?", "Qual é o antônimo de {}?", "Qual é o oposto de {}?"][i % 3]
+        gram.append(ex(q.format(a), f"O contrário de {a} é {b}."))
+    for a, b in D2.PLURAIS_2:
+        gram.append(ex(f"Qual é o plural de {a}?", f"O plural de {a} é {b}."))
+    for a, b in D2.FEMININOS_2:
+        gram.append(ex(f"Qual é o feminino de {a}?", f"O feminino de {a} é {b}."))
+    for a, b in D2.DIMINUTIVOS:
+        gram.append(ex(f"Qual é o diminutivo de {a}?", f"O diminutivo de {a} é {b}."))
+    for a, b in D2.AUMENTATIVOS:
+        gram.append(ex(f"Qual é o aumentativo de {a}?", f"O aumentativo de {a} é {b}."))
+    for a, b in D2.SINONIMOS_2:
+        gram.append(ex(rng.choice(["Me dê um sinônimo de {}.", "Qual é um sinônimo de {}?"]).format(a),
+                       f"Um sinônimo de {a} é {b}."))
+    nomes_sil = {1: "monossílaba", 2: "dissílaba", 3: "trissílaba"}
+    for palavra, sep in D2.SILABAS:
+        n = sep.count("-") + 1
+        gram.append(ex(f"Separe as sílabas da palavra {palavra}.", f"{sep}."))
+        gram.append(ex(f"Quantas sílabas tem a palavra {palavra}?",
+                       f"A palavra {palavra} tem {({1: 'uma', 2: 'duas'}).get(n, por_extenso(n))} sílaba{'s' if n > 1 else ''} ({sep}). "
+                       f"Ela é {nomes_sil.get(n, 'polissílaba')}."))
+    verbos = D2.VERBOS_AR + D2.VERBOS_ER + D2.VERBOS_IR
+    for i, v in enumerate(verbos):
+        tempo = ["presente", "passado", "futuro"][i % 3]
+        nome_tempo = {"presente": "no presente", "passado": "no pretérito perfeito",
+                      "futuro": "no futuro do presente"}[tempo]
+        gram.append(ex(f"Conjugue o verbo {v} {nome_tempo}.", conjugar(v, tempo)))
+        if i % 2 == 0:
+            gram.append(ex(f"Conjugue o verbo {v} no presente." if tempo != "presente" else
+                           f"Como é o verbo {v} no presente?", conjugar(v, "presente")))
+    for v, forms in D2.IRREGULARES.items():
+        gram.append(ex(f"Conjugue o verbo {v} no presente.", forms))
+    for _ in range(25):
+        v = rng.choice(verbos)
+        i = rng.randrange(6)
+        pron = ["Eu", "Tu", "Ele", "Nós", "Vós", "Eles"][i]
+        forma = conjugar(v, "presente").rstrip(".").split(", ")[i].split(" ", 1)[1]
+        gram.append(ex(f"Complete com o verbo {v} no presente: {pron} ___.", f"{pron} {forma}."))
+    for i, (frase, certo) in enumerate(D2.CORRECOES):
+        if certo is None:
+            gram.append(ex(f"Esta frase está correta? {frase[0].upper() + frase[1:]}", "Sim, a frase está correta."))
+        else:
+            q = ["Corrija a frase: {}", "Corrija: {}", "Esta frase está correta? {}"][i % 3].format(frase)
+            a = certo if not q.startswith("Esta frase") else f"Não. O correto é: {certo}"
+            gram.append(ex(q, a))
+    gram += [ex(q, a) for q, a in D2.TRANSFORMACOES]
+    secs.append(("Gramática", gram))
+
+    # --- Inglês ---
+    eng = []
+    for i, (pt, en) in enumerate(D2.INGLES):
+        q = ["Como se diz {} em inglês?", "Qual é a tradução de {} para o inglês?", "Traduza {} para o inglês."][i % 3]
+        eng.append(ex(q.format(pt), f"{pt[0].upper() + pt[1:]} em inglês é {en}."))
+        if i % 2 == 0:
+            eng.append(ex(f"O que significa {en} em português?", f"{en[0].upper() + en[1:]} significa {pt}."))
+    eng.append(ex("Como se diz boa noite em inglês?", "Boa noite em inglês é good evening, ao chegar, ou good night, ao se despedir."))
+    secs.append(("Inglês", eng))
+
+    # --- Classificação e exemplos ---
+    cls = []
+    for c, cat in D2.CLASSIFICAR:
+        cls.append(ex(f"{c[0].upper() + c[1:]} é um animal, uma planta ou um objeto?", f"{c[0].upper() + c[1:]} é {cat}."))
+    for c, cat in D2.FRUTA_LEGUME:
+        cls.append(ex(f"{c[0].upper() + c[1:]} é fruta ou legume?", f"{c[0].upper() + c[1:]} é {cat}."))
+    for lista, a in D2.INTRUSOS:
+        cls.append(ex(rng.choice(["Qual palavra não combina com as outras: {}?", "Qual é o intruso: {}?"]).format(lista), a))
+    for i, (cat, a) in enumerate(D2.EXEMPLOS):
+        cls.append(ex(f"Dê três exemplos de {cat}.", a))
+        if i % 2 == 0:
+            cls.append(ex(f"Cite três {cat}.", a))
+    secs.append(("Classificação e exemplos", cls))
+
+    # --- Por que / como ---
+    secs.append(("Por que", [ex(q, a) for q, a in D2.PORQUES]))
+    secs.append(("Como fazer", [ex(q, a) for q, a in D2.COMO_FAZER]))
+
+    # --- Conversa 2, adivinhas, frases ---
+    conv = [ex(q, a) for q, a in D2.CONVERSA_2]
+    for enigma, a in D2.ADIVINHAS:
+        conv.append(ex(f"O que é, o que é: {enigma}?", a))
+    secs.append(("Conversa 2 e adivinhas", conv))
+    fr = []
+    for i, (w, frase) in enumerate(D2.FRASES_PALAVRA):
+        q = ["Escreva uma frase com a palavra {}.", "Crie uma frase com {}.", "Use a palavra {} em uma frase."][i % 3]
+        fr.append(ex(q.format(w), frase))
+    for i, (ini, fim) in enumerate(D2.HISTORIAS_2):
+        fr.append(ex(["Continue a história: {}", "Continue: {}"][i % 2].format(ini), fim))
+    secs.append(("Frases e histórias", fr))
+
+    # --- Resumos 2 e títulos ---
+    res = []
+    for i, (name, idx, resumo) in enumerate(L.RESUMOS_2):
+        res.append(ex(PEDIDOS_RESUMO[i % len(PEDIDOS_RESUMO)].format(paragraphs(name)[idx]), resumo))
+    res += [ex(q, a) for q, a in L.RESUMOS_TEXTO_2]
+    for name, idx, titulo in L.TITULOS:
+        res.append(ex(f"Dê um título para este texto: {paragraphs(name)[idx]}", titulo))
+    secs.append(("Resumos 2 e títulos", res))
+    return secs
+
+
+def leitura_examples():
+    """Perguntas com Contexto (mesmo formato do RAG) a partir dos textos de data/modern."""
+    out, problems = [], 0
+    for name, idx, q, a in L.LEITURA:
+        para = paragraphs(name)[idx]
+        if not a.startswith("O texto não diz"):
+            key = [w for w in content_words(a) if len(w) > 3]
+            hits = sum(w in content_words(para) for w in key)
+            if key and hits / len(key) < 0.5:
+                problems += 1
+                print(f"aviso: resposta pouco apoiada no texto: {name}#{idx}: {q} -> {a}")
+        out.append(ex(rag_question(q, para), a))
+    return out, problems
+
+
 def build():
     rng = random.Random(42)
     sections = []
@@ -694,6 +1069,7 @@ def build():
         res.append(ex(PEDIDOS_RESUMO[i % len(PEDIDOS_RESUMO)].format(trecho), resumo))
     res += [ex(q, a) for q, a in RESUMOS_HISTORIA]
     sections.append(("Resumos (textos de data/modern)", res))
+    sections += extra_sections(rng)
 
     header = ("# Gerado por tools/gerar_pergeresp.py. Linhas começando com # são comentários.\n"
               "# Para adicionar exemplos seus, crie outro .txt em data/qa/.\n\n")
@@ -708,7 +1084,11 @@ def build():
     with open(QA_DIR / "identidade.txt", "w", encoding="utf-8") as f:
         f.write("# Quem é a Laika. Este arquivo tem peso maior no fine-tuning.\n\n")
         f.write("\n".join(ex(q, a) for q, a in IDENTIDADE) + "\n")
-    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(IDENTIDADE)} exemplos")
+    leitura, _ = leitura_examples()
+    with open(QA_DIR / "leitura.txt", "w", encoding="utf-8") as f:
+        f.write("# Interpretação de texto: Contexto + Pergunta, no mesmo formato que o RAG usa.\n\n")
+        f.write("\n".join(leitura) + "\n")
+    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(IDENTIDADE)} | leitura.txt: {len(leitura)}")
 
 
 if __name__ == "__main__":

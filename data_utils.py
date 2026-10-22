@@ -259,3 +259,95 @@ def synthetic_examples(book_texts, n, seed=0, summary_texts=None, summary_share=
             seen.add(example)
             examples.append(example)
     return examples
+
+
+# ---------- RAG: formato do contexto e escolha das palavras de busca ----------
+
+import unicodedata
+
+_STOPWORDS = set("""
+a o os as um uma uns umas de do da dos das em no na nos nas por pelo pela pelos pelas para pra pro com sem sob
+sobre ate e ou mas nem que quem qual quais quanto quantos quanta quantas como onde aonde quando porque se nao sim
+ja tambem muito muita muitos muitas mais menos tao tanto ser foi era sao eram sera estar esta estao estava ter tem
+tinha ha haver fazer faz fez isso isto esse essa este aquele aquela aquilo ele ela eles elas eu tu voce voces vos
+me te lhe meu minha meus minhas seu sua seus suas teu tua nosso nossa dele dela algum alguma alguns algumas todo
+toda todos todas outro outra cada seja sejam pode podem posso sabe saber diga fale explique defina significa
+significado conte fala diz dizer existe existem coisa coisas entao assim aqui ali favor obrigado obrigada ola oi
+tipo vez vezes ano anos dia dias hoje ontem amanha agora sempre nunca qualquer cujo cuja onde
+""".split())
+_PERSONAL = {"voce", "voces", "seu", "sua", "seus", "suas", "teu", "tua", "te", "laika", "eu", "meu", "minha",
+             "meus", "minhas", "mim", "comigo", "contigo"}
+_INSTRUCTIONS = {"corrija", "complete", "termine", "resuma", "continue", "escreva", "crie", "use", "cite",
+                 "conjugue", "passe", "transforme", "separe", "traduza", "classifique", "calcule", "conte",
+                 "faca", "leia", "vamos", "apresente"}
+MAX_CONTEXT_WORDS = 80
+
+
+def normalize(text):
+    """Minúsculas e sem acentos (para comparar palavras)."""
+    text = unicodedata.normalize("NFKD", text.lower())
+    return "".join(c for c in text if not unicodedata.combining(c))
+
+
+def word_tokens(text):
+    return re.findall(r"[a-z0-9]+", normalize(text))
+
+
+def content_words(text):
+    """Palavras que valem para a busca: sem stopwords, com 3+ letras (ou anos/números longos)."""
+    seen, words = set(), []
+    for word in word_tokens(text):
+        if word in _STOPWORDS or word in seen:
+            continue
+        if (word.isalpha() and len(word) >= 3) or (word.isdigit() and len(word) >= 3):
+            seen.add(word)
+            words.append(word)
+    return words
+
+
+def wants_rag(question):
+    """Decide se vale procurar contexto nos textos para esta pergunta.
+
+    Não usa RAG para conversa e perguntas sobre a Laika ou o usuário (pronomes pessoais),
+    para pedidos de tarefa ("Corrija...", "Resuma...", "Calcule..."), para mensagens que já
+    trazem um texto longo e para contas sem palavras.
+    """
+    if "Contexto:" in question or len(question.split()) > 40:
+        return False
+    first_words = [w.lower().strip(",.!?:;") for w in question.strip().split()[:2]]
+    if first_words and first_words[0] == "me":  # "Me conte...", "Me dê..."
+        first_words = first_words[1:]
+    if first_words and (first_words[0] == "dê" or normalize(first_words[0]) in _INSTRUCTIONS):
+        return False
+    if _PERSONAL & set(word_tokens(question)):
+        return False
+    return bool(content_words(question))
+
+
+def rag_question(question, context):
+    """Formato usado no fine-tuning e no chat quando há contexto."""
+    return f"Contexto: {context}\nPergunta: {question}"
+
+
+def fit_context(count_tokens, question, context, budget, max_words=MAX_CONTEXT_WORDS, min_words=12):
+    """Corta o contexto (em palavras) até a pergunta com contexto caber em `budget` tokens.
+
+    count_tokens(texto_da_pergunta) -> nº de tokens. Devolve o texto da pergunta com contexto,
+    ou None se nem um contexto curto couber.
+    """
+    words = context.split()
+    n = min(len(words), max_words)
+    while n >= min_words:
+        snippet = " ".join(words[:n]) + ("..." if n < len(words) else "")
+        text = rag_question(question, snippet)
+        if count_tokens(text) <= budget:
+            return text
+        n -= 10
+    return None
+
+
+def split_example(example):
+    """'<|user|> P <|assistant|> R <|end|>' -> (P, R)."""
+    user_part, answer = example.split(ASSISTANT_TOKEN, 1)
+    question = user_part.replace(USER_TOKEN, "").strip()
+    return question, answer.replace(END_TOKEN, "").strip()

@@ -5,6 +5,7 @@ import math
 import time
 from pathlib import Path
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from tokenizers import Tokenizer, models, pre_tokenizers, decoders, trainers
@@ -75,15 +76,19 @@ eot_id = tokenizer.token_to_id(EOT_TOKEN)
 block = cfg["block_size"]
 # Validação = os últimos 5% de CADA livro (antes era só o fim do último livro,
 # o que media um livro só e deixava o val loss enviesado).
-train_ids, val_ids = [], []
-for path in book_files:
-    book_ids = tokenizer.encode(path.read_text(encoding="utf-8")).ids + [eot_id]
+# Arrays numpy por arquivo: com 100 mil artigos, listas do Python estourariam a RAM.
+train_parts, val_parts = [], []
+for i, path in enumerate(book_files):
+    book_ids = np.array(tokenizer.encode(path.read_text(encoding="utf-8")).ids + [eot_id], dtype=np.int32)
     cut = int(len(book_ids) * 0.95)
     repeat = args.modern_repeat if path.parent.name == "modern" else 1
-    train_ids.extend(book_ids[:cut] * max(1, repeat))
-    val_ids.extend(book_ids[cut:])
-train_data = torch.tensor(train_ids, dtype=torch.long)
-val_data = torch.tensor(val_ids, dtype=torch.long)
+    train_parts.extend([book_ids[:cut]] * max(1, repeat))
+    val_parts.append(book_ids[cut:])
+    if (i + 1) % 100 == 0:
+        print(f"  tokenizados {i + 1}/{len(book_files)} arquivos", flush=True)
+train_data = torch.from_numpy(np.concatenate(train_parts)).long()
+val_data = torch.from_numpy(np.concatenate(val_parts)).long()
+del train_parts, val_parts
 data = train_data
 if len(val_data) < block * 10 or len(train_data) < block * 100:
     raise SystemExit(f"Poucos dados ({len(train_data)} tokens). Adicione mais livros.")

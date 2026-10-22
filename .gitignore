@@ -4,4 +4,5 @@ checkpoints/
 data/books/
 data/wiki/
 data/qa_auto/
+data/rag/
 .ipynb_checkpoints/

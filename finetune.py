@@ -8,6 +8,10 @@ Para o modelo não decorar o pergeresp (e responder tudo com ele), cada lote mis
      perguntas "O que é X?" tiradas da Wikipédia (data/qa_auto/);
   3) trechos de texto puros (replay), para não esquecer o português do pré-treino.
 
+Com o índice do RAG pronto (python rag.py build), parte das perguntas ganha um
+"Contexto:" achado nos textos, igual ao que o chat faz. Assim o modelo aprende a usar
+o contexto quando ele ajuda e a ignorá-lo quando não ajuda.
+
 Parte de checkpoints/pretrain_best.pt e grava em checkpoints/finetuned.pt, então o
 pré-treino nunca é sobrescrito: dá para repetir só este script à vontade.
 """
@@ -17,14 +21,16 @@ import math
 import random
 from pathlib import Path
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from tokenizers import Tokenizer
 
-from chat import generate
-from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, ASSISTANT_TOKEN, END_TOKEN,
-                        EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
+from chat import build_prompt, generate
+from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit_context, split_example,
+                        wants_rag, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
+from rag import open_index
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--books", nargs="+", default=["data/books", "data/wiki", "data/modern"])
@@ -36,7 +42,15 @@ parser.add_argument("--wiki-qa", type=int, default=3000, help="máximo de pergun
 parser.add_argument("--identity-boost", type=int, default=2,
                     help="peso extra do identidade.txt (quem é a Laika)")
 parser.add_argument("--out", default="checkpoints")
-parser.add_argument("--epochs", type=int, default=4)
+parser.add_argument("--epochs", type=int, default=2, help="era 4; com muito mais exemplos, 2 bastam")
+parser.add_argument("--max-qa-repeat", type=int, default=2, help="máximo de vezes que cada exemplo escrito à mão aparece por época")
+parser.add_argument("--max-text-mb", type=float, default=40,
+                    help="MB de texto (amostrados) usados para exemplos sintéticos e replay")
+parser.add_argument("--max-summary-books", type=int, default=80)
+parser.add_argument("--rag-db", default="data/rag/laika_rag.db")
+parser.add_argument("--rag-share", type=float, default=0.5,
+                    help="fração das perguntas (que pedem informação) que ganham Contexto do RAG")
+parser.add_argument("--no-rag", action="store_true")
 parser.add_argument("--lr", type=float, default=5e-5)
 parser.add_argument("--batch-size", type=int, default=16)
 parser.add_argument("--synthetic", type=int, default=4000, help="nº de exemplos gerados dos livros")
@@ -69,11 +83,30 @@ eot_id = tokenizer.token_to_id(EOT_TOKEN)
 
 
 # ---------- Dados ----------
+def sample_texts(files, max_bytes):
+    """Lê arquivos em ordem aleatória até max_bytes (com 100 mil artigos, ler tudo não cabe na RAM).
+    Os textos de data/modern entram sempre."""
+    files = list(files)
+    random.shuffle(files)
+    files.sort(key=lambda f: f.parent.name != "modern")
+    texts, total = [], 0
+    for f in files:
+        if total >= max_bytes and f.parent.name != "modern":
+            break
+        texts.append(f.read_text(encoding="utf-8"))
+        total += f.stat().st_size
+    return texts
+
+
 book_files = [f for folder in args.books for f in sorted(Path(folder).glob("*.txt"))]
 if not book_files:
     raise SystemExit(f"Nenhum texto em {args.books}: o fine-tuning usa os textos para gerar exemplos.")
-book_texts = [p.read_text(encoding="utf-8") for p in book_files]
-summary_texts = [p.read_text(encoding="utf-8") for p in sorted(Path(args.summary_books).glob("*.txt"))]
+book_texts = sample_texts(book_files, args.max_text_mb * 1e6)
+summary_files = sorted(Path(args.summary_books).glob("*.txt"))
+random.shuffle(summary_files)
+summary_texts = [p.read_text(encoding="utf-8") for p in summary_files[:args.max_summary_books]]
+print(f"Textos usados: {len(book_texts)} de {len(book_files)} arquivos "
+      f"(~{sum(map(len, book_texts)) / 1e6:.0f} M caracteres)")
 
 print("Lendo perguntas/respostas:")
 qa_texts = load_qa_examples(args.qa)
@@ -89,8 +122,42 @@ if Path(args.qa_auto).exists():
     auto = load_qa_examples(args.qa_auto)
     random.shuffle(auto)
     syn_texts += auto[:args.wiki_qa]
+
+# ---------- Contexto do RAG em parte das perguntas ----------
+rag = None if args.no_rag else open_index(args.rag_db)
+
+
+def add_context(examples, share):
+    if rag is None or share <= 0:
+        return examples, 0
+    out, n = [], 0
+    for example in examples:
+        question, answer = split_example(example)
+        if random.random() < share and wants_rag(question):
+            hit = rag.best(question)
+            if hit:
+                def count(user_text):
+                    return len(tokenizer.encode(
+                        f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN} {answer} {END_TOKEN}").ids)
+                user_text = fit_context(count, question, hit["text"], block)
+                if user_text:
+                    out.append(f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN} {answer} {END_TOKEN}")
+                    n += 1
+                    continue
+        out.append(example)
+    return out, n
+
+
+if rag is not None:
+    qa_texts, n_qa_ctx = add_context(qa_texts, args.rag_share)
+    syn_texts, n_syn_ctx = add_context(syn_texts, args.rag_share)
+    print(f"RAG: {n_qa_ctx} perguntas escritas à mão e {n_syn_ctx} automáticas ganharam Contexto")
+else:
+    print("RAG desligado: o fine-tuning segue sem exemplos com Contexto do RAG "
+          "(os de data/qa/leitura.txt continuam).")
+
 for sample in random.sample(syn_texts, min(4, len(syn_texts))):
-    print("   ", sample[:160])
+    print("   ", sample[:160].replace("\n", " "))
 
 
 def encode_chat(texts, identity=frozenset()):
@@ -136,18 +203,16 @@ syn_train, syn_val = split(syn_data)
 qa_repeat = 0
 if qa_train:
     wanted = args.qa_share / (1 - args.qa_share) * len(syn_train)
-    qa_repeat = max(1, round(wanted / len(qa_train)))
+    qa_repeat = min(args.max_qa_repeat, max(1, round(wanted / len(qa_train))))
 id_repeat = qa_repeat * args.identity_boost if id_train else 0
 print(f"Treino: {len(syn_train)} sintéticos + {len(qa_train)} do pergeresp (x{qa_repeat}) + "
       f"{len(id_train)} de identidade (x{id_repeat}) | "
       f"validação: {len(syn_val)} sintéticos + {len(qa_val)} escritos à mão")
 
-# Texto contínuo dos livros para o replay.
-stream = []
-for text in book_texts:
-    stream.extend(tokenizer.encode(text).ids)
-    stream.append(eot_id)
-stream = torch.tensor(stream, dtype=torch.long)
+# Texto contínuo dos livros para o replay (numpy para economizar memória).
+parts = [np.array(enc.ids + [eot_id], dtype=np.int32) for enc in tokenizer.encode_batch(book_texts)]
+stream = torch.from_numpy(np.concatenate(parts)).long()
+del parts
 n_replay = round(args.batch_size * args.replay / (1 - args.replay)) if args.replay > 0 else 0
 
 
@@ -187,7 +252,7 @@ def validate(items):
 
 
 SAMPLE_PROMPTS = [
-    "Qual é o seu nome?", "Oi", "O que é um vulcão?", "Quem foi Santos Dumont?",
+    "Qual é o seu nome?", "Oi", "O que é um vulcão?", "Quem foi Santos Dumont?", "Qual é a capital da França?",
     "Complete a frase: Quem espera", "Escreva uma frase com a palavra noite.",
     "Resuma o texto: O menino acordou cedo, tomou café e foi para a escola de bicicleta. "
     "No caminho, viu um cachorro perdido e parou para ajudar. Por isso, chegou atrasado, "
@@ -199,9 +264,9 @@ SAMPLE_PROMPTS = [
 def show_samples():
     model.eval()
     for question in SAMPLE_PROMPTS:
-        prompt = f"{USER_TOKEN} {question} {ASSISTANT_TOKEN}"
+        prompt, source = build_prompt(question, tokenizer, block, rag, None, max_new_tokens=60)
         answer = generate(model, tokenizer, prompt, device, max_new_tokens=60)
-        print(f"   Você: {question}\n   LLM:  {answer}")
+        print(f"   Você: {question}\n   LLM:  {answer}" + (f"   [contexto: {source}]" if source else ""))
     model.train()
 
 

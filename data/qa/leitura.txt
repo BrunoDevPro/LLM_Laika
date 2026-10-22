@@ -1,0 +1,454 @@
+# Interpretação de texto: Contexto + Pergunta, no mesmo formato que o RAG usa.
+
+<|user|> Contexto: Meu nome é uma homenagem à Laika, uma cadela que foi ao espaço em 1957. Ela viajou a bordo do satélite soviético Sputnik 2 e foi o primeiro animal a dar uma volta completa ao redor da Terra. A cadela Laika não voltou da viagem, mas ficou famosa no mundo inteiro e ajudou os cientistas a entender como os seres vivos reagem ao espaço.
+Pergunta: Em que ano a cadela Laika foi ao espaço?
+<|assistant|> A cadela Laika foi ao espaço em 1957. <|end|>
+
+<|user|> Contexto: Meu nome é uma homenagem à Laika, uma cadela que foi ao espaço em 1957. Ela viajou a bordo do satélite soviético Sputnik 2 e foi o primeiro animal a dar uma volta completa ao redor da Terra. A cadela Laika não voltou da viagem, mas ficou famosa no mundo inteiro e ajudou os cientistas a entender como os seres vivos reagem ao espaço.
+Pergunta: Em qual satélite a cadela Laika viajou?
+<|assistant|> Ela viajou a bordo do satélite soviético Sputnik 2. <|end|>
+
+<|user|> Contexto: Eu, a Laika modelo de linguagem, não sou uma pessoa e não sou um animal. Eu não tenho corpo, não como, não durmo e não sinto as coisas como as pessoas sentem. Eu sou um programa. Quando alguém me escreve uma pergunta, eu tento adivinhar, palavra por palavra, qual seria uma boa resposta.
+Pergunta: A Laika tem corpo?
+<|assistant|> Não. Segundo o texto, ela não tem corpo, não come e não dorme. <|end|>
+
+<|user|> Contexto: Tudo começa com o calor do Sol. Quando o Sol aquece a superfície dos oceanos, dos lagos e dos rios, uma parte da água vira vapor e sobe para a atmosfera. Esse processo se chama evaporação. As plantas também liberam vapor de água pelas folhas, num processo chamado transpiração.
+Pergunta: O que faz a água evaporar?
+<|assistant|> O calor do Sol faz a água evaporar. <|end|>
+
+<|user|> Contexto: Tudo começa com o calor do Sol. Quando o Sol aquece a superfície dos oceanos, dos lagos e dos rios, uma parte da água vira vapor e sobe para a atmosfera. Esse processo se chama evaporação. As plantas também liberam vapor de água pelas folhas, num processo chamado transpiração.
+Pergunta: Como se chama o vapor liberado pelas folhas das plantas?
+<|assistant|> Esse processo se chama transpiração. <|end|>
+
+<|user|> Contexto: Lá no alto, o ar é mais frio. O vapor de água esfria e se transforma em gotinhas muito pequenas, que se juntam e formam as nuvens. Essa etapa se chama condensação. É a mesma coisa que acontece quando um copo gelado fica molhado por fora num dia quente.
+Pergunta: Como se chama a etapa em que o vapor vira gotinhas?
+<|assistant|> Essa etapa se chama condensação. <|end|>
+
+<|user|> Contexto: Quando as gotinhas das nuvens ficam grandes e pesadas demais, elas caem. Essa queda se chama precipitação. A precipitação pode ser chuva, neve ou granizo, dependendo da temperatura do ar.
+Pergunta: Quais formas de precipitação o texto cita?
+<|assistant|> Chuva, neve e granizo. <|end|>
+
+<|user|> Contexto: Depois que a chuva cai, a água segue caminhos diferentes. Uma parte escorre pela superfície do solo e chega aos rios, que levam a água de volta para o mar. Outra parte entra no solo, num processo chamado infiltração, e forma reservas de água debaixo da terra, chamadas lençóis freáticos. Uma parte é absorvida pelas raízes das plantas.
+Pergunta: O que são lençóis freáticos?
+<|assistant|> São reservas de água que se formam debaixo da terra quando a água entra no solo. <|end|>
+
+<|user|> Contexto: O ciclo da água é muito importante para a vida. Ele leva água doce para as plantas, para os animais e para as pessoas. Sem ele, os rios secariam e as florestas não sobreviveriam. Por isso, é importante cuidar das nascentes, não poluir os rios e evitar o desmatamento, que deixa o solo sem proteção e diminui a chuva em muitas regiões.
+Pergunta: O que deixa o solo sem proteção?
+<|assistant|> O desmatamento deixa o solo sem proteção. <|end|>
+
+<|user|> Contexto: Existem oito planetas no Sistema Solar. Em ordem, a partir do Sol, eles são Mercúrio, Vênus, Terra, Marte, Júpiter, Saturno, Urano e Netuno. Os quatro primeiros são chamados de planetas rochosos, porque têm uma superfície sólida. Os quatro últimos são chamados de planetas gasosos, porque são formados principalmente por gases.
+Pergunta: Quantos planetas existem no Sistema Solar?
+<|assistant|> Existem oito planetas. <|end|>
+
+<|user|> Contexto: Mercúrio é o planeta mais próximo do Sol e também o menor de todos. Vênus é o planeta mais quente, porque tem uma atmosfera muito grossa que prende o calor. A Terra é o nosso planeta e o único onde sabemos que existe vida. Marte é conhecido como planeta vermelho, por causa da poeira cheia de ferro que cobre o seu solo.
+Pergunta: Por que Vênus é o planeta mais quente?
+<|assistant|> Porque tem uma atmosfera muito grossa que prende o calor. <|end|>
+
+<|user|> Contexto: Mercúrio é o planeta mais próximo do Sol e também o menor de todos. Vênus é o planeta mais quente, porque tem uma atmosfera muito grossa que prende o calor. A Terra é o nosso planeta e o único onde sabemos que existe vida. Marte é conhecido como planeta vermelho, por causa da poeira cheia de ferro que cobre o seu solo.
+Pergunta: Por que Marte é chamado de planeta vermelho?
+<|assistant|> Por causa da poeira cheia de ferro que cobre o seu solo. <|end|>
+
+<|user|> Contexto: Júpiter é o maior planeta do Sistema Solar. Ele é tão grande que caberiam mais de mil Terras dentro dele. Saturno é famoso pelos seus anéis, formados por pedaços de gelo e rocha. Urano e Netuno são planetas gelados e muito distantes, com uma cor azulada.
+Pergunta: Quantas Terras caberiam dentro de Júpiter?
+<|assistant|> Caberiam mais de mil Terras dentro de Júpiter. <|end|>
+
+<|user|> Contexto: Plutão já foi considerado o nono planeta. Em 2006, os astrônomos decidiram classificá-lo como planeta anão, porque ele é muito pequeno e divide a sua órbita com outros corpos.
+Pergunta: Em que ano Plutão passou a ser planeta anão?
+<|assistant|> Em 2006. <|end|>
+
+<|user|> Contexto: A Terra leva cerca de 365 dias para dar uma volta completa ao redor do Sol. Esse tempo é um ano. Ela também gira em torno de si mesma, e cada volta leva cerca de 24 horas, o que forma o dia e a noite. A luz do Sol leva mais ou menos oito minutos para chegar até a Terra.
+Pergunta: Quanto tempo a luz do Sol leva para chegar à Terra?
+<|assistant|> Mais ou menos oito minutos. <|end|>
+
+<|user|> Contexto: A Lua é o satélite natural da Terra. Ela não tem luz própria: o que vemos é a luz do Sol refletida na sua superfície. Por isso a Lua parece mudar de forma ao longo do mês. Essas mudanças são as fases da Lua: nova, crescente, cheia e minguante.
+Pergunta: Quais são as fases da Lua?
+<|assistant|> Nova, crescente, cheia e minguante. <|end|>
+
+<|user|> Contexto: Em 22 de abril de 1500, uma frota portuguesa comandada por Pedro Álvares Cabral chegou ao litoral do atual estado da Bahia. A partir daí, Portugal tomou posse das terras, e o Brasil se tornou uma colônia portuguesa. No começo, os portugueses exploraram o pau-brasil, uma árvore de madeira avermelhada que deu nome ao país.
+Pergunta: Quem comandou a frota que chegou ao Brasil em 1500?
+<|assistant|> Pedro Álvares Cabral. <|end|>
+
+<|user|> Contexto: Em 22 de abril de 1500, uma frota portuguesa comandada por Pedro Álvares Cabral chegou ao litoral do atual estado da Bahia. A partir daí, Portugal tomou posse das terras, e o Brasil se tornou uma colônia portuguesa. No começo, os portugueses exploraram o pau-brasil, uma árvore de madeira avermelhada que deu nome ao país.
+Pergunta: De onde vem o nome Brasil, segundo o texto?
+<|assistant|> Do pau-brasil, uma árvore de madeira avermelhada. <|end|>
+
+<|user|> Contexto: No século XVIII, foi encontrado ouro na região de Minas Gerais. Muitas pessoas foram para lá, e cidades como Ouro Preto cresceram depressa. Em 1808, a família real portuguesa fugiu de Portugal por causa das guerras na Europa e se mudou para o Rio de Janeiro.
+Pergunta: Onde foi encontrado ouro no século XVIII?
+<|assistant|> Na região de Minas Gerais. <|end|>
+
+<|user|> Contexto: No século XVIII, foi encontrado ouro na região de Minas Gerais. Muitas pessoas foram para lá, e cidades como Ouro Preto cresceram depressa. Em 1808, a família real portuguesa fugiu de Portugal por causa das guerras na Europa e se mudou para o Rio de Janeiro.
+Pergunta: Por que a família real veio para o Brasil em 1808?
+<|assistant|> Porque fugiu de Portugal por causa das guerras na Europa. <|end|>
+
+<|user|> Contexto: Em 7 de setembro de 1822, Dom Pedro declarou a independência do Brasil e se tornou o primeiro imperador do país, com o nome de Dom Pedro I. O Brasil passou a ser um império. Em 13 de maio de 1888, a princesa Isabel assinou a Lei Áurea, que acabou oficialmente com a escravidão.
+Pergunta: Quem assinou a Lei Áurea?
+<|assistant|> A princesa Isabel. <|end|>
+
+<|user|> Contexto: No ano seguinte, em 15 de novembro de 1889, foi proclamada a República, e o marechal Deodoro da Fonseca se tornou o primeiro presidente. Durante o século XX, o Brasil passou por muitas mudanças. As cidades cresceram, surgiram fábricas, e em 1960 a capital foi transferida do Rio de Janeiro para Brasília, uma cidade nova construída no centro do país.
+Pergunta: Quem foi o primeiro presidente do Brasil?
+<|assistant|> O marechal Deodoro da Fonseca. <|end|>
+
+<|user|> Contexto: Entre 1964 e 1985, o Brasil viveu uma ditadura militar, um período em que as pessoas não podiam escolher o presidente e muitas liberdades foram limitadas. Com o fim da ditadura, o país voltou a ser uma democracia. Em 1988, foi aprovada a Constituição que está em vigor até hoje.
+Pergunta: Quando foi aprovada a Constituição atual?
+<|assistant|> Em 1988. <|end|>
+
+<|user|> Contexto: Um computador tem duas partes principais: o hardware e o software. O hardware é a parte física, aquilo que podemos tocar, como a tela, o teclado, o mouse e as peças de dentro da máquina. O software é a parte lógica, formada pelos programas que dizem ao hardware o que fazer.
+Pergunta: O que é o software?
+<|assistant|> É a parte lógica do computador, formada pelos programas. <|end|>
+
+<|user|> Contexto: O cérebro do computador é o processador. Ele executa bilhões de operações simples por segundo, como somar números e comparar valores. A memória RAM guarda as informações que o computador está usando naquele momento. Quando o computador é desligado, a memória RAM se apaga. Para guardar arquivos por muito tempo, o computador usa um disco de armazenamento, como um HD ou um SSD.
+Pergunta: O que acontece com a memória RAM quando o computador é desligado?
+<|assistant|> Ela se apaga. <|end|>
+
+<|user|> Contexto: Dentro do computador, todas as informações são representadas por apenas dois números: zero e um. Cada zero ou um se chama bit. Com muitos bits juntos, é possível representar letras, imagens, músicas e vídeos.
+Pergunta: Como se chama cada zero ou um?
+<|assistant|> Cada zero ou um se chama bit. <|end|>
+
+<|user|> Contexto: O sistema operacional é o programa principal do computador. Ele controla o hardware e permite que os outros programas funcionem. Alguns exemplos de sistemas operacionais são o Windows, o Linux, o macOS e o Android, que é usado em muitos celulares.
+Pergunta: Cite um sistema operacional usado em celulares.
+<|assistant|> O Android. <|end|>
+
+<|user|> Contexto: Os computadores não pensam como as pessoas. Eles fazem exatamente o que os programas mandam. Mesmo os programas de inteligência artificial, que conseguem conversar e escrever textos, funcionam com cálculos matemáticos feitos a partir de muitos exemplos.
+Pergunta: Os computadores pensam como as pessoas?
+<|assistant|> Não. Eles fazem exatamente o que os programas mandam. <|end|>
+
+<|user|> Contexto: O esqueleto sustenta o corpo e protege os órgãos. Um adulto tem 206 ossos. O crânio protege o cérebro, e as costelas protegem o coração e os pulmões. Os músculos ficam presos aos ossos e permitem que a gente se mova, corra, pule e segure as coisas.
+Pergunta: Quantos ossos tem um adulto?
+<|assistant|> Um adulto tem 206 ossos. <|end|>
+
+<|user|> Contexto: O esqueleto sustenta o corpo e protege os órgãos. Um adulto tem 206 ossos. O crânio protege o cérebro, e as costelas protegem o coração e os pulmões. Os músculos ficam presos aos ossos e permitem que a gente se mova, corra, pule e segure as coisas.
+Pergunta: O que o crânio protege?
+<|assistant|> O crânio protege o cérebro. <|end|>
+
+<|user|> Contexto: O coração é um músculo do tamanho de um punho fechado. Ele bate sem parar e bombeia o sangue por todo o corpo. O sangue leva oxigênio e nutrientes para as células e recolhe aquilo que elas não usam mais.
+Pergunta: Qual é o tamanho do coração?
+<|assistant|> O coração é do tamanho de um punho fechado. <|end|>
+
+<|user|> Contexto: Os pulmões ficam dentro do peito. Quando respiramos, o ar entra pelo nariz, desce até os pulmões e o oxigênio passa para o sangue. Ao soltar o ar, eliminamos o gás carbônico.
+Pergunta: Que gás eliminamos ao soltar o ar?
+<|assistant|> O gás carbônico. <|end|>
+
+<|user|> Contexto: O sistema digestório transforma os alimentos em nutrientes. A digestão começa na boca, quando mastigamos, continua no estômago e termina nos intestinos, onde os nutrientes são absorvidos.
+Pergunta: Onde termina a digestão?
+<|assistant|> Nos intestinos, onde os nutrientes são absorvidos. <|end|>
+
+<|user|> Contexto: O cérebro controla tudo o que fazemos. É com ele que pensamos, lembramos, sentimos e aprendemos. O cérebro recebe informações dos cinco sentidos: a visão, a audição, o olfato, o paladar e o tato.
+Pergunta: Quais são os cinco sentidos?
+<|assistant|> A visão, a audição, o olfato, o paladar e o tato. <|end|>
+
+<|user|> Contexto: A pele é o maior órgão do corpo. Ela nos protege do frio, do calor e dos micróbios. Para manter o corpo saudável, é importante comer bem, beber água, dormir o suficiente, fazer exercícios e visitar o médico de vez em quando.
+Pergunta: Qual é o maior órgão do corpo?
+<|assistant|> A pele. <|end|>
+
+<|user|> Contexto: As estações acontecem porque o eixo da Terra é inclinado. Enquanto a Terra dá a volta ao redor do Sol, ora o hemisfério sul recebe mais luz, ora o hemisfério norte. Muita gente pensa que as estações acontecem porque a Terra fica mais perto ou mais longe do Sol, mas isso não é verdade. O que importa é a inclinação.
+Pergunta: Por que acontecem as estações do ano?
+<|assistant|> Porque o eixo da Terra é inclinado. <|end|>
+
+<|user|> Contexto: No Brasil, o verão começa em dezembro e vai até março. É a estação mais quente, com dias longos e muitas chuvas de fim de tarde. O outono vai de março a junho. As temperaturas começam a cair e, em algumas regiões, as folhas das árvores ficam amarelas e caem.
+Pergunta: Quando começa o verão no Brasil?
+<|assistant|> Em dezembro. <|end|>
+
+<|user|> Contexto: O inverno vai de junho a setembro. É a estação mais fria, com noites longas. No sul do país pode fazer muito frio, e às vezes até cai neve nas serras. A primavera vai de setembro a dezembro. É a estação das flores, quando muitas plantas florescem e o tempo volta a esquentar.
+Pergunta: Qual é a estação das flores?
+<|assistant|> A primavera. <|end|>
+
+<|user|> Contexto: Nas regiões perto da linha do equador, como boa parte do norte do Brasil, as quatro estações quase não aparecem. Lá faz calor o ano inteiro, e as pessoas costumam falar apenas em época de chuva e época de seca.
+Pergunta: Como as pessoas perto do equador costumam falar das estações?
+<|assistant|> Elas falam apenas em época de chuva e época de seca. <|end|>
+
+<|user|> Contexto: A Floresta Amazônica é a maior floresta tropical do mundo. Ela ocupa uma área enorme da América do Sul, e a maior parte dela fica no Brasil. O restante se espalha por países vizinhos, como Peru, Colômbia, Bolívia e Venezuela.
+Pergunta: Onde fica a maior parte da Floresta Amazônica?
+<|assistant|> No Brasil. <|end|>
+
+<|user|> Contexto: O coração da floresta é o rio Amazonas, um dos maiores rios do planeta. Ele carrega mais água do que qualquer outro rio do mundo e recebe a água de milhares de rios menores, chamados afluentes.
+Pergunta: Como se chamam os rios menores que levam água ao Amazonas?
+<|assistant|> Afluentes. <|end|>
+
+<|user|> Contexto: A Amazônia abriga uma quantidade imensa de seres vivos. Lá vivem a onça-pintada, o maior felino das Américas, a preguiça, que se move devagar pelos galhos, a arara, com suas penas coloridas, e o boto-cor-de-rosa, um golfinho de água doce. Nos rios, nada o pirarucu, um dos maiores peixes de água doce do mundo. Também há sucuris, tucanos, macacos e milhares de espécies de insetos e plantas.
+Pergunta: Qual é o maior felino das Américas?
+<|assistant|> A onça-pintada. <|end|>
+
+<|user|> Contexto: A Amazônia abriga uma quantidade imensa de seres vivos. Lá vivem a onça-pintada, o maior felino das Américas, a preguiça, que se move devagar pelos galhos, a arara, com suas penas coloridas, e o boto-cor-de-rosa, um golfinho de água doce. Nos rios, nada o pirarucu, um dos maiores peixes de água doce do mundo. Também há sucuris, tucanos, macacos e milhares de espécies de insetos e plantas.
+Pergunta: O que é o boto-cor-de-rosa?
+<|assistant|> É um golfinho de água doce. <|end|>
+
+<|user|> Contexto: A floresta é importante para o mundo inteiro. As árvores liberam muita umidade no ar, o que ajuda a formar chuvas em outras regiões do Brasil. A floresta também guarda grandes quantidades de carbono, o que ajuda a controlar o clima do planeta.
+Pergunta: Como a floresta ajuda a formar chuvas?
+<|assistant|> As árvores liberam muita umidade no ar. <|end|>
+
+<|user|> Contexto: O maior perigo para a Amazônia é o desmatamento, que acontece quando as árvores são cortadas ou queimadas para abrir espaço para pastos, plantações ou garimpos. Proteger a floresta significa proteger os animais, os povos que vivem nela e o clima de todos nós.
+Pergunta: Qual é o maior perigo para a Amazônia?
+<|assistant|> O desmatamento. <|end|>
+
+<|user|> Contexto: Numa vila à beira de um lago, morava um pescador chamado Tomé. Todas as manhãs, ele saía cedo no seu barco e voltava com um balde cheio de peixes.
+Pergunta: Como se chamava o pescador?
+<|assistant|> O pescador se chamava Tomé. <|end|>
+
+<|user|> Contexto: Um dia, a raposa se deitou no meio da estrada e fingiu que estava muito doente. Quando Tomé passou, ficou com pena do animal. Colocou o balde no chão e se abaixou para ver se a raposa estava machucada. Na mesma hora, a raposa pulou, agarrou o balde e correu para a mata.
+Pergunta: O que a raposa fez para enganar o pescador?
+<|assistant|> Ela fingiu que estava muito doente. <|end|>
+
+<|user|> Contexto: Mas o balde era pesado demais. A raposa tropeçou numa raiz, o balde virou, e todos os peixes caíram no lago e foram embora nadando. A raposa ficou sem nada, toda molhada e envergonhada.
+Pergunta: O que aconteceu com os peixes?
+<|assistant|> Caíram no lago e foram embora nadando. <|end|>
+
+<|user|> Contexto: Daquele dia em diante, a raposa passou a ajudar o pescador. Ela espantava as garças que tentavam roubar os peixes do barco, e Tomé, em troca, sempre deixava alguns peixes para ela na beira do lago.
+Pergunta: Como a raposa passou a ajudar o pescador?
+<|assistant|> Ela espantava as garças que tentavam roubar os peixes do barco. <|end|>
+
+<|user|> Contexto: Moral da história: quem tenta enganar os outros muitas vezes acaba sem nada. A honestidade e a cooperação trazem mais resultados do que a esperteza.
+Pergunta: Qual é a moral da história?
+<|assistant|> Quem tenta enganar os outros muitas vezes acaba sem nada. <|end|>
+
+<|user|> Contexto: Na mata perto do lago vivia uma raposa muito esperta. Ela sempre observava o pescador de longe e pensava: "Se eu conseguir pegar aquele balde, vou comer peixe a semana inteira sem fazer esforço nenhum."
+Pergunta: Qual era a cor da raposa?
+<|assistant|> O texto não diz a cor da raposa. <|end|>
+
+<|user|> Contexto: Na barraca do seu Antônio, tem banana, mamão, abacaxi e laranja. Ele sempre grita que a laranja dele é a mais doce da cidade e oferece um pedaço para a gente provar. Minha avó prova, faz cara de quem está pensando e, no fim, sempre compra uma dúzia.
+Pergunta: O que seu Antônio vende?
+<|assistant|> Banana, mamão, abacaxi e laranja. <|end|>
+
+<|user|> Contexto: Na barraca do seu Antônio, tem banana, mamão, abacaxi e laranja. Ele sempre grita que a laranja dele é a mais doce da cidade e oferece um pedaço para a gente provar. Minha avó prova, faz cara de quem está pensando e, no fim, sempre compra uma dúzia.
+Pergunta: Quantas laranjas a avó compra?
+<|assistant|> Ela sempre compra uma dúzia. <|end|>
+
+<|user|> Contexto: Na barraca do seu Antônio, tem banana, mamão, abacaxi e laranja. Ele sempre grita que a laranja dele é a mais doce da cidade e oferece um pedaço para a gente provar. Minha avó prova, faz cara de quem está pensando e, no fim, sempre compra uma dúzia.
+Pergunta: Quantos anos tem seu Antônio?
+<|assistant|> O texto não diz a idade do seu Antônio. <|end|>
+
+<|user|> Contexto: Mais adiante fica a barraca de verduras da dona Rosa, com alface, couve, cheiro-verde e tomate. Dona Rosa conhece todo mundo pelo nome e pergunta da família de cada cliente. Às vezes a conversa demora mais do que a compra.
+Pergunta: Quem vende verduras na feira?
+<|assistant|> A dona Rosa. <|end|>
+
+<|user|> Contexto: O meu lugar preferido é a barraca de pastel. O cheiro chega antes de a gente ver a barraca. Minha avó diz que pastel não é comida de todo dia, mas no sábado pode. Eu sempre peço um de queijo e um copo de caldo de cana.
+Pergunta: Qual pastel o narrador pede?
+<|assistant|> Um pastel de queijo. <|end|>
+
+<|user|> Contexto: O meu lugar preferido é a barraca de pastel. O cheiro chega antes de a gente ver a barraca. Minha avó diz que pastel não é comida de todo dia, mas no sábado pode. Eu sempre peço um de queijo e um copo de caldo de cana.
+Pergunta: O que o narrador bebe na feira?
+<|assistant|> Um copo de caldo de cana. <|end|>
+
+<|user|> Contexto: Clara morava numa pequena cidade no interior, onde a noite era escura e o céu ficava cheio de estrelas. Toda noite, depois do jantar, ela subia no muro do quintal e tentava contar todas elas.
+Pergunta: Onde Clara morava?
+<|assistant|> Numa pequena cidade no interior. <|end|>
+
+<|user|> Contexto: Um dia, a professora de ciências levou um telescópio para a escola. Clara olhou por ele e ficou de boca aberta. No lugar onde ela via um pontinho de luz, apareciam muitas outras estrelas que ela nunca tinha visto. A professora explicou que existem mais estrelas no universo do que grãos de areia em todas as praias da Terra.
+Pergunta: O que a professora levou para a escola?
+<|assistant|> Um telescópio. <|end|>
+
+<|user|> Contexto: Um dia, a professora de ciências levou um telescópio para a escola. Clara olhou por ele e ficou de boca aberta. No lugar onde ela via um pontinho de luz, apareciam muitas outras estrelas que ela nunca tinha visto. A professora explicou que existem mais estrelas no universo do que grãos de areia em todas as praias da Terra.
+Pergunta: Como se chamava a professora?
+<|assistant|> O texto não diz o nome da professora. <|end|>
+
+<|user|> Contexto: No dia seguinte, ela pediu à biblioteca da escola um livro sobre constelações. Aprendeu a encontrar o Cruzeiro do Sul e as Três Marias. Começou a anotar num caderno tudo o que via.
+Pergunta: Quais constelações Clara aprendeu a encontrar?
+<|assistant|> O Cruzeiro do Sul e as Três Marias. <|end|>
+
+<|user|> Contexto: Muitos anos depois, Clara se tornou astrônoma. Ela ainda não conseguiu contar todas as estrelas, e sabe que nunca vai conseguir. Mas aprendeu que a curiosidade não precisa de um fim para valer a pena.
+Pergunta: Que profissão Clara seguiu?
+<|assistant|> Ela se tornou astrônoma. <|end|>
+
+<|user|> Contexto: Os cientistas dividem os animais em grupos. Os animais que têm coluna vertebral são chamados de vertebrados. Os que não têm são chamados de invertebrados, como os insetos, as minhocas, as aranhas e os polvos.
+Pergunta: O que são invertebrados?
+<|assistant|> São animais que não têm coluna vertebral, como os insetos e as minhocas. <|end|>
+
+<|user|> Contexto: Os mamíferos são vertebrados que amamentam os filhotes com leite. A maioria tem pelos e nasce da barriga da mãe. O cachorro, o gato, a vaca, o cavalo e o ser humano são mamíferos. A baleia e o golfinho também são mamíferos, mesmo vivendo no mar. O morcego é o único mamífero que voa de verdade.
+Pergunta: Qual é o único mamífero que voa de verdade?
+<|assistant|> O morcego. <|end|>
+
+<|user|> Contexto: As aves têm penas, bico e asas, e nascem de ovos. A maioria consegue voar, mas algumas não, como o avestruz, a ema e o pinguim. Os peixes vivem na água, respiram por brânquias e geralmente têm o corpo coberto de escamas.
+Pergunta: Quais aves que não voam o texto cita?
+<|assistant|> O avestruz, a ema e o pinguim. <|end|>
+
+<|user|> Contexto: As aves têm penas, bico e asas, e nascem de ovos. A maioria consegue voar, mas algumas não, como o avestruz, a ema e o pinguim. Os peixes vivem na água, respiram por brânquias e geralmente têm o corpo coberto de escamas.
+Pergunta: Como os peixes respiram?
+<|assistant|> Por brânquias. <|end|>
+
+<|user|> Contexto: Os animais também são classificados pelo que comem. Os herbívoros comem plantas, como a vaca e o coelho. Os carnívoros comem outros animais, como o leão e a onça. Os onívoros comem de tudo, como o urso, o porco e o ser humano.
+Pergunta: O que comem os herbívoros?
+<|assistant|> Os herbívoros comem plantas. <|end|>
+
+<|user|> Contexto: Os dinossauros foram répteis que dominaram a Terra durante milhões de anos, muito antes de existirem seres humanos. Eles viveram numa época chamada Era Mesozoica, que começou há cerca de 250 milhões de anos.
+Pergunta: Como se chama a época em que viveram os dinossauros?
+<|assistant|> Era Mesozoica. <|end|>
+
+<|user|> Contexto: Havia dinossauros de muitos tamanhos e formatos. Alguns eram do tamanho de uma galinha, e outros eram gigantes, maiores do que um ônibus. O braquiossauro, por exemplo, tinha um pescoço muito comprido e comia as folhas do alto das árvores. Já o tiranossauro andava sobre duas patas fortes, tinha dentes enormes e caçava outros animais.
+Pergunta: Como era o braquiossauro?
+<|assistant|> Tinha um pescoço muito comprido e comia as folhas do alto das árvores. <|end|>
+
+<|user|> Contexto: Há cerca de 66 milhões de anos, a maioria dos dinossauros desapareceu. A explicação mais aceita pelos cientistas é que um asteroide gigante caiu na Terra. O impacto levantou uma nuvem enorme de poeira, que escureceu o céu, esfriou o planeta e matou muitas plantas e animais.
+Pergunta: Há quanto tempo a maioria dos dinossauros desapareceu?
+<|assistant|> Há cerca de 66 milhões de anos. <|end|>
+
+<|user|> Contexto: Há cerca de 66 milhões de anos, a maioria dos dinossauros desapareceu. A explicação mais aceita pelos cientistas é que um asteroide gigante caiu na Terra. O impacto levantou uma nuvem enorme de poeira, que escureceu o céu, esfriou o planeta e matou muitas plantas e animais.
+Pergunta: Qual é a explicação mais aceita para o desaparecimento dos dinossauros?
+<|assistant|> A queda de um asteroide gigante na Terra. <|end|>
+
+<|user|> Contexto: Mas nem todos os dinossauros sumiram. Os cientistas descobriram que as aves descendem de um grupo de dinossauros. Isso quer dizer que, quando vemos um pássaro voando, estamos olhando para um parente distante do tiranossauro.
+Pergunta: Que animais descendem dos dinossauros?
+<|assistant|> As aves. <|end|>
+
+<|user|> Contexto: Sabemos tudo isso graças aos fósseis, que são restos ou marcas de seres vivos preservados nas rochas por muito tempo. Os cientistas que estudam os fósseis se chamam paleontólogos. No Brasil, já foram encontrados fósseis de dinossauros em vários estados.
+Pergunta: Como se chamam os cientistas que estudam os fósseis?
+<|assistant|> Paleontólogos. <|end|>
+
+<|user|> Contexto: Durante milhares de anos, as pessoas olharam para a Lua e sonharam em chegar até ela. Esse sonho só se realizou no século XX, depois de muitos anos de pesquisa e de uma grande disputa entre os Estados Unidos e a União Soviética, conhecida como corrida espacial.
+Pergunta: Quais países disputavam a corrida espacial?
+<|assistant|> Os Estados Unidos e a União Soviética. <|end|>
+
+<|user|> Contexto: Em 16 de julho de 1969, o foguete Saturno V decolou dos Estados Unidos levando a missão Apollo 11. A bordo estavam três astronautas: Neil Armstrong, Buzz Aldrin e Michael Collins. A viagem até a Lua levou cerca de quatro dias.
+Pergunta: Quem eram os astronautas da Apollo 11?
+<|assistant|> Neil Armstrong, Buzz Aldrin e Michael Collins. <|end|>
+
+<|user|> Contexto: Em 16 de julho de 1969, o foguete Saturno V decolou dos Estados Unidos levando a missão Apollo 11. A bordo estavam três astronautas: Neil Armstrong, Buzz Aldrin e Michael Collins. A viagem até a Lua levou cerca de quatro dias.
+Pergunta: Quanto tempo levou a viagem até a Lua?
+<|assistant|> Cerca de quatro dias. <|end|>
+
+<|user|> Contexto: Em 16 de julho de 1969, o foguete Saturno V decolou dos Estados Unidos levando a missão Apollo 11. A bordo estavam três astronautas: Neil Armstrong, Buzz Aldrin e Michael Collins. A viagem até a Lua levou cerca de quatro dias.
+Pergunta: Qual era a idade de Neil Armstrong?
+<|assistant|> O texto não diz a idade de Neil Armstrong. <|end|>
+
+<|user|> Contexto: Em 20 de julho de 1969, o módulo lunar pousou na superfície da Lua. Neil Armstrong foi o primeiro ser humano a pisar no solo lunar. Ao descer, ele disse uma frase que ficou famosa: "Este é um pequeno passo para um homem, mas um salto gigantesco para a humanidade." Logo depois, Buzz Aldrin também desceu. Michael Collins ficou em órbita, pilotando a nave que os levaria de volta.
+Pergunta: Quem foi o primeiro ser humano a pisar na Lua?
+<|assistant|> Neil Armstrong. <|end|>
+
+<|user|> Contexto: Em 20 de julho de 1969, o módulo lunar pousou na superfície da Lua. Neil Armstrong foi o primeiro ser humano a pisar no solo lunar. Ao descer, ele disse uma frase que ficou famosa: "Este é um pequeno passo para um homem, mas um salto gigantesco para a humanidade." Logo depois, Buzz Aldrin também desceu. Michael Collins ficou em órbita, pilotando a nave que os levaria de volta.
+Pergunta: O que Michael Collins fez durante o pouso?
+<|assistant|> Ficou em órbita, pilotando a nave que os levaria de volta. <|end|>
+
+<|user|> Contexto: Os astronautas recolheram pedras, tiraram fotografias e deixaram uma bandeira e alguns instrumentos científicos. Como a Lua não tem vento nem chuva, as pegadas deixadas por eles podem durar milhões de anos.
+Pergunta: Por que as pegadas na Lua podem durar milhões de anos?
+<|assistant|> Porque a Lua não tem vento nem chuva. <|end|>
+
+<|user|> Contexto: Entre 1969 e 1972, doze astronautas caminharam na Lua. Depois disso, nenhum ser humano voltou até lá. Hoje, vários países planejam novas viagens, e muitos cientistas acreditam que um dia a Lua poderá servir de base para viagens até Marte.
+Pergunta: Quantos astronautas caminharam na Lua?
+<|assistant|> Doze astronautas. <|end|>
+
+<|user|> Contexto: Uma das melhores soluções é a reciclagem. Reciclar é transformar um material usado em um produto novo. Uma garrafa plástica, por exemplo, pode virar fio para fazer roupas, e uma lata de alumínio pode virar uma lata nova várias vezes.
+Pergunta: O que é reciclar?
+<|assistant|> É transformar um material usado em um produto novo. <|end|>
+
+<|user|> Contexto: Para que a reciclagem funcione, o lixo precisa ser separado. No Brasil, as lixeiras de coleta seletiva costumam seguir um código de cores: azul para papel, vermelho para plástico, verde para vidro, amarelo para metal e marrom para lixo orgânico, como restos de comida.
+Pergunta: Qual é a cor da lixeira para vidro?
+<|assistant|> Verde. <|end|>
+
+<|user|> Contexto: Para que a reciclagem funcione, o lixo precisa ser separado. No Brasil, as lixeiras de coleta seletiva costumam seguir um código de cores: azul para papel, vermelho para plástico, verde para vidro, amarelo para metal e marrom para lixo orgânico, como restos de comida.
+Pergunta: Qual é a cor da lixeira para papel?
+<|assistant|> Azul. <|end|>
+
+<|user|> Contexto: Para que a reciclagem funcione, o lixo precisa ser separado. No Brasil, as lixeiras de coleta seletiva costumam seguir um código de cores: azul para papel, vermelho para plástico, verde para vidro, amarelo para metal e marrom para lixo orgânico, como restos de comida.
+Pergunta: Em que lixeira vai o lixo orgânico?
+<|assistant|> Na lixeira marrom. <|end|>
+
+<|user|> Contexto: Alguns materiais demoram muito para se decompor na natureza. Uma garrafa plástica pode levar centenas de anos para desaparecer. O vidro pode durar ainda mais. Já uma casca de banana se decompõe em poucas semanas.
+Pergunta: Quanto tempo uma garrafa plástica pode levar para desaparecer?
+<|assistant|> Pode levar centenas de anos. <|end|>
+
+<|user|> Contexto: Além de reciclar, existem outras duas atitudes importantes, que formam os chamados três erres: reduzir, reutilizar e reciclar. Reduzir é consumir menos e evitar desperdício. Reutilizar é usar de novo um objeto, como transformar um pote de vidro em porta-lápis. Reciclar é o último passo, para aquilo que não pôde ser evitado nem reaproveitado.
+Pergunta: Quais são os três erres?
+<|assistant|> Reduzir, reutilizar e reciclar. <|end|>
+
+<|user|> Contexto: No Brasil, o futebol chegou no fim do século XIX. Charles Miller, um brasileiro filho de ingleses, estudou na Inglaterra e, em 1894, voltou para São Paulo trazendo bolas e um livro de regras. Aos poucos, o esporte deixou de ser praticado só pelos clubes ricos e se espalhou pelas ruas, pelos campos de terra e pelas praias de todo o país.
+Pergunta: Quem trouxe o futebol para o Brasil?
+<|assistant|> Charles Miller, em 1894. <|end|>
+
+<|user|> Contexto: Uma partida de futebol tem dois times, cada um com onze jogadores em campo, sendo um deles o goleiro. O jogo dura noventa minutos, divididos em dois tempos de quarenta e cinco. O objetivo é fazer a bola entrar no gol do adversário. Só o goleiro pode tocar a bola com as mãos, e apenas dentro da sua área.
+Pergunta: Quanto tempo dura uma partida de futebol?
+<|assistant|> Noventa minutos, divididos em dois tempos de quarenta e cinco. <|end|>
+
+<|user|> Contexto: Uma partida de futebol tem dois times, cada um com onze jogadores em campo, sendo um deles o goleiro. O jogo dura noventa minutos, divididos em dois tempos de quarenta e cinco. O objetivo é fazer a bola entrar no gol do adversário. Só o goleiro pode tocar a bola com as mãos, e apenas dentro da sua área.
+Pergunta: Quem pode tocar a bola com as mãos?
+<|assistant|> Só o goleiro, e apenas dentro da sua área. <|end|>
+
+<|user|> Contexto: A competição mais importante do futebol é a Copa do Mundo, que acontece a cada quatro anos. O Brasil é o país com mais títulos: foi campeão em 1958, 1962, 1970, 1994 e 2002. Pelé, que ganhou três dessas Copas, é considerado por muitos o maior jogador de todos os tempos.
+Pergunta: De quanto em quanto tempo acontece a Copa do Mundo?
+<|assistant|> A cada quatro anos. <|end|>
+
+<|user|> Contexto: O futebol também é muito praticado por mulheres. A seleção brasileira feminina teve grandes jogadoras, como Marta, que foi eleita a melhor jogadora do mundo várias vezes.
+Pergunta: Quem é Marta?
+<|assistant|> Uma jogadora da seleção brasileira feminina, eleita várias vezes a melhor jogadora do mundo. <|end|>
+
+<|user|> Contexto: Pedro tinha nove anos e queria muito uma pipa. Os meninos da rua soltavam pipas coloridas toda tarde, mas o pai dele dizia que, naquele mês, não havia dinheiro para comprar brinquedos.
+Pergunta: Quantos anos Pedro tinha?
+<|assistant|> Pedro tinha nove anos. <|end|>
+
+<|user|> Contexto: Um dia, o avô de Pedro chegou com um rolo de linha, duas varetas de bambu, papel de seda e um pote de cola. "Pipa boa a gente não compra, a gente faz", disse o avô, sorrindo. Os dois sentaram na varanda e passaram a tarde inteira trabalhando.
+Pergunta: O que o avô trouxe?
+<|assistant|> Um rolo de linha, duas varetas de bambu, papel de seda e um pote de cola. <|end|>
+
+<|user|> Contexto: Um dia, o avô de Pedro chegou com um rolo de linha, duas varetas de bambu, papel de seda e um pote de cola. "Pipa boa a gente não compra, a gente faz", disse o avô, sorrindo. Os dois sentaram na varanda e passaram a tarde inteira trabalhando.
+Pergunta: Qual era o nome do avô?
+<|assistant|> O texto não diz o nome do avô. <|end|>
+
+<|user|> Contexto: Primeiro, amarraram as varetas em forma de cruz. Depois, colaram o papel azul por cima e fizeram uma rabiola comprida com tiras de jornal. Pedro sujou as mãos de cola e rasgou o papel duas vezes, mas o avô dizia que errar fazia parte.
+Pergunta: De que cor era o papel da pipa?
+<|assistant|> Azul. <|end|>
+
+<|user|> Contexto: No dia seguinte, ventava muito. Pedro correu pelo campo, e a pipa subiu, subiu, até virar um pontinho azul no céu. Os outros meninos vieram ver e perguntaram onde ele tinha comprado uma pipa tão bonita. Pedro respondeu, orgulhoso, que tinha feito com o avô.
+Pergunta: O que Pedro respondeu aos meninos?
+<|assistant|> Que tinha feito a pipa com o avô. <|end|>
+
+<|user|> Contexto: Naquela semana, a varanda virou uma pequena oficina. Os meninos da rua apareceram com varetas e papel, e o avô ensinou todos a fazer as próprias pipas. Pedro aprendeu que algumas das melhores coisas não se compram: se constroem com paciência e com quem a gente gosta.
+Pergunta: O que Pedro aprendeu?
+<|assistant|> Que algumas das melhores coisas não se compram: se constroem com paciência e com quem a gente gosta. <|end|>
+
+<|user|> Contexto: Dos povos indígenas veio o uso da mandioca, uma raiz que pode ser cozida, frita ou transformada em farinha. Com a goma da mandioca se faz a tapioca, muito popular no Nordeste. Também é indígena o costume de comer açaí, uma fruta roxa da Amazônia.
+Pergunta: O que se faz com a goma da mandioca?
+<|assistant|> A tapioca. <|end|>
+
+<|user|> Contexto: Dos povos indígenas veio o uso da mandioca, uma raiz que pode ser cozida, frita ou transformada em farinha. Com a goma da mandioca se faz a tapioca, muito popular no Nordeste. Também é indígena o costume de comer açaí, uma fruta roxa da Amazônia.
+Pergunta: De onde vem o açaí?
+<|assistant|> Da Amazônia. <|end|>
+
+<|user|> Contexto: A influência africana aparece em pratos como o acarajé, um bolinho de feijão-fradinho frito no azeite de dendê, muito tradicional na Bahia. A feijoada, feita com feijão-preto e várias carnes de porco, é um dos pratos mais famosos do Brasil e costuma ser servida com arroz, couve, farofa e laranja.
+Pergunta: O que é o acarajé?
+<|assistant|> Um bolinho de feijão-fradinho frito no azeite de dendê, tradicional na Bahia. <|end|>
+
+<|user|> Contexto: A influência africana aparece em pratos como o acarajé, um bolinho de feijão-fradinho frito no azeite de dendê, muito tradicional na Bahia. A feijoada, feita com feijão-preto e várias carnes de porco, é um dos pratos mais famosos do Brasil e costuma ser servida com arroz, couve, farofa e laranja.
+Pergunta: Com que se faz a feijoada?
+<|assistant|> Com feijão-preto e várias carnes de porco. <|end|>
+
+<|user|> Contexto: Cada região tem as suas especialidades. Em Minas Gerais, o pão de queijo é quase obrigatório no café da manhã. No Sul, o churrasco reúne a família no fim de semana. No Norte, são comuns os pratos com peixes de rio, como o pirarucu e o tambaqui.
+Pergunta: Que comida é quase obrigatória no café da manhã em Minas Gerais?
+<|assistant|> O pão de queijo. <|end|>
+
+<|user|> Contexto: A primeira dica é escolher um lugar tranquilo, com boa luz e sem muitas distrações. Deixar o celular longe, ou pelo menos no silencioso, ajuda bastante a manter a atenção.
+Pergunta: Onde devemos estudar?
+<|assistant|> Num lugar tranquilo, com boa luz e sem muitas distrações. <|end|>
+
+<|user|> Contexto: A segunda dica é estudar um pouco todos os dias, em vez de tentar aprender tudo na véspera da prova. O cérebro guarda melhor as informações quando elas são revisadas várias vezes, com intervalos entre uma revisão e outra.
+Pergunta: Por que é melhor estudar um pouco todos os dias?
+<|assistant|> Porque o cérebro guarda melhor as informações quando elas são revisadas várias vezes. <|end|>
+
+<|user|> Contexto: A terceira dica é fazer pausas. Depois de mais ou menos meia hora de estudo, vale a pena levantar, beber água e descansar alguns minutos. Assim, a mente volta mais disposta.
+Pergunta: Quando devemos fazer uma pausa?
+<|assistant|> Depois de mais ou menos meia hora de estudo. <|end|>
+
+<|user|> Contexto: A quarta dica é estudar de forma ativa. Em vez de só reler o texto, tente explicar o conteúdo com as suas próprias palavras, faça resumos, resolva exercícios e faça perguntas a si mesmo. Ensinar a matéria para outra pessoa também é uma ótima maneira de aprender.
+Pergunta: O que é estudar de forma ativa?
+<|assistant|> É explicar o conteúdo com as próprias palavras, fazer resumos, resolver exercícios e fazer perguntas a si mesmo. <|end|>
+
+<|user|> Contexto: Era uma noite de verão quando, de repente, toda a luz do bairro apagou. A televisão desligou no meio do jogo, o ventilador parou de girar e a casa ficou completamente escura.
+Pergunta: Em que cidade aconteceu a história?
+<|assistant|> O texto não diz em que cidade aconteceu a história. <|end|>
+
+<|user|> Contexto: Mariana, que tinha onze anos, levou um susto. A mãe acendeu uma vela na cozinha e o pai procurou a lanterna na gaveta. Pela janela, dava para ver que todas as casas da rua também estavam no escuro.
+Pergunta: Quantos anos Mariana tinha?
+<|assistant|> Mariana tinha onze anos. <|end|>
+
+<|user|> Contexto: Sem televisão e sem internet, a família não sabia o que fazer. Então o pai teve uma ideia: levou as cadeiras para o quintal. Lá fora, longe das luzes da cidade, o céu estava cheio de estrelas, como Mariana nunca tinha visto.
+Pergunta: O que o pai fez depois que a luz apagou?
+<|assistant|> Levou as cadeiras para o quintal. <|end|>
+
+<|user|> Contexto: Os vizinhos também saíram para a calçada. Alguém trouxe um violão, outra pessoa trouxe uma garrafa de suco, e logo a rua inteira estava conversando e cantando. Os mais velhos contaram histórias de quando eram crianças e não havia luz elétrica no sítio onde moravam.
+Pergunta: O que os vizinhos trouxeram?
+<|assistant|> Um violão e uma garrafa de suco. <|end|>
+
+<|user|> Contexto: Perto da meia-noite, a energia voltou. As lâmpadas acenderam, a televisão ligou sozinha e todos aplaudiram. Mesmo assim, ninguém quis entrar logo.
+Pergunta: Quando a energia voltou?
+<|assistant|> Perto da meia-noite. <|end|>
+
+<|user|> Contexto: No dia seguinte, Mariana escreveu no seu diário que aquela tinha sido uma das noites mais divertidas do ano. E pensou que, às vezes, é preciso que tudo se apague para a gente enxergar o que está bem perto.
+Pergunta: Onde Mariana escreveu sobre aquela noite?
+<|assistant|> No seu diário. <|end|>
+
