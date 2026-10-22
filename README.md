@@ -38,9 +38,9 @@ checkpoints e memória). Se a sessão cair, rode a célula 1 e continue de onde 
 | `finetune.py` | Fine-tuning pergunta→resposta (loss só na resposta); não sobrescreve o pré-treino |
 | `chat.py` | Conversa com RAG e memória; `--base` completa texto com o modelo só pré-treinado |
 | `model.py` / `config.py` | Arquitetura e presets (`tiny` para CPU, `colab` para GPU) |
-| `data/modern/` | 20 textos curtos em português moderno, escritos para o projeto (entram 3x no pré-treino) |
-| `data/qa/pergeresp.txt` | ~2800 perguntas e respostas (gerado por `tools/gerar_pergeresp.py`) |
-| `data/qa/leitura.txt` | ~110 perguntas de interpretação com "Contexto:", o mesmo formato do RAG |
+| `data/modern/` | 130 textos em português moderno escritos para o projeto: 20 maiores e 110 simples (`simples_*.txt`); entram 3x no pré-treino |
+| `data/qa/pergeresp.txt` | ~4000 perguntas e respostas (gerado por `tools/gerar_pergeresp.py`) |
+| `data/qa/leitura.txt` | ~220 perguntas de interpretação com "Contexto:", o mesmo formato do RAG |
 | `data/qa/identidade.txt` | Perguntas sobre quem é a Laika (peso extra no fine-tuning) |
 
 Também funciona localmente: `pip install torch tokenizers`, coloque `.txt` em `data/books/` e rode
@@ -60,7 +60,8 @@ Pergunta: O que é um vulcão? <|assistant|>
   contas e pedidos como "Corrija...", "Resuma..." vão sem contexto.
 - O fine-tuning ensina o modelo a usar esse formato: `leitura.txt` mais ~50% das perguntas que pedem
   informação, treinadas com o trecho achado pela busca (`--rag-share`).
-- No chat, `/fontes` mostra de onde veio o contexto e `/rag` liga ou desliga a busca.
+- Quando o RAG é usado, a resposta termina com `*Nome do artigo`, por exemplo: `Um vulcão é ... *Vulcão`.
+  `/fontes` liga ou desliga esse asterisco e `/rag` liga ou desliga a busca.
 - Testar a busca sem o modelo: `python rag.py search "Quem foi Santos Dumont?"`.
 
 ## Memória
@@ -98,6 +99,6 @@ pergeresp: `python finetune.py --qa-share 0.12 --lr 3e-5`. Não precisa refazer 
 - Formato: `<|user|> pergunta` + quebra de linha + `<|assistant|> resposta <|end|>`, exemplos separados por
   linha em branco; linhas com `#` são comentários. Pode criar quantos `.txt` quiser em `data/qa/`.
 - `pergeresp.txt`, `leitura.txt` e `identidade.txt` são gerados por `python tools/gerar_pergeresp.py` (que os
-  sobrescreve). As tabelas ficam em `tools/dados_extra.py`, `tools/dados_extra2.py` e `tools/leitura.py`.
+  sobrescreve). As tabelas ficam em `tools/dados_extra*.py`, `tools/leitura.py` e `tools/textos_simples*.py`.
   Para os seus próprios exemplos, use outro arquivo, por exemplo `data/qa/meus_exemplos.txt`.
 - Cada exemplo tem que caber no `block_size` (256 no `colab`); o `finetune.py` avisa se descartar exemplos.

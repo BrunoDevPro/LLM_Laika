@@ -6,7 +6,7 @@
   python chat.py --no-memory
 
 Comandos durante a conversa:
-  /fontes   mostra ou esconde de onde veio o contexto
+  /fontes   mostra ou esconde o "*Nome do artigo" no fim das respostas que usaram o RAG
   /rag      liga ou desliga a busca nos textos
   /memoria  mostra o que a Laika lembra sobre você
   sair      encerra
@@ -38,7 +38,7 @@ def load(out_dir, base, device):
 
 
 def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new_tokens=80):
-    """Monta o prompt do chat. Devolve (prompt, fonte ou None).
+    """Monta o prompt do chat. Devolve (prompt, título do artigo usado pelo RAG ou None).
 
     Se a pergunta pede informação (wants_rag) e o RAG acha um trecho relevante, ou se há
     anotações da memória ligadas à pergunta, o prompt ganha um "Contexto:", no mesmo
@@ -49,12 +49,11 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
         note = memory.context_for(question)
         if note:
             context_parts.append(note)
-            source = "memória"
     if rag is not None and wants_rag(question):
         hit = rag.best(question)
         if hit:
             context_parts.append(hit["text"])
-            source = f"{hit['title']} ({hit['kind']})" if not source else f"{source} + {hit['title']}"
+            source = hit["title"]
     plain = f"{USER_TOKEN} {question} {ASSISTANT_TOKEN}"
     if not context_parts:
         return plain, None
@@ -67,6 +66,11 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
     if user_text is None:
         return plain, None
     return f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN}", source
+
+
+def with_citation(answer, source):
+    """Acrescenta ' *Nome do artigo' no fim da resposta quando o RAG foi usado."""
+    return f"{answer} *{source}" if source else answer
 
 
 @torch.no_grad()
@@ -176,9 +180,7 @@ def main():
 
         prompt, source = build_prompt(text, tokenizer, model.block_size, rag, memory, args.max_new_tokens)
         answer = generate(model, tokenizer, prompt, device, args.max_new_tokens, args.temperature)
-        print("LLM:", answer)
-        if source and show_sources:
-            print(f"     (contexto: {source})")
+        print("LLM:", with_citation(answer, source) if show_sources else answer)
 
 
 if __name__ == "__main__":

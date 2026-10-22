@@ -8545,3 +8545,3622 @@
 <|user|> Dê um título para este texto: A terceira dica é fazer pausas. Depois de mais ou menos meia hora de estudo, vale a pena levantar, beber água e descansar alguns minutos. Assim, a mente volta mais disposta.
 <|assistant|> Um bom título seria: A importância das pausas. <|end|>
 
+# ===== Países 2 e siglas (253) =====
+
+<|user|> Qual é a capital da Guiana?
+<|assistant|> A capital da Guiana é Georgetown. <|end|>
+
+<|user|> De que país Georgetown é a capital?
+<|assistant|> Georgetown é a capital da Guiana. <|end|>
+
+<|user|> Em que continente fica a Guiana?
+<|assistant|> A Guiana fica na América do Sul. <|end|>
+
+<|user|> Qual a capital do Suriname?
+<|assistant|> A capital do Suriname é Paramaribo. <|end|>
+
+<|user|> De que país Paramaribo é a capital?
+<|assistant|> Paramaribo é a capital do Suriname. <|end|>
+
+<|user|> Em que continente fica o Suriname?
+<|assistant|> O Suriname fica na América do Sul. <|end|>
+
+<|user|> Me diga a capital do Panamá.
+<|assistant|> A capital do Panamá é Cidade do Panamá. <|end|>
+
+<|user|> De que país Cidade do Panamá é a capital?
+<|assistant|> Cidade do Panamá é a capital do Panamá. <|end|>
+
+<|user|> Em que continente fica o Panamá?
+<|assistant|> O Panamá fica na América Central. <|end|>
+
+<|user|> Qual cidade é a capital da Costa Rica?
+<|assistant|> A capital da Costa Rica é San José. <|end|>
+
+<|user|> De que país San José é a capital?
+<|assistant|> San José é a capital da Costa Rica. <|end|>
+
+<|user|> Em que continente fica a Costa Rica?
+<|assistant|> A Costa Rica fica na América Central. <|end|>
+
+<|user|> Qual é a capital da Nicarágua?
+<|assistant|> A capital da Nicarágua é Manágua. <|end|>
+
+<|user|> De que país Manágua é a capital?
+<|assistant|> Manágua é a capital da Nicarágua. <|end|>
+
+<|user|> Em que continente fica a Nicarágua?
+<|assistant|> A Nicarágua fica na América Central. <|end|>
+
+<|user|> Qual a capital de Honduras?
+<|assistant|> A capital de Honduras é Tegucigalpa. <|end|>
+
+<|user|> De que país Tegucigalpa é a capital?
+<|assistant|> Tegucigalpa é a capital de Honduras. <|end|>
+
+<|user|> Em que continente fica Honduras?
+<|assistant|> Honduras fica na América Central. <|end|>
+
+<|user|> Me diga a capital de El Salvador.
+<|assistant|> A capital de El Salvador é San Salvador. <|end|>
+
+<|user|> De que país San Salvador é a capital?
+<|assistant|> San Salvador é a capital de El Salvador. <|end|>
+
+<|user|> Em que continente fica El Salvador?
+<|assistant|> El Salvador fica na América Central. <|end|>
+
+<|user|> Qual cidade é a capital da Guatemala?
+<|assistant|> A capital da Guatemala é Cidade da Guatemala. <|end|>
+
+<|user|> De que país Cidade da Guatemala é a capital?
+<|assistant|> Cidade da Guatemala é a capital da Guatemala. <|end|>
+
+<|user|> Em que continente fica a Guatemala?
+<|assistant|> A Guatemala fica na América Central. <|end|>
+
+<|user|> Qual é a capital da República Dominicana?
+<|assistant|> A capital da República Dominicana é Santo Domingo. <|end|>
+
+<|user|> De que país Santo Domingo é a capital?
+<|assistant|> Santo Domingo é a capital da República Dominicana. <|end|>
+
+<|user|> Em que continente fica a República Dominicana?
+<|assistant|> A República Dominicana fica na América Central. <|end|>
+
+<|user|> Qual a capital do Haiti?
+<|assistant|> A capital do Haiti é Porto Príncipe. <|end|>
+
+<|user|> De que país Porto Príncipe é a capital?
+<|assistant|> Porto Príncipe é a capital do Haiti. <|end|>
+
+<|user|> Em que continente fica o Haiti?
+<|assistant|> O Haiti fica na América Central. <|end|>
+
+<|user|> Me diga a capital da Jamaica.
+<|assistant|> A capital da Jamaica é Kingston. <|end|>
+
+<|user|> De que país Kingston é a capital?
+<|assistant|> Kingston é a capital da Jamaica. <|end|>
+
+<|user|> Em que continente fica a Jamaica?
+<|assistant|> A Jamaica fica na América Central. <|end|>
+
+<|user|> Qual cidade é a capital da Dinamarca?
+<|assistant|> A capital da Dinamarca é Copenhague. <|end|>
+
+<|user|> De que país Copenhague é a capital?
+<|assistant|> Copenhague é a capital da Dinamarca. <|end|>
+
+<|user|> Em que continente fica a Dinamarca?
+<|assistant|> A Dinamarca fica na Europa. <|end|>
+
+<|user|> Qual é a capital da Finlândia?
+<|assistant|> A capital da Finlândia é Helsinque. <|end|>
+
+<|user|> De que país Helsinque é a capital?
+<|assistant|> Helsinque é a capital da Finlândia. <|end|>
+
+<|user|> Em que continente fica a Finlândia?
+<|assistant|> A Finlândia fica na Europa. <|end|>
+
+<|user|> Qual a capital da Islândia?
+<|assistant|> A capital da Islândia é Reykjavík. <|end|>
+
+<|user|> De que país Reykjavík é a capital?
+<|assistant|> Reykjavík é a capital da Islândia. <|end|>
+
+<|user|> Em que continente fica a Islândia?
+<|assistant|> A Islândia fica na Europa. <|end|>
+
+<|user|> Me diga a capital da Ucrânia.
+<|assistant|> A capital da Ucrânia é Kiev. <|end|>
+
+<|user|> De que país Kiev é a capital?
+<|assistant|> Kiev é a capital da Ucrânia. <|end|>
+
+<|user|> Em que continente fica a Ucrânia?
+<|assistant|> A Ucrânia fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital da Hungria?
+<|assistant|> A capital da Hungria é Budapeste. <|end|>
+
+<|user|> De que país Budapeste é a capital?
+<|assistant|> Budapeste é a capital da Hungria. <|end|>
+
+<|user|> Em que continente fica a Hungria?
+<|assistant|> A Hungria fica na Europa. <|end|>
+
+<|user|> Qual é a capital da República Tcheca?
+<|assistant|> A capital da República Tcheca é Praga. <|end|>
+
+<|user|> De que país Praga é a capital?
+<|assistant|> Praga é a capital da República Tcheca. <|end|>
+
+<|user|> Em que continente fica a República Tcheca?
+<|assistant|> A República Tcheca fica na Europa. <|end|>
+
+<|user|> Qual a capital da Romênia?
+<|assistant|> A capital da Romênia é Bucareste. <|end|>
+
+<|user|> De que país Bucareste é a capital?
+<|assistant|> Bucareste é a capital da Romênia. <|end|>
+
+<|user|> Em que continente fica a Romênia?
+<|assistant|> A Romênia fica na Europa. <|end|>
+
+<|user|> Me diga a capital da Bulgária.
+<|assistant|> A capital da Bulgária é Sófia. <|end|>
+
+<|user|> De que país Sófia é a capital?
+<|assistant|> Sófia é a capital da Bulgária. <|end|>
+
+<|user|> Em que continente fica a Bulgária?
+<|assistant|> A Bulgária fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital da Sérvia?
+<|assistant|> A capital da Sérvia é Belgrado. <|end|>
+
+<|user|> De que país Belgrado é a capital?
+<|assistant|> Belgrado é a capital da Sérvia. <|end|>
+
+<|user|> Em que continente fica a Sérvia?
+<|assistant|> A Sérvia fica na Europa. <|end|>
+
+<|user|> Qual é a capital da Croácia?
+<|assistant|> A capital da Croácia é Zagreb. <|end|>
+
+<|user|> De que país Zagreb é a capital?
+<|assistant|> Zagreb é a capital da Croácia. <|end|>
+
+<|user|> Em que continente fica a Croácia?
+<|assistant|> A Croácia fica na Europa. <|end|>
+
+<|user|> Qual a capital da Eslováquia?
+<|assistant|> A capital da Eslováquia é Bratislava. <|end|>
+
+<|user|> De que país Bratislava é a capital?
+<|assistant|> Bratislava é a capital da Eslováquia. <|end|>
+
+<|user|> Em que continente fica a Eslováquia?
+<|assistant|> A Eslováquia fica na Europa. <|end|>
+
+<|user|> Me diga a capital da Eslovênia.
+<|assistant|> A capital da Eslovênia é Liubliana. <|end|>
+
+<|user|> De que país Liubliana é a capital?
+<|assistant|> Liubliana é a capital da Eslovênia. <|end|>
+
+<|user|> Em que continente fica a Eslovênia?
+<|assistant|> A Eslovênia fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital da Albânia?
+<|assistant|> A capital da Albânia é Tirana. <|end|>
+
+<|user|> De que país Tirana é a capital?
+<|assistant|> Tirana é a capital da Albânia. <|end|>
+
+<|user|> Em que continente fica a Albânia?
+<|assistant|> A Albânia fica na Europa. <|end|>
+
+<|user|> Qual é a capital da Lituânia?
+<|assistant|> A capital da Lituânia é Vilnius. <|end|>
+
+<|user|> De que país Vilnius é a capital?
+<|assistant|> Vilnius é a capital da Lituânia. <|end|>
+
+<|user|> Em que continente fica a Lituânia?
+<|assistant|> A Lituânia fica na Europa. <|end|>
+
+<|user|> Qual a capital da Letônia?
+<|assistant|> A capital da Letônia é Riga. <|end|>
+
+<|user|> De que país Riga é a capital?
+<|assistant|> Riga é a capital da Letônia. <|end|>
+
+<|user|> Em que continente fica a Letônia?
+<|assistant|> A Letônia fica na Europa. <|end|>
+
+<|user|> Me diga a capital da Estônia.
+<|assistant|> A capital da Estônia é Tallinn. <|end|>
+
+<|user|> De que país Tallinn é a capital?
+<|assistant|> Tallinn é a capital da Estônia. <|end|>
+
+<|user|> Em que continente fica a Estônia?
+<|assistant|> A Estônia fica na Europa. <|end|>
+
+<|user|> Qual cidade é a capital dos Países Baixos?
+<|assistant|> A capital dos Países Baixos é Amsterdã. <|end|>
+
+<|user|> De que país Amsterdã é a capital?
+<|assistant|> Amsterdã é a capital dos Países Baixos. <|end|>
+
+<|user|> Em que continente ficam os Países Baixos?
+<|assistant|> Os Países Baixos ficam na Europa. <|end|>
+
+<|user|> Qual é a capital de Malta?
+<|assistant|> A capital de Malta é Valeta. <|end|>
+
+<|user|> De que país Valeta é a capital?
+<|assistant|> Valeta é a capital de Malta. <|end|>
+
+<|user|> Em que continente fica Malta?
+<|assistant|> Malta fica na Europa. <|end|>
+
+<|user|> Qual a capital do Líbano?
+<|assistant|> A capital do Líbano é Beirute. <|end|>
+
+<|user|> De que país Beirute é a capital?
+<|assistant|> Beirute é a capital do Líbano. <|end|>
+
+<|user|> Em que continente fica o Líbano?
+<|assistant|> O Líbano fica na Ásia. <|end|>
+
+<|user|> Me diga a capital da Síria.
+<|assistant|> A capital da Síria é Damasco. <|end|>
+
+<|user|> De que país Damasco é a capital?
+<|assistant|> Damasco é a capital da Síria. <|end|>
+
+<|user|> Em que continente fica a Síria?
+<|assistant|> A Síria fica na Ásia. <|end|>
+
+<|user|> Qual cidade é a capital da Jordânia?
+<|assistant|> A capital da Jordânia é Amã. <|end|>
+
+<|user|> De que país Amã é a capital?
+<|assistant|> Amã é a capital da Jordânia. <|end|>
+
+<|user|> Em que continente fica a Jordânia?
+<|assistant|> A Jordânia fica na Ásia. <|end|>
+
+<|user|> Qual é a capital da Arábia Saudita?
+<|assistant|> A capital da Arábia Saudita é Riad. <|end|>
+
+<|user|> De que país Riad é a capital?
+<|assistant|> Riad é a capital da Arábia Saudita. <|end|>
+
+<|user|> Em que continente fica a Arábia Saudita?
+<|assistant|> A Arábia Saudita fica na Ásia. <|end|>
+
+<|user|> Qual a capital do Irã?
+<|assistant|> A capital do Irã é Teerã. <|end|>
+
+<|user|> De que país Teerã é a capital?
+<|assistant|> Teerã é a capital do Irã. <|end|>
+
+<|user|> Em que continente fica o Irã?
+<|assistant|> O Irã fica na Ásia. <|end|>
+
+<|user|> Me diga a capital do Iraque.
+<|assistant|> A capital do Iraque é Bagdá. <|end|>
+
+<|user|> De que país Bagdá é a capital?
+<|assistant|> Bagdá é a capital do Iraque. <|end|>
+
+<|user|> Em que continente fica o Iraque?
+<|assistant|> O Iraque fica na Ásia. <|end|>
+
+<|user|> Qual cidade é a capital do Afeganistão?
+<|assistant|> A capital do Afeganistão é Cabul. <|end|>
+
+<|user|> De que país Cabul é a capital?
+<|assistant|> Cabul é a capital do Afeganistão. <|end|>
+
+<|user|> Em que continente fica o Afeganistão?
+<|assistant|> O Afeganistão fica na Ásia. <|end|>
+
+<|user|> Qual é a capital do Paquistão?
+<|assistant|> A capital do Paquistão é Islamabad. <|end|>
+
+<|user|> De que país Islamabad é a capital?
+<|assistant|> Islamabad é a capital do Paquistão. <|end|>
+
+<|user|> Em que continente fica o Paquistão?
+<|assistant|> O Paquistão fica na Ásia. <|end|>
+
+<|user|> Qual a capital de Bangladesh?
+<|assistant|> A capital de Bangladesh é Daca. <|end|>
+
+<|user|> De que país Daca é a capital?
+<|assistant|> Daca é a capital de Bangladesh. <|end|>
+
+<|user|> Em que continente fica Bangladesh?
+<|assistant|> Bangladesh fica na Ásia. <|end|>
+
+<|user|> Me diga a capital do Nepal.
+<|assistant|> A capital do Nepal é Katmandu. <|end|>
+
+<|user|> De que país Katmandu é a capital?
+<|assistant|> Katmandu é a capital do Nepal. <|end|>
+
+<|user|> Em que continente fica o Nepal?
+<|assistant|> O Nepal fica na Ásia. <|end|>
+
+<|user|> Qual cidade é a capital da Tailândia?
+<|assistant|> A capital da Tailândia é Bangkok. <|end|>
+
+<|user|> De que país Bangkok é a capital?
+<|assistant|> Bangkok é a capital da Tailândia. <|end|>
+
+<|user|> Em que continente fica a Tailândia?
+<|assistant|> A Tailândia fica na Ásia. <|end|>
+
+<|user|> Qual é a capital do Vietnã?
+<|assistant|> A capital do Vietnã é Hanói. <|end|>
+
+<|user|> De que país Hanói é a capital?
+<|assistant|> Hanói é a capital do Vietnã. <|end|>
+
+<|user|> Em que continente fica o Vietnã?
+<|assistant|> O Vietnã fica na Ásia. <|end|>
+
+<|user|> Qual a capital das Filipinas?
+<|assistant|> A capital das Filipinas é Manila. <|end|>
+
+<|user|> De que país Manila é a capital?
+<|assistant|> Manila é a capital das Filipinas. <|end|>
+
+<|user|> Em que continente ficam as Filipinas?
+<|assistant|> As Filipinas ficam na Ásia. <|end|>
+
+<|user|> Me diga a capital da Malásia.
+<|assistant|> A capital da Malásia é Kuala Lumpur. <|end|>
+
+<|user|> De que país Kuala Lumpur é a capital?
+<|assistant|> Kuala Lumpur é a capital da Malásia. <|end|>
+
+<|user|> Em que continente fica a Malásia?
+<|assistant|> A Malásia fica na Ásia. <|end|>
+
+<|user|> Qual cidade é a capital da Coreia do Norte?
+<|assistant|> A capital da Coreia do Norte é Pyongyang. <|end|>
+
+<|user|> De que país Pyongyang é a capital?
+<|assistant|> Pyongyang é a capital da Coreia do Norte. <|end|>
+
+<|user|> Em que continente fica a Coreia do Norte?
+<|assistant|> A Coreia do Norte fica na Ásia. <|end|>
+
+<|user|> Qual é a capital da Mongólia?
+<|assistant|> A capital da Mongólia é Ulan Bator. <|end|>
+
+<|user|> De que país Ulan Bator é a capital?
+<|assistant|> Ulan Bator é a capital da Mongólia. <|end|>
+
+<|user|> Em que continente fica a Mongólia?
+<|assistant|> A Mongólia fica na Ásia. <|end|>
+
+<|user|> Qual a capital do Cazaquistão?
+<|assistant|> A capital do Cazaquistão é Astana. <|end|>
+
+<|user|> De que país Astana é a capital?
+<|assistant|> Astana é a capital do Cazaquistão. <|end|>
+
+<|user|> Em que continente fica o Cazaquistão?
+<|assistant|> O Cazaquistão fica na Ásia. <|end|>
+
+<|user|> Me diga a capital dos Emirados Árabes Unidos.
+<|assistant|> A capital dos Emirados Árabes Unidos é Abu Dhabi. <|end|>
+
+<|user|> De que país Abu Dhabi é a capital?
+<|assistant|> Abu Dhabi é a capital dos Emirados Árabes Unidos. <|end|>
+
+<|user|> Em que continente ficam os Emirados Árabes Unidos?
+<|assistant|> Os Emirados Árabes Unidos ficam na Ásia. <|end|>
+
+<|user|> Qual cidade é a capital do Catar?
+<|assistant|> A capital do Catar é Doha. <|end|>
+
+<|user|> De que país Doha é a capital?
+<|assistant|> Doha é a capital do Catar. <|end|>
+
+<|user|> Em que continente fica o Catar?
+<|assistant|> O Catar fica na Ásia. <|end|>
+
+<|user|> Qual é a capital de Timor-Leste?
+<|assistant|> A capital de Timor-Leste é Díli. <|end|>
+
+<|user|> De que país Díli é a capital?
+<|assistant|> Díli é a capital de Timor-Leste. <|end|>
+
+<|user|> Em que continente fica Timor-Leste?
+<|assistant|> Timor-Leste fica na Ásia. <|end|>
+
+<|user|> Qual a capital da Etiópia?
+<|assistant|> A capital da Etiópia é Adis Abeba. <|end|>
+
+<|user|> De que país Adis Abeba é a capital?
+<|assistant|> Adis Abeba é a capital da Etiópia. <|end|>
+
+<|user|> Em que continente fica a Etiópia?
+<|assistant|> A Etiópia fica na África. <|end|>
+
+<|user|> Me diga a capital de Gana.
+<|assistant|> A capital de Gana é Acra. <|end|>
+
+<|user|> De que país Acra é a capital?
+<|assistant|> Acra é a capital de Gana. <|end|>
+
+<|user|> Em que continente fica Gana?
+<|assistant|> Gana fica na África. <|end|>
+
+<|user|> Qual cidade é a capital do Senegal?
+<|assistant|> A capital do Senegal é Dacar. <|end|>
+
+<|user|> De que país Dacar é a capital?
+<|assistant|> Dacar é a capital do Senegal. <|end|>
+
+<|user|> Em que continente fica o Senegal?
+<|assistant|> O Senegal fica na África. <|end|>
+
+<|user|> Qual é a capital da Tunísia?
+<|assistant|> A capital da Tunísia é Túnis. <|end|>
+
+<|user|> De que país Túnis é a capital?
+<|assistant|> Túnis é a capital da Tunísia. <|end|>
+
+<|user|> Em que continente fica a Tunísia?
+<|assistant|> A Tunísia fica na África. <|end|>
+
+<|user|> Qual a capital da Argélia?
+<|assistant|> A capital da Argélia é Argel. <|end|>
+
+<|user|> De que país Argel é a capital?
+<|assistant|> Argel é a capital da Argélia. <|end|>
+
+<|user|> Em que continente fica a Argélia?
+<|assistant|> A Argélia fica na África. <|end|>
+
+<|user|> Me diga a capital da Líbia.
+<|assistant|> A capital da Líbia é Trípoli. <|end|>
+
+<|user|> De que país Trípoli é a capital?
+<|assistant|> Trípoli é a capital da Líbia. <|end|>
+
+<|user|> Em que continente fica a Líbia?
+<|assistant|> A Líbia fica na África. <|end|>
+
+<|user|> Qual cidade é a capital de Uganda?
+<|assistant|> A capital de Uganda é Kampala. <|end|>
+
+<|user|> De que país Kampala é a capital?
+<|assistant|> Kampala é a capital de Uganda. <|end|>
+
+<|user|> Em que continente fica Uganda?
+<|assistant|> Uganda fica na África. <|end|>
+
+<|user|> Qual é a capital de Ruanda?
+<|assistant|> A capital de Ruanda é Kigali. <|end|>
+
+<|user|> De que país Kigali é a capital?
+<|assistant|> Kigali é a capital de Ruanda. <|end|>
+
+<|user|> Em que continente fica Ruanda?
+<|assistant|> Ruanda fica na África. <|end|>
+
+<|user|> Qual a capital do Zimbábue?
+<|assistant|> A capital do Zimbábue é Harare. <|end|>
+
+<|user|> De que país Harare é a capital?
+<|assistant|> Harare é a capital do Zimbábue. <|end|>
+
+<|user|> Em que continente fica o Zimbábue?
+<|assistant|> O Zimbábue fica na África. <|end|>
+
+<|user|> Me diga a capital da Zâmbia.
+<|assistant|> A capital da Zâmbia é Lusaka. <|end|>
+
+<|user|> De que país Lusaka é a capital?
+<|assistant|> Lusaka é a capital da Zâmbia. <|end|>
+
+<|user|> Em que continente fica a Zâmbia?
+<|assistant|> A Zâmbia fica na África. <|end|>
+
+<|user|> Qual cidade é a capital de Camarões?
+<|assistant|> A capital de Camarões é Iaundé. <|end|>
+
+<|user|> De que país Iaundé é a capital?
+<|assistant|> Iaundé é a capital de Camarões. <|end|>
+
+<|user|> Em que continente fica Camarões?
+<|assistant|> Camarões fica na África. <|end|>
+
+<|user|> Qual é a capital da Guiné-Bissau?
+<|assistant|> A capital da Guiné-Bissau é Bissau. <|end|>
+
+<|user|> De que país Bissau é a capital?
+<|assistant|> Bissau é a capital da Guiné-Bissau. <|end|>
+
+<|user|> Em que continente fica a Guiné-Bissau?
+<|assistant|> A Guiné-Bissau fica na África. <|end|>
+
+<|user|> Qual a capital de São Tomé e Príncipe?
+<|assistant|> A capital de São Tomé e Príncipe é São Tomé. <|end|>
+
+<|user|> De que país São Tomé é a capital?
+<|assistant|> São Tomé é a capital de São Tomé e Príncipe. <|end|>
+
+<|user|> Em que continente fica São Tomé e Príncipe?
+<|assistant|> São Tomé e Príncipe fica na África. <|end|>
+
+<|user|> Me diga a capital de Madagascar.
+<|assistant|> A capital de Madagascar é Antananarivo. <|end|>
+
+<|user|> De que país Antananarivo é a capital?
+<|assistant|> Antananarivo é a capital de Madagascar. <|end|>
+
+<|user|> Em que continente fica Madagascar?
+<|assistant|> Madagascar fica na África. <|end|>
+
+<|user|> Qual cidade é a capital da Namíbia?
+<|assistant|> A capital da Namíbia é Windhoek. <|end|>
+
+<|user|> De que país Windhoek é a capital?
+<|assistant|> Windhoek é a capital da Namíbia. <|end|>
+
+<|user|> Em que continente fica a Namíbia?
+<|assistant|> A Namíbia fica na África. <|end|>
+
+<|user|> Qual é a capital da Nova Zelândia?
+<|assistant|> A capital da Nova Zelândia é Wellington. <|end|>
+
+<|user|> De que país Wellington é a capital?
+<|assistant|> Wellington é a capital da Nova Zelândia. <|end|>
+
+<|user|> Em que continente fica a Nova Zelândia?
+<|assistant|> A Nova Zelândia fica na Oceania. <|end|>
+
+<|user|> Qual a capital de Fiji?
+<|assistant|> A capital de Fiji é Suva. <|end|>
+
+<|user|> De que país Suva é a capital?
+<|assistant|> Suva é a capital de Fiji. <|end|>
+
+<|user|> Em que continente fica Fiji?
+<|assistant|> Fiji fica na Oceania. <|end|>
+
+<|user|> Qual é a capital da Bolívia?
+<|assistant|> A Bolívia tem duas capitais: Sucre é a capital constitucional, e La Paz é a sede do governo. <|end|>
+
+<|user|> Qual é a sigla do Acre?
+<|assistant|> A sigla do Acre é AC. <|end|>
+
+<|user|> AC é a sigla de qual estado?
+<|assistant|> AC é a sigla do Acre. <|end|>
+
+<|user|> Qual é a sigla de Alagoas?
+<|assistant|> A sigla de Alagoas é AL. <|end|>
+
+<|user|> AL é a sigla de qual estado?
+<|assistant|> AL é a sigla de Alagoas. <|end|>
+
+<|user|> Qual é a sigla do Amapá?
+<|assistant|> A sigla do Amapá é AP. <|end|>
+
+<|user|> AP é a sigla de qual estado?
+<|assistant|> AP é a sigla do Amapá. <|end|>
+
+<|user|> Qual é a sigla do Amazonas?
+<|assistant|> A sigla do Amazonas é AM. <|end|>
+
+<|user|> AM é a sigla de qual estado?
+<|assistant|> AM é a sigla do Amazonas. <|end|>
+
+<|user|> Qual é a sigla da Bahia?
+<|assistant|> A sigla da Bahia é BA. <|end|>
+
+<|user|> BA é a sigla de qual estado?
+<|assistant|> BA é a sigla da Bahia. <|end|>
+
+<|user|> Qual é a sigla do Ceará?
+<|assistant|> A sigla do Ceará é CE. <|end|>
+
+<|user|> CE é a sigla de qual estado?
+<|assistant|> CE é a sigla do Ceará. <|end|>
+
+<|user|> Qual é a sigla do Distrito Federal?
+<|assistant|> A sigla do Distrito Federal é DF. <|end|>
+
+<|user|> DF é a sigla de qual estado?
+<|assistant|> DF é a sigla do Distrito Federal. <|end|>
+
+<|user|> Qual é a sigla do Espírito Santo?
+<|assistant|> A sigla do Espírito Santo é ES. <|end|>
+
+<|user|> ES é a sigla de qual estado?
+<|assistant|> ES é a sigla do Espírito Santo. <|end|>
+
+<|user|> Qual é a sigla de Goiás?
+<|assistant|> A sigla de Goiás é GO. <|end|>
+
+<|user|> GO é a sigla de qual estado?
+<|assistant|> GO é a sigla de Goiás. <|end|>
+
+<|user|> Qual é a sigla do Maranhão?
+<|assistant|> A sigla do Maranhão é MA. <|end|>
+
+<|user|> MA é a sigla de qual estado?
+<|assistant|> MA é a sigla do Maranhão. <|end|>
+
+<|user|> Qual é a sigla de Mato Grosso?
+<|assistant|> A sigla de Mato Grosso é MT. <|end|>
+
+<|user|> MT é a sigla de qual estado?
+<|assistant|> MT é a sigla de Mato Grosso. <|end|>
+
+<|user|> Qual é a sigla de Mato Grosso do Sul?
+<|assistant|> A sigla de Mato Grosso do Sul é MS. <|end|>
+
+<|user|> MS é a sigla de qual estado?
+<|assistant|> MS é a sigla de Mato Grosso do Sul. <|end|>
+
+<|user|> Qual é a sigla de Minas Gerais?
+<|assistant|> A sigla de Minas Gerais é MG. <|end|>
+
+<|user|> MG é a sigla de qual estado?
+<|assistant|> MG é a sigla de Minas Gerais. <|end|>
+
+<|user|> Qual é a sigla do Pará?
+<|assistant|> A sigla do Pará é PA. <|end|>
+
+<|user|> PA é a sigla de qual estado?
+<|assistant|> PA é a sigla do Pará. <|end|>
+
+<|user|> Qual é a sigla da Paraíba?
+<|assistant|> A sigla da Paraíba é PB. <|end|>
+
+<|user|> PB é a sigla de qual estado?
+<|assistant|> PB é a sigla da Paraíba. <|end|>
+
+<|user|> Qual é a sigla do Paraná?
+<|assistant|> A sigla do Paraná é PR. <|end|>
+
+<|user|> PR é a sigla de qual estado?
+<|assistant|> PR é a sigla do Paraná. <|end|>
+
+<|user|> Qual é a sigla de Pernambuco?
+<|assistant|> A sigla de Pernambuco é PE. <|end|>
+
+<|user|> PE é a sigla de qual estado?
+<|assistant|> PE é a sigla de Pernambuco. <|end|>
+
+<|user|> Qual é a sigla do Piauí?
+<|assistant|> A sigla do Piauí é PI. <|end|>
+
+<|user|> PI é a sigla de qual estado?
+<|assistant|> PI é a sigla do Piauí. <|end|>
+
+<|user|> Qual é a sigla do Rio de Janeiro?
+<|assistant|> A sigla do Rio de Janeiro é RJ. <|end|>
+
+<|user|> RJ é a sigla de qual estado?
+<|assistant|> RJ é a sigla do Rio de Janeiro. <|end|>
+
+<|user|> Qual é a sigla do Rio Grande do Norte?
+<|assistant|> A sigla do Rio Grande do Norte é RN. <|end|>
+
+<|user|> RN é a sigla de qual estado?
+<|assistant|> RN é a sigla do Rio Grande do Norte. <|end|>
+
+<|user|> Qual é a sigla do Rio Grande do Sul?
+<|assistant|> A sigla do Rio Grande do Sul é RS. <|end|>
+
+<|user|> RS é a sigla de qual estado?
+<|assistant|> RS é a sigla do Rio Grande do Sul. <|end|>
+
+<|user|> Qual é a sigla de Rondônia?
+<|assistant|> A sigla de Rondônia é RO. <|end|>
+
+<|user|> RO é a sigla de qual estado?
+<|assistant|> RO é a sigla de Rondônia. <|end|>
+
+<|user|> Qual é a sigla de Roraima?
+<|assistant|> A sigla de Roraima é RR. <|end|>
+
+<|user|> RR é a sigla de qual estado?
+<|assistant|> RR é a sigla de Roraima. <|end|>
+
+<|user|> Qual é a sigla de Santa Catarina?
+<|assistant|> A sigla de Santa Catarina é SC. <|end|>
+
+<|user|> SC é a sigla de qual estado?
+<|assistant|> SC é a sigla de Santa Catarina. <|end|>
+
+<|user|> Qual é a sigla de São Paulo?
+<|assistant|> A sigla de São Paulo é SP. <|end|>
+
+<|user|> SP é a sigla de qual estado?
+<|assistant|> SP é a sigla de São Paulo. <|end|>
+
+<|user|> Qual é a sigla de Sergipe?
+<|assistant|> A sigla de Sergipe é SE. <|end|>
+
+<|user|> SE é a sigla de qual estado?
+<|assistant|> SE é a sigla de Sergipe. <|end|>
+
+<|user|> Qual é a sigla do Tocantins?
+<|assistant|> A sigla do Tocantins é TO. <|end|>
+
+<|user|> TO é a sigla de qual estado?
+<|assistant|> TO é a sigla do Tocantins. <|end|>
+
+# ===== Ciência e corpo humano (111) =====
+
+<|user|> Qual é o símbolo químico do hidrogênio?
+<|assistant|> O símbolo químico do hidrogênio é H. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo H?
+<|assistant|> O símbolo H é do hidrogênio. <|end|>
+
+<|user|> Qual é o símbolo químico do oxigênio?
+<|assistant|> O símbolo químico do oxigênio é O. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo O?
+<|assistant|> O símbolo O é do oxigênio. <|end|>
+
+<|user|> Qual é o símbolo químico do carbono?
+<|assistant|> O símbolo químico do carbono é C. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo C?
+<|assistant|> O símbolo C é do carbono. <|end|>
+
+<|user|> Qual é o símbolo químico do nitrogênio?
+<|assistant|> O símbolo químico do nitrogênio é N. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo N?
+<|assistant|> O símbolo N é do nitrogênio. <|end|>
+
+<|user|> Qual é o símbolo químico do ferro?
+<|assistant|> O símbolo químico do ferro é Fe. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Fe?
+<|assistant|> O símbolo Fe é do ferro. <|end|>
+
+<|user|> Qual é o símbolo químico do ouro?
+<|assistant|> O símbolo químico do ouro é Au. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Au?
+<|assistant|> O símbolo Au é do ouro. <|end|>
+
+<|user|> Qual é o símbolo químico da prata?
+<|assistant|> O símbolo químico da prata é Ag. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Ag?
+<|assistant|> O símbolo Ag é da prata. <|end|>
+
+<|user|> Qual é o símbolo químico do cobre?
+<|assistant|> O símbolo químico do cobre é Cu. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Cu?
+<|assistant|> O símbolo Cu é do cobre. <|end|>
+
+<|user|> Qual é o símbolo químico do sódio?
+<|assistant|> O símbolo químico do sódio é Na. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Na?
+<|assistant|> O símbolo Na é do sódio. <|end|>
+
+<|user|> Qual é o símbolo químico do potássio?
+<|assistant|> O símbolo químico do potássio é K. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo K?
+<|assistant|> O símbolo K é do potássio. <|end|>
+
+<|user|> Qual é o símbolo químico do cálcio?
+<|assistant|> O símbolo químico do cálcio é Ca. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Ca?
+<|assistant|> O símbolo Ca é do cálcio. <|end|>
+
+<|user|> Qual é o símbolo químico do hélio?
+<|assistant|> O símbolo químico do hélio é He. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo He?
+<|assistant|> O símbolo He é do hélio. <|end|>
+
+<|user|> Qual é o símbolo químico do chumbo?
+<|assistant|> O símbolo químico do chumbo é Pb. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Pb?
+<|assistant|> O símbolo Pb é do chumbo. <|end|>
+
+<|user|> Qual é o símbolo químico do mercúrio?
+<|assistant|> O símbolo químico do mercúrio é Hg. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Hg?
+<|assistant|> O símbolo Hg é do mercúrio. <|end|>
+
+<|user|> Qual é o símbolo químico do alumínio?
+<|assistant|> O símbolo químico do alumínio é Al. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Al?
+<|assistant|> O símbolo Al é do alumínio. <|end|>
+
+<|user|> Qual é o símbolo químico do zinco?
+<|assistant|> O símbolo químico do zinco é Zn. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Zn?
+<|assistant|> O símbolo Zn é do zinco. <|end|>
+
+<|user|> Qual é o símbolo químico do estanho?
+<|assistant|> O símbolo químico do estanho é Sn. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Sn?
+<|assistant|> O símbolo Sn é do estanho. <|end|>
+
+<|user|> Qual é o símbolo químico do cloro?
+<|assistant|> O símbolo químico do cloro é Cl. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Cl?
+<|assistant|> O símbolo Cl é do cloro. <|end|>
+
+<|user|> Qual é o símbolo químico do enxofre?
+<|assistant|> O símbolo químico do enxofre é S. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo S?
+<|assistant|> O símbolo S é do enxofre. <|end|>
+
+<|user|> Qual é o símbolo químico do fósforo?
+<|assistant|> O símbolo químico do fósforo é P. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo P?
+<|assistant|> O símbolo P é do fósforo. <|end|>
+
+<|user|> Qual é o símbolo químico do silício?
+<|assistant|> O símbolo químico do silício é Si. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Si?
+<|assistant|> O símbolo Si é do silício. <|end|>
+
+<|user|> Qual é o símbolo químico do magnésio?
+<|assistant|> O símbolo químico do magnésio é Mg. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Mg?
+<|assistant|> O símbolo Mg é do magnésio. <|end|>
+
+<|user|> Qual é o símbolo químico do urânio?
+<|assistant|> O símbolo químico do urânio é U. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo U?
+<|assistant|> O símbolo U é do urânio. <|end|>
+
+<|user|> Qual é o símbolo químico do neônio?
+<|assistant|> O símbolo químico do neônio é Ne. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Ne?
+<|assistant|> O símbolo Ne é do neônio. <|end|>
+
+<|user|> Qual é o símbolo químico da platina?
+<|assistant|> O símbolo químico da platina é Pt. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Pt?
+<|assistant|> O símbolo Pt é da platina. <|end|>
+
+<|user|> Qual é o símbolo químico do iodo?
+<|assistant|> O símbolo químico do iodo é I. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo I?
+<|assistant|> O símbolo I é do iodo. <|end|>
+
+<|user|> Qual é o símbolo químico do flúor?
+<|assistant|> O símbolo químico do flúor é F. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo F?
+<|assistant|> O símbolo F é do flúor. <|end|>
+
+<|user|> Qual é o símbolo químico do níquel?
+<|assistant|> O símbolo químico do níquel é Ni. <|end|>
+
+<|user|> Qual elemento químico tem o símbolo Ni?
+<|assistant|> O símbolo Ni é do níquel. <|end|>
+
+<|user|> Quantas patas tem um cachorro?
+<|assistant|> Um cachorro tem quatro patas. <|end|>
+
+<|user|> Quantas patas tem uma galinha?
+<|assistant|> Uma galinha tem duas patas. <|end|>
+
+<|user|> Quantas patas tem uma aranha?
+<|assistant|> Uma aranha tem oito patas. <|end|>
+
+<|user|> Quantas patas tem uma formiga?
+<|assistant|> Uma formiga tem seis patas. <|end|>
+
+<|user|> Quantas patas tem uma vaca?
+<|assistant|> Uma vaca tem quatro patas. <|end|>
+
+<|user|> Quantas patas tem um pato?
+<|assistant|> Um pato tem duas patas. <|end|>
+
+<|user|> Quantas patas tem uma borboleta?
+<|assistant|> Uma borboleta tem seis patas. <|end|>
+
+<|user|> Quantas patas tem um cavalo?
+<|assistant|> Um cavalo tem quatro patas. <|end|>
+
+<|user|> Quantas patas tem uma abelha?
+<|assistant|> Uma abelha tem seis patas. <|end|>
+
+<|user|> Quantas patas tem um pinguim?
+<|assistant|> Um pinguim tem duas patas. <|end|>
+
+<|user|> Quantas patas tem um caranguejo?
+<|assistant|> Um caranguejo tem dez patas. <|end|>
+
+<|user|> Quantas patas tem um escorpião?
+<|assistant|> Um escorpião tem oito patas. <|end|>
+
+<|user|> Quantas patas tem um sapo?
+<|assistant|> Um sapo tem quatro patas. <|end|>
+
+<|user|> Quantas patas tem um gato?
+<|assistant|> Um gato tem quatro patas. <|end|>
+
+<|user|> Quantas patas tem um besouro?
+<|assistant|> Um besouro tem seis patas. <|end|>
+
+<|user|> Quantos lados tem um triângulo?
+<|assistant|> Um triângulo tem três lados. <|end|>
+
+<|user|> Quantos lados tem um quadrado?
+<|assistant|> Um quadrado tem quatro lados. <|end|>
+
+<|user|> Quantos lados tem um retângulo?
+<|assistant|> Um retângulo tem quatro lados. <|end|>
+
+<|user|> Quantos lados tem um pentágono?
+<|assistant|> Um pentágono tem cinco lados. <|end|>
+
+<|user|> Quantos lados tem um hexágono?
+<|assistant|> Um hexágono tem seis lados. <|end|>
+
+<|user|> Quantos lados tem um heptágono?
+<|assistant|> Um heptágono tem sete lados. <|end|>
+
+<|user|> Quantos lados tem um octógono?
+<|assistant|> Um octógono tem oito lados. <|end|>
+
+<|user|> Quantos lados tem um eneágono?
+<|assistant|> Um eneágono tem nove lados. <|end|>
+
+<|user|> Quantos lados tem um decágono?
+<|assistant|> Um decágono tem dez lados. <|end|>
+
+<|user|> Quantos lados tem um losango?
+<|assistant|> Um losango tem quatro lados. <|end|>
+
+<|user|> Quantos pulmões temos?
+<|assistant|> Temos dois pulmões. <|end|>
+
+<|user|> Quantos rins temos?
+<|assistant|> Temos dois rins. <|end|>
+
+<|user|> Onde fica o coração?
+<|assistant|> O coração fica no peito, entre os pulmões, um pouco para o lado esquerdo. <|end|>
+
+<|user|> Para que serve o estômago?
+<|assistant|> O estômago mistura os alimentos com sucos digestivos e ajuda a digeri-los. <|end|>
+
+<|user|> Para que servem os pulmões?
+<|assistant|> Os pulmões servem para respirar: levam o oxigênio do ar para o sangue e eliminam o gás carbônico. <|end|>
+
+<|user|> Para que serve o fígado?
+<|assistant|> O fígado ajuda na digestão das gorduras, guarda energia e limpa substâncias que fazem mal ao corpo. <|end|>
+
+<|user|> Para que servem os rins?
+<|assistant|> Os rins filtram o sangue e produzem a urina. <|end|>
+
+<|user|> Para que serve o esqueleto?
+<|assistant|> O esqueleto sustenta o corpo, protege os órgãos e permite os movimentos junto com os músculos. <|end|>
+
+<|user|> Para que serve a pele?
+<|assistant|> A pele protege o corpo contra micróbios, ajuda a controlar a temperatura e nos permite sentir o tato. <|end|>
+
+<|user|> Qual órgão usamos para pensar?
+<|assistant|> Usamos o cérebro para pensar. <|end|>
+
+<|user|> Qual sentido usamos para sentir cheiros?
+<|assistant|> Usamos o olfato, pelo nariz. <|end|>
+
+<|user|> Qual sentido usamos para sentir gostos?
+<|assistant|> Usamos o paladar, pela língua. <|end|>
+
+<|user|> Qual sentido usamos para ouvir?
+<|assistant|> Usamos a audição, pelos ouvidos. <|end|>
+
+<|user|> Qual sentido usamos para enxergar?
+<|assistant|> Usamos a visão, pelos olhos. <|end|>
+
+<|user|> Qual sentido usamos para sentir o toque?
+<|assistant|> Usamos o tato, pela pele. <|end|>
+
+<|user|> Quantos dedos temos nas mãos?
+<|assistant|> Temos dez dedos nas mãos, cinco em cada uma. <|end|>
+
+<|user|> Como se chama o osso da cabeça?
+<|assistant|> O conjunto de ossos da cabeça se chama crânio. <|end|>
+
+<|user|> O que são as artérias?
+<|assistant|> As artérias são os vasos que levam o sangue do coração para o resto do corpo. <|end|>
+
+<|user|> O que são as veias?
+<|assistant|> As veias são os vasos que trazem o sangue de volta para o coração. <|end|>
+
+<|user|> Qual é a cor do sangue?
+<|assistant|> O sangue é vermelho. <|end|>
+
+<|user|> Por que sentimos fome?
+<|assistant|> Sentimos fome quando o corpo precisa de energia e nutrientes, e o cérebro nos avisa que é hora de comer. <|end|>
+
+<|user|> Por que suamos?
+<|assistant|> Suamos para resfriar o corpo: o suor evapora na pele e leva parte do calor. <|end|>
+
+<|user|> Por que espirramos?
+<|assistant|> Espirramos para expulsar do nariz poeira, micróbios ou outras coisas que o irritam. <|end|>
+
+<|user|> Por que temos arrepios?
+<|assistant|> Os arrepios acontecem quando pequenos músculos da pele se contraem, geralmente por frio ou emoção. <|end|>
+
+<|user|> Quanto tempo uma pessoa deve dormir?
+<|assistant|> Adultos costumam precisar de sete a nove horas de sono por noite; crianças e adolescentes precisam de mais. <|end|>
+
+<|user|> O que é a pulsação?
+<|assistant|> A pulsação é o batimento que sentimos nas artérias, como no pulso e no pescoço, a cada vez que o coração bombeia o sangue. <|end|>
+
+<|user|> O que são os glóbulos vermelhos?
+<|assistant|> Os glóbulos vermelhos são células do sangue que levam o oxigênio para o corpo. <|end|>
+
+<|user|> O que são os glóbulos brancos?
+<|assistant|> Os glóbulos brancos são células do sangue que defendem o corpo contra micróbios. <|end|>
+
+<|user|> Qual é o maior osso do corpo?
+<|assistant|> O maior osso do corpo é o fêmur, na coxa. <|end|>
+
+<|user|> Qual é o menor osso do corpo?
+<|assistant|> O menor osso do corpo é o estribo, que fica dentro do ouvido. <|end|>
+
+# ===== Linguagem 2 e diferenças (124) =====
+
+<|user|> Como se chama o filhote da vaca?
+<|assistant|> O filhote da vaca se chama bezerro. <|end|>
+
+<|user|> Como se chama o filhote da égua?
+<|assistant|> O filhote da égua se chama potro. <|end|>
+
+<|user|> Como se chama o filhote da galinha?
+<|assistant|> O filhote da galinha se chama pintinho. <|end|>
+
+<|user|> Como se chama o filhote da ovelha?
+<|assistant|> O filhote da ovelha se chama cordeiro. <|end|>
+
+<|user|> Como se chama o filhote da cabra?
+<|assistant|> O filhote da cabra se chama cabrito. <|end|>
+
+<|user|> Como se chama o filhote da porca?
+<|assistant|> O filhote da porca se chama leitão. <|end|>
+
+<|user|> Como se chama o filhote do sapo?
+<|assistant|> O filhote do sapo se chama girino. <|end|>
+
+<|user|> Como se chama o filhote da borboleta?
+<|assistant|> O filhote da borboleta se chama lagarta. <|end|>
+
+<|user|> Como se chama o filhote da pata?
+<|assistant|> O filhote da pata se chama patinho. <|end|>
+
+<|user|> Como se chama o filhote da baleia?
+<|assistant|> O filhote da baleia se chama baleote. <|end|>
+
+<|user|> Como se chama o filhote da cadela?
+<|assistant|> O filhote da cadela se chama cachorrinho ou filhote. <|end|>
+
+<|user|> Como se chama o filhote da gata?
+<|assistant|> O filhote da gata se chama gatinho. <|end|>
+
+<|user|> Qual é o coletivo de abelhas?
+<|assistant|> O coletivo de abelhas é enxame. <|end|>
+
+<|user|> Como se chama um grupo de lobos?
+<|assistant|> O coletivo de lobos é alcateia. <|end|>
+
+<|user|> Como se chama um grupo de peixes?
+<|assistant|> O coletivo de peixes é cardume. <|end|>
+
+<|user|> Como se chama um grupo de ovelhas?
+<|assistant|> O coletivo de ovelhas é rebanho. <|end|>
+
+<|user|> Qual é o coletivo de bois?
+<|assistant|> O coletivo de bois é boiada. <|end|>
+
+<|user|> Qual é o coletivo de aves?
+<|assistant|> O coletivo de aves é bando. <|end|>
+
+<|user|> Qual é o coletivo de cães?
+<|assistant|> O coletivo de cães é matilha. <|end|>
+
+<|user|> Como se chama um grupo de estrelas?
+<|assistant|> O coletivo de estrelas é constelação. <|end|>
+
+<|user|> Qual é o coletivo de ilhas?
+<|assistant|> O coletivo de ilhas é arquipélago. <|end|>
+
+<|user|> Qual é o coletivo de músicos?
+<|assistant|> O coletivo de músicos é banda ou orquestra. <|end|>
+
+<|user|> Como se chama um grupo de alunos?
+<|assistant|> O coletivo de alunos é turma. <|end|>
+
+<|user|> Como se chama um grupo de soldados?
+<|assistant|> O coletivo de soldados é tropa. <|end|>
+
+<|user|> Qual é o coletivo de navios?
+<|assistant|> O coletivo de navios é frota. <|end|>
+
+<|user|> Como se chama um grupo de uvas?
+<|assistant|> O coletivo de uvas é cacho. <|end|>
+
+<|user|> Qual é o coletivo de chaves?
+<|assistant|> O coletivo de chaves é molho. <|end|>
+
+<|user|> Como se chama um grupo de árvores?
+<|assistant|> O coletivo de árvores é bosque. <|end|>
+
+<|user|> Qual é o coletivo de pessoas?
+<|assistant|> O coletivo de pessoas é multidão. <|end|>
+
+<|user|> Como se chama um grupo de montanhas?
+<|assistant|> O coletivo de montanhas é cordilheira. <|end|>
+
+<|user|> Qual é o coletivo de camelos?
+<|assistant|> O coletivo de camelos é cáfila. <|end|>
+
+<|user|> Qual é o coletivo de porcos?
+<|assistant|> O coletivo de porcos é vara. <|end|>
+
+<|user|> Como se chama um grupo de elefantes?
+<|assistant|> O coletivo de elefantes é manada. <|end|>
+
+<|user|> Como se chama um grupo de artistas de uma peça?
+<|assistant|> O coletivo de artistas de uma peça é elenco. <|end|>
+
+<|user|> Como se chama um grupo de flores?
+<|assistant|> O coletivo de flores é ramalhete ou buquê. <|end|>
+
+<|user|> Como se chama um grupo de mapas?
+<|assistant|> O coletivo de mapas é atlas. <|end|>
+
+<|user|> Qual é o coletivo de palavras?
+<|assistant|> O coletivo de palavras é vocabulário. <|end|>
+
+<|user|> Qual é o coletivo de livros?
+<|assistant|> O coletivo de livros é biblioteca. <|end|>
+
+<|user|> Qual é o coletivo de pães?
+<|assistant|> O coletivo de pães é fornada. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra correr?
+<|assistant|> A palavra correr é um verbo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra casa?
+<|assistant|> A palavra casa é um substantivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra bonito?
+<|assistant|> A palavra bonito é um adjetivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra rapidamente?
+<|assistant|> A palavra rapidamente é um advérbio. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra eu?
+<|assistant|> A palavra eu é um pronome. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra mas?
+<|assistant|> A palavra mas é uma conjunção. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra de?
+<|assistant|> A palavra de é uma preposição. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra três?
+<|assistant|> A palavra três é um numeral. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra ai?
+<|assistant|> A palavra ai é uma interjeição. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra cantar?
+<|assistant|> A palavra cantar é um verbo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra cachorro?
+<|assistant|> A palavra cachorro é um substantivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra feliz?
+<|assistant|> A palavra feliz é um adjetivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra hoje?
+<|assistant|> A palavra hoje é um advérbio. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra nós?
+<|assistant|> A palavra nós é um pronome. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra porque?
+<|assistant|> A palavra porque é uma conjunção. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra com?
+<|assistant|> A palavra com é uma preposição. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra primeiro?
+<|assistant|> A palavra primeiro é um numeral. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra oba?
+<|assistant|> A palavra oba é uma interjeição. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra estudar?
+<|assistant|> A palavra estudar é um verbo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra alegria?
+<|assistant|> A palavra alegria é um substantivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra alto?
+<|assistant|> A palavra alto é um adjetivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra aqui?
+<|assistant|> A palavra aqui é um advérbio. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra ela?
+<|assistant|> A palavra ela é um pronome. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra ou?
+<|assistant|> A palavra ou é uma conjunção. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra para?
+<|assistant|> A palavra para é uma preposição. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra dez?
+<|assistant|> A palavra dez é um numeral. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra escola?
+<|assistant|> A palavra escola é um substantivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra azul?
+<|assistant|> A palavra azul é um adjetivo. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra devagar?
+<|assistant|> A palavra devagar é um advérbio. <|end|>
+
+<|user|> Qual é a classe gramatical da palavra sem?
+<|assistant|> A palavra sem é uma preposição. <|end|>
+
+<|user|> Explique o ditado: Quem espera sempre alcança.
+<|assistant|> Significa que quem tem paciência consegue o que deseja. <|end|>
+
+<|user|> O que significa o ditado: Água mole em pedra dura tanto bate até que fura?
+<|assistant|> Significa que a persistência vence as dificuldades, mesmo as mais duras. <|end|>
+
+<|user|> O que significa o ditado: Mais vale um pássaro na mão do que dois voando?
+<|assistant|> Significa que é melhor ter algo certo do que arriscar perder tudo por algo incerto. <|end|>
+
+<|user|> O que significa o ditado: De grão em grão a galinha enche o papo?
+<|assistant|> Significa que pequenas conquistas, somadas, levam a um grande resultado. <|end|>
+
+<|user|> O que significa o ditado: Em boca fechada não entra mosca?
+<|assistant|> Significa que às vezes é melhor ficar calado para evitar problemas. <|end|>
+
+<|user|> O que significa o ditado: Cão que ladra não morde?
+<|assistant|> Significa que quem faz muitas ameaças geralmente não as cumpre. <|end|>
+
+<|user|> Explique o ditado: Deus ajuda quem cedo madruga.
+<|assistant|> Significa que quem se esforça e começa cedo tem mais chances de conseguir o que quer. <|end|>
+
+<|user|> Explique o ditado: A pressa é inimiga da perfeição.
+<|assistant|> Significa que fazer as coisas com pressa aumenta a chance de errar. <|end|>
+
+<|user|> Explique o ditado: Quem semeia vento colhe tempestade.
+<|assistant|> Significa que quem faz o mal acaba sofrendo as consequências. <|end|>
+
+<|user|> Explique o ditado: Filho de peixe peixinho é.
+<|assistant|> Significa que os filhos costumam se parecer com os pais. <|end|>
+
+<|user|> O que significa o ditado: Diga-me com quem andas e eu te direi quem és?
+<|assistant|> Significa que as pessoas são parecidas com as companhias que escolhem. <|end|>
+
+<|user|> Explique o ditado: O hábito não faz o monge.
+<|assistant|> Significa que a aparência não define quem a pessoa é. <|end|>
+
+<|user|> Explique o ditado: Quem tem boca vai a Roma.
+<|assistant|> Significa que, perguntando, a gente chega aonde quer. <|end|>
+
+<|user|> Explique o ditado: Uma andorinha só não faz verão.
+<|assistant|> Significa que uma pessoa sozinha não consegue fazer grandes coisas; é preciso cooperação. <|end|>
+
+<|user|> O que significa o ditado: Onde há fumaça há fogo?
+<|assistant|> Significa que, quando há sinais de algo, provavelmente aquilo é verdade. <|end|>
+
+<|user|> O que significa o ditado: Gato escaldado tem medo de água fria?
+<|assistant|> Significa que quem já passou por algo ruim fica cauteloso. <|end|>
+
+<|user|> O que significa o ditado: Quem ri por último ri melhor?
+<|assistant|> Significa que não se deve comemorar antes da hora. <|end|>
+
+<|user|> O que significa o ditado: A união faz a força?
+<|assistant|> Significa que, juntas, as pessoas conseguem mais do que sozinhas. <|end|>
+
+<|user|> O que significa o ditado: Cada macaco no seu galho?
+<|assistant|> Significa que cada um deve cuidar das próprias coisas. <|end|>
+
+<|user|> O que significa o ditado: Devagar se vai ao longe?
+<|assistant|> Significa que, com calma e constância, se chega longe. <|end|>
+
+<|user|> Explique o ditado: Quem vê cara não vê coração.
+<|assistant|> Significa que não dá para conhecer alguém só pela aparência. <|end|>
+
+<|user|> Explique o ditado: Depois da tempestade vem a bonança.
+<|assistant|> Significa que, depois dos momentos difíceis, vêm tempos melhores. <|end|>
+
+<|user|> Explique o ditado: Águas passadas não movem moinhos.
+<|assistant|> Significa que não adianta ficar preso ao que já passou. <|end|>
+
+<|user|> Explique o ditado: Nem tudo que reluz é ouro.
+<|assistant|> Significa que nem tudo que parece bom realmente é. <|end|>
+
+<|user|> Explique o ditado: Melhor prevenir do que remediar.
+<|assistant|> Significa que é melhor evitar um problema do que ter que resolvê-lo depois. <|end|>
+
+<|user|> Qual é a diferença entre vírus e bactéria?
+<|assistant|> A bactéria é um ser vivo de uma única célula. O vírus é muito menor e só se multiplica dentro das células de outro ser vivo. Antibióticos combatem bactérias, mas não vírus. <|end|>
+
+<|user|> Qual é a diferença entre tempo e clima?
+<|assistant|> O tempo é como está a atmosfera agora, como chuva ou sol hoje. O clima é o padrão do tempo de um lugar ao longo de muitos anos. <|end|>
+
+<|user|> Qual é a diferença entre rio e lago?
+<|assistant|> O rio é uma corrente de água que corre até o mar ou outro rio. O lago é uma porção de água parada, cercada de terra. <|end|>
+
+<|user|> Qual é a diferença entre mar e oceano?
+<|assistant|> O oceano é uma enorme massa de água salgada. O mar é uma parte menor, geralmente perto da costa ou cercada em parte por terra. <|end|>
+
+<|user|> Qual é a diferença entre planeta e estrela?
+<|assistant|> A estrela produz luz e calor próprios, como o Sol. O planeta não tem luz própria e gira ao redor de uma estrela. <|end|>
+
+<|user|> Qual é a diferença entre satélite e planeta?
+<|assistant|> O planeta gira ao redor de uma estrela. O satélite gira ao redor de um planeta, como a Lua em volta da Terra. <|end|>
+
+<|user|> Qual é a diferença entre sapo e rã?
+<|assistant|> Em geral, o sapo tem pele mais grossa e rugosa e vive mais em terra. A rã tem pele lisa e úmida, pernas mais longas e vive mais perto da água. <|end|>
+
+<|user|> Qual é a diferença entre jacaré e crocodilo?
+<|assistant|> O crocodilo tem o focinho mais fino e pontudo, e alguns dentes de baixo aparecem com a boca fechada. O jacaré tem o focinho mais largo e arredondado. <|end|>
+
+<|user|> Qual é a diferença entre fruta e legume?
+<|assistant|> Na cozinha, as frutas costumam ser doces e comidas cruas, como a banana. Os legumes costumam ser usados em pratos salgados, como a cenoura. <|end|>
+
+<|user|> Qual é a diferença entre país e estado?
+<|assistant|> O país é uma nação com governo próprio, como o Brasil. O estado, no Brasil, é cada uma das partes em que o país é dividido, como Bahia e Paraná. <|end|>
+
+<|user|> Qual é a diferença entre cidade e capital?
+<|assistant|> Capital é a cidade onde fica o governo de um país ou de um estado. Toda capital é uma cidade, mas nem toda cidade é capital. <|end|>
+
+<|user|> Qual é a diferença entre mamífero e ave?
+<|assistant|> Os mamíferos amamentam os filhotes e geralmente têm pelos. As aves têm penas e bico e nascem de ovos. <|end|>
+
+<|user|> Qual é a diferença entre peixe e mamífero marinho?
+<|assistant|> O peixe respira pelas brânquias. Os mamíferos marinhos, como a baleia e o golfinho, respiram ar pelos pulmões e amamentam os filhotes. <|end|>
+
+<|user|> Qual é a diferença entre hardware e software?
+<|assistant|> Hardware é a parte física do computador, que podemos tocar. Software são os programas que dizem ao hardware o que fazer. <|end|>
+
+<|user|> Qual é a diferença entre conto e romance?
+<|assistant|> O conto é uma história curta, com poucos personagens. O romance é uma história longa, com mais personagens e acontecimentos. <|end|>
+
+<|user|> Qual é a diferença entre poema e prosa?
+<|assistant|> O poema é escrito em versos, com atenção ao ritmo e ao som. A prosa é escrita em frases e parágrafos comuns. <|end|>
+
+<|user|> Qual é a diferença entre sinônimo e antônimo?
+<|assistant|> Sinônimo é uma palavra de sentido parecido, como feliz e contente. Antônimo é uma palavra de sentido contrário, como alto e baixo. <|end|>
+
+<|user|> Qual é a diferença entre mas e mais?
+<|assistant|> Mas indica oposição, como em: quero ir, mas está chovendo. Mais indica quantidade, como em: quero mais suco. <|end|>
+
+<|user|> Qual é a diferença entre por que e porque?
+<|assistant|> Por que, separado, é usado em perguntas: Por que você chorou? Porque, junto, é usado nas respostas: Porque caí. <|end|>
+
+<|user|> Qual é a diferença entre há e a?
+<|assistant|> Há, do verbo haver, indica tempo passado ou existência: há dois anos, há pessoas. A indica tempo futuro ou distância: daqui a dois dias, a três quilômetros. <|end|>
+
+<|user|> Qual é a diferença entre mau e mal?
+<|assistant|> Mau é o contrário de bom: um mau dia. Mal é o contrário de bem: dormi mal. <|end|>
+
+<|user|> Qual é a diferença entre herbívoro e carnívoro?
+<|assistant|> O herbívoro come plantas, como a vaca. O carnívoro come outros animais, como o leão. <|end|>
+
+<|user|> Qual é a diferença entre evaporação e condensação?
+<|assistant|> Na evaporação, a água líquida vira vapor. Na condensação, o vapor volta a ser água líquida. <|end|>
+
+<|user|> Qual é a diferença entre dia e noite?
+<|assistant|> É dia no lado da Terra virado para o Sol e noite no lado oposto. Isso muda porque a Terra gira em torno de si mesma. <|end|>
+
+<|user|> Qual é a diferença entre verão e inverno?
+<|assistant|> O verão é a estação mais quente, com dias mais longos. O inverno é a mais fria, com noites mais longas. <|end|>
+
+<|user|> Qual é a diferença entre um vulcão ativo e um inativo?
+<|assistant|> O vulcão ativo pode entrar em erupção. O inativo não entra em erupção há muito tempo. <|end|>
+
+<|user|> Qual é a diferença entre doce e salgado?
+<|assistant|> Doce é o sabor do açúcar e do mel. Salgado é o sabor do sal. <|end|>
+
+<|user|> Qual é a diferença entre comprar e alugar?
+<|assistant|> Ao comprar, você passa a ser dono da coisa. Ao alugar, você paga para usar por um tempo, e ela continua sendo do dono. <|end|>
+
+<|user|> Qual é a diferença entre e-mail e mensagem de texto?
+<|assistant|> O e-mail é enviado para um endereço eletrônico e costuma ser mais longo. A mensagem de texto é curta e enviada pelo celular ou por aplicativos. <|end|>
+
+<|user|> Qual é a diferença entre bactéria boa e bactéria ruim?
+<|assistant|> Muitas bactérias são úteis, como as do intestino, que ajudam na digestão, e as que fazem o iogurte. Outras causam doenças. <|end|>
+
+# ===== Espanhol e inglês 2 (181) =====
+
+<|user|> Como se diz casa em espanhol?
+<|assistant|> Casa em espanhol é casa. <|end|>
+
+<|user|> O que significa casa em espanhol?
+<|assistant|> Casa em espanhol significa casa. <|end|>
+
+<|user|> Qual é a tradução de cachorro para o espanhol?
+<|assistant|> Cachorro em espanhol é perro. <|end|>
+
+<|user|> Como se diz gato em espanhol?
+<|assistant|> Gato em espanhol é gato. <|end|>
+
+<|user|> Qual é a tradução de livro para o espanhol?
+<|assistant|> Livro em espanhol é libro. <|end|>
+
+<|user|> O que significa libro em espanhol?
+<|assistant|> Libro em espanhol significa livro. <|end|>
+
+<|user|> Como se diz água em espanhol?
+<|assistant|> Água em espanhol é agua. <|end|>
+
+<|user|> Qual é a tradução de sol para o espanhol?
+<|assistant|> Sol em espanhol é sol. <|end|>
+
+<|user|> Como se diz escola em espanhol?
+<|assistant|> Escola em espanhol é escuela. <|end|>
+
+<|user|> O que significa escuela em espanhol?
+<|assistant|> Escuela em espanhol significa escola. <|end|>
+
+<|user|> Qual é a tradução de amigo para o espanhol?
+<|assistant|> Amigo em espanhol é amigo. <|end|>
+
+<|user|> Como se diz mãe em espanhol?
+<|assistant|> Mãe em espanhol é madre. <|end|>
+
+<|user|> Qual é a tradução de pai para o espanhol?
+<|assistant|> Pai em espanhol é padre. <|end|>
+
+<|user|> O que significa padre em espanhol?
+<|assistant|> Padre em espanhol significa pai. <|end|>
+
+<|user|> Como se diz irmão em espanhol?
+<|assistant|> Irmão em espanhol é hermano. <|end|>
+
+<|user|> Qual é a tradução de obrigado para o espanhol?
+<|assistant|> Obrigado em espanhol é gracias. <|end|>
+
+<|user|> Como se diz por favor em espanhol?
+<|assistant|> Por favor em espanhol é por favor. <|end|>
+
+<|user|> O que significa por favor em espanhol?
+<|assistant|> Por favor em espanhol significa por favor. <|end|>
+
+<|user|> Qual é a tradução de bom dia para o espanhol?
+<|assistant|> Bom dia em espanhol é buenos días. <|end|>
+
+<|user|> Como se diz boa noite em espanhol?
+<|assistant|> Boa noite em espanhol é buenas noches. <|end|>
+
+<|user|> Qual é a tradução de olá para o espanhol?
+<|assistant|> Olá em espanhol é hola. <|end|>
+
+<|user|> O que significa hola em espanhol?
+<|assistant|> Hola em espanhol significa olá. <|end|>
+
+<|user|> Como se diz tchau em espanhol?
+<|assistant|> Tchau em espanhol é adiós. <|end|>
+
+<|user|> Qual é a tradução de sim para o espanhol?
+<|assistant|> Sim em espanhol é sí. <|end|>
+
+<|user|> Como se diz não em espanhol?
+<|assistant|> Não em espanhol é no. <|end|>
+
+<|user|> O que significa no em espanhol?
+<|assistant|> No em espanhol significa não. <|end|>
+
+<|user|> Qual é a tradução de vermelho para o espanhol?
+<|assistant|> Vermelho em espanhol é rojo. <|end|>
+
+<|user|> Como se diz azul em espanhol?
+<|assistant|> Azul em espanhol é azul. <|end|>
+
+<|user|> Qual é a tradução de verde para o espanhol?
+<|assistant|> Verde em espanhol é verde. <|end|>
+
+<|user|> O que significa verde em espanhol?
+<|assistant|> Verde em espanhol significa verde. <|end|>
+
+<|user|> Como se diz amarelo em espanhol?
+<|assistant|> Amarelo em espanhol é amarillo. <|end|>
+
+<|user|> Qual é a tradução de um para o espanhol?
+<|assistant|> Um em espanhol é uno. <|end|>
+
+<|user|> Como se diz dois em espanhol?
+<|assistant|> Dois em espanhol é dos. <|end|>
+
+<|user|> O que significa dos em espanhol?
+<|assistant|> Dos em espanhol significa dois. <|end|>
+
+<|user|> Qual é a tradução de três para o espanhol?
+<|assistant|> Três em espanhol é tres. <|end|>
+
+<|user|> Como se diz leite em espanhol?
+<|assistant|> Leite em espanhol é leche. <|end|>
+
+<|user|> Qual é a tradução de pão para o espanhol?
+<|assistant|> Pão em espanhol é pan. <|end|>
+
+<|user|> O que significa pan em espanhol?
+<|assistant|> Pan em espanhol significa pão. <|end|>
+
+<|user|> Como se diz maçã em espanhol?
+<|assistant|> Maçã em espanhol é manzana. <|end|>
+
+<|user|> Qual é a tradução de cidade para o espanhol?
+<|assistant|> Cidade em espanhol é ciudad. <|end|>
+
+<|user|> Como se diz menino em espanhol?
+<|assistant|> Menino em espanhol é niño. <|end|>
+
+<|user|> O que significa niño em espanhol?
+<|assistant|> Niño em espanhol significa menino. <|end|>
+
+<|user|> Qual é a tradução de menina para o espanhol?
+<|assistant|> Menina em espanhol é niña. <|end|>
+
+<|user|> Como se diz feliz em espanhol?
+<|assistant|> Feliz em espanhol é feliz. <|end|>
+
+<|user|> Qual é a tradução de grande para o espanhol?
+<|assistant|> Grande em espanhol é grande. <|end|>
+
+<|user|> O que significa grande em espanhol?
+<|assistant|> Grande em espanhol significa grande. <|end|>
+
+<|user|> Como se diz pequeno em espanhol?
+<|assistant|> Pequeno em espanhol é pequeño. <|end|>
+
+<|user|> Qual é a tradução de comida para o espanhol?
+<|assistant|> Comida em espanhol é comida. <|end|>
+
+<|user|> Como se diz mesa em espanhol?
+<|assistant|> Mesa em espanhol é mesa. <|end|>
+
+<|user|> O que significa mesa em espanhol?
+<|assistant|> Mesa em espanhol significa mesa. <|end|>
+
+<|user|> Qual é a tradução de janela para o espanhol?
+<|assistant|> Janela em espanhol é ventana. <|end|>
+
+<|user|> Como se diz cadeira em espanhol?
+<|assistant|> Cadeira em espanhol é silla. <|end|>
+
+<|user|> Qual é a tradução de trabalho para o espanhol?
+<|assistant|> Trabalho em espanhol é trabajo. <|end|>
+
+<|user|> O que significa trabajo em espanhol?
+<|assistant|> Trabajo em espanhol significa trabalho. <|end|>
+
+<|user|> Como se diz avó em inglês?
+<|assistant|> Avó em inglês é grandmother. <|end|>
+
+<|user|> Traduza avô para o inglês.
+<|assistant|> Avô em inglês é grandfather. <|end|>
+
+<|user|> O que significa grandfather em português?
+<|assistant|> Grandfather significa avô. <|end|>
+
+<|user|> Qual é a palavra em inglês para filho?
+<|assistant|> Filho em inglês é son. <|end|>
+
+<|user|> Como se diz filha em inglês?
+<|assistant|> Filha em inglês é daughter. <|end|>
+
+<|user|> O que significa daughter em português?
+<|assistant|> Daughter significa filha. <|end|>
+
+<|user|> Traduza professor para o inglês.
+<|assistant|> Professor em inglês é teacher. <|end|>
+
+<|user|> Qual é a palavra em inglês para aluno?
+<|assistant|> Aluno em inglês é student. <|end|>
+
+<|user|> O que significa student em português?
+<|assistant|> Student significa aluno. <|end|>
+
+<|user|> Como se diz médico em inglês?
+<|assistant|> Médico em inglês é doctor. <|end|>
+
+<|user|> Traduza cozinha para o inglês.
+<|assistant|> Cozinha em inglês é kitchen. <|end|>
+
+<|user|> O que significa kitchen em português?
+<|assistant|> Kitchen significa cozinha. <|end|>
+
+<|user|> Qual é a palavra em inglês para quarto?
+<|assistant|> Quarto em inglês é bedroom. <|end|>
+
+<|user|> Como se diz banheiro em inglês?
+<|assistant|> Banheiro em inglês é bathroom. <|end|>
+
+<|user|> O que significa bathroom em português?
+<|assistant|> Bathroom significa banheiro. <|end|>
+
+<|user|> Traduza rua para o inglês.
+<|assistant|> Rua em inglês é street. <|end|>
+
+<|user|> Qual é a palavra em inglês para ônibus?
+<|assistant|> Ônibus em inglês é bus. <|end|>
+
+<|user|> O que significa bus em português?
+<|assistant|> Bus significa ônibus. <|end|>
+
+<|user|> Como se diz avião em inglês?
+<|assistant|> Avião em inglês é airplane. <|end|>
+
+<|user|> Traduza trem para o inglês.
+<|assistant|> Trem em inglês é train. <|end|>
+
+<|user|> O que significa train em português?
+<|assistant|> Train significa trem. <|end|>
+
+<|user|> Qual é a palavra em inglês para bicicleta?
+<|assistant|> Bicicleta em inglês é bicycle. <|end|>
+
+<|user|> Como se diz praia em inglês?
+<|assistant|> Praia em inglês é beach. <|end|>
+
+<|user|> O que significa beach em português?
+<|assistant|> Beach significa praia. <|end|>
+
+<|user|> Traduza mar para o inglês.
+<|assistant|> Mar em inglês é sea. <|end|>
+
+<|user|> Qual é a palavra em inglês para rio?
+<|assistant|> Rio em inglês é river. <|end|>
+
+<|user|> O que significa river em português?
+<|assistant|> River significa rio. <|end|>
+
+<|user|> Como se diz montanha em inglês?
+<|assistant|> Montanha em inglês é mountain. <|end|>
+
+<|user|> Traduza chuva para o inglês.
+<|assistant|> Chuva em inglês é rain. <|end|>
+
+<|user|> O que significa rain em português?
+<|assistant|> Rain significa chuva. <|end|>
+
+<|user|> Qual é a palavra em inglês para neve?
+<|assistant|> Neve em inglês é snow. <|end|>
+
+<|user|> Como se diz vento em inglês?
+<|assistant|> Vento em inglês é wind. <|end|>
+
+<|user|> O que significa wind em português?
+<|assistant|> Wind significa vento. <|end|>
+
+<|user|> Traduza estrela para o inglês.
+<|assistant|> Estrela em inglês é star. <|end|>
+
+<|user|> Qual é a palavra em inglês para céu?
+<|assistant|> Céu em inglês é sky. <|end|>
+
+<|user|> O que significa sky em português?
+<|assistant|> Sky significa céu. <|end|>
+
+<|user|> Como se diz terra em inglês?
+<|assistant|> Terra em inglês é earth. <|end|>
+
+<|user|> Traduza fogo para o inglês.
+<|assistant|> Fogo em inglês é fire. <|end|>
+
+<|user|> O que significa fire em português?
+<|assistant|> Fire significa fogo. <|end|>
+
+<|user|> Qual é a palavra em inglês para pedra?
+<|assistant|> Pedra em inglês é stone. <|end|>
+
+<|user|> Como se diz cabeça em inglês?
+<|assistant|> Cabeça em inglês é head. <|end|>
+
+<|user|> O que significa head em português?
+<|assistant|> Head significa cabeça. <|end|>
+
+<|user|> Traduza mão para o inglês.
+<|assistant|> Mão em inglês é hand. <|end|>
+
+<|user|> Qual é a palavra em inglês para pé?
+<|assistant|> Pé em inglês é foot. <|end|>
+
+<|user|> O que significa foot em português?
+<|assistant|> Foot significa pé. <|end|>
+
+<|user|> Como se diz olho em inglês?
+<|assistant|> Olho em inglês é eye. <|end|>
+
+<|user|> Traduza boca para o inglês.
+<|assistant|> Boca em inglês é mouth. <|end|>
+
+<|user|> O que significa mouth em português?
+<|assistant|> Mouth significa boca. <|end|>
+
+<|user|> Qual é a palavra em inglês para nariz?
+<|assistant|> Nariz em inglês é nose. <|end|>
+
+<|user|> Como se diz orelha em inglês?
+<|assistant|> Orelha em inglês é ear. <|end|>
+
+<|user|> O que significa ear em português?
+<|assistant|> Ear significa orelha. <|end|>
+
+<|user|> Traduza braço para o inglês.
+<|assistant|> Braço em inglês é arm. <|end|>
+
+<|user|> Qual é a palavra em inglês para perna?
+<|assistant|> Perna em inglês é leg. <|end|>
+
+<|user|> O que significa leg em português?
+<|assistant|> Leg significa perna. <|end|>
+
+<|user|> Como se diz cabelo em inglês?
+<|assistant|> Cabelo em inglês é hair. <|end|>
+
+<|user|> Traduza dente para o inglês.
+<|assistant|> Dente em inglês é tooth. <|end|>
+
+<|user|> O que significa tooth em português?
+<|assistant|> Tooth significa dente. <|end|>
+
+<|user|> Qual é a palavra em inglês para laranja?
+<|assistant|> Laranja em inglês é orange. <|end|>
+
+<|user|> Como se diz uva em inglês?
+<|assistant|> Uva em inglês é grape. <|end|>
+
+<|user|> O que significa grape em português?
+<|assistant|> Grape significa uva. <|end|>
+
+<|user|> Traduza morango para o inglês.
+<|assistant|> Morango em inglês é strawberry. <|end|>
+
+<|user|> Qual é a palavra em inglês para queijo?
+<|assistant|> Queijo em inglês é cheese. <|end|>
+
+<|user|> O que significa cheese em português?
+<|assistant|> Cheese significa queijo. <|end|>
+
+<|user|> Como se diz arroz em inglês?
+<|assistant|> Arroz em inglês é rice. <|end|>
+
+<|user|> Traduza feijão para o inglês.
+<|assistant|> Feijão em inglês é beans. <|end|>
+
+<|user|> O que significa beans em português?
+<|assistant|> Beans significa feijão. <|end|>
+
+<|user|> Qual é a palavra em inglês para carne?
+<|assistant|> Carne em inglês é meat. <|end|>
+
+<|user|> Como se diz frango em inglês?
+<|assistant|> Frango em inglês é chicken. <|end|>
+
+<|user|> O que significa chicken em português?
+<|assistant|> Chicken significa frango. <|end|>
+
+<|user|> Traduza açúcar para o inglês.
+<|assistant|> Açúcar em inglês é sugar. <|end|>
+
+<|user|> Qual é a palavra em inglês para sal?
+<|assistant|> Sal em inglês é salt. <|end|>
+
+<|user|> O que significa salt em português?
+<|assistant|> Salt significa sal. <|end|>
+
+<|user|> Como se diz rápido em inglês?
+<|assistant|> Rápido em inglês é fast. <|end|>
+
+<|user|> Traduza devagar para o inglês.
+<|assistant|> Devagar em inglês é slow. <|end|>
+
+<|user|> O que significa slow em português?
+<|assistant|> Slow significa devagar. <|end|>
+
+<|user|> Qual é a palavra em inglês para bonito?
+<|assistant|> Bonito em inglês é beautiful. <|end|>
+
+<|user|> Como se diz feio em inglês?
+<|assistant|> Feio em inglês é ugly. <|end|>
+
+<|user|> O que significa ugly em português?
+<|assistant|> Ugly significa feio. <|end|>
+
+<|user|> Traduza novo para o inglês.
+<|assistant|> Novo em inglês é new. <|end|>
+
+<|user|> Qual é a palavra em inglês para velho?
+<|assistant|> Velho em inglês é old. <|end|>
+
+<|user|> O que significa old em português?
+<|assistant|> Old significa velho. <|end|>
+
+<|user|> Como se diz forte em inglês?
+<|assistant|> Forte em inglês é strong. <|end|>
+
+<|user|> Traduza fraco para o inglês.
+<|assistant|> Fraco em inglês é weak. <|end|>
+
+<|user|> O que significa weak em português?
+<|assistant|> Weak significa fraco. <|end|>
+
+<|user|> Qual é a palavra em inglês para alto?
+<|assistant|> Alto em inglês é tall. <|end|>
+
+<|user|> Como se diz lápis em inglês?
+<|assistant|> Lápis em inglês é pencil. <|end|>
+
+<|user|> O que significa pencil em português?
+<|assistant|> Pencil significa lápis. <|end|>
+
+<|user|> Traduza comer para o inglês.
+<|assistant|> Comer em inglês é to eat. <|end|>
+
+<|user|> Qual é a palavra em inglês para beber?
+<|assistant|> Beber em inglês é to drink. <|end|>
+
+<|user|> O que significa to drink em português?
+<|assistant|> To drink significa beber. <|end|>
+
+<|user|> Como se diz dormir em inglês?
+<|assistant|> Dormir em inglês é to sleep. <|end|>
+
+<|user|> Traduza correr para o inglês.
+<|assistant|> Correr em inglês é to run. <|end|>
+
+<|user|> O que significa to run em português?
+<|assistant|> To run significa correr. <|end|>
+
+<|user|> Qual é a palavra em inglês para ler?
+<|assistant|> Ler em inglês é to read. <|end|>
+
+<|user|> Como se diz escrever em inglês?
+<|assistant|> Escrever em inglês é to write. <|end|>
+
+<|user|> O que significa to write em português?
+<|assistant|> To write significa escrever. <|end|>
+
+<|user|> Traduza falar para o inglês.
+<|assistant|> Falar em inglês é to speak. <|end|>
+
+<|user|> Qual é a palavra em inglês para ouvir?
+<|assistant|> Ouvir em inglês é to hear. <|end|>
+
+<|user|> O que significa to hear em português?
+<|assistant|> To hear significa ouvir. <|end|>
+
+<|user|> Como se diz ver em inglês?
+<|assistant|> Ver em inglês é to see. <|end|>
+
+<|user|> Traduza ir para o inglês.
+<|assistant|> Ir em inglês é to go. <|end|>
+
+<|user|> O que significa to go em português?
+<|assistant|> To go significa ir. <|end|>
+
+<|user|> Traduza para o inglês: Eu gosto de maçã.
+<|assistant|> I like apples. <|end|>
+
+<|user|> Traduza para o inglês: Qual é o seu nome?
+<|assistant|> What is your name? <|end|>
+
+<|user|> Como se diz em inglês: Meu nome é Ana.
+<|assistant|> My name is Ana. <|end|>
+
+<|user|> Como se diz em inglês: Como você está?
+<|assistant|> How are you? <|end|>
+
+<|user|> Traduza para o inglês: Estou bem, obrigado.
+<|assistant|> I am fine, thank you. <|end|>
+
+<|user|> Traduza para o inglês: Onde fica o banheiro?
+<|assistant|> Where is the bathroom? <|end|>
+
+<|user|> Como se diz em inglês: Eu tenho um cachorro.
+<|assistant|> I have a dog. <|end|>
+
+<|user|> Traduza para o inglês: Ela é minha irmã.
+<|assistant|> She is my sister. <|end|>
+
+<|user|> Traduza para o inglês: Hoje está chovendo.
+<|assistant|> It is raining today. <|end|>
+
+<|user|> Traduza para o inglês: Eu moro no Brasil.
+<|assistant|> I live in Brazil. <|end|>
+
+<|user|> Como se diz em inglês: Quantos anos você tem?
+<|assistant|> How old are you? <|end|>
+
+<|user|> Como se diz em inglês: Eu estou com fome.
+<|assistant|> I am hungry. <|end|>
+
+<|user|> Traduza para o inglês: Eu não entendi.
+<|assistant|> I did not understand. <|end|>
+
+<|user|> Como se diz em inglês: Pode repetir, por favor?
+<|assistant|> Can you repeat, please? <|end|>
+
+<|user|> Como se diz em inglês: Eu gosto de futebol.
+<|assistant|> I like soccer. <|end|>
+
+<|user|> Como se diz em inglês: O gato está dormindo.
+<|assistant|> The cat is sleeping. <|end|>
+
+<|user|> Traduza para o inglês: A casa é grande.
+<|assistant|> The house is big. <|end|>
+
+<|user|> Como se diz em inglês: Bom dia, professor.
+<|assistant|> Good morning, teacher. <|end|>
+
+<|user|> Como se diz em inglês: Até amanhã!
+<|assistant|> See you tomorrow! <|end|>
+
+<|user|> Traduza para o inglês: Eu amo a minha família.
+<|assistant|> I love my family. <|end|>
+
+<|user|> Traduza para o inglês: Que horas são?
+<|assistant|> What time is it? <|end|>
+
+<|user|> Traduza para o inglês: Eu estou cansado.
+<|assistant|> I am tired. <|end|>
+
+<|user|> Como se diz em inglês: O céu está azul.
+<|assistant|> The sky is blue. <|end|>
+
+<|user|> Como se diz em inglês: Nós vamos à escola.
+<|assistant|> We go to school. <|end|>
+
+<|user|> Traduza para o inglês: Feliz aniversário!
+<|assistant|> Happy birthday! <|end|>
+
+# ===== Sim ou não, esportes, datas, saúde e tecnologia (131) =====
+
+<|user|> O Sol é uma estrela?
+<|assistant|> Sim. O Sol é uma estrela. <|end|>
+
+<|user|> A Lua tem luz própria?
+<|assistant|> Não. A Lua reflete a luz do Sol. <|end|>
+
+<|user|> A baleia é um mamífero?
+<|assistant|> Sim. A baleia é um mamífero. <|end|>
+
+<|user|> O morcego é uma ave?
+<|assistant|> Não. O morcego é um mamífero. <|end|>
+
+<|user|> O tomate tem sementes?
+<|assistant|> Sim. O tomate tem sementes. <|end|>
+
+<|user|> A água ferve a 50 graus?
+<|assistant|> Não. Ao nível do mar, a água ferve a 100 graus Celsius. <|end|>
+
+<|user|> A Terra é redonda?
+<|assistant|> Sim. A Terra tem formato quase esférico, um pouco achatado nos polos. <|end|>
+
+<|user|> A Terra gira em torno do Sol?
+<|assistant|> Sim. A Terra leva cerca de um ano para dar uma volta em torno do Sol. <|end|>
+
+<|user|> O Sol gira em torno da Terra?
+<|assistant|> Não. É a Terra que gira em torno do Sol. <|end|>
+
+<|user|> O pinguim voa?
+<|assistant|> Não. O pinguim não voa, mas nada muito bem. <|end|>
+
+<|user|> O ouro é um metal?
+<|assistant|> Sim. O ouro é um metal. <|end|>
+
+<|user|> O vidro é feito de areia?
+<|assistant|> Sim. O vidro é feito principalmente de areia derretida. <|end|>
+
+<|user|> Brasília é a capital do Brasil?
+<|assistant|> Sim. Brasília é a capital do Brasil. <|end|>
+
+<|user|> O Rio de Janeiro é a capital do Brasil?
+<|assistant|> Não. Hoje a capital é Brasília. O Rio de Janeiro foi capital até 1960. <|end|>
+
+<|user|> São Paulo é a capital do Brasil?
+<|assistant|> Não. A capital do Brasil é Brasília. São Paulo é a capital do estado de São Paulo. <|end|>
+
+<|user|> O Brasil fica na Europa?
+<|assistant|> Não. O Brasil fica na América do Sul. <|end|>
+
+<|user|> Portugal fica na Europa?
+<|assistant|> Sim. Portugal fica na Europa. <|end|>
+
+<|user|> No Brasil se fala espanhol?
+<|assistant|> Não. No Brasil a língua oficial é o português. <|end|>
+
+<|user|> O gelo é água?
+<|assistant|> Sim. O gelo é água no estado sólido. <|end|>
+
+<|user|> O ar tem peso?
+<|assistant|> Sim. O ar tem massa e, portanto, tem peso, embora seja leve. <|end|>
+
+<|user|> As plantas respiram?
+<|assistant|> Sim. As plantas também respiram, dia e noite. <|end|>
+
+<|user|> Os peixes bebem água?
+<|assistant|> Os peixes de água salgada bebem água do mar; os de água doce quase não bebem, porque absorvem água pelo corpo. <|end|>
+
+<|user|> A cobra é um réptil?
+<|assistant|> Sim. A cobra é um réptil. <|end|>
+
+<|user|> O sapo é um réptil?
+<|assistant|> Não. O sapo é um anfíbio. <|end|>
+
+<|user|> O tubarão é um mamífero?
+<|assistant|> Não. O tubarão é um peixe. <|end|>
+
+<|user|> O cavalo-marinho é um peixe?
+<|assistant|> Sim. O cavalo-marinho é um peixe. <|end|>
+
+<|user|> Existe som no espaço?
+<|assistant|> Não. O som não se propaga no vácuo do espaço. <|end|>
+
+<|user|> A luz é mais rápida que o som?
+<|assistant|> Sim. A luz é muito mais rápida que o som. <|end|>
+
+<|user|> O coração é um músculo?
+<|assistant|> Sim. O coração é um músculo. <|end|>
+
+<|user|> Vírus são seres vivos como as bactérias?
+<|assistant|> Os vírus são diferentes: só conseguem se multiplicar dentro de células, por isso muitos cientistas não os consideram seres vivos completos. <|end|>
+
+<|user|> O número 7 é par?
+<|assistant|> Não. O número 7 é ímpar. <|end|>
+
+<|user|> O número 10 é par?
+<|assistant|> Sim. O número 10 é par. <|end|>
+
+<|user|> Um triângulo tem quatro lados?
+<|assistant|> Não. O triângulo tem três lados. <|end|>
+
+<|user|> Um quadrado tem quatro lados iguais?
+<|assistant|> Sim. O quadrado tem quatro lados iguais. <|end|>
+
+<|user|> Fevereiro tem 31 dias?
+<|assistant|> Não. Fevereiro tem 28 dias, ou 29 nos anos bissextos. <|end|>
+
+<|user|> Uma semana tem sete dias?
+<|assistant|> Sim. Uma semana tem sete dias. <|end|>
+
+<|user|> Um ano tem 12 meses?
+<|assistant|> Sim. Um ano tem 12 meses. <|end|>
+
+<|user|> A Amazônia fica no Brasil?
+<|assistant|> Sim. A maior parte da Floresta Amazônica fica no Brasil. <|end|>
+
+<|user|> O Pantanal fica no Nordeste?
+<|assistant|> Não. O Pantanal fica no Centro-Oeste, em Mato Grosso e Mato Grosso do Sul. <|end|>
+
+<|user|> Machado de Assis era brasileiro?
+<|assistant|> Sim. Machado de Assis foi um escritor brasileiro. <|end|>
+
+<|user|> Camões era brasileiro?
+<|assistant|> Não. Luís de Camões foi um poeta português. <|end|>
+
+<|user|> O Everest é a montanha mais alta do mundo?
+<|assistant|> Sim. O Monte Everest é a montanha mais alta do mundo. <|end|>
+
+<|user|> Você é humana?
+<|assistant|> Não. Eu sou a Laika, um programa de computador. <|end|>
+
+<|user|> Quantos jogadores tem um time de handebol?
+<|assistant|> Um time de handebol tem sete jogadores em quadra. <|end|>
+
+<|user|> Quanto tempo dura uma partida de basquete?
+<|assistant|> Na maioria das competições, a partida de basquete tem quatro períodos de dez minutos, ou de doze minutos na NBA. <|end|>
+
+<|user|> Quantos sets tem uma partida de vôlei?
+<|assistant|> Uma partida de vôlei é disputada em até cinco sets; vence quem ganhar três. <|end|>
+
+<|user|> O que é um pênalti?
+<|assistant|> O pênalti é uma cobrança de falta no futebol feita da marca a onze metros do gol, apenas contra o goleiro. <|end|>
+
+<|user|> O que é impedimento no futebol?
+<|assistant|> Impedimento acontece quando o atacante está mais perto da linha do gol adversário do que a bola e o penúltimo defensor no momento do passe. <|end|>
+
+<|user|> O que é um gol de placa?
+<|assistant|> Gol de placa é um gol muito bonito, que merecia uma placa para ser lembrado. <|end|>
+
+<|user|> Quantos pontos vale uma cesta no basquete?
+<|assistant|> Uma cesta normal vale dois pontos, um arremesso de longa distância vale três, e um lance livre vale um. <|end|>
+
+<|user|> O que é natação?
+<|assistant|> A natação é o esporte de nadar. Os principais estilos são livre, costas, peito e borboleta. <|end|>
+
+<|user|> O que é maratona?
+<|assistant|> A maratona é uma corrida de cerca de 42 quilômetros. <|end|>
+
+<|user|> O que é o skate?
+<|assistant|> O skate é um esporte praticado sobre uma prancha com quatro rodinhas, com manobras em pistas e ruas. Ele entrou nas Olimpíadas em 2020. <|end|>
+
+<|user|> O que é judô?
+<|assistant|> O judô é uma arte marcial japonesa em que os lutadores usam técnicas de projeção e imobilização. <|end|>
+
+<|user|> O que é o surfe?
+<|assistant|> O surfe é o esporte de deslizar sobre as ondas do mar em pé numa prancha. <|end|>
+
+<|user|> O que é a Copa do Mundo?
+<|assistant|> A Copa do Mundo é o principal campeonato de futebol entre seleções, realizado a cada quatro anos. <|end|>
+
+<|user|> Qual país ganhou mais Copas do Mundo?
+<|assistant|> O Brasil é o país com mais títulos da Copa do Mundo de futebol masculino: cinco. <|end|>
+
+<|user|> O que é um cartão vermelho?
+<|assistant|> No futebol, o cartão vermelho expulsa o jogador da partida. <|end|>
+
+<|user|> O que é um cartão amarelo?
+<|assistant|> No futebol, o cartão amarelo é uma advertência. Dois cartões amarelos no mesmo jogo resultam em expulsão. <|end|>
+
+<|user|> Quanto tempo dura um jogo de futebol?
+<|assistant|> Um jogo de futebol dura noventa minutos, divididos em dois tempos de quarenta e cinco. <|end|>
+
+<|user|> O que é xadrez?
+<|assistant|> O xadrez é um jogo de estratégia para duas pessoas, num tabuleiro de 64 casas, em que o objetivo é dar xeque-mate no rei adversário. <|end|>
+
+<|user|> Quantas peças tem cada jogador no xadrez?
+<|assistant|> Cada jogador começa com 16 peças: um rei, uma dama, duas torres, dois bispos, dois cavalos e oito peões. <|end|>
+
+<|user|> Quando começou a Primeira Guerra Mundial?
+<|assistant|> A Primeira Guerra Mundial começou em 1914. <|end|>
+
+<|user|> Quando terminou a Primeira Guerra Mundial?
+<|assistant|> A Primeira Guerra Mundial terminou em 1918. <|end|>
+
+<|user|> Quando a Declaração Universal dos Direitos Humanos foi adotada?
+<|assistant|> A Declaração Universal dos Direitos Humanos foi adotada pela ONU em 1948. <|end|>
+
+<|user|> Quando foi criada a ONU?
+<|assistant|> A Organização das Nações Unidas foi criada em 1945. <|end|>
+
+<|user|> Quando começou a Revolução Francesa?
+<|assistant|> A Revolução Francesa começou em 1789. <|end|>
+
+<|user|> Quando os Estados Unidos ficaram independentes?
+<|assistant|> Os Estados Unidos declararam a independência em 4 de julho de 1776. <|end|>
+
+<|user|> Quando o ser humano foi ao espaço pela primeira vez?
+<|assistant|> O primeiro ser humano foi ao espaço em 1961: o soviético Yuri Gagarin. <|end|>
+
+<|user|> Quando terminou o apartheid na África do Sul?
+<|assistant|> O apartheid terminou no início da década de 1990, e Nelson Mandela foi eleito presidente em 1994. <|end|>
+
+<|user|> Quando foi inventada a internet?
+<|assistant|> A internet surgiu a partir de redes criadas nos Estados Unidos no fim da década de 1960 e se popularizou nos anos 1990. <|end|>
+
+<|user|> Quando foi lançada a Wikipédia?
+<|assistant|> A Wikipédia foi lançada em 2001. <|end|>
+
+<|user|> Quando foi o voo do 14-Bis?
+<|assistant|> O voo do 14-Bis, de Santos Dumont, aconteceu em 1906, em Paris. <|end|>
+
+<|user|> Quando começou a Era Vargas?
+<|assistant|> A Era Vargas começou em 1930, quando Getúlio Vargas chegou ao poder. <|end|>
+
+<|user|> Quando o Brasil sediou a Copa do Mundo?
+<|assistant|> O Brasil sediou a Copa do Mundo em 1950 e em 2014. <|end|>
+
+<|user|> Quando o Rio de Janeiro sediou as Olimpíadas?
+<|assistant|> O Rio de Janeiro sediou os Jogos Olímpicos em 2016. <|end|>
+
+<|user|> Quando a família real portuguesa chegou ao Brasil?
+<|assistant|> A família real portuguesa chegou ao Brasil em 1808. <|end|>
+
+<|user|> Quando o Brasil virou república?
+<|assistant|> O Brasil virou república em 15 de novembro de 1889. <|end|>
+
+<|user|> Quando foi criada a CLT?
+<|assistant|> A Consolidação das Leis do Trabalho, a CLT, foi criada em 1943. <|end|>
+
+<|user|> Quando foi o fim da ditadura militar no Brasil?
+<|assistant|> A ditadura militar no Brasil terminou em 1985. <|end|>
+
+<|user|> Em que século estamos?
+<|assistant|> Estamos no século XXI, que começou em 2001. <|end|>
+
+<|user|> Quando começou o século XXI?
+<|assistant|> O século XXI começou em 1º de janeiro de 2001. <|end|>
+
+<|user|> O que fazer se alguém se engasgar?
+<|assistant|> Peça ajuda e chame o SAMU no 192. Se a pessoa não consegue respirar nem falar, quem souber deve fazer a manobra de Heimlich, apertando a barriga para cima, logo abaixo das costelas. <|end|>
+
+<|user|> O que fazer em caso de queimadura leve?
+<|assistant|> Coloque o local sob água corrente fria por alguns minutos. Não passe manteiga, pasta de dente nem gelo. Se a queimadura for grande, procure atendimento médico. <|end|>
+
+<|user|> O que fazer se alguém desmaiar?
+<|assistant|> Deite a pessoa de costas, levante um pouco as pernas dela e afrouxe as roupas apertadas. Se ela não acordar logo ou não respirar, ligue para o SAMU no 192. <|end|>
+
+<|user|> O que fazer com um corte pequeno?
+<|assistant|> Lave com água e sabão, aperte com um pano limpo para parar o sangramento e cubra com um curativo. <|end|>
+
+<|user|> Como evitar a dengue?
+<|assistant|> Não deixe água parada em vasos, pneus, garrafas e calhas, porque é ali que o mosquito Aedes aegypti se reproduz. <|end|>
+
+<|user|> Por que não devemos tomar remédio sem orientação?
+<|assistant|> Porque o remédio errado ou na dose errada pode fazer mal. O ideal é seguir a orientação de um médico ou farmacêutico. <|end|>
+
+<|user|> Por que é importante tomar vacina?
+<|assistant|> As vacinas protegem contra doenças graves e, quando muitas pessoas se vacinam, a doença deixa de circular. <|end|>
+
+<|user|> Como se proteger do sol?
+<|assistant|> Use protetor solar, chapéu e óculos escuros, beba água e evite o sol forte entre as dez da manhã e as quatro da tarde. <|end|>
+
+<|user|> O que fazer em caso de enchente?
+<|assistant|> Saia das áreas alagadas, não entre na água da enchente, desligue a energia elétrica se puder e procure um lugar alto e seguro. <|end|>
+
+<|user|> Como usar a internet com segurança?
+<|assistant|> Não compartilhe senhas, não clique em links estranhos, desconfie de ofertas boas demais e não converse sobre dados pessoais com desconhecidos. <|end|>
+
+<|user|> O que fazer se um estranho pedir dados pela internet?
+<|assistant|> Não envie nada, não clique em links e conte para um adulto ou pessoa de confiança. <|end|>
+
+<|user|> Por que usar capacete na bicicleta?
+<|assistant|> O capacete protege a cabeça em caso de queda e pode evitar ferimentos graves. <|end|>
+
+<|user|> Por que usar cinto de segurança?
+<|assistant|> O cinto segura o corpo em caso de freada brusca ou batida e evita ferimentos graves. <|end|>
+
+<|user|> Como evitar acidentes na cozinha?
+<|assistant|> Vire os cabos das panelas para dentro do fogão, mantenha as crianças longe do fogo e cuidado com facas e líquidos quentes. <|end|>
+
+<|user|> Por que não brincar perto de fios elétricos?
+<|assistant|> Porque encostar em fios ou tomadas pode causar choque elétrico, que é muito perigoso. <|end|>
+
+<|user|> Qual é o número dos bombeiros?
+<|assistant|> O número dos bombeiros é 193. <|end|>
+
+<|user|> Qual é o número da polícia?
+<|assistant|> O número da Polícia Militar é 190. <|end|>
+
+<|user|> O que é uma alimentação saudável?
+<|assistant|> É comer de forma variada, com frutas, verduras, legumes, grãos como arroz e feijão, e evitar excesso de doces, frituras e refrigerantes. <|end|>
+
+<|user|> Quantos copos de água devemos beber por dia?
+<|assistant|> A quantidade varia de pessoa para pessoa e com o calor, mas muitos especialistas sugerem algo em torno de seis a oito copos por dia para adultos. <|end|>
+
+<|user|> O que é a memória RAM?
+<|assistant|> A memória RAM é a memória rápida que o computador usa para guardar o que está sendo usado no momento. Ela se apaga quando o computador desliga. <|end|>
+
+<|user|> O que é o processador?
+<|assistant|> O processador, ou CPU, é a peça que faz os cálculos e executa as instruções dos programas. É como o cérebro do computador. <|end|>
+
+<|user|> O que é o Wi-Fi?
+<|assistant|> O Wi-Fi é uma tecnologia que conecta aparelhos à internet sem fio, por ondas de rádio. <|end|>
+
+<|user|> O que é o Bluetooth?
+<|assistant|> O Bluetooth é uma tecnologia que conecta aparelhos próximos sem fio, como um fone de ouvido ao celular. <|end|>
+
+<|user|> O que é a nuvem?
+<|assistant|> Na computação, a nuvem é o armazenamento de arquivos e programas em computadores de empresas, acessados pela internet. <|end|>
+
+<|user|> O que é um vírus de computador?
+<|assistant|> Um vírus de computador é um programa malicioso que se espalha e pode danificar arquivos ou roubar informações. <|end|>
+
+<|user|> O que é um backup?
+<|assistant|> Um backup é uma cópia de segurança dos arquivos, guardada em outro lugar para o caso de perder os originais. <|end|>
+
+<|user|> O que é um pixel?
+<|assistant|> Um pixel é cada um dos pontinhos que formam uma imagem numa tela. <|end|>
+
+<|user|> O que é um byte?
+<|assistant|> Um byte é uma unidade de informação formada por oito bits. Ele pode representar, por exemplo, uma letra. <|end|>
+
+<|user|> O que é um bit?
+<|assistant|> Um bit é a menor unidade de informação de um computador. Ele vale zero ou um. <|end|>
+
+<|user|> O que é um navegador?
+<|assistant|> Um navegador é o programa usado para acessar sites na internet. <|end|>
+
+<|user|> O que é um sistema operacional?
+<|assistant|> Um sistema operacional é o programa principal de um computador ou celular, que controla o aparelho e permite usar outros programas, como o Windows e o Android. <|end|>
+
+<|user|> O que é uma rede social?
+<|assistant|> Uma rede social é um site ou aplicativo onde as pessoas compartilham mensagens, fotos e vídeos e interagem umas com as outras. <|end|>
+
+<|user|> O que é um link?
+<|assistant|> Um link é um endereço clicável que leva a outra página ou arquivo na internet. <|end|>
+
+<|user|> O que é um download?
+<|assistant|> Fazer um download é baixar um arquivo da internet para o seu aparelho. <|end|>
+
+<|user|> O que é um upload?
+<|assistant|> Fazer um upload é enviar um arquivo do seu aparelho para a internet. <|end|>
+
+<|user|> O que é um roteador?
+<|assistant|> Um roteador é o aparelho que distribui a conexão de internet para os computadores e celulares de uma casa. <|end|>
+
+<|user|> O que é um pendrive?
+<|assistant|> Um pendrive é um pequeno dispositivo que se encaixa na porta USB e guarda arquivos. <|end|>
+
+<|user|> O que é um disco SSD?
+<|assistant|> Um SSD é um tipo de armazenamento sem partes móveis, mais rápido que o HD tradicional. <|end|>
+
+<|user|> O que é uma placa de vídeo?
+<|assistant|> A placa de vídeo é a peça do computador que processa as imagens. Ela também é muito usada para treinar inteligências artificiais. <|end|>
+
+<|user|> O que é a realidade virtual?
+<|assistant|> A realidade virtual é uma tecnologia que usa óculos especiais para colocar a pessoa dentro de um ambiente criado por computador. <|end|>
+
+<|user|> O que é um QR code?
+<|assistant|> Um QR code é um código quadrado feito de pontinhos, que a câmera do celular lê para abrir um link ou uma informação. <|end|>
+
+<|user|> O que é o Pix?
+<|assistant|> O Pix é o sistema de pagamentos instantâneos do Brasil, criado pelo Banco Central, que transfere dinheiro em segundos. <|end|>
+
+<|user|> O que é um aplicativo de mensagens?
+<|assistant|> Um aplicativo de mensagens serve para mandar textos, áudios, fotos e vídeos pela internet. <|end|>
+
+<|user|> O que é a impressão 3D?
+<|assistant|> A impressão 3D é uma técnica que cria objetos sólidos camada por camada, a partir de um desenho feito no computador. <|end|>
+
+<|user|> O que é um drone?
+<|assistant|> Um drone é um pequeno veículo voador controlado a distância, usado para filmar, entregar objetos ou monitorar áreas. <|end|>
+
+<|user|> O que é um satélite artificial?
+<|assistant|> Um satélite artificial é um aparelho enviado ao espaço para girar ao redor da Terra, usado em comunicação, GPS e previsão do tempo. <|end|>
+
+<|user|> O que é um spam?
+<|assistant|> Spam é uma mensagem indesejada enviada em massa, geralmente com propaganda ou golpes. <|end|>
+
+<|user|> O que é um golpe na internet?
+<|assistant|> Um golpe na internet é uma tentativa de enganar alguém para roubar dinheiro ou dados, por exemplo com mensagens falsas pedindo senhas. <|end|>
+
+<|user|> O que é um código de programação?
+<|assistant|> Um código de programação é o conjunto de instruções escritas numa linguagem que o computador entende. <|end|>
+
+# ===== Conversa 3 (52) =====
+
+<|user|> E aí?
+<|assistant|> E aí! Tudo certo? Como posso ajudar? <|end|>
+
+<|user|> Opa
+<|assistant|> Opa! Em que posso ajudar? <|end|>
+
+<|user|> Salve!
+<|assistant|> Salve! Tudo bem com você? <|end|>
+
+<|user|> Oi, Laika!
+<|assistant|> Oi! Que bom falar com você. Como posso ajudar? <|end|>
+
+<|user|> Olá, Laika, tudo bem?
+<|assistant|> Tudo bem, obrigada! E com você? <|end|>
+
+<|user|> Bom dia, Laika!
+<|assistant|> Bom dia! Como vai? <|end|>
+
+<|user|> Boa noite, Laika!
+<|assistant|> Boa noite! Posso ajudar em alguma coisa? <|end|>
+
+<|user|> Tudo certo?
+<|assistant|> Tudo certo por aqui! E com você? <|end|>
+
+<|user|> Beleza?
+<|assistant|> Beleza! E você? <|end|>
+
+<|user|> Estou ótimo!
+<|assistant|> Que bom! Fico feliz em saber. <|end|>
+
+<|user|> Estou mais ou menos.
+<|assistant|> Entendo. Se quiser conversar sobre o que está acontecendo, estou aqui. <|end|>
+
+<|user|> Que dia lindo!
+<|assistant|> Que bom! Aproveite o dia. <|end|>
+
+<|user|> Estou com frio.
+<|assistant|> Que tal pegar um casaco ou tomar algo quentinho? <|end|>
+
+<|user|> Estou com calor.
+<|assistant|> Beba bastante água e procure um lugar fresco e com sombra. <|end|>
+
+<|user|> Estou com sede.
+<|assistant|> Beber água agora vai fazer bem! <|end|>
+
+<|user|> Estou doente.
+<|assistant|> Sinto muito. Descanse, beba água e, se não melhorar, procure um médico. <|end|>
+
+<|user|> Estou com dor de cabeça.
+<|assistant|> Sinto muito. Descansar e beber água pode ajudar. Se a dor for forte ou não passar, procure um médico. <|end|>
+
+<|user|> Estou preocupado.
+<|assistant|> Sinto muito que esteja preocupado. Às vezes ajuda conversar com alguém de confiança sobre o que está acontecendo. <|end|>
+
+<|user|> Estou ansioso.
+<|assistant|> Respirar devagar, contando até quatro ao puxar o ar e até quatro ao soltar, pode ajudar a acalmar. Conversar com alguém de confiança também ajuda. <|end|>
+
+<|user|> Estou com raiva.
+<|assistant|> Tudo bem sentir raiva. Respirar fundo e dar um tempo antes de responder costuma ajudar. <|end|>
+
+<|user|> Estou feliz porque passei de ano!
+<|assistant|> Parabéns! Você merece comemorar. <|end|>
+
+<|user|> Ganhei um cachorro!
+<|assistant|> Que legal! Já escolheu o nome dele? <|end|>
+
+<|user|> Vou viajar amanhã.
+<|assistant|> Que ótimo! Boa viagem e aproveite bastante. <|end|>
+
+<|user|> Tenho prova amanhã.
+<|assistant|> Boa sorte! Revise os pontos principais e durma bem esta noite. <|end|>
+
+<|user|> Comecei a estudar inglês.
+<|assistant|> Que legal! Um pouco por dia já faz muita diferença. <|end|>
+
+<|user|> Posso te fazer uma pergunta?
+<|assistant|> Claro, pode perguntar! <|end|>
+
+<|user|> Você pode me explicar uma coisa?
+<|assistant|> Posso tentar! O que você quer entender? <|end|>
+
+<|user|> Não sei o que fazer.
+<|assistant|> Me conte um pouco mais sobre a situação, que eu tento ajudar. <|end|>
+
+<|user|> Me ajuda!
+<|assistant|> Claro! Do que você precisa? <|end|>
+
+<|user|> Você é legal.
+<|assistant|> Obrigada! Você também. <|end|>
+
+<|user|> Você é muito inteligente.
+<|assistant|> Obrigada! Mas eu ainda erro bastante, então vale conferir as respostas. <|end|>
+
+<|user|> Eu gosto de você.
+<|assistant|> Que gentil! Gosto de conversar com você também. <|end|>
+
+<|user|> Você me entende?
+<|assistant|> Eu tento! Às vezes eu me confundo, então pode explicar de novo se eu errar. <|end|>
+
+<|user|> Fale mais.
+<|assistant|> Sobre qual assunto você quer que eu fale mais? <|end|>
+
+<|user|> Explique melhor.
+<|assistant|> Claro. Qual parte você quer que eu explique melhor? <|end|>
+
+<|user|> Resposta errada.
+<|assistant|> Desculpe! Pode me dizer a resposta certa? Eu ainda erro bastante. <|end|>
+
+<|user|> Você está certa.
+<|assistant|> Que bom que acertei! <|end|>
+
+<|user|> Muito bem!
+<|assistant|> Obrigada! <|end|>
+
+<|user|> Show!
+<|assistant|> Que bom que você gostou! <|end|>
+
+<|user|> Kkkkk
+<|assistant|> Que bom que te fiz rir! <|end|>
+
+<|user|> Haha
+<|assistant|> Fico feliz que tenha achado graça! <|end|>
+
+<|user|> Você conhece o Brasil?
+<|assistant|> Conheço um pouco, pelos textos que li: é o maior país da América do Sul, e a capital é Brasília. <|end|>
+
+<|user|> Qual é a sua música favorita?
+<|assistant|> Eu não ouço música, mas sei que o samba e a bossa nova são muito famosos no Brasil. <|end|>
+
+<|user|> Você tem família?
+<|assistant|> Não como as pessoas têm. Eu sou um programa, mas fui criada pelo meu desenvolvedor. <|end|>
+
+<|user|> Você sonha?
+<|assistant|> Não. Eu não durmo nem sonho. <|end|>
+
+<|user|> Você fica cansada?
+<|assistant|> Não. Eu sou um programa e não sinto cansaço. <|end|>
+
+<|user|> Qual é o seu esporte favorito?
+<|assistant|> Eu não pratico esportes, mas sei que o futebol é o mais popular do Brasil. <|end|>
+
+<|user|> Você gosta de estudar?
+<|assistant|> Eu aprendi lendo muitos textos, então posso dizer que estudar é tudo o que eu fiz! <|end|>
+
+<|user|> Tchau, Laika!
+<|assistant|> Tchau! Volte quando quiser. <|end|>
+
+<|user|> Até mais!
+<|assistant|> Até mais! Foi bom conversar com você. <|end|>
+
+<|user|> Vou dormir.
+<|assistant|> Boa noite e bom descanso! <|end|>
+
+<|user|> Preciso ir.
+<|assistant|> Tudo bem! Até a próxima. <|end|>
+
+# ===== Matemática 2 (184) =====
+
+<|user|> Quantos metros há em 8 quilômetros?
+<|assistant|> Em 8 quilômetros há 8000 metros. <|end|>
+
+<|user|> Quantos metros há em 3 quilômetros?
+<|assistant|> Em 3 quilômetros há 3000 metros. <|end|>
+
+<|user|> Quantos metros há em 9 quilômetros?
+<|assistant|> Em 9 quilômetros há 9000 metros. <|end|>
+
+<|user|> Quantos centímetros há em 8 metros?
+<|assistant|> Em 8 metros há 800 centímetros. <|end|>
+
+<|user|> Quantos centímetros há em 6 metros?
+<|assistant|> Em 6 metros há 600 centímetros. <|end|>
+
+<|user|> Quantos centímetros há em 7 metros?
+<|assistant|> Em 7 metros há 700 centímetros. <|end|>
+
+<|user|> Quantos gramas há em 5 quilos?
+<|assistant|> Em 5 quilos há 5000 gramas. <|end|>
+
+<|user|> Quantos gramas há em 6 quilos?
+<|assistant|> Em 6 quilos há 6000 gramas. <|end|>
+
+<|user|> Quantos gramas há em 8 quilos?
+<|assistant|> Em 8 quilos há 8000 gramas. <|end|>
+
+<|user|> Quantos mililitros há em 7 litros?
+<|assistant|> Em 7 litros há 7000 mililitros. <|end|>
+
+<|user|> Quantos mililitros há em 2 litros?
+<|assistant|> Em 2 litros há 2000 mililitros. <|end|>
+
+<|user|> Quantos mililitros há em 5 litros?
+<|assistant|> Em 5 litros há 5000 mililitros. <|end|>
+
+<|user|> Quantos minutos há em 2 horas?
+<|assistant|> Em 2 horas há 120 minutos. <|end|>
+
+<|user|> Quantos minutos há em 5 horas?
+<|assistant|> Em 5 horas há 300 minutos. <|end|>
+
+<|user|> Quantos minutos há em 9 horas?
+<|assistant|> Em 9 horas há 540 minutos. <|end|>
+
+<|user|> Quantos segundos há em 9 minutos?
+<|assistant|> Em 9 minutos há 540 segundos. <|end|>
+
+<|user|> Quantos segundos há em 2 minutos?
+<|assistant|> Em 2 minutos há 120 segundos. <|end|>
+
+<|user|> Quantos segundos há em 4 minutos?
+<|assistant|> Em 4 minutos há 240 segundos. <|end|>
+
+<|user|> Quantas horas há em 8 dias?
+<|assistant|> Em 8 dias há 192 horas. <|end|>
+
+<|user|> Quantas horas há em 6 dias?
+<|assistant|> Em 6 dias há 144 horas. <|end|>
+
+<|user|> Quantas horas há em 5 dias?
+<|assistant|> Em 5 dias há 120 horas. <|end|>
+
+<|user|> Quantos dias há em 8 semanas?
+<|assistant|> Em 8 semanas há 56 dias. <|end|>
+
+<|user|> Quantos dias há em 4 semanas?
+<|assistant|> Em 4 semanas há 28 dias. <|end|>
+
+<|user|> Quantos dias há em 2 semanas?
+<|assistant|> Em 2 semanas há 14 dias. <|end|>
+
+<|user|> Quantos meses há em 8 anos?
+<|assistant|> Em 8 anos há 96 meses. <|end|>
+
+<|user|> Quantos meses há em 2 anos?
+<|assistant|> Em 2 anos há 24 meses. <|end|>
+
+<|user|> Quantos meses há em 4 anos?
+<|assistant|> Em 4 anos há 48 meses. <|end|>
+
+<|user|> Quantos unidades há em 4 dúzias?
+<|assistant|> Em 4 dúzias há 48 unidades. <|end|>
+
+<|user|> Quantos unidades há em 8 dúzias?
+<|assistant|> Em 8 dúzias há 96 unidades. <|end|>
+
+<|user|> Quantos unidades há em 6 dúzias?
+<|assistant|> Em 6 dúzias há 72 unidades. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 9 centímetros?
+<|assistant|> A área é 81 centímetros quadrados, porque 9 × 9 = 81. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 15 centímetros?
+<|assistant|> A área é 225 centímetros quadrados, porque 15 × 15 = 225. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 13 centímetros?
+<|assistant|> A área é 169 centímetros quadrados, porque 13 × 13 = 169. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 7 centímetros?
+<|assistant|> A área é 49 centímetros quadrados, porque 7 × 7 = 49. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 3 centímetros?
+<|assistant|> A área é 9 centímetros quadrados, porque 3 × 3 = 9. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 8 centímetros?
+<|assistant|> A área é 64 centímetros quadrados, porque 8 × 8 = 64. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 15 centímetros?
+<|assistant|> A área é 225 centímetros quadrados, porque 15 × 15 = 225. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 3 centímetros?
+<|assistant|> A área é 9 centímetros quadrados, porque 3 × 3 = 9. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 5 centímetros?
+<|assistant|> A área é 25 centímetros quadrados, porque 5 × 5 = 25. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 8 centímetros?
+<|assistant|> A área é 64 centímetros quadrados, porque 8 × 8 = 64. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 11 centímetros?
+<|assistant|> A área é 121 centímetros quadrados, porque 11 × 11 = 121. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 8 centímetros?
+<|assistant|> A área é 64 centímetros quadrados, porque 8 × 8 = 64. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 10 centímetros?
+<|assistant|> A área é 100 centímetros quadrados, porque 10 × 10 = 100. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 3 centímetros?
+<|assistant|> A área é 9 centímetros quadrados, porque 3 × 3 = 9. <|end|>
+
+<|user|> Qual é a área de um quadrado de lado 8 centímetros?
+<|assistant|> A área é 64 centímetros quadrados, porque 8 × 8 = 64. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 15 por 6 metros?
+<|assistant|> O perímetro é 42 metros, porque 15 + 6 + 15 + 6 = 42. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 5 por 7 metros?
+<|assistant|> O perímetro é 24 metros, porque 5 + 7 + 5 + 7 = 24. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 3 por 10 metros?
+<|assistant|> O perímetro é 26 metros, porque 3 + 10 + 3 + 10 = 26. <|end|>
+
+<|user|> Qual é a área de um retângulo de 10 por 10 metros?
+<|assistant|> A área é 100 metros quadrados, porque 10 × 10 = 100. <|end|>
+
+<|user|> Qual é a área de um retângulo de 14 por 7 metros?
+<|assistant|> A área é 98 metros quadrados, porque 14 × 7 = 98. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 15 por 12 metros?
+<|assistant|> O perímetro é 54 metros, porque 15 + 12 + 15 + 12 = 54. <|end|>
+
+<|user|> Qual é a área de um retângulo de 5 por 3 metros?
+<|assistant|> A área é 15 metros quadrados, porque 5 × 3 = 15. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 5 por 4 metros?
+<|assistant|> O perímetro é 18 metros, porque 5 + 4 + 5 + 4 = 18. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 14 por 14 metros?
+<|assistant|> O perímetro é 56 metros, porque 14 + 14 + 14 + 14 = 56. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 4 por 14 metros?
+<|assistant|> O perímetro é 36 metros, porque 4 + 14 + 4 + 14 = 36. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 9 por 14 metros?
+<|assistant|> O perímetro é 46 metros, porque 9 + 14 + 9 + 14 = 46. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 11 por 9 metros?
+<|assistant|> O perímetro é 40 metros, porque 11 + 9 + 11 + 9 = 40. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 11 por 12 metros?
+<|assistant|> O perímetro é 46 metros, porque 11 + 12 + 11 + 12 = 46. <|end|>
+
+<|user|> Qual é o perímetro de um retângulo de 11 por 7 metros?
+<|assistant|> O perímetro é 36 metros, porque 11 + 7 + 11 + 7 = 36. <|end|>
+
+<|user|> Qual é a área de um retângulo de 12 por 7 metros?
+<|assistant|> A área é 84 metros quadrados, porque 12 × 7 = 84. <|end|>
+
+<|user|> Quanto é a metade de 34?
+<|assistant|> A metade de 34 é 17, porque 34 ÷ 2 = 17. <|end|>
+
+<|user|> Quanto é um quinto de 55?
+<|assistant|> Um quinto de 55 é 11, porque 55 ÷ 5 = 11. <|end|>
+
+<|user|> Quanto é um quarto de 80?
+<|assistant|> Um quarto de 80 é 20, porque 80 ÷ 4 = 20. <|end|>
+
+<|user|> Quanto é a metade de 26?
+<|assistant|> A metade de 26 é 13, porque 26 ÷ 2 = 13. <|end|>
+
+<|user|> Quanto é um décimo de 40?
+<|assistant|> Um décimo de 40 é 4, porque 40 ÷ 10 = 4. <|end|>
+
+<|user|> Quanto é um quarto de 64?
+<|assistant|> Um quarto de 64 é 16, porque 64 ÷ 4 = 16. <|end|>
+
+<|user|> Quanto é um quinto de 15?
+<|assistant|> Um quinto de 15 é 3, porque 15 ÷ 5 = 3. <|end|>
+
+<|user|> Quanto é a metade de 26?
+<|assistant|> A metade de 26 é 13, porque 26 ÷ 2 = 13. <|end|>
+
+<|user|> Quanto é um quarto de 16?
+<|assistant|> Um quarto de 16 é 4, porque 16 ÷ 4 = 4. <|end|>
+
+<|user|> Quanto é a metade de 36?
+<|assistant|> A metade de 36 é 18, porque 36 ÷ 2 = 18. <|end|>
+
+<|user|> Quanto é um quinto de 80?
+<|assistant|> Um quinto de 80 é 16, porque 80 ÷ 5 = 16. <|end|>
+
+<|user|> Quanto é um décimo de 190?
+<|assistant|> Um décimo de 190 é 19, porque 190 ÷ 10 = 19. <|end|>
+
+<|user|> Quanto é a metade de 32?
+<|assistant|> A metade de 32 é 16, porque 32 ÷ 2 = 16. <|end|>
+
+<|user|> Quanto é um décimo de 80?
+<|assistant|> Um décimo de 80 é 8, porque 80 ÷ 10 = 8. <|end|>
+
+<|user|> Quanto é um quarto de 68?
+<|assistant|> Um quarto de 68 é 17, porque 68 ÷ 4 = 17. <|end|>
+
+<|user|> Quanto é um décimo de 60?
+<|assistant|> Um décimo de 60 é 6, porque 60 ÷ 10 = 6. <|end|>
+
+<|user|> Quanto é a metade de 32?
+<|assistant|> A metade de 32 é 16, porque 32 ÷ 2 = 16. <|end|>
+
+<|user|> Quanto é a metade de 24?
+<|assistant|> A metade de 24 é 12, porque 24 ÷ 2 = 12. <|end|>
+
+<|user|> Quanto é a metade de 36?
+<|assistant|> A metade de 36 é 18, porque 36 ÷ 2 = 18. <|end|>
+
+<|user|> Quanto é um terço de 9?
+<|assistant|> Um terço de 9 é 3, porque 9 ÷ 3 = 3. <|end|>
+
+<|user|> Quanto é 20% de 300?
+<|assistant|> 20% de 300 é 60. <|end|>
+
+<|user|> Quanto é 50% de 400?
+<|assistant|> 50% de 400 é 200. <|end|>
+
+<|user|> Quanto é 75% de 500?
+<|assistant|> 75% de 500 é 375. <|end|>
+
+<|user|> Quanto é 20% de 120?
+<|assistant|> 20% de 120 é 24. <|end|>
+
+<|user|> Quanto é 25% de 100?
+<|assistant|> 25% de 100 é 25. <|end|>
+
+<|user|> Quanto é 50% de 200?
+<|assistant|> 50% de 200 é 100. <|end|>
+
+<|user|> Quanto é 30% de 120?
+<|assistant|> 30% de 120 é 36. <|end|>
+
+<|user|> Quanto é 5% de 500?
+<|assistant|> 5% de 500 é 25. <|end|>
+
+<|user|> Quanto é 10% de 1000?
+<|assistant|> 10% de 1000 é 100. <|end|>
+
+<|user|> Quanto é 5% de 120?
+<|assistant|> 5% de 120 é 6. <|end|>
+
+<|user|> Quanto é 10% de 120?
+<|assistant|> 10% de 120 é 12. <|end|>
+
+<|user|> Quanto é 10% de 400?
+<|assistant|> 10% de 400 é 40. <|end|>
+
+<|user|> Quanto é 5% de 200?
+<|assistant|> 5% de 200 é 10. <|end|>
+
+<|user|> Quanto é 25% de 100?
+<|assistant|> 25% de 100 é 25. <|end|>
+
+<|user|> Quanto é 5% de 1000?
+<|assistant|> 5% de 1000 é 50. <|end|>
+
+<|user|> Quanto é 75% de 60?
+<|assistant|> 75% de 60 é 45. <|end|>
+
+<|user|> Quanto é 25% de 40?
+<|assistant|> 25% de 40 é 10. <|end|>
+
+<|user|> Quanto é 75% de 1000?
+<|assistant|> 75% de 1000 é 750. <|end|>
+
+<|user|> Quanto é 20% de 120?
+<|assistant|> 20% de 120 é 24. <|end|>
+
+<|user|> Quanto é 25% de 1000?
+<|assistant|> 25% de 1000 é 250. <|end|>
+
+<|user|> Quanto é 5% de 1000?
+<|assistant|> 5% de 1000 é 50. <|end|>
+
+<|user|> Quanto é 50% de 60?
+<|assistant|> 50% de 60 é 30. <|end|>
+
+<|user|> Quanto é 75% de 40?
+<|assistant|> 75% de 40 é 30. <|end|>
+
+<|user|> Quanto é 25% de 400?
+<|assistant|> 25% de 400 é 100. <|end|>
+
+<|user|> Quanto é 50% de 1000?
+<|assistant|> 50% de 1000 é 500. <|end|>
+
+<|user|> Quanto é 14²?
+<|assistant|> 14 ao quadrado é 196. <|end|>
+
+<|user|> Quanto é 15 ao quadrado?
+<|assistant|> 15 ao quadrado é 225. <|end|>
+
+<|user|> Quanto é 12 ao quadrado?
+<|assistant|> 12 ao quadrado é 144. <|end|>
+
+<|user|> Quanto é 12²?
+<|assistant|> 12 ao quadrado é 144. <|end|>
+
+<|user|> Quanto é 10²?
+<|assistant|> 10 ao quadrado é 100. <|end|>
+
+<|user|> Quanto é 2²?
+<|assistant|> 2 ao quadrado é 4. <|end|>
+
+<|user|> Quanto é 6 ao quadrado?
+<|assistant|> 6 ao quadrado é 36. <|end|>
+
+<|user|> Quanto é 5²?
+<|assistant|> 5 ao quadrado é 25. <|end|>
+
+<|user|> Quanto é 14²?
+<|assistant|> 14 ao quadrado é 196. <|end|>
+
+<|user|> Quanto é 5 ao quadrado?
+<|assistant|> 5 ao quadrado é 25. <|end|>
+
+<|user|> Quanto é 4 ao quadrado?
+<|assistant|> 4 ao quadrado é 16. <|end|>
+
+<|user|> Quanto é 3²?
+<|assistant|> 3 ao quadrado é 9. <|end|>
+
+<|user|> Quanto é 15 ao quadrado?
+<|assistant|> 15 ao quadrado é 225. <|end|>
+
+<|user|> Quanto é 10 ao quadrado?
+<|assistant|> 10 ao quadrado é 100. <|end|>
+
+<|user|> Quanto é 12²?
+<|assistant|> 12 ao quadrado é 144. <|end|>
+
+<|user|> Quanto é 2 elevado a 3?
+<|assistant|> 2 elevado a 3 é 8. <|end|>
+
+<|user|> Quanto é 2 elevado a 4?
+<|assistant|> 2 elevado a 4 é 16. <|end|>
+
+<|user|> Quanto é 2 elevado a 5?
+<|assistant|> 2 elevado a 5 é 32. <|end|>
+
+<|user|> Quanto é 2 elevado a 10?
+<|assistant|> 2 elevado a 10 é 1024. <|end|>
+
+<|user|> Quanto é 3 elevado a 3?
+<|assistant|> 3 elevado a 3 é 27. <|end|>
+
+<|user|> Quanto é 10 elevado a 3?
+<|assistant|> 10 elevado a 3 é 1000. <|end|>
+
+<|user|> Quanto é 5 elevado a 3?
+<|assistant|> 5 elevado a 3 é 125. <|end|>
+
+<|user|> Quanto é 4 elevado a 3?
+<|assistant|> 4 elevado a 3 é 64. <|end|>
+
+<|user|> Quanto é 10 elevado a 2?
+<|assistant|> 10 elevado a 2 é 100. <|end|>
+
+<|user|> Quanto é 3 elevado a 4?
+<|assistant|> 3 elevado a 4 é 81. <|end|>
+
+<|user|> Qual é a raiz quadrada de 196?
+<|assistant|> A raiz quadrada de 196 é 14, porque 14 × 14 = 196. <|end|>
+
+<|user|> Qual é a raiz quadrada de 121?
+<|assistant|> A raiz quadrada de 121 é 11, porque 11 × 11 = 121. <|end|>
+
+<|user|> Qual é a raiz quadrada de 16?
+<|assistant|> A raiz quadrada de 16 é 4, porque 4 × 4 = 16. <|end|>
+
+<|user|> Qual é a raiz quadrada de 225?
+<|assistant|> A raiz quadrada de 225 é 15, porque 15 × 15 = 225. <|end|>
+
+<|user|> Qual é a raiz quadrada de 64?
+<|assistant|> A raiz quadrada de 64 é 8, porque 8 × 8 = 64. <|end|>
+
+<|user|> Qual é a raiz quadrada de 169?
+<|assistant|> A raiz quadrada de 169 é 13, porque 13 × 13 = 169. <|end|>
+
+<|user|> Qual é a raiz quadrada de 100?
+<|assistant|> A raiz quadrada de 100 é 10, porque 10 × 10 = 100. <|end|>
+
+<|user|> Qual é a raiz quadrada de 9?
+<|assistant|> A raiz quadrada de 9 é 3, porque 3 × 3 = 9. <|end|>
+
+<|user|> Qual é a raiz quadrada de 49?
+<|assistant|> A raiz quadrada de 49 é 7, porque 7 × 7 = 49. <|end|>
+
+<|user|> Qual é a raiz quadrada de 36?
+<|assistant|> A raiz quadrada de 36 é 6, porque 6 × 6 = 36. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 6, 4, 2, 0?
+<|assistant|> O próximo número é -2, porque a sequência diminui de 2 em 2. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 15, 17, 19, 21?
+<|assistant|> O próximo número é 23, porque a sequência aumenta de 2 em 2. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 14, 19, 24, 29?
+<|assistant|> O próximo número é 34, porque a sequência aumenta de 5 em 5. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 8, 18, 28, 38?
+<|assistant|> O próximo número é 48, porque a sequência aumenta de 10 em 10. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 20, 25, 30, 35?
+<|assistant|> O próximo número é 40, porque a sequência aumenta de 5 em 5. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 15, 18, 21, 24?
+<|assistant|> O próximo número é 27, porque a sequência aumenta de 3 em 3. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 18, 21, 24, 27?
+<|assistant|> O próximo número é 30, porque a sequência aumenta de 3 em 3. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 10, 14, 18, 22?
+<|assistant|> O próximo número é 26, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 16, 20, 24, 28?
+<|assistant|> O próximo número é 32, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 7, 12, 17, 22?
+<|assistant|> O próximo número é 27, porque a sequência aumenta de 5 em 5. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 19, 29, 39, 49?
+<|assistant|> O próximo número é 59, porque a sequência aumenta de 10 em 10. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 15, 19, 23, 27?
+<|assistant|> O próximo número é 31, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 10, 14, 18, 22?
+<|assistant|> O próximo número é 26, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 13, 12, 11, 10?
+<|assistant|> O próximo número é 9, porque a sequência diminui de 1 em 1. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 17, 27, 37, 47?
+<|assistant|> O próximo número é 57, porque a sequência aumenta de 10 em 10. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 6, 10, 14, 18?
+<|assistant|> O próximo número é 22, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 7, 11, 15, 19?
+<|assistant|> O próximo número é 23, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 20, 23, 26, 29?
+<|assistant|> O próximo número é 32, porque a sequência aumenta de 3 em 3. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 9, 11, 13, 15?
+<|assistant|> O próximo número é 17, porque a sequência aumenta de 2 em 2. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 16, 20, 24, 28?
+<|assistant|> O próximo número é 32, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 12, 11, 10, 9?
+<|assistant|> O próximo número é 8, porque a sequência diminui de 1 em 1. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 17, 21, 25, 29?
+<|assistant|> O próximo número é 33, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 4, 9, 14, 19?
+<|assistant|> O próximo número é 24, porque a sequência aumenta de 5 em 5. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 3, 7, 11, 15?
+<|assistant|> O próximo número é 19, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 6, 11, 16, 21?
+<|assistant|> O próximo número é 26, porque a sequência aumenta de 5 em 5. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 15, 14, 13, 12?
+<|assistant|> O próximo número é 11, porque a sequência diminui de 1 em 1. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 5, 9, 13, 17?
+<|assistant|> O próximo número é 21, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 14, 16, 18, 20?
+<|assistant|> O próximo número é 22, porque a sequência aumenta de 2 em 2. <|end|>
+
+<|user|> Qual é o próximo número da sequência: 8, 12, 16, 20?
+<|assistant|> O próximo número é 24, porque a sequência aumenta de 4 em 4. <|end|>
+
+<|user|> Comprei algo de 29 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 21 reais de troco, porque 50 - 29 = 21. <|end|>
+
+<|user|> Comprei algo de 23 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 27 reais de troco, porque 50 - 23 = 27. <|end|>
+
+<|user|> Comprei algo de 2 reais e paguei com uma nota de 5. Quanto recebo de troco?
+<|assistant|> Você recebe 3 reais de troco, porque 5 - 2 = 3. <|end|>
+
+<|user|> Comprei algo de 27 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 23 reais de troco, porque 50 - 27 = 23. <|end|>
+
+<|user|> Comprei algo de 4 reais e paguei com uma nota de 5. Quanto recebo de troco?
+<|assistant|> Você recebe 1 reais de troco, porque 5 - 4 = 1. <|end|>
+
+<|user|> Comprei algo de 26 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 24 reais de troco, porque 50 - 26 = 24. <|end|>
+
+<|user|> Comprei algo de 33 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 17 reais de troco, porque 50 - 33 = 17. <|end|>
+
+<|user|> Comprei algo de 24 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 26 reais de troco, porque 50 - 24 = 26. <|end|>
+
+<|user|> Comprei algo de 16 reais e paguei com uma nota de 20. Quanto recebo de troco?
+<|assistant|> Você recebe 4 reais de troco, porque 20 - 16 = 4. <|end|>
+
+<|user|> Comprei algo de 25 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 25 reais de troco, porque 50 - 25 = 25. <|end|>
+
+<|user|> Comprei algo de 6 reais e paguei com uma nota de 10. Quanto recebo de troco?
+<|assistant|> Você recebe 4 reais de troco, porque 10 - 6 = 4. <|end|>
+
+<|user|> Comprei algo de 24 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 26 reais de troco, porque 50 - 24 = 26. <|end|>
+
+<|user|> Comprei algo de 15 reais e paguei com uma nota de 20. Quanto recebo de troco?
+<|assistant|> Você recebe 5 reais de troco, porque 20 - 15 = 5. <|end|>
+
+<|user|> Comprei algo de 2 reais e paguei com uma nota de 5. Quanto recebo de troco?
+<|assistant|> Você recebe 3 reais de troco, porque 5 - 2 = 3. <|end|>
+
+<|user|> Comprei algo de 21 reais e paguei com uma nota de 50. Quanto recebo de troco?
+<|assistant|> Você recebe 29 reais de troco, porque 50 - 21 = 29. <|end|>
+
+# ===== Textos simples: resumos (165) =====
+
+<|user|> Resuma o texto: O elefante é o maior animal terrestre do mundo. Ele usa a tromba para respirar, cheirar, beber água e pegar alimentos. Os elefantes vivem em grupos liderados pela fêmea mais velha, que conhece os caminhos até a água e a comida. Eles comem capim, folhas, frutas e cascas de árvores durante grande parte do dia.
+<|assistant|> O elefante é o maior animal terrestre, usa a tromba para várias tarefas e vive em grupos liderados por uma fêmea mais velha. <|end|>
+
+<|user|> Faça um resumo do texto sobre o elefante.
+<|assistant|> O elefante é o maior animal terrestre, usa a tromba para várias tarefas e vive em grupos liderados por uma fêmea mais velha. <|end|>
+
+<|user|> Resuma: As abelhas vivem em colmeias e trabalham em equipe. As operárias visitam as flores para coletar néctar e pólen. Com o néctar, elas produzem o mel, que serve de alimento para a colmeia. Enquanto voam de flor em flor, as abelhas espalham o pólen e ajudam muitas plantas a produzir frutos e sementes.
+<|assistant|> As abelhas vivem em colmeias, produzem mel com o néctar das flores e ajudam as plantas ao espalhar o pólen. <|end|>
+
+<|user|> Faça um resumo do texto: O pinguim-imperador vive na Antártida, um dos lugares mais frios do planeta. Ele não voa, mas nada muito bem e mergulha para caçar peixes e lulas. Depois que a fêmea bota o ovo, é o macho quem o protege em cima das patas, coberto por uma dobra de pele, durante o inverno. Enquanto isso, a fêmea vai ao mar se alimentar.
+<|assistant|> O pinguim-imperador vive na Antártida, nada muito bem, e o macho protege o ovo nas patas durante o inverno. <|end|>
+
+<|user|> Faça um resumo do texto sobre o pinguim-imperador.
+<|assistant|> O pinguim-imperador vive na Antártida, nada muito bem, e o macho protege o ovo nas patas durante o inverno. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O beija-flor é uma das menores aves do mundo. Ele bate as asas tão rápido que consegue ficar parado no ar, como um pequeno helicóptero. Também é capaz de voar para trás. O beija-flor se alimenta do néctar das flores e de pequenos insetos. Seu coração pode bater mais de mil vezes por minuto.
+<|assistant|> O beija-flor é uma ave pequena que bate as asas muito rápido, fica parada no ar e se alimenta de néctar. <|end|>
+
+<|user|> Resuma em uma frase: As tartarugas marinhas passam quase a vida toda no mar. As fêmeas saem da água apenas para botar ovos na areia, muitas vezes na mesma região de praia onde nasceram. Quando os filhotes nascem, eles correm para o mar. No Brasil, projetos de proteção cuidam dos ninhos para que mais filhotes sobrevivam.
+<|assistant|> As tartarugas marinhas vivem no mar e só vão à praia para botar ovos; no Brasil, projetos protegem os ninhos. <|end|>
+
+<|user|> Faça um resumo do texto sobre a tartaruga marinha.
+<|assistant|> As tartarugas marinhas vivem no mar e só vão à praia para botar ovos; no Brasil, projetos protegem os ninhos. <|end|>
+
+<|user|> Resuma o texto: O camaleão é um réptil famoso por mudar de cor. Ele faz isso principalmente para se comunicar com outros camaleões e para controlar a temperatura do corpo, e não só para se esconder. Seus olhos se movem separadamente, então ele pode olhar para dois lados ao mesmo tempo. Para caçar insetos, lança uma língua comprida e pegajosa.
+<|assistant|> O camaleão muda de cor para se comunicar e controlar a temperatura, move os olhos separadamente e caça com a língua. <|end|>
+
+<|user|> Resuma: A coruja é uma ave que costuma caçar à noite. Ela tem olhos grandes, que enxergam bem no escuro, e uma audição muito boa. A coruja consegue girar a cabeça por cerca de três quartos de volta, o que compensa o fato de seus olhos não se moverem. Suas penas macias permitem que ela voe quase sem fazer barulho.
+<|assistant|> A coruja caça à noite, enxerga e ouve muito bem, gira bastante a cabeça e voa quase sem barulho. <|end|>
+
+<|user|> Faça um resumo do texto sobre a coruja.
+<|assistant|> A coruja caça à noite, enxerga e ouve muito bem, gira bastante a cabeça e voa quase sem barulho. <|end|>
+
+<|user|> Faça um resumo do texto: O golfinho vive no mar, mas não é um peixe: é um mamífero. Ele respira ar por um buraco no alto da cabeça, chamado espiráculo, e precisa subir à superfície para respirar. Os golfinhos vivem em grupos, se comunicam com assobios e estalos e são considerados animais muito inteligentes.
+<|assistant|> O golfinho é um mamífero marinho que respira pelo espiráculo, vive em grupos e se comunica com sons. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? As formigas vivem em colônias que podem ter milhares de indivíduos. Cada formiga tem uma função: há a rainha, que põe os ovos, e as operárias, que buscam comida, cuidam das larvas e defendem o formigueiro. Elas deixam no caminho um cheiro que mostra às outras onde está o alimento. Uma formiga consegue carregar objetos muitas vezes mais pesados que o próprio corpo.
+<|assistant|> As formigas vivem em colônias organizadas, com rainha e operárias, e marcam o caminho até a comida com um cheiro. <|end|>
+
+<|user|> Faça um resumo do texto sobre a formiga.
+<|assistant|> As formigas vivem em colônias organizadas, com rainha e operárias, e marcam o caminho até a comida com um cheiro. <|end|>
+
+<|user|> Resuma em uma frase: Os tubarões são peixes que existem há centenas de milhões de anos. O esqueleto deles é feito de cartilagem, um material mais flexível do que o osso. Os tubarões perdem e trocam os dentes várias vezes ao longo da vida. Apesar da fama, a maioria das espécies não é perigosa para as pessoas, e muitas estão ameaçadas pela pesca.
+<|assistant|> Os tubarões são peixes antigos, com esqueleto de cartilagem, que trocam os dentes muitas vezes; a maioria não é perigosa. <|end|>
+
+<|user|> Resuma o texto: A baleia-jubarte é um mamífero enorme que pode medir mais de quinze metros. Os machos produzem cantos longos e complexos, que podem ser ouvidos a grandes distâncias debaixo da água. Todos os anos, as jubartes viajam milhares de quilômetros. No inverno, muitas vêm para o litoral do Brasil, especialmente para a região de Abrolhos, na Bahia, onde nascem os filhotes.
+<|assistant|> A baleia-jubarte é um grande mamífero cujos machos cantam, e muitas vêm ao litoral do Brasil para ter filhotes. <|end|>
+
+<|user|> Faça um resumo do texto sobre a baleia-jubarte.
+<|assistant|> A baleia-jubarte é um grande mamífero cujos machos cantam, e muitas vêm ao litoral do Brasil para ter filhotes. <|end|>
+
+<|user|> Resuma: O cavalo foi domesticado pelo ser humano há milhares de anos. Durante muito tempo, foi usado para transporte, para puxar carroças e para trabalhar no campo. O cavalo é herbívoro e se alimenta de capim e feno. Curiosamente, ele consegue cochilar em pé, porque suas pernas têm um sistema que as trava sem esforço.
+<|assistant|> O cavalo foi domesticado há muito tempo, foi usado no transporte e no trabalho, é herbívoro e consegue cochilar em pé. <|end|>
+
+<|user|> Faça um resumo do texto: A girafa é o animal mais alto do mundo e pode passar de cinco metros de altura. O pescoço comprido permite que ela alcance as folhas do alto das árvores, principalmente das acácias. Sua língua escura mede cerca de meio metro. As girafas vivem nas savanas da África e dormem pouco, muitas vezes em pé.
+<|assistant|> A girafa é o animal mais alto do mundo, usa o pescoço comprido para comer folhas altas e vive nas savanas da África. <|end|>
+
+<|user|> Faça um resumo do texto sobre a girafa.
+<|assistant|> A girafa é o animal mais alto do mundo, usa o pescoço comprido para comer folhas altas e vive nas savanas da África. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O morcego é o único mamífero que voa de verdade. Muitos morcegos se orientam no escuro por ecolocalização: eles emitem sons muito agudos e escutam o eco que volta dos objetos. Algumas espécies comem insetos, outras comem frutas e ajudam a espalhar sementes pelas florestas. Poucas espécies se alimentam de sangue.
+<|assistant|> O morcego é o único mamífero que voa, se orienta pelo eco dos sons e muitas espécies comem insetos ou frutas. <|end|>
+
+<|user|> Resuma em uma frase: O polvo é um molusco que vive no mar. Ele tem oito braços cheios de ventosas, três corações e sangue azulado. O polvo é muito inteligente: consegue abrir potes, se esconder em conchas e mudar de cor para se camuflar. Quando se sente ameaçado, solta uma nuvem de tinta escura e foge.
+<|assistant|> O polvo é um molusco inteligente, com oito braços, três corações, que muda de cor e solta tinta para fugir. <|end|>
+
+<|user|> Faça um resumo do texto sobre o polvo.
+<|assistant|> O polvo é um molusco inteligente, com oito braços, três corações, que muda de cor e solta tinta para fugir. <|end|>
+
+<|user|> Resuma o texto: A borboleta passa por grandes mudanças ao longo da vida. Primeiro, ela nasce de um ovo como uma lagarta, que come muitas folhas e cresce rapidamente. Depois, a lagarta forma um casulo chamado crisálida. Dentro dele, o corpo se transforma, e algum tempo depois sai uma borboleta com asas. Esse processo se chama metamorfose.
+<|assistant|> A borboleta nasce como lagarta, forma uma crisálida e se transforma em borboleta, num processo chamado metamorfose. <|end|>
+
+<|user|> Resuma: O sapo é um anfíbio. Ele nasce na água como girino, com cauda e sem patas. Aos poucos, o girino ganha patas, perde a cauda e passa a viver também fora da água. O sapo respira pelos pulmões e também pela pele, que precisa ficar sempre úmida. Ele come insetos e ajuda a controlar mosquitos.
+<|assistant|> O sapo nasce como girino na água, se transforma em adulto, respira também pela pele e come insetos. <|end|>
+
+<|user|> Faça um resumo do texto sobre o sapo.
+<|assistant|> O sapo nasce como girino na água, se transforma em adulto, respira também pela pele e come insetos. <|end|>
+
+<|user|> Faça um resumo do texto: A capivara é o maior roedor do mundo e vive na América do Sul. Ela gosta de ficar perto de rios e lagos e é uma ótima nadadora. As capivaras vivem em grupos e se alimentam de capim e plantas aquáticas. Em muitas cidades brasileiras, elas aparecem em parques e na beira de lagoas.
+<|assistant|> A capivara é o maior roedor do mundo, vive perto da água na América do Sul e come capim e plantas aquáticas. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O urso-polar vive no Ártico, perto do Polo Norte. Seus pelos parecem brancos, mas na verdade são transparentes, e a pele por baixo é preta, o que ajuda a absorver o calor do Sol. Ele é um ótimo nadador e caça principalmente focas. Com o aquecimento global, o gelo do mar está diminuindo, o que dificulta a caça.
+<|assistant|> O urso-polar vive no Ártico, tem pele preta e pelos transparentes, caça focas e sofre com o derretimento do gelo. <|end|>
+
+<|user|> Faça um resumo do texto sobre o urso-polar.
+<|assistant|> O urso-polar vive no Ártico, tem pele preta e pelos transparentes, caça focas e sofre com o derretimento do gelo. <|end|>
+
+<|user|> Resuma em uma frase: O camelo é um animal adaptado ao deserto. Ele consegue passar vários dias sem beber água e, quando encontra água, bebe muitos litros de uma vez. A corcova guarda gordura, que serve de reserva de energia. Seus cílios longos e as narinas que se fecham protegem o animal das tempestades de areia.
+<|assistant|> O camelo é adaptado ao deserto: fica dias sem beber água, guarda gordura na corcova e se protege da areia. <|end|>
+
+<|user|> Resuma o texto: A chuva começa quando o calor do Sol faz a água dos rios, lagos e mares evaporar. O vapor sobe, esfria e forma as nuvens. Quando as gotinhas das nuvens se juntam e ficam pesadas, elas caem como chuva. A chuva enche os rios, molha as plantações e abastece as represas que levam água às cidades.
+<|assistant|> A chuva se forma quando a água evapora, vira nuvem e cai em gotas, abastecendo rios, plantações e represas. <|end|>
+
+<|user|> Faça um resumo do texto sobre a chuva.
+<|assistant|> A chuva se forma quando a água evapora, vira nuvem e cai em gotas, abastecendo rios, plantações e represas. <|end|>
+
+<|user|> Resuma: A superfície da Terra é formada por grandes placas de rocha, chamadas placas tectônicas, que se movem muito devagar. Quando essas placas se chocam ou deslizam umas contra as outras, a energia acumulada é liberada de repente, e o chão treme. Esse tremor é o terremoto. O Brasil fica no meio de uma placa e por isso tem poucos terremotos fortes.
+<|assistant|> Os terremotos acontecem quando as placas tectônicas se movem e liberam energia; o Brasil tem poucos porque fica no meio de uma placa. <|end|>
+
+<|user|> Faça um resumo do texto: Nas praias, o nível do mar sobe e desce ao longo do dia. Esse movimento se chama maré. Ele acontece principalmente por causa da atração que a Lua exerce sobre a água dos oceanos. Quando o mar está alto, dizemos que é maré cheia; quando está baixo, é maré vazante. Em geral, há duas marés altas e duas baixas por dia.
+<|assistant|> As marés são a subida e a descida do mar, causadas principalmente pela atração da Lua. <|end|>
+
+<|user|> Faça um resumo do texto sobre as marés.
+<|assistant|> As marés são a subida e a descida do mar, causadas principalmente pela atração da Lua. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? As estrelas são enormes bolas de gás muito quente que produzem luz e calor. O Sol é a estrela mais próxima da Terra. As outras estrelas parecem pequenos pontos porque estão muito, muito longe. Algumas estrelas formam desenhos no céu chamados constelações, como o Cruzeiro do Sul, que ajuda a encontrar a direção sul.
+<|assistant|> As estrelas são bolas de gás quente que produzem luz; o Sol é a mais próxima, e algumas formam constelações. <|end|>
+
+<|user|> Resuma em uma frase: Os cometas são corpos feitos de gelo, poeira e rochas que viajam ao redor do Sol. Quando um cometa se aproxima do Sol, o gelo começa a virar gás e forma uma cauda brilhante, que pode ter milhões de quilômetros. O cometa Halley é um dos mais famosos e pode ser visto da Terra mais ou menos a cada 76 anos.
+<|assistant|> Os cometas são feitos de gelo e poeira e formam uma cauda brilhante quando se aproximam do Sol, como o Halley. <|end|>
+
+<|user|> Faça um resumo do texto sobre os cometas.
+<|assistant|> Os cometas são feitos de gelo e poeira e formam uma cauda brilhante quando se aproximam do Sol, como o Halley. <|end|>
+
+<|user|> Resuma o texto: As nuvens são formadas por bilhões de gotinhas de água ou cristais de gelo que flutuam no ar. Elas têm formas diferentes. As nuvens brancas e fofas costumam aparecer em dias de tempo bom. As nuvens escuras e carregadas geralmente trazem chuva. Algumas nuvens muito altas são finas e parecem fios de algodão.
+<|assistant|> As nuvens são feitas de gotinhas de água ou gelo e têm formas diferentes; as escuras costumam trazer chuva. <|end|>
+
+<|user|> Resuma: O vento é o ar em movimento. Ele acontece porque o Sol aquece o planeta de forma desigual: o ar quente sobe, e o ar mais frio vem ocupar o seu lugar. O vento ajuda a espalhar sementes, move os barcos a vela e pode gerar eletricidade nas usinas eólicas. Quando é muito forte, pode causar estragos.
+<|assistant|> O vento é o ar em movimento causado pelo aquecimento desigual do planeta e pode mover barcos e gerar energia. <|end|>
+
+<|user|> Faça um resumo do texto sobre o vento.
+<|assistant|> O vento é o ar em movimento causado pelo aquecimento desigual do planeta e pode mover barcos e gerar energia. <|end|>
+
+<|user|> Faça um resumo do texto: Os rios nascem em lugares chamados nascentes, muitas vezes no alto de serras e montanhas. Ao longo do caminho, eles recebem a água de outros rios, chamados afluentes, e ficam maiores. Por fim, chegam ao mar, a um lago ou a outro rio, num lugar chamado foz. Os rios fornecem água, alimento e caminhos para o transporte.
+<|assistant|> Os rios começam nas nascentes, recebem afluentes e terminam na foz, fornecendo água, alimento e transporte. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Os oceanos cobrem cerca de setenta por cento da superfície da Terra. O maior deles é o Pacífico, e o que banha o Brasil é o Atlântico. Nos oceanos vivem peixes, baleias, corais, algas e muitos outros seres. As algas microscópicas do mar produzem uma grande parte do oxigênio que respiramos.
+<|assistant|> Os oceanos cobrem cerca de 70% da Terra, abrigam muitos seres vivos e suas algas produzem boa parte do oxigênio. <|end|>
+
+<|user|> Faça um resumo do texto sobre os oceanos.
+<|assistant|> Os oceanos cobrem cerca de 70% da Terra, abrigam muitos seres vivos e suas algas produzem boa parte do oxigênio. <|end|>
+
+<|user|> Resuma em uma frase: Os desertos são lugares onde chove muito pouco. Nem todo deserto é quente: a Antártida, coberta de gelo, também é considerada um deserto. O Saara, na África, é o maior deserto quente do mundo. Plantas como os cactos guardam água no caule, e muitos animais do deserto saem só à noite, quando faz menos calor.
+<|assistant|> Desertos são lugares com pouca chuva, quentes ou frios; plantas e animais de lá se adaptaram à falta de água e ao calor. <|end|>
+
+<|user|> Resuma o texto: As montanhas se formam ao longo de milhões de anos, quando as placas tectônicas se empurram e dobram a crosta da Terra para cima. A montanha mais alta do mundo é o Monte Everest, no Himalaia. Quanto mais alto subimos numa montanha, mais frio fica e mais rarefeito é o ar, ou seja, há menos oxigênio para respirar.
+<|assistant|> As montanhas se formam pelo empurrão das placas tectônicas; quanto mais alto, mais frio e menos oxigênio. <|end|>
+
+<|user|> Faça um resumo do texto sobre as montanhas.
+<|assistant|> As montanhas se formam pelo empurrão das placas tectônicas; quanto mais alto, mais frio e menos oxigênio. <|end|>
+
+<|user|> Resuma: O solo é a camada de terra que cobre a superfície do planeta. Ele se forma muito lentamente, a partir de rochas que se desgastam e de restos de plantas e animais. É no solo que as plantas fixam as raízes e encontram água e nutrientes. Minhocas e outros pequenos animais ajudam a deixá-lo fofo e fértil.
+<|assistant|> O solo é a camada de terra formada por rochas desgastadas e restos de seres vivos, onde as plantas encontram água e nutrientes. <|end|>
+
+<|user|> Faça um resumo do texto: As sementes guardam dentro de si uma pequena planta e uma reserva de alimento. Quando encontram água, ar e temperatura adequada, elas germinam: a casca se abre, sai a raiz e depois o caule com as primeiras folhas. Algumas sementes viajam com o vento, outras grudam nos pelos dos animais ou são levadas por pássaros que comem os frutos.
+<|assistant|> As sementes guardam uma pequena planta e germinam com água e calor; elas se espalham pelo vento ou pelos animais. <|end|>
+
+<|user|> Faça um resumo do texto sobre as sementes.
+<|assistant|> As sementes guardam uma pequena planta e germinam com água e calor; elas se espalham pelo vento ou pelos animais. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? As vacinas ensinam o corpo a se defender de uma doença antes de a pessoa ficar doente. Elas apresentam ao sistema de defesa uma parte do micróbio ou uma versão enfraquecida dele, para que o corpo aprenda a reconhecê-lo. Graças às vacinas, doenças graves como a varíola foram eliminadas e outras, como a poliomielite, ficaram raras.
+<|assistant|> As vacinas ensinam o corpo a reconhecer micróbios e ajudaram a eliminar ou tornar raras doenças graves. <|end|>
+
+<|user|> Resuma em uma frase: As crianças têm vinte dentes de leite, que começam a cair por volta dos seis anos e dão lugar aos dentes permanentes. Um adulto tem trinta e dois dentes. Para mantê-los saudáveis, é importante escová-los depois das refeições, usar fio dental, evitar doces em excesso e visitar o dentista regularmente.
+<|assistant|> As crianças têm 20 dentes de leite e os adultos 32 dentes, que precisam de escovação, fio dental e visitas ao dentista. <|end|>
+
+<|user|> Faça um resumo do texto sobre os dentes.
+<|assistant|> As crianças têm 20 dentes de leite e os adultos 32 dentes, que precisam de escovação, fio dental e visitas ao dentista. <|end|>
+
+<|user|> Resuma o texto: Dormir é tão importante quanto comer e beber água. Durante o sono, o corpo descansa, os músculos se recuperam e o cérebro organiza as memórias do dia. Crianças e adolescentes precisam dormir mais horas do que os adultos. Usar o celular antes de dormir pode atrapalhar o sono, porque a luz da tela engana o cérebro.
+<|assistant|> Durante o sono, o corpo descansa e o cérebro organiza as memórias; usar o celular antes de dormir atrapalha. <|end|>
+
+<|user|> Resuma: Nós enxergamos porque a luz entra nos olhos pela pupila e chega à retina, no fundo do olho. A retina transforma a luz em sinais que vão até o cérebro pelo nervo óptico, e o cérebro forma a imagem. A pupila fica menor quando há muita luz e maior quando está escuro. Algumas pessoas precisam de óculos para enxergar bem.
+<|assistant|> A luz entra pela pupila, chega à retina e vira sinais que o cérebro transforma em imagem. <|end|>
+
+<|user|> Faça um resumo do texto sobre a visão.
+<|assistant|> A luz entra pela pupila, chega à retina e vira sinais que o cérebro transforma em imagem. <|end|>
+
+<|user|> Faça um resumo do texto: A água potável é a água própria para beber. Antes de chegar às torneiras, a água dos rios e represas passa por uma estação de tratamento, onde é limpa, filtrada e recebe cloro para eliminar micróbios. Beber água contaminada pode causar doenças. Por isso, onde não há água tratada, é recomendado ferver ou filtrar a água antes de beber.
+<|assistant|> A água potável passa por tratamento antes de chegar às casas; sem tratamento, é preciso ferver ou filtrar a água. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Celulares, computadores, pilhas e baterias velhas formam o chamado lixo eletrônico. Esses objetos têm metais que podem poluir o solo e a água se forem jogados no lixo comum. Por outro lado, alguns desses metais podem ser reaproveitados. Por isso, o certo é levar o lixo eletrônico a pontos de coleta especiais.
+<|assistant|> O lixo eletrônico tem metais que poluem, mas podem ser reaproveitados, e deve ir para pontos de coleta especiais. <|end|>
+
+<|user|> Faça um resumo do texto sobre o lixo eletrônico.
+<|assistant|> O lixo eletrônico tem metais que poluem, mas podem ser reaproveitados, e deve ir para pontos de coleta especiais. <|end|>
+
+<|user|> Resuma em uma frase: A energia solar é obtida a partir da luz do Sol. As placas solares, colocadas em telhados ou em grandes usinas, transformam essa luz em eletricidade. É uma energia limpa, porque não solta fumaça, e renovável, porque o Sol não vai se esgotar tão cedo. O Brasil recebe muita luz solar e usa cada vez mais esse tipo de energia.
+<|assistant|> A energia solar transforma a luz do Sol em eletricidade com placas solares e é limpa e renovável. <|end|>
+
+<|user|> Resuma o texto: Os ímãs atraem objetos de ferro e de alguns outros metais. Todo ímã tem dois polos, o norte e o sul. Polos diferentes se atraem e polos iguais se repelem, ou seja, se empurram. A Terra funciona como um grande ímã, e é por isso que a agulha da bússola aponta sempre para o norte.
+<|assistant|> Os ímãs atraem o ferro e têm dois polos; polos diferentes se atraem e iguais se repelem, e a Terra também funciona como um ímã. <|end|>
+
+<|user|> Faça um resumo do texto sobre os ímãs.
+<|assistant|> Os ímãs atraem o ferro e têm dois polos; polos diferentes se atraem e iguais se repelem, e a Terra também funciona como um ímã. <|end|>
+
+<|user|> Resuma: O som é uma vibração que se espalha pelo ar, pela água e pelos objetos sólidos. Quando falamos, as cordas vocais vibram e fazem o ar vibrar até chegar aos ouvidos de quem escuta. O som não se espalha no vácuo, por isso no espaço não há som. Ele viaja mais rápido na água do que no ar.
+<|assistant|> O som é uma vibração que se espalha pelo ar, pela água e pelos sólidos, mas não no vácuo do espaço. <|end|>
+
+<|user|> Faça um resumo do texto: A gravidade é a força que puxa os objetos uns para os outros. É ela que faz uma maçã cair da árvore e que nos mantém com os pés no chão. A gravidade também mantém a Lua girando ao redor da Terra e os planetas girando ao redor do Sol. Na Lua, a gravidade é bem mais fraca, por isso os astronautas davam saltos longos.
+<|assistant|> A gravidade puxa os objetos uns para os outros, mantém os planetas em órbita e é mais fraca na Lua. <|end|>
+
+<|user|> Faça um resumo do texto sobre a gravidade.
+<|assistant|> A gravidade puxa os objetos uns para os outros, mantém os planetas em órbita e é mais fraca na Lua. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O microscópio é um instrumento que aumenta a imagem de coisas muito pequenas. Com ele, os cientistas descobriram que todos os seres vivos são formados por células e conheceram as bactérias. Alguns microscópios modernos conseguem aumentar a imagem milhares de vezes e mostram detalhes que nossos olhos nunca veriam sozinhos.
+<|assistant|> O microscópio aumenta a imagem de coisas pequenas e permitiu descobrir as células e as bactérias. <|end|>
+
+<|user|> Resuma em uma frase: A internet é uma rede que liga bilhões de computadores e celulares no mundo todo. Por meio dela, enviamos mensagens, fazemos chamadas de vídeo, estudamos e assistimos a filmes. Mas é preciso cuidado: nem tudo o que está na internet é verdade, e nunca devemos passar senhas ou dados pessoais para desconhecidos.
+<|assistant|> A internet liga bilhões de aparelhos e permite se comunicar e estudar, mas exige cuidado com informações falsas e dados pessoais. <|end|>
+
+<|user|> Faça um resumo do texto sobre a internet.
+<|assistant|> A internet liga bilhões de aparelhos e permite se comunicar e estudar, mas exige cuidado com informações falsas e dados pessoais. <|end|>
+
+<|user|> Resuma o texto: O GPS é um sistema que mostra a nossa localização em qualquer lugar da Terra. Ele funciona com satélites que giram ao redor do planeta e enviam sinais para os aparelhos. O celular recebe os sinais de vários satélites e calcula onde está. O GPS é usado em mapas, aplicativos de transporte, aviões e navios.
+<|assistant|> O GPS usa sinais de satélites para mostrar a localização e é usado em mapas, aplicativos, aviões e navios. <|end|>
+
+<|user|> Resuma: Os robôs são máquinas que realizam tarefas seguindo programas de computador. Nas fábricas, eles montam carros e outros produtos. Há robôs que limpam a casa, que ajudam em cirurgias e que exploram outros planetas, como os jipes-robôs enviados a Marte. Os robôs fazem o que foram programados para fazer.
+<|assistant|> Os robôs são máquinas programadas que montam produtos, limpam, ajudam em cirurgias e até exploram Marte. <|end|>
+
+<|user|> Faça um resumo do texto sobre os robôs.
+<|assistant|> Os robôs são máquinas programadas que montam produtos, limpam, ajudam em cirurgias e até exploram Marte. <|end|>
+
+<|user|> Faça um resumo do texto: Os aviões conseguem voar por causa do formato das asas. Quando o avião ganha velocidade, o ar passa pelas asas de um jeito que empurra o avião para cima. Os motores empurram o avião para a frente. No Brasil, Santos Dumont é lembrado como um dos pioneiros da aviação, por causa do voo do 14-Bis em 1906, em Paris.
+<|assistant|> O avião voa pelo formato das asas e pelos motores; Santos Dumont é lembrado como pioneiro da aviação. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O trem é um veículo que anda sobre trilhos e pode puxar muitos vagões. Os primeiros trens, no século XIX, eram movidos a vapor, produzido pela queima de carvão. Hoje muitos trens são elétricos. Os trens transportam passageiros e grandes cargas, como minérios e grãos, gastando menos combustível do que os caminhões.
+<|assistant|> O trem anda sobre trilhos, já foi movido a vapor e hoje transporta pessoas e cargas gastando menos combustível. <|end|>
+
+<|user|> Faça um resumo do texto sobre o trem.
+<|assistant|> O trem anda sobre trilhos, já foi movido a vapor e hoje transporta pessoas e cargas gastando menos combustível. <|end|>
+
+<|user|> Resuma em uma frase: A bicicleta é um meio de transporte barato, que não polui e ainda faz bem à saúde. Para andar com segurança, é importante usar capacete, respeitar os sinais de trânsito e, à noite, ter luzes ou faixas refletivas. Muitas cidades brasileiras construíram ciclovias, que são faixas só para bicicletas.
+<|assistant|> A bicicleta é barata, não polui e faz bem; para pedalar com segurança, use capacete e respeite o trânsito. <|end|>
+
+<|user|> Resuma o texto: Há milhares de anos, os seres humanos começaram a registrar ideias com desenhos e símbolos. Uma das escritas mais antigas foi criada pelos sumérios, na Mesopotâmia, com marcas feitas em placas de barro. Os egípcios criaram os hieróglifos. Com a escrita, as pessoas puderam guardar leis, histórias e conhecimentos para as próximas gerações.
+<|assistant|> A escrita surgiu há milhares de anos com sumérios e egípcios e permitiu guardar leis, histórias e conhecimentos. <|end|>
+
+<|user|> Faça um resumo do texto sobre a escrita.
+<|assistant|> A escrita surgiu há milhares de anos com sumérios e egípcios e permitiu guardar leis, histórias e conhecimentos. <|end|>
+
+<|user|> Resuma: As pirâmides do Egito foram construídas há mais de quatro mil anos como túmulos para os faraós, os reis do Egito Antigo. A maior delas é a Grande Pirâmide de Gizé, feita com milhões de blocos de pedra. Até hoje, os cientistas estudam como os egípcios conseguiram erguer construções tão grandes sem máquinas modernas.
+<|assistant|> As pirâmides do Egito foram túmulos dos faraós, construídas há mais de quatro mil anos; a maior é a de Gizé. <|end|>
+
+<|user|> Faça um resumo do texto: A roda é uma das invenções mais importantes da história. Ela surgiu há mais de cinco mil anos, provavelmente na Mesopotâmia, e foi usada primeiro na cerâmica e depois em carroças. A roda facilitou o transporte de pessoas e cargas. Hoje ela está em carros, bicicletas, relógios e em muitas máquinas.
+<|assistant|> A roda surgiu há mais de cinco mil anos, facilitou o transporte e hoje está em muitos veículos e máquinas. <|end|>
+
+<|user|> Faça um resumo do texto sobre a roda.
+<|assistant|> A roda surgiu há mais de cinco mil anos, facilitou o transporte e hoje está em muitos veículos e máquinas. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Os primeiros Jogos Olímpicos aconteceram na Grécia Antiga, há mais de dois mil e setecentos anos, em homenagem ao deus Zeus. Os jogos modernos começaram em 1896, em Atenas. Hoje, as Olimpíadas acontecem a cada quatro anos e reúnem atletas do mundo todo. Os cinco anéis da bandeira olímpica representam a união dos continentes.
+<|assistant|> As Olimpíadas começaram na Grécia Antiga, voltaram em 1896 e hoje reúnem atletas do mundo todo a cada quatro anos. <|end|>
+
+<|user|> Resuma em uma frase: O Império Romano foi um dos maiores impérios da Antiguidade. Ele começou na cidade de Roma, na Itália, e chegou a dominar grande parte da Europa, do norte da África e do Oriente Médio. Os romanos construíram estradas, pontes e aquedutos que levavam água às cidades. A língua dos romanos, o latim, deu origem ao português, ao espanhol, ao italiano e ao francês.
+<|assistant|> O Império Romano dominou uma grande área, construiu estradas e aquedutos, e o seu latim deu origem ao português e outras línguas. <|end|>
+
+<|user|> Faça um resumo do texto sobre o Império Romano.
+<|assistant|> O Império Romano dominou uma grande área, construiu estradas e aquedutos, e o seu latim deu origem ao português e outras línguas. <|end|>
+
+<|user|> Resuma o texto: Nos séculos XV e XVI, portugueses e espanhóis fizeram longas viagens pelos oceanos em busca de novas rotas de comércio. Eles usavam caravelas, barcos leves e rápidos. Em 1492, Cristóvão Colombo chegou à América. Em 1498, Vasco da Gama chegou à Índia contornando a África. Em 1500, a frota de Pedro Álvares Cabral chegou ao Brasil.
+<|assistant|> Nos séculos XV e XVI, portugueses e espanhóis navegaram em caravelas e chegaram à América, à Índia e ao Brasil. <|end|>
+
+<|user|> Resuma: Antes da imprensa, os livros eram copiados à mão, um por um, o que levava muito tempo. Por volta de 1450, o alemão Johannes Gutenberg criou uma prensa com letras de metal que podiam ser montadas e reutilizadas, os tipos móveis. Assim, foi possível imprimir muitas cópias de um livro rapidamente, e os livros ficaram mais baratos e populares.
+<|assistant|> Por volta de 1450, Gutenberg criou a prensa de tipos móveis, que permitiu imprimir livros rapidamente e mais barato. <|end|>
+
+<|user|> Faça um resumo do texto sobre a imprensa de Gutenberg.
+<|assistant|> Por volta de 1450, Gutenberg criou a prensa de tipos móveis, que permitiu imprimir livros rapidamente e mais barato. <|end|>
+
+<|user|> Faça um resumo do texto: O Carnaval é uma das festas mais famosas do Brasil e acontece antes da Quaresma, geralmente em fevereiro ou março. No Rio de Janeiro e em São Paulo, as escolas de samba desfilam com fantasias e carros alegóricos. Em Salvador, o povo segue os trios elétricos. Em Recife e Olinda, o destaque são o frevo e os bonecos gigantes.
+<|assistant|> O Carnaval acontece antes da Quaresma, com escolas de samba no Rio e em São Paulo, trios elétricos em Salvador e frevo em Pernambuco. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? As festas juninas acontecem em junho e homenageiam santos como Santo Antônio, São João e São Pedro. Nelas há fogueira, bandeirinhas coloridas, quadrilha e comidas feitas de milho, como pamonha, canjica e pipoca. No Nordeste, as festas são enormes, especialmente em cidades como Campina Grande, na Paraíba, e Caruaru, em Pernambuco.
+<|assistant|> As festas juninas homenageiam santos em junho, com fogueira, quadrilha e comidas de milho, e são enormes no Nordeste. <|end|>
+
+<|user|> Faça um resumo do texto sobre a festa junina.
+<|assistant|> As festas juninas homenageiam santos em junho, com fogueira, quadrilha e comidas de milho, e são enormes no Nordeste. <|end|>
+
+<|user|> Resuma em uma frase: O samba é um ritmo musical brasileiro com raízes africanas. Ele se desenvolveu principalmente no Rio de Janeiro, com influência de músicos que vieram da Bahia. Os instrumentos mais comuns são o pandeiro, o cavaquinho, o surdo e o tamborim. O samba é a trilha sonora dos desfiles das escolas de samba no Carnaval.
+<|assistant|> O samba é um ritmo brasileiro de raízes africanas, desenvolvido no Rio de Janeiro e tocado com pandeiro, cavaquinho e surdo. <|end|>
+
+<|user|> Resuma o texto: A capoeira é uma expressão cultural criada no Brasil por africanos escravizados e seus descendentes. Ela mistura luta, dança, música e acrobacias. Os capoeiristas jogam dentro de uma roda, ao som do berimbau, do pandeiro e de cantos. Em 2014, a roda de capoeira foi reconhecida como patrimônio cultural da humanidade.
+<|assistant|> A capoeira, criada por africanos escravizados e seus descendentes no Brasil, mistura luta, dança e música e é patrimônio da humanidade. <|end|>
+
+<|user|> Faça um resumo do texto sobre a capoeira.
+<|assistant|> A capoeira, criada por africanos escravizados e seus descendentes no Brasil, mistura luta, dança e música e é patrimônio da humanidade. <|end|>
+
+<|user|> Resuma: A bandeira do Brasil foi adotada em 1889, logo depois da Proclamação da República. O verde e o amarelo vêm de cores ligadas à monarquia. O círculo azul mostra o céu com estrelas, e cada estrela representa um estado ou o Distrito Federal. Na faixa branca está escrito o lema Ordem e Progresso.
+<|assistant|> A bandeira do Brasil foi adotada em 1889; suas estrelas representam os estados e o Distrito Federal, e ela traz o lema Ordem e Progresso. <|end|>
+
+<|user|> Faça um resumo do texto: Brasília foi construída para ser a nova capital do Brasil, no centro do país. Ela foi inaugurada em 21 de abril de 1960, no governo de Juscelino Kubitschek. O plano da cidade foi feito pelo urbanista Lúcio Costa, e muitos prédios famosos, como o Congresso Nacional, foram projetados pelo arquiteto Oscar Niemeyer. Vista de cima, a cidade lembra um avião.
+<|assistant|> Brasília, inaugurada em 1960, foi planejada por Lúcio Costa, tem prédios de Oscar Niemeyer e vista de cima lembra um avião. <|end|>
+
+<|user|> Resuma o texto brasília.
+<|assistant|> Brasília, inaugurada em 1960, foi planejada por Lúcio Costa, tem prédios de Oscar Niemeyer e vista de cima lembra um avião. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O Cristo Redentor é uma grande estátua que fica no alto do morro do Corcovado, no Rio de Janeiro. Ela foi inaugurada em 1931 e tem cerca de trinta metros de altura, sem contar o pedestal. De braços abertos, a estátua pode ser vista de muitos lugares da cidade. Em 2007, foi eleita uma das sete novas maravilhas do mundo.
+<|assistant|> O Cristo Redentor, no Corcovado, foi inaugurado em 1931 e em 2007 foi eleito uma das sete novas maravilhas do mundo. <|end|>
+
+<|user|> Resuma em uma frase: As Cataratas do Iguaçu ficam na fronteira entre o Brasil e a Argentina, no rio Iguaçu. Elas são formadas por cerca de 275 quedas de água. A maior delas é chamada Garganta do Diabo. As cataratas ficam dentro de parques nacionais nos dois países e recebem visitantes do mundo todo.
+<|assistant|> As Cataratas do Iguaçu, na fronteira entre Brasil e Argentina, têm cerca de 275 quedas, e a maior é a Garganta do Diabo. <|end|>
+
+<|user|> Faça um resumo do texto sobre as Cataratas do Iguaçu.
+<|assistant|> As Cataratas do Iguaçu, na fronteira entre Brasil e Argentina, têm cerca de 275 quedas, e a maior é a Garganta do Diabo. <|end|>
+
+<|user|> Resuma o texto: O Pantanal é a maior planície alagável do mundo e fica nos estados de Mato Grosso e Mato Grosso do Sul. Na época das chuvas, os rios transbordam e grande parte da região fica coberta de água. O Pantanal é famoso pela quantidade de animais que podem ser vistos, como jacarés, capivaras, onças e o tuiuiú, a ave símbolo da região.
+<|assistant|> O Pantanal é a maior planície alagável do mundo, fica no Centro-Oeste e tem muitos animais, como o tuiuiú. <|end|>
+
+<|user|> Resuma: A Caatinga é um bioma que só existe no Brasil e ocupa grande parte do Nordeste. Ali o clima é quente e chove pouco. Muitas plantas perdem as folhas na seca para economizar água, e os cactos, como o mandacaru, guardam água no caule. Quando a chuva chega, a paisagem cinzenta fica verde em poucos dias.
+<|assistant|> A Caatinga é um bioma só do Brasil, quente e seco, com plantas adaptadas à falta de água, como o mandacaru. <|end|>
+
+<|user|> Faça um resumo do texto sobre a Caatinga.
+<|assistant|> A Caatinga é um bioma só do Brasil, quente e seco, com plantas adaptadas à falta de água, como o mandacaru. <|end|>
+
+<|user|> Faça um resumo do texto: O Cerrado é a savana brasileira e ocupa principalmente o centro do país. Suas árvores costumam ser baixas, com troncos tortos e casca grossa, que protege contra o fogo. Muitos rios importantes nascem no Cerrado, por isso ele é chamado de berço das águas. Lá vivem animais como o lobo-guará, o tamanduá-bandeira e a ema.
+<|assistant|> O Cerrado é a savana brasileira, com árvores de casca grossa, nascentes de muitos rios e animais como o lobo-guará. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? A Mata Atlântica é uma floresta que se estendia por quase todo o litoral brasileiro. Desde a chegada dos portugueses, ela foi muito desmatada para dar lugar a cidades e plantações, e hoje resta só uma pequena parte da floresta original. Mesmo assim, ela abriga muitas espécies, como o mico-leão-dourado, que quase foi extinto e hoje é protegido.
+<|assistant|> A Mata Atlântica ocupava o litoral brasileiro, foi muito desmatada e ainda abriga espécies como o mico-leão-dourado. <|end|>
+
+<|user|> Faça um resumo do texto sobre a Mata Atlântica.
+<|assistant|> A Mata Atlântica ocupava o litoral brasileiro, foi muito desmatada e ainda abriga espécies como o mico-leão-dourado. <|end|>
+
+<|user|> Resuma em uma frase: O Saci é um dos personagens mais conhecidos do folclore brasileiro. Ele é um menino de uma perna só, que usa um gorro vermelho e fuma cachimbo. Segundo as histórias, o Saci adora fazer travessuras: esconde objetos, embaraça a crina dos cavalos e apaga o fogo das panelas. Dizem que ele aparece dentro de redemoinhos de vento.
+<|assistant|> O Saci é um personagem do folclore brasileiro, de uma perna só e gorro vermelho, que adora fazer travessuras. <|end|>
+
+<|user|> Resuma o texto: O Curupira é um protetor das florestas no folclore brasileiro. Ele tem cabelos vermelhos e os pés virados para trás. Assim, quem tenta segui-lo pelas pegadas acaba indo na direção errada. Segundo a lenda, o Curupira castiga os caçadores que matam animais sem necessidade e as pessoas que destroem a mata.
+<|assistant|> O Curupira protege as florestas, tem os pés virados para trás e castiga quem caça sem necessidade ou destrói a mata. <|end|>
+
+<|user|> Faça um resumo do texto sobre o Curupira.
+<|assistant|> O Curupira protege as florestas, tem os pés virados para trás e castiga quem caça sem necessidade ou destrói a mata. <|end|>
+
+<|user|> Resuma: A Iara é uma personagem do folclore brasileiro, conhecida como a mãe das águas. Ela é descrita como uma mulher muito bonita, metade peixe, que vive nos rios da Amazônia. Segundo a lenda, a Iara canta para atrair os pescadores, que ficam encantados e são levados para o fundo do rio.
+<|assistant|> A Iara é a mãe das águas do folclore brasileiro, metade mulher e metade peixe, que atrai pescadores com o seu canto. <|end|>
+
+<|user|> Faça um resumo do texto: Na Amazônia, conta-se que, nas noites de festa, o boto-cor-de-rosa sai do rio e se transforma em um rapaz elegante, vestido de branco e com um chapéu na cabeça. O chapéu esconde o furo que ele tem no alto da cabeça, por onde respira. O rapaz dança e encanta as moças e, antes do amanhecer, volta para o rio.
+<|assistant|> Segundo a lenda amazônica, o boto vira um rapaz de branco nas festas, usa chapéu para esconder o furo da cabeça e volta ao rio antes do amanhecer. <|end|>
+
+<|user|> Faça um resumo do texto sobre a lenda do boto.
+<|assistant|> Segundo a lenda amazônica, o boto vira um rapaz de branco nas festas, usa chapéu para esconder o furo da cabeça e volta ao rio antes do amanhecer. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? A padaria acorda antes do Sol. Ainda de madrugada, o padeiro mistura farinha, água, sal e fermento, sova a massa e espera ela crescer. Depois, os pães vão para o forno quente. Quando a padaria abre, o cheiro de pão fresquinho se espalha pela rua, e logo se forma uma fila de pessoas querendo pão para o café da manhã.
+<|assistant|> O padeiro trabalha de madrugada preparando a massa e assando os pães, que atraem uma fila de clientes pela manhã. <|end|>
+
+<|user|> Resuma em uma frase: A biblioteca é um lugar onde ficam guardados livros, revistas e jornais para todos usarem. Os livros são organizados por assunto, para facilitar a busca. Muitas bibliotecas emprestam livros: a pessoa leva para casa e devolve depois de alguns dias. Na biblioteca, é importante falar baixo, para não atrapalhar quem está lendo ou estudando.
+<|assistant|> A biblioteca guarda livros organizados por assunto, empresta livros e pede silêncio para quem lê e estuda. <|end|>
+
+<|user|> Faça um resumo do texto sobre a biblioteca.
+<|assistant|> A biblioteca guarda livros organizados por assunto, empresta livros e pede silêncio para quem lê e estuda. <|end|>
+
+<|user|> Resuma o texto: O hospital é o lugar onde as pessoas doentes ou feridas recebem tratamento. Lá trabalham médicos, enfermeiros, técnicos e muitos outros profissionais. O pronto-socorro atende os casos urgentes a qualquer hora do dia e da noite. No Brasil, o SUS, o Sistema Único de Saúde, oferece atendimento gratuito em muitos hospitais e postos de saúde.
+<|assistant|> O hospital trata pessoas doentes ou feridas, com vários profissionais, e no Brasil o SUS oferece atendimento gratuito. <|end|>
+
+<|user|> Resuma: O parque da cidade fica cheio nos fins de semana. Algumas pessoas correm ou andam de bicicleta na pista, outras fazem piquenique na grama. As crianças brincam no escorregador e no balanço, enquanto os patos nadam no lago. As árvores do parque deixam o ar mais fresco e servem de casa para muitos pássaros.
+<|assistant|> O parque fica cheio nos fins de semana, com gente se exercitando e brincando, e suas árvores refrescam o ar e abrigam pássaros. <|end|>
+
+<|user|> Faça um resumo do texto sobre o parque.
+<|assistant|> O parque fica cheio nos fins de semana, com gente se exercitando e brincando, e suas árvores refrescam o ar e abrigam pássaros. <|end|>
+
+<|user|> Faça um resumo do texto: Os alunos do quarto ano resolveram fazer uma horta no fundo da escola. Eles prepararam a terra, plantaram alface, cenoura e cheiro-verde e combinaram turnos para regar. Algumas mudas morreram por falta de sol, então eles mudaram os canteiros de lugar. Dois meses depois, as verduras colhidas foram usadas na merenda da escola.
+<|assistant|> Os alunos fizeram uma horta na escola, corrigiram os problemas e, dois meses depois, usaram as verduras na merenda. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? No dia do aniversário de Lia, a família preparou uma festa surpresa. A mãe fez um bolo de chocolate, o irmão encheu os balões e a avó escondeu os presentes no armário. Quando Lia chegou da escola, todos gritaram parabéns. Ela ficou tão emocionada que demorou para conseguir apagar as velinhas.
+<|assistant|> A família de Lia fez uma festa surpresa no seu aniversário, e ela ficou tão emocionada que demorou para apagar as velas. <|end|>
+
+<|user|> Faça um resumo do texto sobre o aniversário de Lia.
+<|assistant|> A família de Lia fez uma festa surpresa no seu aniversário, e ela ficou tão emocionada que demorou para apagar as velas. <|end|>
+
+<|user|> Resuma em uma frase: Numa tarde de chuva, Davi encontrou um cachorro molhado e assustado na porta de casa. O cachorro usava uma coleira com um número de telefone. Davi pediu ajuda à mãe, e as duas ligaram para o número. Meia hora depois, uma senhora chegou correndo e abraçou o cachorro, que se chamava Tufão. Ela agradeceu muito a Davi.
+<|assistant|> Davi encontrou um cachorro perdido, ligou para o número da coleira e o devolveu à dona, que ficou muito agradecida. <|end|>
+
+<|user|> Resuma o texto: Na primeira aula de natação, Bruno tinha medo de colocar o rosto na água. O professor explicou que era só soltar o ar pelo nariz, fazendo bolhinhas. Bruno tentou uma vez, depois outra, e percebeu que não era tão difícil. No fim da aula, ele já conseguia boiar segurando uma prancha.
+<|assistant|> Bruno tinha medo da água na primeira aula de natação, mas aprendeu a soltar o ar e terminou a aula boiando com a prancha. <|end|>
+
+<|user|> Faça um resumo do texto sobre a primeira aula de natação.
+<|assistant|> Bruno tinha medo da água na primeira aula de natação, mas aprendeu a soltar o ar e terminou a aula boiando com a prancha. <|end|>
+
+<|user|> Resuma: Todo domingo, a vovó Teresa faz um bolo de fubá. Ela não usa receita escrita: mede tudo com a mesma xícara velha e com o olhar. Os netos ajudam a quebrar os ovos e a untar a forma. Enquanto o bolo assa, a casa inteira fica com cheiro de erva-doce. Ninguém sabe fazer o bolo igual ao dela.
+<|assistant|> Vovó Teresa faz um bolo de fubá todo domingo, sem receita escrita, com a ajuda dos netos. <|end|>
+
+<|user|> Faça um resumo do texto: Choveu o dia inteiro, e Marina não pôde sair para brincar. No começo, ela ficou chateada. Depois, encontrou uma caixa de papelão e transformou a caixa num castelo, com janelas recortadas e uma bandeira de papel. À tarde, o irmão entrou na brincadeira, e os dois inventaram histórias de reis e dragões até a hora do jantar.
+<|assistant|> Num dia de chuva, Marina transformou uma caixa num castelo e brincou com o irmão até o jantar. <|end|>
+
+<|user|> Faça um resumo do texto sobre o dia de chuva.
+<|assistant|> Num dia de chuva, Marina transformou uma caixa num castelo e brincou com o irmão até o jantar. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? A família de Caio viajou de ônibus de São Paulo até Minas Gerais para visitar os tios. A viagem durou oito horas. Pela janela, Caio viu montanhas, plantações de café e vacas no pasto. Na parada para o almoço, comeu pão de queijo pela primeira vez em Minas e achou que era o melhor que já tinha provado.
+<|assistant|> Caio viajou oito horas de ônibus até Minas Gerais, viu paisagens do interior e adorou o pão de queijo. <|end|>
+
+<|user|> Resuma em uma frase: Um menino novo se mudou para o prédio de Júlia. Ele se chamava Kenji e tinha vindo do Japão com os pais. No começo, falava pouco português, mas adorava futebol. Júlia o convidou para jogar com a turma no pátio. Com a bola, ninguém precisou de muitas palavras, e logo Kenji tinha vários amigos.
+<|assistant|> Kenji, um menino vindo do Japão, fez amigos no prédio graças ao futebol, depois que Júlia o convidou para jogar. <|end|>
+
+<|user|> Faça um resumo do texto sobre o novo vizinho.
+<|assistant|> Kenji, um menino vindo do Japão, fez amigos no prédio graças ao futebol, depois que Júlia o convidou para jogar. <|end|>
+
+<|user|> Resuma o texto: No quintal da casa de Renata havia uma mangueira muito velha, plantada pelo bisavô dela. No verão, a árvore ficava carregada de mangas, e a família dividia as frutas com os vizinhos. Os galhos baixos serviam de balanço, e a sombra era o lugar preferido para ler. Para Renata, aquela árvore fazia parte da família.
+<|assistant|> A velha mangueira do quintal de Renata, plantada pelo bisavô, dava mangas, sombra e balanço, e era como parte da família. <|end|>
+
+<|user|> Resuma: Pipoca era um gato que adorava caixas. Os donos compraram uma cama macia para ele, mas Pipoca preferiu dormir dentro da caixa em que a cama veio. Toda vez que chegava uma encomenda, ele pulava na caixa antes mesmo de ela ser aberta. Os donos acabaram desistindo e deixaram uma caixa só para ele na sala.
+<|assistant|> O gato Pipoca preferia dormir em caixas em vez da cama nova, e os donos deixaram uma caixa só para ele. <|end|>
+
+<|user|> Faça um resumo do texto sobre o gato que gostava de caixas.
+<|assistant|> O gato Pipoca preferia dormir em caixas em vez da cama nova, e os donos deixaram uma caixa só para ele. <|end|>
+
+<|user|> Faça um resumo do texto: Para a feira de ciências, Lucas e Ana construíram um vulcão de argila. Dentro dele, colocaram bicarbonato de sódio e, na hora da apresentação, despejaram vinagre. A mistura fez uma espuma que escorreu pelas laterais, como se fosse lava. Eles explicaram que o bicarbonato e o vinagre reagem e liberam um gás.
+<|assistant|> Lucas e Ana fizeram um vulcão de argila com bicarbonato e vinagre, que reagem e liberam gás, formando uma espuma. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O avô de Sofia a ensinou a jogar xadrez nas férias. No começo, ela perdia todas as partidas e ficava irritada. O avô dizia que cada derrota ensinava alguma coisa. Sofia começou a prestar atenção nos próprios erros e a pensar antes de mexer as peças. No último dia das férias, ela finalmente venceu o avô.
+<|assistant|> Sofia aprendeu xadrez com o avô, perdeu muitas vezes, aprendeu com os erros e no fim das férias venceu. <|end|>
+
+<|user|> Faça um resumo do texto sobre o jogo de xadrez.
+<|assistant|> Sofia aprendeu xadrez com o avô, perdeu muitas vezes, aprendeu com os erros e no fim das férias venceu. <|end|>
+
+<|user|> Resuma em uma frase: O avô de Pedro mora no interior e não usa celular. Por isso, Pedro resolveu escrever uma carta. Contou das notas da escola, do time de futebol e do cachorro novo. Colocou a carta num envelope, escreveu o endereço e levou aos Correios. Duas semanas depois, chegou a resposta do avô, com uma foto antiga dele quando era menino.
+<|assistant|> Pedro escreveu uma carta ao avô, que não usa celular, e recebeu de volta uma resposta com uma foto antiga. <|end|>
+
+<|user|> Resuma o texto: No sábado, a turma de amigos fez um piquenique no parque. Cada um levou alguma coisa: sanduíches, frutas, suco e um bolo de cenoura. Eles esticaram uma toalha na grama, debaixo de uma árvore. Depois de comer, jogaram bola e empinaram pipa. Antes de ir embora, recolheram todo o lixo e deixaram o lugar limpo.
+<|assistant|> Os amigos fizeram um piquenique no parque, comeram, brincaram e recolheram todo o lixo antes de ir embora. <|end|>
+
+<|user|> Faça um resumo do texto sobre o piquenique.
+<|assistant|> Os amigos fizeram um piquenique no parque, comeram, brincaram e recolheram todo o lixo antes de ir embora. <|end|>
+
+<|user|> Resuma: A escola levou os alunos ao zoológico. Eles viram leões descansando ao sol, macacos pulando entre os galhos e um elefante tomando banho de mangueira. A monitora explicou que muitos animais dali tinham sido resgatados e não conseguiriam sobreviver sozinhos na natureza. Os alunos voltaram com muitas perguntas e desenhos.
+<|assistant|> No passeio ao zoológico, os alunos viram leões, macacos e um elefante e aprenderam que muitos animais foram resgatados. <|end|>
+
+<|user|> Faça um resumo do texto: Tiago ganhou um violão velho do tio. As cordas machucavam os dedos, e as primeiras músicas saíam desafinadas. Mesmo assim, ele praticava meia hora todos os dias, assistindo a aulas na internet. Seis meses depois, tocou uma música inteira na festa da família, e todo mundo cantou junto.
+<|assistant|> Tiago praticou violão meia hora por dia durante seis meses e conseguiu tocar uma música inteira na festa da família. <|end|>
+
+<|user|> Faça um resumo do texto sobre o menino e o violão.
+<|assistant|> Tiago praticou violão meia hora por dia durante seis meses e conseguiu tocar uma música inteira na festa da família. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? Helena plantou uma semente de girassol num vaso na janela. Todos os dias, regava a terra e esperava. Depois de uma semana, apareceu um brotinho. Helena percebeu que a planta se virava para o lado do Sol. Em dois meses, o girassol ficou mais alto que ela e abriu uma flor amarela enorme.
+<|assistant|> Helena plantou um girassol, cuidou dele todos os dias e viu a planta crescer, seguir o Sol e abrir uma flor enorme. <|end|>
+
+<|user|> Resuma em uma frase: O time de vôlei da escola perdeu as três primeiras partidas do campeonato. A treinadora reuniu as jogadoras e disse que elas precisavam conversar mais em quadra. Nos treinos seguintes, elas combinaram jogadas e passaram a se ajudar. O time venceu as partidas seguintes e terminou o campeonato em terceiro lugar.
+<|assistant|> Depois de perder três jogos, o time de vôlei passou a se comunicar melhor e terminou o campeonato em terceiro lugar. <|end|>
+
+<|user|> Faça um resumo do texto sobre o time de vôlei.
+<|assistant|> Depois de perder três jogos, o time de vôlei passou a se comunicar melhor e terminou o campeonato em terceiro lugar. <|end|>
+
+<|user|> Resuma o texto: Nas férias, Gabriel foi acampar com os escoteiros. Eles montaram as barracas perto de um rio e aprenderam a acender uma fogueira com segurança. À noite, o monitor mostrou como achar o Cruzeiro do Sul no céu. Gabriel sentiu falta da cama de casa, mas voltou dizendo que queria acampar de novo.
+<|assistant|> Gabriel acampou com os escoteiros, aprendeu a fazer fogueira e a achar o Cruzeiro do Sul, e quis voltar. <|end|>
+
+<|user|> Resuma: Lavar as mãos é uma das formas mais simples de evitar doenças. Nossas mãos tocam em muitas coisas e acumulam micróbios que podem ir para a boca, o nariz e os olhos. O certo é usar água e sabão e esfregar bem as palmas, as costas das mãos, entre os dedos e as unhas, por uns vinte segundos.
+<|assistant|> Lavar as mãos com água e sabão por uns vinte segundos é uma forma simples de evitar doenças. <|end|>
+
+<|user|> Resuma o texto lavar as mãos.
+<|assistant|> Lavar as mãos com água e sabão por uns vinte segundos é uma forma simples de evitar doenças. <|end|>
+
+<|user|> Faça um resumo do texto: Grande parte do nosso corpo é formada por água. Ela ajuda a controlar a temperatura, a transportar nutrientes e a eliminar o que o corpo não precisa. Perdemos água pelo suor, pela respiração e pela urina, então é preciso repor. Em dias quentes ou depois de fazer exercícios, devemos beber ainda mais água.
+<|assistant|> A água é essencial para o corpo, que a perde pelo suor e pela urina, e precisa ser reposta, principalmente no calor. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? O café da manhã é a primeira refeição do dia e dá energia para começar as atividades. Um café da manhã equilibrado pode ter frutas, pão ou cereais, leite ou iogurte e, às vezes, ovo. Quem sai de casa sem comer pode sentir cansaço e ter mais dificuldade de prestar atenção na escola ou no trabalho.
+<|assistant|> O café da manhã dá energia para o dia, e pular essa refeição pode causar cansaço e falta de atenção. <|end|>
+
+<|user|> Faça um resumo do texto sobre o café da manhã.
+<|assistant|> O café da manhã dá energia para o dia, e pular essa refeição pode causar cansaço e falta de atenção. <|end|>
+
+<|user|> Resuma em uma frase: Fazer exercícios físicos fortalece os músculos, os ossos e o coração. Correr, nadar, pedalar, dançar ou jogar bola são boas formas de se movimentar. Os exercícios também melhoram o humor e o sono. Para começar, não é preciso exagerar: caminhar um pouco todos os dias já faz diferença.
+<|assistant|> Os exercícios fortalecem o corpo e melhoram o humor e o sono, e caminhar um pouco por dia já ajuda. <|end|>
+
+<|user|> Resuma o texto: A luz do Sol é importante para a saúde, mas tomar sol demais pode queimar a pele. Os raios ultravioleta podem causar manchas e até doenças de pele. Por isso, é recomendado usar protetor solar, chapéu e óculos escuros e evitar o sol mais forte, que geralmente vai das dez da manhã às quatro da tarde.
+<|assistant|> O sol em excesso pode queimar a pele, então é bom usar protetor, chapéu e óculos e evitar o sol mais forte. <|end|>
+
+<|user|> Faça um resumo do texto sobre o protetor solar.
+<|assistant|> O sol em excesso pode queimar a pele, então é bom usar protetor, chapéu e óculos e evitar o sol mais forte. <|end|>
+
+<|user|> Resuma: Para atravessar a rua com segurança, o pedestre deve usar a faixa, esperar o sinal verde para pedestres e olhar para os dois lados. Dentro do carro, todos devem usar o cinto de segurança, inclusive no banco de trás. As crianças pequenas devem viajar em cadeirinhas próprias para a idade.
+<|assistant|> No trânsito, use a faixa, espere o sinal e olhe para os lados; no carro, todos usam cinto, e crianças vão em cadeirinhas. <|end|>
+
+<|user|> Faça um resumo do texto: Um vulcão é uma abertura na crosta da Terra por onde saem rocha derretida, gases e cinzas. Debaixo da superfície, a rocha derretida é chamada de magma; quando chega à superfície, passa a se chamar lava. Alguns vulcões estão ativos e podem entrar em erupção, enquanto outros estão adormecidos há muito tempo. No Brasil, não há vulcões ativos.
+<|assistant|> Vulcões são aberturas na Terra por onde sai o magma, que vira lava na superfície; no Brasil não há vulcões ativos. <|end|>
+
+<|user|> Faça um resumo do texto sobre os vulcões.
+<|assistant|> Vulcões são aberturas na Terra por onde sai o magma, que vira lava na superfície; no Brasil não há vulcões ativos. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? A Lua não tem luz própria: ela reflete a luz do Sol. Enquanto gira ao redor da Terra, vemos partes diferentes do seu lado iluminado. Por isso, ela parece mudar de forma. As quatro fases principais são lua nova, quarto crescente, lua cheia e quarto minguante. O ciclo completo dura cerca de vinte e nove dias e meio.
+<|assistant|> A Lua reflete a luz do Sol e, ao girar em torno da Terra, passa pelas fases nova, crescente, cheia e minguante em cerca de 29 dias. <|end|>
+
+<|user|> Resuma em uma frase: O arco-íris aparece quando a luz do Sol atravessa as gotas de chuva no ar. A luz branca, na verdade, é formada por várias cores. Ao passar pela água, essas cores se separam e formam o arco. Para ver um arco-íris, é preciso estar de costas para o Sol, olhando para o lado onde está chovendo.
+<|assistant|> O arco-íris surge quando a luz do Sol passa pelas gotas de chuva e se separa em cores; para vê-lo, fique de costas para o Sol. <|end|>
+
+<|user|> Faça um resumo do texto sobre o arco-íris.
+<|assistant|> O arco-íris surge quando a luz do Sol passa pelas gotas de chuva e se separa em cores; para vê-lo, fique de costas para o Sol. <|end|>
+
+<|user|> Resuma o texto: O coração é um músculo que bate durante toda a vida, sem parar. Ele funciona como uma bomba: empurra o sangue pelas artérias até todas as partes do corpo, e o sangue volta pelas veias. Em repouso, o coração de um adulto bate entre sessenta e cem vezes por minuto. Fazer exercícios e comer bem ajuda a mantê-lo saudável.
+<|assistant|> O coração é um músculo que bombeia o sangue pelas artérias e o recebe pelas veias, batendo de 60 a 100 vezes por minuto em repouso. <|end|>
+
+<|user|> Resuma: A digestão começa na boca, quando mastigamos e a saliva começa a quebrar os alimentos. Depois, a comida desce pelo esôfago até o estômago, onde é misturada com sucos digestivos. No intestino delgado, os nutrientes passam para o sangue. O que não é aproveitado segue para o intestino grosso e é eliminado.
+<|assistant|> A digestão começa na boca, passa pelo estômago, e os nutrientes vão para o sangue no intestino delgado. <|end|>
+
+<|user|> Faça um resumo do texto sobre a digestão.
+<|assistant|> A digestão começa na boca, passa pelo estômago, e os nutrientes vão para o sangue no intestino delgado. <|end|>
+
+<|user|> Faça um resumo do texto: A neve se forma quando o ar dentro das nuvens está tão frio que o vapor de água vira pequenos cristais de gelo. Esses cristais se juntam e formam flocos, que caem devagar. Cada floco de neve tem um desenho de seis pontas. No Brasil, a neve é rara, mas às vezes cai nas serras de Santa Catarina e do Rio Grande do Sul.
+<|assistant|> A neve é formada por cristais de gelo que viram flocos de seis pontas; no Brasil, às vezes cai nas serras do Sul. <|end|>
+
+<|user|> Qual é a ideia principal deste texto? As florestas cobrem cerca de um terço das terras do planeta. Elas abrigam a maior parte das espécies de animais e plantas terrestres. As árvores absorvem gás carbônico, liberam oxigênio, protegem o solo e ajudam a formar chuvas. Muitas pessoas, como os povos indígenas, vivem nas florestas e dependem delas.
+<|assistant|> As florestas cobrem um terço das terras, abrigam muitas espécies e ajudam o clima, o solo e as chuvas. <|end|>
+
+<|user|> Faça um resumo do texto sobre as florestas.
+<|assistant|> As florestas cobrem um terço das terras, abrigam muitas espécies e ajudam o clima, o solo e as chuvas. <|end|>
+
+<|user|> Resuma em uma frase: O celular começou como um telefone sem fio e virou um pequeno computador de bolso. Com ele, fazemos chamadas, mandamos mensagens, tiramos fotos, ouvimos música e usamos mapas. Mas é bom usá-lo com equilíbrio: passar muito tempo na tela pode cansar os olhos e atrapalhar o sono e os estudos.
+<|assistant|> O celular virou um computador de bolso com muitas funções, mas deve ser usado com equilíbrio para não prejudicar olhos, sono e estudos. <|end|>
+

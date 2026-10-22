@@ -1,0 +1,3 @@
+O GPS
+
+O GPS é um sistema que mostra a nossa localização em qualquer lugar da Terra. Ele funciona com satélites que giram ao redor do planeta e enviam sinais para os aparelhos. O celular recebe os sinais de vários satélites e calcula onde está. O GPS é usado em mapas, aplicativos de transporte, aviões e navios.

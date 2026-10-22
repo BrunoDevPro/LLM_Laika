@@ -1,0 +1,3 @@
+As fases da Lua
+
+A Lua não tem luz própria: ela reflete a luz do Sol. Enquanto gira ao redor da Terra, vemos partes diferentes do seu lado iluminado. Por isso, ela parece mudar de forma. As quatro fases principais são lua nova, quarto crescente, lua cheia e quarto minguante. O ciclo completo dura cerca de vinte e nove dias e meio.

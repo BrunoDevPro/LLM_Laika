@@ -17,6 +17,11 @@ from data_utils import rag_question, content_words  # noqa: E402
 import dados_extra as D1  # noqa: E402
 import dados_extra2 as D2  # noqa: E402
 import leitura as L  # noqa: E402
+import dados_extra3 as D3  # noqa: E402
+from textos_simples import TEXTOS_1  # noqa: E402
+from textos_simples2 import TEXTOS_2  # noqa: E402
+
+TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
 QA_DIR = ROOT / "data" / "qa"
 MODERN_DIR = ROOT / "data" / "modern"
 
@@ -970,6 +975,160 @@ def leitura_examples():
     return out, problems
 
 
+# =====================================================================
+# SEÇÕES EXTRAS 3 (tools/dados_extra3.py e textos simples)
+# =====================================================================
+GENERO_CLASSE = {"verbo": "um", "substantivo": "um", "adjetivo": "um", "advérbio": "um", "pronome": "um",
+                 "numeral": "um", "conjunção": "uma", "preposição": "uma", "interjeição": "uma"}
+
+
+def cap(text):
+    return text[0].upper() + text[1:]
+
+
+def extra_sections_3(rng):
+    secs = []
+
+    geo = []
+    forms = ["Qual é a capital {p} {c}?", "Qual a capital {p} {c}?", "Me diga a capital {p} {c}.",
+             "Qual cidade é a capital {p} {c}?"]
+    art = {"do": "o ", "da": "a ", "dos": "os ", "das": "as ", "de": ""}
+    for i, (pais, prep, capital, cont) in enumerate(D3.CAPITAIS_2):
+        geo.append(ex(forms[i % 4].format(p=prep, c=pais), f"A capital {prep} {pais} é {capital}."))
+        geo.append(ex(f"De que país {capital} é a capital?", f"{capital} é a capital {prep} {pais}."))
+        verbo = "ficam" if art[prep] in ("os ", "as ") else "fica"
+        geo.append(ex(f"Em que continente {verbo} {art[prep]}{pais}?", f"{cap(art[prep]) if art[prep] else ''}{pais} {verbo} {cont}."))
+    geo.append(ex("Qual é a capital da Bolívia?", "A Bolívia tem duas capitais: Sucre é a capital constitucional, e La Paz é a sede do governo."))
+    for estado, sigla in D3.SIGLAS:
+        if estado == "Distrito Federal":
+            a, prep = "o ", "do"
+        else:
+            a, prep = artigo_estado(estado)
+        geo.append(ex(f"Qual é a sigla {prep} {estado}?", f"A sigla {prep} {estado} é {sigla}."))
+        geo.append(ex(f"{sigla} é a sigla de qual estado?", f"{sigla} é a sigla {prep} {estado}."))
+    secs.append(("Países 2 e siglas", geo))
+
+    sci = []
+    for nome, simb in D3.ELEMENTOS:
+        sci.append(ex(f"Qual é o símbolo químico do {nome}?" if nome not in ("prata", "platina") else
+                      f"Qual é o símbolo químico da {nome}?", f"O símbolo químico {'da' if nome in ('prata', 'platina') else 'do'} {nome} é {simb}."))
+        sci.append(ex(f"Qual elemento químico tem o símbolo {simb}?", f"O símbolo {simb} é do {nome}." if nome not in ("prata", "platina")
+                      else f"O símbolo {simb} é da {nome}."))
+    for animal, n in D3.ANIMAIS_PATAS:
+        sci.append(ex(f"Quantas patas tem {animal}?", f"{cap(animal)} tem {({1: 'uma', 2: 'duas'}).get(n, por_extenso(n))} patas."))
+    for poli, n in D3.POLIGONOS:
+        sci.append(ex(f"Quantos lados tem {poli}?", f"{cap(poli)} tem {por_extenso(n)} lados."))
+    sci += [ex(q, a) for q, a in D3.CORPO]
+    secs.append(("Ciência e corpo humano", sci))
+
+    ling = []
+    for mae, filhote in D3.FILHOTES:
+        ling.append(ex(f"Como se chama o filhote {mae}?", f"O filhote {mae} se chama {filhote}."))
+    for grupo, col in D3.COLETIVOS:
+        ling.append(ex(rng.choice(["Qual é o coletivo de {}?", "Como se chama um grupo de {}?"]).format(grupo),
+                       f"O coletivo de {grupo} é {col}."))
+    for palavra, classe in D3.CLASSES:
+        ling.append(ex(f"Qual é a classe gramatical da palavra {palavra}?",
+                       f"A palavra {palavra} é {GENERO_CLASSE[classe]} {classe}."))
+    for ditado, sentido in D3.DITADOS_SIGNIFICADO:
+        ling.append(ex(rng.choice(["O que significa o ditado: {}?", "Explique o ditado: {}."]).format(ditado), sentido))
+    ling += [ex(q, a) for q, a in D3.DIFERENCAS]
+    secs.append(("Linguagem 2 e diferenças", ling))
+
+    lang = []
+    for i, (pt, es) in enumerate(D3.ESPANHOL):
+        lang.append(ex(["Como se diz {} em espanhol?", "Qual é a tradução de {} para o espanhol?"][i % 2].format(pt),
+                       f"{cap(pt)} em espanhol é {es}."))
+        if i % 3 == 0:
+            lang.append(ex(f"O que significa {es} em espanhol?", f"{cap(es)} em espanhol significa {pt}."))
+    for i, (pt, en) in enumerate(D3.INGLES_2):
+        lang.append(ex(["Como se diz {} em inglês?", "Traduza {} para o inglês.", "Qual é a palavra em inglês para {}?"][i % 3].format(pt),
+                       f"{cap(pt)} em inglês é {en}."))
+        if i % 2 == 1:
+            lang.append(ex(f"O que significa {en} em português?", f"{cap(en)} significa {pt}."))
+    for frase, en in D3.FRASES_INGLES:
+        lang.append(ex(rng.choice(["Como se diz em inglês: {}", "Traduza para o inglês: {}"]).format(frase), en))
+    secs.append(("Espanhol e inglês 2", lang))
+
+    mundo = [ex(q, a) for q, a in D3.SIM_NAO + D3.ESPORTES + D3.DATAS_MUNDO + D3.SAUDE_SEGURANCA]
+    mundo += [ex(f"O que é {t}?", a) for t, a in D3.TECNOLOGIA]
+    secs.append(("Sim ou não, esportes, datas, saúde e tecnologia", mundo))
+
+    secs.append(("Conversa 3", [ex(q, a) for q, a in D3.CONVERSA_3]))
+
+    # --- Matemática gerada ---
+    mat = []
+    conv = [("quilômetros", "metros", 1000), ("metros", "centímetros", 100), ("quilos", "gramas", 1000),
+            ("litros", "mililitros", 1000), ("horas", "minutos", 60), ("minutos", "segundos", 60),
+            ("dias", "horas", 24), ("semanas", "dias", 7), ("anos", "meses", 12), ("dúzias", "unidades", 12)]
+    for de, para, fator in conv:
+        for n in rng.sample(range(2, 10), 3):
+            mat.append(ex(f"Quantos {para} há em {n} {de}?" if para not in ("horas",) else f"Quantas {para} há em {n} {de}?",
+                          f"Em {n} {de} há {n * fator} {para}."))
+    for _ in range(15):
+        a = rng.randint(2, 15)
+        mat.append(ex(f"Qual é a área de um quadrado de lado {a} centímetros?",
+                      f"A área é {a * a} centímetros quadrados, porque {a} × {a} = {a * a}."))
+    for _ in range(15):
+        a, b = rng.randint(2, 15), rng.randint(2, 15)
+        if rng.random() < 0.5:
+            mat.append(ex(f"Qual é a área de um retângulo de {a} por {b} metros?",
+                          f"A área é {a * b} metros quadrados, porque {a} × {b} = {a * b}."))
+        else:
+            mat.append(ex(f"Qual é o perímetro de um retângulo de {a} por {b} metros?",
+                          f"O perímetro é {2 * (a + b)} metros, porque {a} + {b} + {a} + {b} = {2 * (a + b)}."))
+    for _ in range(20):
+        d = rng.choice([2, 3, 4, 5, 10])
+        n = d * rng.randint(2, 20)
+        nome = {2: "a metade", 3: "um terço", 4: "um quarto", 5: "um quinto", 10: "um décimo"}[d]
+        mat.append(ex(f"Quanto é {nome} de {n}?", f"{cap(nome)} de {n} é {n // d}, porque {n} ÷ {d} = {n // d}."))
+    for _ in range(25):
+        p = rng.choice([10, 20, 25, 50, 75, 5, 30])
+        n = rng.choice([20, 40, 60, 80, 100, 120, 200, 300, 400, 500, 1000])
+        mat.append(ex(f"Quanto é {p}% de {n}?", f"{p}% de {n} é {p * n // 100}."))
+    for _ in range(15):
+        b = rng.randint(2, 15)
+        mat.append(ex(rng.choice(["Quanto é {} ao quadrado?", "Quanto é {}²?"]).format(b), f"{b} ao quadrado é {b * b}."))
+    for b, e in [(2, 3), (2, 4), (2, 5), (2, 10), (3, 3), (10, 3), (5, 3), (4, 3), (10, 2), (3, 4)]:
+        mat.append(ex(f"Quanto é {b} elevado a {e}?", f"{b} elevado a {e} é {b ** e}."))
+    for r in rng.sample(range(2, 16), 10):
+        mat.append(ex(f"Qual é a raiz quadrada de {r * r}?", f"A raiz quadrada de {r * r} é {r}, porque {r} × {r} = {r * r}."))
+    for _ in range(30):
+        start, step = rng.randint(1, 20), rng.choice([2, 3, 5, 10, -1, -2, 4])
+        seq = [start + step * k for k in range(4)]
+        if min(seq) < 0:
+            continue
+        mat.append(ex(f"Qual é o próximo número da sequência: {', '.join(map(str, seq))}?",
+                      f"O próximo número é {seq[-1] + step}, porque a sequência {'aumenta' if step > 0 else 'diminui'} de {abs(step)} em {abs(step)}."))
+    for _ in range(15):
+        preco = rng.randint(1, 45)
+        nota = min(n for n in (2, 5, 10, 20, 50, 100) if n > preco)
+        mat.append(ex(f"Comprei algo de {preco} reais e paguei com uma nota de {nota}. Quanto recebo de troco?",
+                      f"Você recebe {nota - preco} reais de troco, porque {nota} - {preco} = {nota - preco}."))
+    secs.append(("Matemática 2", mat))
+
+    # --- Textos simples ---
+    res = []
+    for i, (titulo, texto, resumo, _, _) in enumerate(TEXTOS_SIMPLES):
+        res.append(ex(PEDIDOS_RESUMO[i % len(PEDIDOS_RESUMO)].format(texto), resumo))
+        if i % 2 == 0:
+            res.append(ex(f"Resuma o texto {titulo[0].lower() + titulo[1:]}." if not titulo.startswith(("O ", "A ", "Os ", "As "))
+                          else f"Faça um resumo do texto sobre {titulo[0].lower() + titulo[1:]}.", resumo))
+    secs.append(("Textos simples: resumos", res))
+    return secs
+
+
+def leitura_simples():
+    return [ex(rag_question(q, texto), a) for _, texto, _, q, a in TEXTOS_SIMPLES]
+
+
+def write_simple_texts():
+    for f in MODERN_DIR.glob("simples_*.txt"):
+        f.unlink()
+    for i, (titulo, texto, _, _, _) in enumerate(TEXTOS_SIMPLES, 1):
+        (MODERN_DIR / f"simples_{i:03d}.txt").write_text(f"{titulo}\n\n{texto}\n", encoding="utf-8")
+
+
 def build():
     rng = random.Random(42)
     sections = []
@@ -1070,6 +1229,8 @@ def build():
     res += [ex(q, a) for q, a in RESUMOS_HISTORIA]
     sections.append(("Resumos (textos de data/modern)", res))
     sections += extra_sections(rng)
+    sections += extra_sections_3(rng)
+    write_simple_texts()
 
     header = ("# Gerado por tools/gerar_pergeresp.py. Linhas começando com # são comentários.\n"
               "# Para adicionar exemplos seus, crie outro .txt em data/qa/.\n\n")
@@ -1083,12 +1244,13 @@ def build():
             print(f"{title}: {len(items)}")
     with open(QA_DIR / "identidade.txt", "w", encoding="utf-8") as f:
         f.write("# Quem é a Laika. Este arquivo tem peso maior no fine-tuning.\n\n")
-        f.write("\n".join(ex(q, a) for q, a in IDENTIDADE) + "\n")
+        f.write("\n".join(ex(q, a) for q, a in IDENTIDADE + D3.IDENTIDADE_2) + "\n")
     leitura, _ = leitura_examples()
+    leitura += leitura_simples()
     with open(QA_DIR / "leitura.txt", "w", encoding="utf-8") as f:
         f.write("# Interpretação de texto: Contexto + Pergunta, no mesmo formato que o RAG usa.\n\n")
         f.write("\n".join(leitura) + "\n")
-    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(IDENTIDADE)} | leitura.txt: {len(leitura)}")
+    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(IDENTIDADE) + len(D3.IDENTIDADE_2)} | leitura.txt: {len(leitura)}")
 
 
 if __name__ == "__main__":

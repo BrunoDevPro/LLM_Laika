@@ -26,7 +26,7 @@ import torch
 import torch.nn.functional as F
 from tokenizers import Tokenizer
 
-from chat import build_prompt, generate
+from chat import build_prompt, generate, with_citation
 from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit_context, split_example,
                         wants_rag, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
@@ -266,7 +266,7 @@ def show_samples():
     for question in SAMPLE_PROMPTS:
         prompt, source = build_prompt(question, tokenizer, block, rag, None, max_new_tokens=60)
         answer = generate(model, tokenizer, prompt, device, max_new_tokens=60)
-        print(f"   Você: {question}\n   LLM:  {answer}" + (f"   [contexto: {source}]" if source else ""))
+        print(f"   Você: {question}\n   LLM:  {with_citation(answer, source)}")
     model.train()
 
 

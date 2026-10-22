@@ -452,3 +452,443 @@ Pergunta: Quando a energia voltou?
 Pergunta: Onde Mariana escreveu sobre aquela noite?
 <|assistant|> No seu diário. <|end|>
 
+<|user|> Contexto: O elefante é o maior animal terrestre do mundo. Ele usa a tromba para respirar, cheirar, beber água e pegar alimentos. Os elefantes vivem em grupos liderados pela fêmea mais velha, que conhece os caminhos até a água e a comida. Eles comem capim, folhas, frutas e cascas de árvores durante grande parte do dia.
+Pergunta: Quem lidera os grupos de elefantes?
+<|assistant|> A fêmea mais velha do grupo. <|end|>
+
+<|user|> Contexto: As abelhas vivem em colmeias e trabalham em equipe. As operárias visitam as flores para coletar néctar e pólen. Com o néctar, elas produzem o mel, que serve de alimento para a colmeia. Enquanto voam de flor em flor, as abelhas espalham o pólen e ajudam muitas plantas a produzir frutos e sementes.
+Pergunta: O que as abelhas produzem com o néctar?
+<|assistant|> Elas produzem o mel. <|end|>
+
+<|user|> Contexto: O pinguim-imperador vive na Antártida, um dos lugares mais frios do planeta. Ele não voa, mas nada muito bem e mergulha para caçar peixes e lulas. Depois que a fêmea bota o ovo, é o macho quem o protege em cima das patas, coberto por uma dobra de pele, durante o inverno. Enquanto isso, a fêmea vai ao mar se alimentar.
+Pergunta: Quem cuida do ovo do pinguim-imperador?
+<|assistant|> O macho, que o protege em cima das patas. <|end|>
+
+<|user|> Contexto: O beija-flor é uma das menores aves do mundo. Ele bate as asas tão rápido que consegue ficar parado no ar, como um pequeno helicóptero. Também é capaz de voar para trás. O beija-flor se alimenta do néctar das flores e de pequenos insetos. Seu coração pode bater mais de mil vezes por minuto.
+Pergunta: O que o beija-flor consegue fazer por bater as asas muito rápido?
+<|assistant|> Ele consegue ficar parado no ar e até voar para trás. <|end|>
+
+<|user|> Contexto: As tartarugas marinhas passam quase a vida toda no mar. As fêmeas saem da água apenas para botar ovos na areia, muitas vezes na mesma região de praia onde nasceram. Quando os filhotes nascem, eles correm para o mar. No Brasil, projetos de proteção cuidam dos ninhos para que mais filhotes sobrevivam.
+Pergunta: Por que as tartarugas marinhas vão à praia?
+<|assistant|> As fêmeas vão à praia para botar ovos na areia. <|end|>
+
+<|user|> Contexto: O camaleão é um réptil famoso por mudar de cor. Ele faz isso principalmente para se comunicar com outros camaleões e para controlar a temperatura do corpo, e não só para se esconder. Seus olhos se movem separadamente, então ele pode olhar para dois lados ao mesmo tempo. Para caçar insetos, lança uma língua comprida e pegajosa.
+Pergunta: Para que o camaleão muda de cor?
+<|assistant|> Principalmente para se comunicar e para controlar a temperatura do corpo. <|end|>
+
+<|user|> Contexto: A coruja é uma ave que costuma caçar à noite. Ela tem olhos grandes, que enxergam bem no escuro, e uma audição muito boa. A coruja consegue girar a cabeça por cerca de três quartos de volta, o que compensa o fato de seus olhos não se moverem. Suas penas macias permitem que ela voe quase sem fazer barulho.
+Pergunta: Por que a coruja voa quase sem fazer barulho?
+<|assistant|> Porque tem penas macias. <|end|>
+
+<|user|> Contexto: O golfinho vive no mar, mas não é um peixe: é um mamífero. Ele respira ar por um buraco no alto da cabeça, chamado espiráculo, e precisa subir à superfície para respirar. Os golfinhos vivem em grupos, se comunicam com assobios e estalos e são considerados animais muito inteligentes.
+Pergunta: Como se chama o buraco por onde o golfinho respira?
+<|assistant|> Espiráculo. <|end|>
+
+<|user|> Contexto: As formigas vivem em colônias que podem ter milhares de indivíduos. Cada formiga tem uma função: há a rainha, que põe os ovos, e as operárias, que buscam comida, cuidam das larvas e defendem o formigueiro. Elas deixam no caminho um cheiro que mostra às outras onde está o alimento. Uma formiga consegue carregar objetos muitas vezes mais pesados que o próprio corpo.
+Pergunta: Como as formigas mostram às outras onde está a comida?
+<|assistant|> Elas deixam um cheiro no caminho. <|end|>
+
+<|user|> Contexto: Os tubarões são peixes que existem há centenas de milhões de anos. O esqueleto deles é feito de cartilagem, um material mais flexível do que o osso. Os tubarões perdem e trocam os dentes várias vezes ao longo da vida. Apesar da fama, a maioria das espécies não é perigosa para as pessoas, e muitas estão ameaçadas pela pesca.
+Pergunta: De que é feito o esqueleto dos tubarões?
+<|assistant|> De cartilagem. <|end|>
+
+<|user|> Contexto: A baleia-jubarte é um mamífero enorme que pode medir mais de quinze metros. Os machos produzem cantos longos e complexos, que podem ser ouvidos a grandes distâncias debaixo da água. Todos os anos, as jubartes viajam milhares de quilômetros. No inverno, muitas vêm para o litoral do Brasil, especialmente para a região de Abrolhos, na Bahia, onde nascem os filhotes.
+Pergunta: Para qual região do Brasil muitas jubartes vão no inverno?
+<|assistant|> Para a região de Abrolhos, na Bahia. <|end|>
+
+<|user|> Contexto: O cavalo foi domesticado pelo ser humano há milhares de anos. Durante muito tempo, foi usado para transporte, para puxar carroças e para trabalhar no campo. O cavalo é herbívoro e se alimenta de capim e feno. Curiosamente, ele consegue cochilar em pé, porque suas pernas têm um sistema que as trava sem esforço.
+Pergunta: Como o cavalo consegue cochilar em pé?
+<|assistant|> Porque suas pernas têm um sistema que as trava sem esforço. <|end|>
+
+<|user|> Contexto: A girafa é o animal mais alto do mundo e pode passar de cinco metros de altura. O pescoço comprido permite que ela alcance as folhas do alto das árvores, principalmente das acácias. Sua língua escura mede cerca de meio metro. As girafas vivem nas savanas da África e dormem pouco, muitas vezes em pé.
+Pergunta: Onde vivem as girafas?
+<|assistant|> Nas savanas da África. <|end|>
+
+<|user|> Contexto: O morcego é o único mamífero que voa de verdade. Muitos morcegos se orientam no escuro por ecolocalização: eles emitem sons muito agudos e escutam o eco que volta dos objetos. Algumas espécies comem insetos, outras comem frutas e ajudam a espalhar sementes pelas florestas. Poucas espécies se alimentam de sangue.
+Pergunta: Como muitos morcegos se orientam no escuro?
+<|assistant|> Por ecolocalização: emitem sons agudos e escutam o eco. <|end|>
+
+<|user|> Contexto: O polvo é um molusco que vive no mar. Ele tem oito braços cheios de ventosas, três corações e sangue azulado. O polvo é muito inteligente: consegue abrir potes, se esconder em conchas e mudar de cor para se camuflar. Quando se sente ameaçado, solta uma nuvem de tinta escura e foge.
+Pergunta: O que o polvo faz quando se sente ameaçado?
+<|assistant|> Solta uma nuvem de tinta escura e foge. <|end|>
+
+<|user|> Contexto: A borboleta passa por grandes mudanças ao longo da vida. Primeiro, ela nasce de um ovo como uma lagarta, que come muitas folhas e cresce rapidamente. Depois, a lagarta forma um casulo chamado crisálida. Dentro dele, o corpo se transforma, e algum tempo depois sai uma borboleta com asas. Esse processo se chama metamorfose.
+Pergunta: Como se chama o casulo que a lagarta forma?
+<|assistant|> Crisálida. <|end|>
+
+<|user|> Contexto: O sapo é um anfíbio. Ele nasce na água como girino, com cauda e sem patas. Aos poucos, o girino ganha patas, perde a cauda e passa a viver também fora da água. O sapo respira pelos pulmões e também pela pele, que precisa ficar sempre úmida. Ele come insetos e ajuda a controlar mosquitos.
+Pergunta: Como se chama o sapo quando nasce?
+<|assistant|> Girino. <|end|>
+
+<|user|> Contexto: A capivara é o maior roedor do mundo e vive na América do Sul. Ela gosta de ficar perto de rios e lagos e é uma ótima nadadora. As capivaras vivem em grupos e se alimentam de capim e plantas aquáticas. Em muitas cidades brasileiras, elas aparecem em parques e na beira de lagoas.
+Pergunta: Qual é o maior roedor do mundo?
+<|assistant|> A capivara. <|end|>
+
+<|user|> Contexto: O urso-polar vive no Ártico, perto do Polo Norte. Seus pelos parecem brancos, mas na verdade são transparentes, e a pele por baixo é preta, o que ajuda a absorver o calor do Sol. Ele é um ótimo nadador e caça principalmente focas. Com o aquecimento global, o gelo do mar está diminuindo, o que dificulta a caça.
+Pergunta: De que cor é a pele do urso-polar?
+<|assistant|> A pele do urso-polar é preta. <|end|>
+
+<|user|> Contexto: O camelo é um animal adaptado ao deserto. Ele consegue passar vários dias sem beber água e, quando encontra água, bebe muitos litros de uma vez. A corcova guarda gordura, que serve de reserva de energia. Seus cílios longos e as narinas que se fecham protegem o animal das tempestades de areia.
+Pergunta: O que a corcova do camelo guarda?
+<|assistant|> Gordura, que serve de reserva de energia. <|end|>
+
+<|user|> Contexto: A chuva começa quando o calor do Sol faz a água dos rios, lagos e mares evaporar. O vapor sobe, esfria e forma as nuvens. Quando as gotinhas das nuvens se juntam e ficam pesadas, elas caem como chuva. A chuva enche os rios, molha as plantações e abastece as represas que levam água às cidades.
+Pergunta: Quando as gotinhas das nuvens caem como chuva?
+<|assistant|> Quando se juntam e ficam pesadas. <|end|>
+
+<|user|> Contexto: A superfície da Terra é formada por grandes placas de rocha, chamadas placas tectônicas, que se movem muito devagar. Quando essas placas se chocam ou deslizam umas contra as outras, a energia acumulada é liberada de repente, e o chão treme. Esse tremor é o terremoto. O Brasil fica no meio de uma placa e por isso tem poucos terremotos fortes.
+Pergunta: Por que o Brasil tem poucos terremotos fortes?
+<|assistant|> Porque fica no meio de uma placa tectônica. <|end|>
+
+<|user|> Contexto: Nas praias, o nível do mar sobe e desce ao longo do dia. Esse movimento se chama maré. Ele acontece principalmente por causa da atração que a Lua exerce sobre a água dos oceanos. Quando o mar está alto, dizemos que é maré cheia; quando está baixo, é maré vazante. Em geral, há duas marés altas e duas baixas por dia.
+Pergunta: O que causa principalmente as marés?
+<|assistant|> A atração que a Lua exerce sobre a água dos oceanos. <|end|>
+
+<|user|> Contexto: As estrelas são enormes bolas de gás muito quente que produzem luz e calor. O Sol é a estrela mais próxima da Terra. As outras estrelas parecem pequenos pontos porque estão muito, muito longe. Algumas estrelas formam desenhos no céu chamados constelações, como o Cruzeiro do Sul, que ajuda a encontrar a direção sul.
+Pergunta: Qual constelação ajuda a encontrar a direção sul?
+<|assistant|> O Cruzeiro do Sul. <|end|>
+
+<|user|> Contexto: Os cometas são corpos feitos de gelo, poeira e rochas que viajam ao redor do Sol. Quando um cometa se aproxima do Sol, o gelo começa a virar gás e forma uma cauda brilhante, que pode ter milhões de quilômetros. O cometa Halley é um dos mais famosos e pode ser visto da Terra mais ou menos a cada 76 anos.
+Pergunta: De quanto em quanto tempo o cometa Halley pode ser visto da Terra?
+<|assistant|> Mais ou menos a cada 76 anos. <|end|>
+
+<|user|> Contexto: As nuvens são formadas por bilhões de gotinhas de água ou cristais de gelo que flutuam no ar. Elas têm formas diferentes. As nuvens brancas e fofas costumam aparecer em dias de tempo bom. As nuvens escuras e carregadas geralmente trazem chuva. Algumas nuvens muito altas são finas e parecem fios de algodão.
+Pergunta: Que tipo de nuvem costuma trazer chuva?
+<|assistant|> As nuvens escuras e carregadas. <|end|>
+
+<|user|> Contexto: O vento é o ar em movimento. Ele acontece porque o Sol aquece o planeta de forma desigual: o ar quente sobe, e o ar mais frio vem ocupar o seu lugar. O vento ajuda a espalhar sementes, move os barcos a vela e pode gerar eletricidade nas usinas eólicas. Quando é muito forte, pode causar estragos.
+Pergunta: Como o vento pode gerar eletricidade?
+<|assistant|> Nas usinas eólicas. <|end|>
+
+<|user|> Contexto: Os rios nascem em lugares chamados nascentes, muitas vezes no alto de serras e montanhas. Ao longo do caminho, eles recebem a água de outros rios, chamados afluentes, e ficam maiores. Por fim, chegam ao mar, a um lago ou a outro rio, num lugar chamado foz. Os rios fornecem água, alimento e caminhos para o transporte.
+Pergunta: Como se chama o lugar onde o rio termina?
+<|assistant|> Foz. <|end|>
+
+<|user|> Contexto: Os oceanos cobrem cerca de setenta por cento da superfície da Terra. O maior deles é o Pacífico, e o que banha o Brasil é o Atlântico. Nos oceanos vivem peixes, baleias, corais, algas e muitos outros seres. As algas microscópicas do mar produzem uma grande parte do oxigênio que respiramos.
+Pergunta: Qual oceano banha o Brasil?
+<|assistant|> O Oceano Atlântico. <|end|>
+
+<|user|> Contexto: Os desertos são lugares onde chove muito pouco. Nem todo deserto é quente: a Antártida, coberta de gelo, também é considerada um deserto. O Saara, na África, é o maior deserto quente do mundo. Plantas como os cactos guardam água no caule, e muitos animais do deserto saem só à noite, quando faz menos calor.
+Pergunta: Qual é o maior deserto quente do mundo?
+<|assistant|> O Saara, na África. <|end|>
+
+<|user|> Contexto: As montanhas se formam ao longo de milhões de anos, quando as placas tectônicas se empurram e dobram a crosta da Terra para cima. A montanha mais alta do mundo é o Monte Everest, no Himalaia. Quanto mais alto subimos numa montanha, mais frio fica e mais rarefeito é o ar, ou seja, há menos oxigênio para respirar.
+Pergunta: O que acontece com o ar quanto mais alto subimos numa montanha?
+<|assistant|> Fica mais frio e mais rarefeito, com menos oxigênio. <|end|>
+
+<|user|> Contexto: O solo é a camada de terra que cobre a superfície do planeta. Ele se forma muito lentamente, a partir de rochas que se desgastam e de restos de plantas e animais. É no solo que as plantas fixam as raízes e encontram água e nutrientes. Minhocas e outros pequenos animais ajudam a deixá-lo fofo e fértil.
+Pergunta: Que animais ajudam a deixar o solo fofo?
+<|assistant|> As minhocas e outros pequenos animais. <|end|>
+
+<|user|> Contexto: As sementes guardam dentro de si uma pequena planta e uma reserva de alimento. Quando encontram água, ar e temperatura adequada, elas germinam: a casca se abre, sai a raiz e depois o caule com as primeiras folhas. Algumas sementes viajam com o vento, outras grudam nos pelos dos animais ou são levadas por pássaros que comem os frutos.
+Pergunta: O que acontece quando a semente germina?
+<|assistant|> A casca se abre, sai a raiz e depois o caule com as primeiras folhas. <|end|>
+
+<|user|> Contexto: As vacinas ensinam o corpo a se defender de uma doença antes de a pessoa ficar doente. Elas apresentam ao sistema de defesa uma parte do micróbio ou uma versão enfraquecida dele, para que o corpo aprenda a reconhecê-lo. Graças às vacinas, doenças graves como a varíola foram eliminadas e outras, como a poliomielite, ficaram raras.
+Pergunta: Qual doença foi eliminada graças às vacinas, segundo o texto?
+<|assistant|> A varíola. <|end|>
+
+<|user|> Contexto: As crianças têm vinte dentes de leite, que começam a cair por volta dos seis anos e dão lugar aos dentes permanentes. Um adulto tem trinta e dois dentes. Para mantê-los saudáveis, é importante escová-los depois das refeições, usar fio dental, evitar doces em excesso e visitar o dentista regularmente.
+Pergunta: Quantos dentes de leite tem uma criança?
+<|assistant|> Vinte dentes de leite. <|end|>
+
+<|user|> Contexto: Dormir é tão importante quanto comer e beber água. Durante o sono, o corpo descansa, os músculos se recuperam e o cérebro organiza as memórias do dia. Crianças e adolescentes precisam dormir mais horas do que os adultos. Usar o celular antes de dormir pode atrapalhar o sono, porque a luz da tela engana o cérebro.
+Pergunta: Por que usar o celular antes de dormir pode atrapalhar o sono?
+<|assistant|> Porque a luz da tela engana o cérebro. <|end|>
+
+<|user|> Contexto: Nós enxergamos porque a luz entra nos olhos pela pupila e chega à retina, no fundo do olho. A retina transforma a luz em sinais que vão até o cérebro pelo nervo óptico, e o cérebro forma a imagem. A pupila fica menor quando há muita luz e maior quando está escuro. Algumas pessoas precisam de óculos para enxergar bem.
+Pergunta: Por onde os sinais da retina chegam ao cérebro?
+<|assistant|> Pelo nervo óptico. <|end|>
+
+<|user|> Contexto: A água potável é a água própria para beber. Antes de chegar às torneiras, a água dos rios e represas passa por uma estação de tratamento, onde é limpa, filtrada e recebe cloro para eliminar micróbios. Beber água contaminada pode causar doenças. Por isso, onde não há água tratada, é recomendado ferver ou filtrar a água antes de beber.
+Pergunta: O que é colocado na água para eliminar micróbios?
+<|assistant|> Cloro. <|end|>
+
+<|user|> Contexto: Celulares, computadores, pilhas e baterias velhas formam o chamado lixo eletrônico. Esses objetos têm metais que podem poluir o solo e a água se forem jogados no lixo comum. Por outro lado, alguns desses metais podem ser reaproveitados. Por isso, o certo é levar o lixo eletrônico a pontos de coleta especiais.
+Pergunta: Para onde deve ir o lixo eletrônico?
+<|assistant|> Para pontos de coleta especiais. <|end|>
+
+<|user|> Contexto: A energia solar é obtida a partir da luz do Sol. As placas solares, colocadas em telhados ou em grandes usinas, transformam essa luz em eletricidade. É uma energia limpa, porque não solta fumaça, e renovável, porque o Sol não vai se esgotar tão cedo. O Brasil recebe muita luz solar e usa cada vez mais esse tipo de energia.
+Pergunta: Por que a energia solar é considerada limpa?
+<|assistant|> Porque não solta fumaça. <|end|>
+
+<|user|> Contexto: Os ímãs atraem objetos de ferro e de alguns outros metais. Todo ímã tem dois polos, o norte e o sul. Polos diferentes se atraem e polos iguais se repelem, ou seja, se empurram. A Terra funciona como um grande ímã, e é por isso que a agulha da bússola aponta sempre para o norte.
+Pergunta: O que acontece quando aproximamos dois polos iguais de ímãs?
+<|assistant|> Eles se repelem, ou seja, se empurram. <|end|>
+
+<|user|> Contexto: O som é uma vibração que se espalha pelo ar, pela água e pelos objetos sólidos. Quando falamos, as cordas vocais vibram e fazem o ar vibrar até chegar aos ouvidos de quem escuta. O som não se espalha no vácuo, por isso no espaço não há som. Ele viaja mais rápido na água do que no ar.
+Pergunta: Por que não há som no espaço?
+<|assistant|> Porque o som não se espalha no vácuo. <|end|>
+
+<|user|> Contexto: A gravidade é a força que puxa os objetos uns para os outros. É ela que faz uma maçã cair da árvore e que nos mantém com os pés no chão. A gravidade também mantém a Lua girando ao redor da Terra e os planetas girando ao redor do Sol. Na Lua, a gravidade é bem mais fraca, por isso os astronautas davam saltos longos.
+Pergunta: Por que os astronautas davam saltos longos na Lua?
+<|assistant|> Porque a gravidade da Lua é bem mais fraca. <|end|>
+
+<|user|> Contexto: O microscópio é um instrumento que aumenta a imagem de coisas muito pequenas. Com ele, os cientistas descobriram que todos os seres vivos são formados por células e conheceram as bactérias. Alguns microscópios modernos conseguem aumentar a imagem milhares de vezes e mostram detalhes que nossos olhos nunca veriam sozinhos.
+Pergunta: O que os cientistas descobriram com o microscópio?
+<|assistant|> Que os seres vivos são formados por células, e conheceram as bactérias. <|end|>
+
+<|user|> Contexto: A internet é uma rede que liga bilhões de computadores e celulares no mundo todo. Por meio dela, enviamos mensagens, fazemos chamadas de vídeo, estudamos e assistimos a filmes. Mas é preciso cuidado: nem tudo o que está na internet é verdade, e nunca devemos passar senhas ou dados pessoais para desconhecidos.
+Pergunta: O que nunca devemos passar para desconhecidos na internet?
+<|assistant|> Senhas ou dados pessoais. <|end|>
+
+<|user|> Contexto: O GPS é um sistema que mostra a nossa localização em qualquer lugar da Terra. Ele funciona com satélites que giram ao redor do planeta e enviam sinais para os aparelhos. O celular recebe os sinais de vários satélites e calcula onde está. O GPS é usado em mapas, aplicativos de transporte, aviões e navios.
+Pergunta: Como o GPS descobre a localização?
+<|assistant|> O aparelho recebe sinais de vários satélites e calcula onde está. <|end|>
+
+<|user|> Contexto: Os robôs são máquinas que realizam tarefas seguindo programas de computador. Nas fábricas, eles montam carros e outros produtos. Há robôs que limpam a casa, que ajudam em cirurgias e que exploram outros planetas, como os jipes-robôs enviados a Marte. Os robôs fazem o que foram programados para fazer.
+Pergunta: Que robôs foram enviados a Marte?
+<|assistant|> Jipes-robôs. <|end|>
+
+<|user|> Contexto: Os aviões conseguem voar por causa do formato das asas. Quando o avião ganha velocidade, o ar passa pelas asas de um jeito que empurra o avião para cima. Os motores empurram o avião para a frente. No Brasil, Santos Dumont é lembrado como um dos pioneiros da aviação, por causa do voo do 14-Bis em 1906, em Paris.
+Pergunta: Em que ano Santos Dumont voou com o 14-Bis?
+<|assistant|> Em 1906. <|end|>
+
+<|user|> Contexto: O trem é um veículo que anda sobre trilhos e pode puxar muitos vagões. Os primeiros trens, no século XIX, eram movidos a vapor, produzido pela queima de carvão. Hoje muitos trens são elétricos. Os trens transportam passageiros e grandes cargas, como minérios e grãos, gastando menos combustível do que os caminhões.
+Pergunta: Como eram movidos os primeiros trens?
+<|assistant|> A vapor, produzido pela queima de carvão. <|end|>
+
+<|user|> Contexto: A bicicleta é um meio de transporte barato, que não polui e ainda faz bem à saúde. Para andar com segurança, é importante usar capacete, respeitar os sinais de trânsito e, à noite, ter luzes ou faixas refletivas. Muitas cidades brasileiras construíram ciclovias, que são faixas só para bicicletas.
+Pergunta: O que são ciclovias?
+<|assistant|> Faixas só para bicicletas. <|end|>
+
+<|user|> Contexto: Há milhares de anos, os seres humanos começaram a registrar ideias com desenhos e símbolos. Uma das escritas mais antigas foi criada pelos sumérios, na Mesopotâmia, com marcas feitas em placas de barro. Os egípcios criaram os hieróglifos. Com a escrita, as pessoas puderam guardar leis, histórias e conhecimentos para as próximas gerações.
+Pergunta: Em que material os sumérios faziam a sua escrita?
+<|assistant|> Em placas de barro. <|end|>
+
+<|user|> Contexto: As pirâmides do Egito foram construídas há mais de quatro mil anos como túmulos para os faraós, os reis do Egito Antigo. A maior delas é a Grande Pirâmide de Gizé, feita com milhões de blocos de pedra. Até hoje, os cientistas estudam como os egípcios conseguiram erguer construções tão grandes sem máquinas modernas.
+Pergunta: Para que foram construídas as pirâmides do Egito?
+<|assistant|> Como túmulos para os faraós. <|end|>
+
+<|user|> Contexto: A roda é uma das invenções mais importantes da história. Ela surgiu há mais de cinco mil anos, provavelmente na Mesopotâmia, e foi usada primeiro na cerâmica e depois em carroças. A roda facilitou o transporte de pessoas e cargas. Hoje ela está em carros, bicicletas, relógios e em muitas máquinas.
+Pergunta: Onde a roda provavelmente surgiu?
+<|assistant|> Na Mesopotâmia. <|end|>
+
+<|user|> Contexto: Os primeiros Jogos Olímpicos aconteceram na Grécia Antiga, há mais de dois mil e setecentos anos, em homenagem ao deus Zeus. Os jogos modernos começaram em 1896, em Atenas. Hoje, as Olimpíadas acontecem a cada quatro anos e reúnem atletas do mundo todo. Os cinco anéis da bandeira olímpica representam a união dos continentes.
+Pergunta: O que representam os cinco anéis olímpicos?
+<|assistant|> A união dos continentes. <|end|>
+
+<|user|> Contexto: O Império Romano foi um dos maiores impérios da Antiguidade. Ele começou na cidade de Roma, na Itália, e chegou a dominar grande parte da Europa, do norte da África e do Oriente Médio. Os romanos construíram estradas, pontes e aquedutos que levavam água às cidades. A língua dos romanos, o latim, deu origem ao português, ao espanhol, ao italiano e ao francês.
+Pergunta: Que línguas vieram do latim?
+<|assistant|> O português, o espanhol, o italiano e o francês. <|end|>
+
+<|user|> Contexto: Nos séculos XV e XVI, portugueses e espanhóis fizeram longas viagens pelos oceanos em busca de novas rotas de comércio. Eles usavam caravelas, barcos leves e rápidos. Em 1492, Cristóvão Colombo chegou à América. Em 1498, Vasco da Gama chegou à Índia contornando a África. Em 1500, a frota de Pedro Álvares Cabral chegou ao Brasil.
+Pergunta: Quem chegou à Índia em 1498?
+<|assistant|> Vasco da Gama. <|end|>
+
+<|user|> Contexto: Antes da imprensa, os livros eram copiados à mão, um por um, o que levava muito tempo. Por volta de 1450, o alemão Johannes Gutenberg criou uma prensa com letras de metal que podiam ser montadas e reutilizadas, os tipos móveis. Assim, foi possível imprimir muitas cópias de um livro rapidamente, e os livros ficaram mais baratos e populares.
+Pergunta: Como eram feitos os livros antes da imprensa?
+<|assistant|> Eram copiados à mão, um por um. <|end|>
+
+<|user|> Contexto: O Carnaval é uma das festas mais famosas do Brasil e acontece antes da Quaresma, geralmente em fevereiro ou março. No Rio de Janeiro e em São Paulo, as escolas de samba desfilam com fantasias e carros alegóricos. Em Salvador, o povo segue os trios elétricos. Em Recife e Olinda, o destaque são o frevo e os bonecos gigantes.
+Pergunta: O que o povo segue no Carnaval de Salvador?
+<|assistant|> Os trios elétricos. <|end|>
+
+<|user|> Contexto: As festas juninas acontecem em junho e homenageiam santos como Santo Antônio, São João e São Pedro. Nelas há fogueira, bandeirinhas coloridas, quadrilha e comidas feitas de milho, como pamonha, canjica e pipoca. No Nordeste, as festas são enormes, especialmente em cidades como Campina Grande, na Paraíba, e Caruaru, em Pernambuco.
+Pergunta: Que comidas de milho aparecem nas festas juninas?
+<|assistant|> Pamonha, canjica e pipoca. <|end|>
+
+<|user|> Contexto: O samba é um ritmo musical brasileiro com raízes africanas. Ele se desenvolveu principalmente no Rio de Janeiro, com influência de músicos que vieram da Bahia. Os instrumentos mais comuns são o pandeiro, o cavaquinho, o surdo e o tamborim. O samba é a trilha sonora dos desfiles das escolas de samba no Carnaval.
+Pergunta: Quais instrumentos são comuns no samba?
+<|assistant|> O pandeiro, o cavaquinho, o surdo e o tamborim. <|end|>
+
+<|user|> Contexto: A capoeira é uma expressão cultural criada no Brasil por africanos escravizados e seus descendentes. Ela mistura luta, dança, música e acrobacias. Os capoeiristas jogam dentro de uma roda, ao som do berimbau, do pandeiro e de cantos. Em 2014, a roda de capoeira foi reconhecida como patrimônio cultural da humanidade.
+Pergunta: Qual instrumento é tocado na roda de capoeira?
+<|assistant|> O berimbau, junto com o pandeiro. <|end|>
+
+<|user|> Contexto: A bandeira do Brasil foi adotada em 1889, logo depois da Proclamação da República. O verde e o amarelo vêm de cores ligadas à monarquia. O círculo azul mostra o céu com estrelas, e cada estrela representa um estado ou o Distrito Federal. Na faixa branca está escrito o lema Ordem e Progresso.
+Pergunta: O que cada estrela da bandeira representa?
+<|assistant|> Um estado ou o Distrito Federal. <|end|>
+
+<|user|> Contexto: Brasília foi construída para ser a nova capital do Brasil, no centro do país. Ela foi inaugurada em 21 de abril de 1960, no governo de Juscelino Kubitschek. O plano da cidade foi feito pelo urbanista Lúcio Costa, e muitos prédios famosos, como o Congresso Nacional, foram projetados pelo arquiteto Oscar Niemeyer. Vista de cima, a cidade lembra um avião.
+Pergunta: Quem projetou muitos prédios de Brasília?
+<|assistant|> O arquiteto Oscar Niemeyer. <|end|>
+
+<|user|> Contexto: O Cristo Redentor é uma grande estátua que fica no alto do morro do Corcovado, no Rio de Janeiro. Ela foi inaugurada em 1931 e tem cerca de trinta metros de altura, sem contar o pedestal. De braços abertos, a estátua pode ser vista de muitos lugares da cidade. Em 2007, foi eleita uma das sete novas maravilhas do mundo.
+Pergunta: Em que ano o Cristo Redentor foi inaugurado?
+<|assistant|> Em 1931. <|end|>
+
+<|user|> Contexto: As Cataratas do Iguaçu ficam na fronteira entre o Brasil e a Argentina, no rio Iguaçu. Elas são formadas por cerca de 275 quedas de água. A maior delas é chamada Garganta do Diabo. As cataratas ficam dentro de parques nacionais nos dois países e recebem visitantes do mundo todo.
+Pergunta: Como se chama a maior queda das Cataratas do Iguaçu?
+<|assistant|> Garganta do Diabo. <|end|>
+
+<|user|> Contexto: O Pantanal é a maior planície alagável do mundo e fica nos estados de Mato Grosso e Mato Grosso do Sul. Na época das chuvas, os rios transbordam e grande parte da região fica coberta de água. O Pantanal é famoso pela quantidade de animais que podem ser vistos, como jacarés, capivaras, onças e o tuiuiú, a ave símbolo da região.
+Pergunta: Qual é a ave símbolo do Pantanal?
+<|assistant|> O tuiuiú. <|end|>
+
+<|user|> Contexto: A Caatinga é um bioma que só existe no Brasil e ocupa grande parte do Nordeste. Ali o clima é quente e chove pouco. Muitas plantas perdem as folhas na seca para economizar água, e os cactos, como o mandacaru, guardam água no caule. Quando a chuva chega, a paisagem cinzenta fica verde em poucos dias.
+Pergunta: O que muitas plantas da Caatinga fazem na seca?
+<|assistant|> Perdem as folhas para economizar água. <|end|>
+
+<|user|> Contexto: O Cerrado é a savana brasileira e ocupa principalmente o centro do país. Suas árvores costumam ser baixas, com troncos tortos e casca grossa, que protege contra o fogo. Muitos rios importantes nascem no Cerrado, por isso ele é chamado de berço das águas. Lá vivem animais como o lobo-guará, o tamanduá-bandeira e a ema.
+Pergunta: Por que o Cerrado é chamado de berço das águas?
+<|assistant|> Porque muitos rios importantes nascem nele. <|end|>
+
+<|user|> Contexto: A Mata Atlântica é uma floresta que se estendia por quase todo o litoral brasileiro. Desde a chegada dos portugueses, ela foi muito desmatada para dar lugar a cidades e plantações, e hoje resta só uma pequena parte da floresta original. Mesmo assim, ela abriga muitas espécies, como o mico-leão-dourado, que quase foi extinto e hoje é protegido.
+Pergunta: Que animal da Mata Atlântica quase foi extinto?
+<|assistant|> O mico-leão-dourado. <|end|>
+
+<|user|> Contexto: O Saci é um dos personagens mais conhecidos do folclore brasileiro. Ele é um menino de uma perna só, que usa um gorro vermelho e fuma cachimbo. Segundo as histórias, o Saci adora fazer travessuras: esconde objetos, embaraça a crina dos cavalos e apaga o fogo das panelas. Dizem que ele aparece dentro de redemoinhos de vento.
+Pergunta: Onde dizem que o Saci aparece?
+<|assistant|> Dentro de redemoinhos de vento. <|end|>
+
+<|user|> Contexto: O Curupira é um protetor das florestas no folclore brasileiro. Ele tem cabelos vermelhos e os pés virados para trás. Assim, quem tenta segui-lo pelas pegadas acaba indo na direção errada. Segundo a lenda, o Curupira castiga os caçadores que matam animais sem necessidade e as pessoas que destroem a mata.
+Pergunta: Por que quem segue as pegadas do Curupira se perde?
+<|assistant|> Porque os pés dele são virados para trás. <|end|>
+
+<|user|> Contexto: A Iara é uma personagem do folclore brasileiro, conhecida como a mãe das águas. Ela é descrita como uma mulher muito bonita, metade peixe, que vive nos rios da Amazônia. Segundo a lenda, a Iara canta para atrair os pescadores, que ficam encantados e são levados para o fundo do rio.
+Pergunta: Como a Iara atrai os pescadores?
+<|assistant|> Com o seu canto. <|end|>
+
+<|user|> Contexto: Na Amazônia, conta-se que, nas noites de festa, o boto-cor-de-rosa sai do rio e se transforma em um rapaz elegante, vestido de branco e com um chapéu na cabeça. O chapéu esconde o furo que ele tem no alto da cabeça, por onde respira. O rapaz dança e encanta as moças e, antes do amanhecer, volta para o rio.
+Pergunta: Por que o rapaz da lenda usa chapéu?
+<|assistant|> Para esconder o furo que tem no alto da cabeça. <|end|>
+
+<|user|> Contexto: A padaria acorda antes do Sol. Ainda de madrugada, o padeiro mistura farinha, água, sal e fermento, sova a massa e espera ela crescer. Depois, os pães vão para o forno quente. Quando a padaria abre, o cheiro de pão fresquinho se espalha pela rua, e logo se forma uma fila de pessoas querendo pão para o café da manhã.
+Pergunta: Quais ingredientes o padeiro mistura?
+<|assistant|> Farinha, água, sal e fermento. <|end|>
+
+<|user|> Contexto: A biblioteca é um lugar onde ficam guardados livros, revistas e jornais para todos usarem. Os livros são organizados por assunto, para facilitar a busca. Muitas bibliotecas emprestam livros: a pessoa leva para casa e devolve depois de alguns dias. Na biblioteca, é importante falar baixo, para não atrapalhar quem está lendo ou estudando.
+Pergunta: Por que é importante falar baixo na biblioteca?
+<|assistant|> Para não atrapalhar quem está lendo ou estudando. <|end|>
+
+<|user|> Contexto: O hospital é o lugar onde as pessoas doentes ou feridas recebem tratamento. Lá trabalham médicos, enfermeiros, técnicos e muitos outros profissionais. O pronto-socorro atende os casos urgentes a qualquer hora do dia e da noite. No Brasil, o SUS, o Sistema Único de Saúde, oferece atendimento gratuito em muitos hospitais e postos de saúde.
+Pergunta: O que é o SUS?
+<|assistant|> O Sistema Único de Saúde, que oferece atendimento gratuito no Brasil. <|end|>
+
+<|user|> Contexto: O parque da cidade fica cheio nos fins de semana. Algumas pessoas correm ou andam de bicicleta na pista, outras fazem piquenique na grama. As crianças brincam no escorregador e no balanço, enquanto os patos nadam no lago. As árvores do parque deixam o ar mais fresco e servem de casa para muitos pássaros.
+Pergunta: O que as árvores do parque fazem?
+<|assistant|> Deixam o ar mais fresco e servem de casa para muitos pássaros. <|end|>
+
+<|user|> Contexto: Os alunos do quarto ano resolveram fazer uma horta no fundo da escola. Eles prepararam a terra, plantaram alface, cenoura e cheiro-verde e combinaram turnos para regar. Algumas mudas morreram por falta de sol, então eles mudaram os canteiros de lugar. Dois meses depois, as verduras colhidas foram usadas na merenda da escola.
+Pergunta: Por que algumas mudas morreram?
+<|assistant|> Por falta de sol. <|end|>
+
+<|user|> Contexto: No dia do aniversário de Lia, a família preparou uma festa surpresa. A mãe fez um bolo de chocolate, o irmão encheu os balões e a avó escondeu os presentes no armário. Quando Lia chegou da escola, todos gritaram parabéns. Ela ficou tão emocionada que demorou para conseguir apagar as velinhas.
+Pergunta: Quem encheu os balões?
+<|assistant|> O irmão de Lia. <|end|>
+
+<|user|> Contexto: Numa tarde de chuva, Davi encontrou um cachorro molhado e assustado na porta de casa. O cachorro usava uma coleira com um número de telefone. Davi pediu ajuda à mãe, e as duas ligaram para o número. Meia hora depois, uma senhora chegou correndo e abraçou o cachorro, que se chamava Tufão. Ela agradeceu muito a Davi.
+Pergunta: Como se chamava o cachorro?
+<|assistant|> Tufão. <|end|>
+
+<|user|> Contexto: Na primeira aula de natação, Bruno tinha medo de colocar o rosto na água. O professor explicou que era só soltar o ar pelo nariz, fazendo bolhinhas. Bruno tentou uma vez, depois outra, e percebeu que não era tão difícil. No fim da aula, ele já conseguia boiar segurando uma prancha.
+Pergunta: O que o professor ensinou Bruno a fazer?
+<|assistant|> A soltar o ar pelo nariz, fazendo bolhinhas. <|end|>
+
+<|user|> Contexto: Todo domingo, a vovó Teresa faz um bolo de fubá. Ela não usa receita escrita: mede tudo com a mesma xícara velha e com o olhar. Os netos ajudam a quebrar os ovos e a untar a forma. Enquanto o bolo assa, a casa inteira fica com cheiro de erva-doce. Ninguém sabe fazer o bolo igual ao dela.
+Pergunta: Que bolo a vovó Teresa faz aos domingos?
+<|assistant|> Um bolo de fubá. <|end|>
+
+<|user|> Contexto: Choveu o dia inteiro, e Marina não pôde sair para brincar. No começo, ela ficou chateada. Depois, encontrou uma caixa de papelão e transformou a caixa num castelo, com janelas recortadas e uma bandeira de papel. À tarde, o irmão entrou na brincadeira, e os dois inventaram histórias de reis e dragões até a hora do jantar.
+Pergunta: O que Marina fez com a caixa de papelão?
+<|assistant|> Transformou a caixa num castelo. <|end|>
+
+<|user|> Contexto: A família de Caio viajou de ônibus de São Paulo até Minas Gerais para visitar os tios. A viagem durou oito horas. Pela janela, Caio viu montanhas, plantações de café e vacas no pasto. Na parada para o almoço, comeu pão de queijo pela primeira vez em Minas e achou que era o melhor que já tinha provado.
+Pergunta: Quanto tempo durou a viagem?
+<|assistant|> Oito horas. <|end|>
+
+<|user|> Contexto: Um menino novo se mudou para o prédio de Júlia. Ele se chamava Kenji e tinha vindo do Japão com os pais. No começo, falava pouco português, mas adorava futebol. Júlia o convidou para jogar com a turma no pátio. Com a bola, ninguém precisou de muitas palavras, e logo Kenji tinha vários amigos.
+Pergunta: De que país Kenji tinha vindo?
+<|assistant|> Do Japão. <|end|>
+
+<|user|> Contexto: No quintal da casa de Renata havia uma mangueira muito velha, plantada pelo bisavô dela. No verão, a árvore ficava carregada de mangas, e a família dividia as frutas com os vizinhos. Os galhos baixos serviam de balanço, e a sombra era o lugar preferido para ler. Para Renata, aquela árvore fazia parte da família.
+Pergunta: Quem plantou a mangueira?
+<|assistant|> O bisavô de Renata. <|end|>
+
+<|user|> Contexto: Pipoca era um gato que adorava caixas. Os donos compraram uma cama macia para ele, mas Pipoca preferiu dormir dentro da caixa em que a cama veio. Toda vez que chegava uma encomenda, ele pulava na caixa antes mesmo de ela ser aberta. Os donos acabaram desistindo e deixaram uma caixa só para ele na sala.
+Pergunta: Onde Pipoca preferiu dormir?
+<|assistant|> Dentro da caixa em que a cama veio. <|end|>
+
+<|user|> Contexto: Para a feira de ciências, Lucas e Ana construíram um vulcão de argila. Dentro dele, colocaram bicarbonato de sódio e, na hora da apresentação, despejaram vinagre. A mistura fez uma espuma que escorreu pelas laterais, como se fosse lava. Eles explicaram que o bicarbonato e o vinagre reagem e liberam um gás.
+Pergunta: O que reage para formar a espuma do vulcão?
+<|assistant|> O bicarbonato de sódio e o vinagre. <|end|>
+
+<|user|> Contexto: O avô de Sofia a ensinou a jogar xadrez nas férias. No começo, ela perdia todas as partidas e ficava irritada. O avô dizia que cada derrota ensinava alguma coisa. Sofia começou a prestar atenção nos próprios erros e a pensar antes de mexer as peças. No último dia das férias, ela finalmente venceu o avô.
+Pergunta: O que o avô dizia sobre as derrotas?
+<|assistant|> Que cada derrota ensinava alguma coisa. <|end|>
+
+<|user|> Contexto: O avô de Pedro mora no interior e não usa celular. Por isso, Pedro resolveu escrever uma carta. Contou das notas da escola, do time de futebol e do cachorro novo. Colocou a carta num envelope, escreveu o endereço e levou aos Correios. Duas semanas depois, chegou a resposta do avô, com uma foto antiga dele quando era menino.
+Pergunta: O que veio junto com a resposta do avô?
+<|assistant|> Uma foto antiga dele quando era menino. <|end|>
+
+<|user|> Contexto: No sábado, a turma de amigos fez um piquenique no parque. Cada um levou alguma coisa: sanduíches, frutas, suco e um bolo de cenoura. Eles esticaram uma toalha na grama, debaixo de uma árvore. Depois de comer, jogaram bola e empinaram pipa. Antes de ir embora, recolheram todo o lixo e deixaram o lugar limpo.
+Pergunta: O que os amigos fizeram antes de ir embora?
+<|assistant|> Recolheram todo o lixo e deixaram o lugar limpo. <|end|>
+
+<|user|> Contexto: A escola levou os alunos ao zoológico. Eles viram leões descansando ao sol, macacos pulando entre os galhos e um elefante tomando banho de mangueira. A monitora explicou que muitos animais dali tinham sido resgatados e não conseguiriam sobreviver sozinhos na natureza. Os alunos voltaram com muitas perguntas e desenhos.
+Pergunta: Por que muitos animais estavam no zoológico?
+<|assistant|> Porque tinham sido resgatados e não sobreviveriam sozinhos na natureza. <|end|>
+
+<|user|> Contexto: Tiago ganhou um violão velho do tio. As cordas machucavam os dedos, e as primeiras músicas saíam desafinadas. Mesmo assim, ele praticava meia hora todos os dias, assistindo a aulas na internet. Seis meses depois, tocou uma música inteira na festa da família, e todo mundo cantou junto.
+Pergunta: Quanto tempo Tiago praticava por dia?
+<|assistant|> Meia hora. <|end|>
+
+<|user|> Contexto: Helena plantou uma semente de girassol num vaso na janela. Todos os dias, regava a terra e esperava. Depois de uma semana, apareceu um brotinho. Helena percebeu que a planta se virava para o lado do Sol. Em dois meses, o girassol ficou mais alto que ela e abriu uma flor amarela enorme.
+Pergunta: Para onde a planta se virava?
+<|assistant|> Para o lado do Sol. <|end|>
+
+<|user|> Contexto: O time de vôlei da escola perdeu as três primeiras partidas do campeonato. A treinadora reuniu as jogadoras e disse que elas precisavam conversar mais em quadra. Nos treinos seguintes, elas combinaram jogadas e passaram a se ajudar. O time venceu as partidas seguintes e terminou o campeonato em terceiro lugar.
+Pergunta: Em que lugar o time terminou o campeonato?
+<|assistant|> Em terceiro lugar. <|end|>
+
+<|user|> Contexto: Nas férias, Gabriel foi acampar com os escoteiros. Eles montaram as barracas perto de um rio e aprenderam a acender uma fogueira com segurança. À noite, o monitor mostrou como achar o Cruzeiro do Sul no céu. Gabriel sentiu falta da cama de casa, mas voltou dizendo que queria acampar de novo.
+Pergunta: O que o monitor mostrou no céu?
+<|assistant|> Como achar o Cruzeiro do Sul. <|end|>
+
+<|user|> Contexto: Lavar as mãos é uma das formas mais simples de evitar doenças. Nossas mãos tocam em muitas coisas e acumulam micróbios que podem ir para a boca, o nariz e os olhos. O certo é usar água e sabão e esfregar bem as palmas, as costas das mãos, entre os dedos e as unhas, por uns vinte segundos.
+Pergunta: Por quanto tempo devemos esfregar as mãos?
+<|assistant|> Por uns vinte segundos. <|end|>
+
+<|user|> Contexto: Grande parte do nosso corpo é formada por água. Ela ajuda a controlar a temperatura, a transportar nutrientes e a eliminar o que o corpo não precisa. Perdemos água pelo suor, pela respiração e pela urina, então é preciso repor. Em dias quentes ou depois de fazer exercícios, devemos beber ainda mais água.
+Pergunta: Quando devemos beber ainda mais água?
+<|assistant|> Em dias quentes ou depois de fazer exercícios. <|end|>
+
+<|user|> Contexto: O café da manhã é a primeira refeição do dia e dá energia para começar as atividades. Um café da manhã equilibrado pode ter frutas, pão ou cereais, leite ou iogurte e, às vezes, ovo. Quem sai de casa sem comer pode sentir cansaço e ter mais dificuldade de prestar atenção na escola ou no trabalho.
+Pergunta: O que pode acontecer com quem sai de casa sem comer?
+<|assistant|> Pode sentir cansaço e ter dificuldade de prestar atenção. <|end|>
+
+<|user|> Contexto: Fazer exercícios físicos fortalece os músculos, os ossos e o coração. Correr, nadar, pedalar, dançar ou jogar bola são boas formas de se movimentar. Os exercícios também melhoram o humor e o sono. Para começar, não é preciso exagerar: caminhar um pouco todos os dias já faz diferença.
+Pergunta: Os exercícios melhoram o quê, além do corpo?
+<|assistant|> O humor e o sono. <|end|>
+
+<|user|> Contexto: A luz do Sol é importante para a saúde, mas tomar sol demais pode queimar a pele. Os raios ultravioleta podem causar manchas e até doenças de pele. Por isso, é recomendado usar protetor solar, chapéu e óculos escuros e evitar o sol mais forte, que geralmente vai das dez da manhã às quatro da tarde.
+Pergunta: Em que horário o sol costuma ser mais forte?
+<|assistant|> Das dez da manhã às quatro da tarde. <|end|>
+
+<|user|> Contexto: Para atravessar a rua com segurança, o pedestre deve usar a faixa, esperar o sinal verde para pedestres e olhar para os dois lados. Dentro do carro, todos devem usar o cinto de segurança, inclusive no banco de trás. As crianças pequenas devem viajar em cadeirinhas próprias para a idade.
+Pergunta: Quem deve usar cinto de segurança no carro?
+<|assistant|> Todos, inclusive quem está no banco de trás. <|end|>
+
+<|user|> Contexto: Um vulcão é uma abertura na crosta da Terra por onde saem rocha derretida, gases e cinzas. Debaixo da superfície, a rocha derretida é chamada de magma; quando chega à superfície, passa a se chamar lava. Alguns vulcões estão ativos e podem entrar em erupção, enquanto outros estão adormecidos há muito tempo. No Brasil, não há vulcões ativos.
+Pergunta: Como se chama a rocha derretida quando chega à superfície?
+<|assistant|> Lava. <|end|>
+
+<|user|> Contexto: A Lua não tem luz própria: ela reflete a luz do Sol. Enquanto gira ao redor da Terra, vemos partes diferentes do seu lado iluminado. Por isso, ela parece mudar de forma. As quatro fases principais são lua nova, quarto crescente, lua cheia e quarto minguante. O ciclo completo dura cerca de vinte e nove dias e meio.
+Pergunta: Quanto tempo dura o ciclo das fases da Lua?
+<|assistant|> Cerca de vinte e nove dias e meio. <|end|>
+
+<|user|> Contexto: O arco-íris aparece quando a luz do Sol atravessa as gotas de chuva no ar. A luz branca, na verdade, é formada por várias cores. Ao passar pela água, essas cores se separam e formam o arco. Para ver um arco-íris, é preciso estar de costas para o Sol, olhando para o lado onde está chovendo.
+Pergunta: Como devemos ficar para ver um arco-íris?
+<|assistant|> De costas para o Sol, olhando para o lado onde está chovendo. <|end|>
+
+<|user|> Contexto: O coração é um músculo que bate durante toda a vida, sem parar. Ele funciona como uma bomba: empurra o sangue pelas artérias até todas as partes do corpo, e o sangue volta pelas veias. Em repouso, o coração de um adulto bate entre sessenta e cem vezes por minuto. Fazer exercícios e comer bem ajuda a mantê-lo saudável.
+Pergunta: Por onde o sangue volta ao coração?
+<|assistant|> Pelas veias. <|end|>
+
+<|user|> Contexto: A digestão começa na boca, quando mastigamos e a saliva começa a quebrar os alimentos. Depois, a comida desce pelo esôfago até o estômago, onde é misturada com sucos digestivos. No intestino delgado, os nutrientes passam para o sangue. O que não é aproveitado segue para o intestino grosso e é eliminado.
+Pergunta: Onde os nutrientes passam para o sangue?
+<|assistant|> No intestino delgado. <|end|>
+
+<|user|> Contexto: A neve se forma quando o ar dentro das nuvens está tão frio que o vapor de água vira pequenos cristais de gelo. Esses cristais se juntam e formam flocos, que caem devagar. Cada floco de neve tem um desenho de seis pontas. No Brasil, a neve é rara, mas às vezes cai nas serras de Santa Catarina e do Rio Grande do Sul.
+Pergunta: Onde às vezes cai neve no Brasil?
+<|assistant|> Nas serras de Santa Catarina e do Rio Grande do Sul. <|end|>
+
+<|user|> Contexto: As florestas cobrem cerca de um terço das terras do planeta. Elas abrigam a maior parte das espécies de animais e plantas terrestres. As árvores absorvem gás carbônico, liberam oxigênio, protegem o solo e ajudam a formar chuvas. Muitas pessoas, como os povos indígenas, vivem nas florestas e dependem delas.
+Pergunta: Que gás as árvores absorvem?
+<|assistant|> Gás carbônico. <|end|>
+
+<|user|> Contexto: O celular começou como um telefone sem fio e virou um pequeno computador de bolso. Com ele, fazemos chamadas, mandamos mensagens, tiramos fotos, ouvimos música e usamos mapas. Mas é bom usá-lo com equilíbrio: passar muito tempo na tela pode cansar os olhos e atrapalhar o sono e os estudos.
+Pergunta: O que o uso exagerado do celular pode atrapalhar?
+<|assistant|> O sono e os estudos, além de cansar os olhos. <|end|>
+
