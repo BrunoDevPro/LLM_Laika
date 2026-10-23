@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="fundo">#F3F4F8</color>
+    <color name="topo">#1B2A4A</color>
+    <color name="topo_texto">#FFFFFF</color>
+    <color name="topo_sub">#B9C3DA</color>
+    <color name="bolha_usuario">#2F6FED</color>
+    <color name="texto_usuario">#FFFFFF</color>
+    <color name="bolha_laika">#FFFFFF</color>
+    <color name="texto_laika">#1C1F26</color>
+    <color name="fonte">#5B6B8C</color>
+    <color name="aviso">#6B7280</color>
+    <color name="barra">#FFFFFF</color>
+    <color name="campo">#EEF0F5</color>
+    <color name="borda">#DDE1EA</color>
+</resources>

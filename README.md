@@ -5,6 +5,11 @@ com busca nos textos (RAG) e memória do usuário.
 
 [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrunoDevPro/LLM_Laika/blob/main/colab.ipynb)
 
+## No celular (Android)
+
+A pasta `android/` tem um app que roda a Laika no celular, sem internet (RAG e memória incluídos).
+Veja `android/LEIA-ME.md` para instalar o APK e para gerá-lo de novo depois de um treino.
+
 ## Como rodar (Google Colab)
 
 1. Clique no botão acima.

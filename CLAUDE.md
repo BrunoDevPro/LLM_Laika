@@ -38,6 +38,8 @@ Os checkpoints atuais (`pretrain_best.pt`, `finetuned.pt`, `tokenizer.json`) fic
 **o PyTorch nunca foi executado aqui**. Tudo que depende de torch foi testado só no Colab pelo usuário;
 o resto (gerador de dados, RAG, memória, montagem do prompt) foi testado com um torch falso. Se o
 Claude Code tiver PyTorch disponível, vale rodar um teste ponta a ponta com `--preset tiny`.
+(Em 23/10/2026 o Claude Code rodou com PyTorch 2.14 em CPU: `train → rag build → finetune → chat` com
+`--preset tiny` funcionou, e os checkpoints reais foram comparados com o app Android.)
 
 ## 3. Estrutura
 
@@ -54,6 +56,7 @@ Claude Code tiver PyTorch disponível, vale rodar um teste ponta a ponta com `--
 | `prepare_data.py` | Baixa livros pt do catálogo CSV do Gutenberg (`--max-books 500`, grava `data/books/titulos.tsv`) e artigos da Wikipédia via Hugging Face `wikimedia/wikipedia` `20231101.pt` em streaming (`--wiki 100000`). |
 | `colab.ipynb` | 5 células: (1) preparar/Drive, (2) dados + índice RAG, (3) pré-treino (`MODO = "pular" / "continuar" / "do_zero"`), (4) fine-tuning, (5) conversar. |
 | `tools/gerar_pergeresp.py` | **Gera** `data/qa/pergeresp.txt`, `identidade.txt`, `leitura.txt` e `data/modern/simples_*.txt` a partir das tabelas em `tools/dados_extra*.py`, `tools/leitura.py`, `tools/textos_simples*.py`. |
+| `android/` | **App Android** (APK) que roda a Laika no celular, sem PyTorch: o transformer com KV cache, o tokenizer, o RAG e a memória reescritos em Java (`android/core`), conferidos contra o Python por `core/referencias.py` + `gradle :core:test`. `exportar_modelo.py` converte os checkpoints (pesos em float16) para `app/src/main/assets/` (fora do Git). Ver seção 6b e `android/LEIA-ME.md`. |
 | `windows/` | Scripts do pacote para Windows (`instalar.bat`, `conversar.bat`, `completar_texto.bat`, `instalar_indice.bat`, `rodar.py`, `LEIA-ME.txt`). Ver seção 6. |
 
 ## 4. Formatos
@@ -100,6 +103,20 @@ Montagem: pasta com `chat.py model.py data_utils.py rag.py memory.py` + tudo de 
 arquivos, verifica se o SQLite tem FTS5, procura o índice (em `data/rag`, na raiz ou em `Downloads`,
 aceitando `laika_rag (1).db`) e, se não achar, monta um índice pequeno com `data/modern`.
 Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
+
+## 6b. App Android (`android/`)
+
+- `core/` (Java puro, roda no Android e no PC): `Modelo` (TinyLLM + KV cache + threads), `Tokenizador`
+  (BPE byte-level), `Laika` (`build_prompt`/`generate`), `IndiceRag` (FTS5, mesma pontuação do `rag.py`),
+  `Memoria` (mesmo `memoria.json`), `Texto` (`content_words`, `wants_rag`, `fit_context`).
+  **Qualquer mudança no formato do prompt, no `rag.py`, no `memory.py` ou no `model.py` precisa ser
+  repetida aqui**; rode `python android/core/referencias.py --checkpoints checkpoints` e `./gradlew :core:test`.
+- `app/`: uma tela de chat (Views, sem Compose), `Motor` com uma thread de fundo. SQLite próprio
+  (`androidx.sqlite:sqlite-bundled`, tem FTS5). O índice pequeno (`laika_rag_mini.db`) vai no APK; o
+  `laika_rag.db` completo é importado pelo menu (não cabe no APK). minSdk 26, targetSdk 35.
+- Não usa a GPU: com 7M parâmetros o processador é mais rápido (~5 ms/token no PC). Rever com o modelo de 100M.
+- Só o modelo em `model.py` (posições aprendidas, GELU exato, pesos compartilhados) é suportado; RoPE
+  (Fase 2) exige mudar `Modelo.java` e o formato do `exportar_modelo.py`.
 
 ## 7. Decisões e lições (não desfazer sem motivo)
 
