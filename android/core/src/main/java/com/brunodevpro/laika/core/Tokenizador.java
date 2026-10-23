@@ -28,9 +28,14 @@ public final class Tokenizador {
     private final Map<String, Integer> mergeRank = new HashMap<>();
     private final String[] especiais;
     private final boolean[] ehEspecial;
-    private final char[] byteParaChar = new char[256];
-    private final int[] charParaByte = new int[512];
+    private static final char[] byteParaChar = new char[256];
+    private static final int[] charParaByte = new int[512];
     private final Map<String, int[]> cache = new HashMap<>();
+    private int maxCache = 50000;
+
+    static {
+        montarTabelaDeBytes();
+    }
 
     public Tokenizador(InputStream in) throws IOException {
         BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
@@ -49,9 +54,8 @@ public final class Tokenizador {
         }
         int nm = cabecalho(r.readLine(), "merges");
         for (int i = 0; i < nm; i++) {
-            mergeRank.put(r.readLine(), i);
+            mergeRank.putIfAbsent(r.readLine(), i);
         }
-        montarTabelaDeBytes();
     }
 
     private static int cabecalho(String linha, String nome) throws IOException {
@@ -62,7 +66,7 @@ public final class Tokenizador {
     }
 
     /** Tabela bytes -> caracteres visíveis do GPT-2 (o espaço vira 'Ġ', a quebra de linha 'Ċ'). */
-    private void montarTabelaDeBytes() {
+    private static void montarTabelaDeBytes() {
         boolean[] direto = new boolean[256];
         for (int b = '!'; b <= '~'; b++) direto[b] = true;
         for (int b = 0xA1; b <= 0xAC; b++) direto[b] = true;
@@ -110,6 +114,31 @@ public final class Tokenizador {
         return r;
     }
 
+    /**
+     * Pré-tokenização do ByteLevel: os pedaços da regex do GPT-2, já com os bytes trocados pelos
+     * caracteres visíveis ("Ġpalavra"). Usado também para treinar um tokenizer novo.
+     */
+    public static void preTokenizar(String texto, java.util.function.Consumer<String> pedaco) {
+        Matcher m = PRE.matcher(texto);
+        StringBuilder sb = new StringBuilder();
+        while (m.find()) {
+            byte[] bytes = m.group().getBytes(StandardCharsets.UTF_8);
+            sb.setLength(0);
+            for (byte b : bytes) sb.append(byteParaChar[b & 0xFF]);
+            pedaco.accept(sb.toString());
+        }
+    }
+
+    /** Os 256 caracteres do alfabeto byte-level. */
+    public static char[] alfabeto() {
+        return byteParaChar.clone();
+    }
+
+    /** Guarda mais palavras já tokenizadas (útil ao tokenizar o corpus inteiro). */
+    public void cacheMaximo(int n) {
+        maxCache = n;
+    }
+
     private void codificarTrecho(String trecho, List<Integer> saida) {
         Matcher m = PRE.matcher(trecho);
         while (m.find()) {
@@ -153,7 +182,7 @@ public final class Tokenizador {
             Integer t = ids.get(partes.get(k));
             r[k] = t == null ? unk : t;
         }
-        if (cache.size() < 50000) cache.put(palavra, r);
+        if (cache.size() < maxCache) cache.put(palavra, r);
         return r;
     }
 

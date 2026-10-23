@@ -82,7 +82,7 @@ public final class Modelo {
         return out;
     }
 
-    static float meiaParaFloat(short h) {
+    public static float meiaParaFloat(short h) {
         int bits = h & 0xFFFF;
         int sinal = (bits >>> 15) << 31;
         int exp = (bits >>> 10) & 0x1F;

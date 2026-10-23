@@ -258,7 +258,9 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
                 + "Antes de trocar, a versão em uso é guardada como backup.", 13, R.color.texto_laika, false);
         ajuda.setPadding(0, dp(4), 0, 0);
         u.addView(ajuda);
-        botao(linhaDeBotoes(u), "Escolher arquivos", true, v -> escolherArquivos.launch(new String[]{"*/*"}));
+        LinearLayout lu = linhaDeBotoes(u);
+        botao(lu, "Escolher arquivos", true, v -> escolherArquivos.launch(new String[]{"*/*"}));
+        botao(lu, "Treinar no celular", false, v -> startActivity(new android.content.Intent(this, TreinoActivity.class)));
 
         // Backups
         secao("BACKUPS (" + backups.size() + ")");

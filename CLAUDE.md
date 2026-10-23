@@ -114,7 +114,17 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
 - `app/`: uma tela de chat (Views, sem Compose), `Motor` com uma thread de fundo. SQLite próprio
   (`androidx.sqlite:sqlite-bundled`, tem FTS5). O índice pequeno (`laika_rag_mini.db`) vai no APK; o
   `laika_rag.db` completo é importado pelo menu (não cabe no APK). minSdk 26, targetSdk 35.
-- Não usa a GPU: com 7M parâmetros o processador é mais rápido (~5 ms/token no PC). Rever com o modelo de 100M.
+- Conversa no processador (com 7M parâmetros é mais rápido, ~5 ms/token no PC). Rever com o modelo de 100M.
+- **Versões e backups** (`core/Armazem`): versão = modelos + tokenizer + índice + memória + conversa; arquivos
+  grandes em `blobs/`, compartilhados entre backups. `ConversorPt` lê os `.pt` (pickle mínimo) no celular, com
+  saída idêntica ao `exportar_modelo.py` (que agora grava um rodapé `INFO` com val loss, step e se é de chat).
+- **Treino no celular** (`core/treino`, tela `TreinoActivity`, `TreinoService` em primeiro plano): forward e
+  backward do TinyLLM escritos à mão em compute shaders GLSL ES 3.1 (`Shaders.java`, grupos de 128 threads),
+  AdamW, corte do gradiente, dropout com máscara refeita por semente, acumulação de gradiente (micro-lotes).
+  Port do `train.py` (tokens uint16 em disco, retomada completa), `finetune.py`, BPE (`TreinadorBpe`, igual ao
+  da biblioteca tokenizers) e `rag.py build`. Os dados vêm do Colab pela célula 6 (`laika_dados.zip`).
+  Testes no PC com o Mesa (`apt install libegl-mesa0 libgles2`): `referencias_treino.py` + `RedeGpuTest`,
+  `TreinadorBpeTest`, `PipelineTest`. **Mudanças no `model.py`, `train.py` ou `finetune.py` precisam ser repetidas aqui.**
 - Só o modelo em `model.py` (posições aprendidas, GELU exato, pesos compartilhados) é suportado; RoPE
   (Fase 2) exige mudar `Modelo.java` e o formato do `exportar_modelo.py`.
 

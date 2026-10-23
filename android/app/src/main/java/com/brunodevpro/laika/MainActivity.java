@@ -335,6 +335,7 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         m.add(0, 5, 0, String.format(Locale.getDefault(), "Criatividade (temperatura %.1f)…", motor.temperatura));
         m.add(0, 6, 0, "O que a Laika lembra de mim");
         m.add(0, 7, 0, "Versões e backups…");
+        m.add(0, 10, 0, "Treinar no celular…");
         m.add(0, 8, 0, "Limpar conversa");
         m.add(0, 9, 0, "Sobre");
         pm.setOnMenuItemClickListener(this::itemDoMenu);
@@ -362,6 +363,7 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
                         .setNegativeButton("Cancelar", null).show();
                 break;
             case 9: sobre(); break;
+            case 10: startActivity(new Intent(this, TreinoActivity.class)); break;
             default: return false;
         }
         return true;

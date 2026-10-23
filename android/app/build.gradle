@@ -27,6 +27,11 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    sourceSets {
+        // data/modern e data/qa do repositório vão no APK (o mínimo para o fine-tuning no celular)
+        main.assets.srcDirs += ["$buildDir/dados_assets"]
+    }
+
     androidResources {
         // Pesos e índice sem compressão: o APK quase não muda de tamanho e a leitura é mais rápida.
         noCompress += ["bin", "db"]
@@ -40,3 +45,10 @@ dependencies {
     implementation "androidx.activity:activity:1.9.3"
     implementation "androidx.core:core:1.13.1"
 }
+
+tasks.register("copiarDados", Copy) {
+    from("../../data/modern") { into "dados/modern" }
+    from("../../data/qa") { into "dados/qa" }
+    into "$buildDir/dados_assets"
+}
+tasks.named("preBuild") { dependsOn "copiarDados" }

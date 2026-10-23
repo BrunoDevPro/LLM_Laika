@@ -559,6 +559,62 @@ final class Motor {
         return -1;
     }
 
+    /** O arquivo do índice da versão em uso (o do APK é copiado para um arquivo). */
+    File arquivoDoIndiceAtual() throws IOException {
+        Armazem.Arquivo ind = armazem.atual().arquivos.get(Armazem.INDICE);
+        File f = armazem.arquivo(ind.ref);
+        return f != null ? f : indiceDeFabrica(ind.ref.substring(Armazem.FABRICA.length()));
+    }
+
+    /**
+     * Usa o que o treino no celular produziu (treino/saida: tokenizer, modelo base, modelo de chat,
+     * índice) como uma atualização: confere se combinam, guarda a versão em uso como backup e troca.
+     */
+    void usarResultadoDoTreino(File saida) {
+        emFundo("Aplicando o resultado do treino…", () -> {
+            List<Importador.Entrada> entradas = new ArrayList<>();
+            try {
+                for (String n : new String[]{"tokenizer.txt", "laika_base.bin", "laika_chat.bin", "laika_rag.db"}) {
+                    File f = new File(saida, n);
+                    if (!f.exists()) continue;
+                    File tmp = armazem.temporario("x");
+                    if (n.endsWith(".db")) {
+                        // O índice pode ter centenas de MB: um link para o mesmo arquivo em vez de uma cópia
+                        // (se algo der errado, o original continua em saida/).
+                        try {
+                            Files.createLink(tmp.toPath(), f.toPath());
+                        } catch (Exception semLink) {
+                            try (InputStream in = new java.io.FileInputStream(f)) {
+                                Armazem.copiar(in, tmp, -1, null);
+                            }
+                        }
+                    } else {
+                        try (InputStream in = new java.io.FileInputStream(f)) {
+                            Armazem.copiar(in, tmp, -1, null);
+                        }
+                    }
+                    entradas.add(new Importador.Entrada(tmp, n + " (treinado no celular)"));
+                }
+                if (entradas.isEmpty()) throw new IOException("ainda não há resultado do treino");
+                Importador.Resultado r = new Importador(armazem, Motor::conferirIndice).importar(entradas);
+                entradas.clear();
+                String quando = agora();
+                if (armazem.backupIgualAoAtual() == null) {
+                    armazem.fazerBackup(nomeVersao + " (antes do treino de " + quando + ")");
+                }
+                String nome = "Treino no celular de " + quando;
+                armazem.aplicar(r.trocas, nome, null);
+                carregarVersao();
+                aviso("Usando o modelo treinado no celular: " + String.join(", ", r.feitos) + ".");
+                avisarUsuario("Resultado do treino aplicado", "Agora usando \"" + nome + "\" com: " + String.join(", ", r.feitos)
+                        + ".\n\nA versão anterior foi guardada nos backups."
+                        + (r.avisos.isEmpty() ? "" : "\n\nAtenção: " + String.join("; ", r.avisos) + "."));
+            } finally {
+                for (Importador.Entrada e : entradas) e.arquivo.delete();
+            }
+        });
+    }
+
     /** Importa os arquivos de uma atualização (ou backups .zip) escolhidos no seletor. */
     void importar(List<Uri> uris) {
         emFundo("Importando…", () -> {

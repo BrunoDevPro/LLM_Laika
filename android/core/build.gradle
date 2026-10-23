@@ -18,14 +18,24 @@ dependencies {
     testImplementation "androidx.sqlite:sqlite-bundled:${rootProject.sqliteVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    // OpenGL ES do Mesa no PC, para testar os shaders do treino contra o PyTorch
+    testImplementation "org.lwjgl:lwjgl:3.3.4"
+    testImplementation "org.lwjgl:lwjgl-egl:3.3.4"
+    testImplementation "org.lwjgl:lwjgl-opengles:3.3.4"
+    testRuntimeOnly "org.lwjgl:lwjgl:3.3.4:natives-linux"
+    testRuntimeOnly "org.lwjgl:lwjgl-opengles:3.3.4:natives-linux"
 }
 
 test {
     useJUnitPlatform()
+    maxHeapSize = "3g"
+    environment "EGL_PLATFORM", "surfaceless"  // Mesa sem janela
     // Arquivos gerados por exportar_modelo.py e core/referencias.py (os testes são pulados se faltarem).
     systemProperty "laika.assets", file("../app/src/main/assets").absolutePath
     systemProperty "laika.referencias", file("build/referencias").absolutePath
     // Pasta com finetuned.pt, pretrain_best.pt e tokenizer.json (testes da importação no app).
+    systemProperty "laika.livros", System.getenv("LAIKA_LIVROS") ?: "none"
+    systemProperty "laika.repo", file("../..").absolutePath
     systemProperty "laika.checkpoints", System.getenv("LAIKA_CHECKPOINTS") ?: file("../../checkpoints").absolutePath
     testLogging {
         events "passed", "skipped", "failed"

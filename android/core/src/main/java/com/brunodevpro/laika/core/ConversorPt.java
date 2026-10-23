@@ -89,8 +89,7 @@ public final class ConversorPt {
         i.dim = c.getInt();
         i.heads = c.getInt();
         i.layers = c.getInt();
-        long d1 = i.dim, porCamada = 2 * d1 + 3 * d1 * d1 + d1 * d1 + 2 * d1 + 4 * d1 * d1 + 4 * d1 + 4 * d1 * d1 + d1;
-        i.parametros = (long) i.vocab * d1 + (long) i.block * d1 + i.layers * porCamada + 2 * d1;
+        i.parametros = parametros(i.vocab, i.block, i.dim, i.layers);
         long pular = i.parametros * 2;
         while (pular > 0) {
             long p = d.skip(pular);
@@ -114,6 +113,12 @@ public final class ConversorPt {
             i.temRodape = true;
         }
         return i;
+    }
+
+    /** Número de parâmetros do TinyLLM (sem contar a saída, que é o embedding). */
+    public static long parametros(int vocab, int block, int dim, int layers) {
+        long d = dim, porCamada = 2 * d + 3 * d * d + d * d + 2 * d + 4 * d * d + 4 * d + 4 * d * d + d;
+        return (long) vocab * d + (long) block * d + layers * porCamada + 2 * d;
     }
 
     /** Só lê o cabeçalho (config, val loss...) para identificar o arquivo. */
@@ -266,7 +271,7 @@ public final class ConversorPt {
     }
 
     /** float32 -> float16 com arredondamento para o par mais próximo (igual ao numpy). */
-    static short paraMeia(float f) {
+    public static short paraMeia(float f) {
         int bits = Float.floatToRawIntBits(f);
         int sinal = (bits >>> 16) & 0x8000;
         int exp = (bits >>> 23) & 0xFF;
