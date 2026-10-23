@@ -189,6 +189,16 @@ public final class Memoria {
         return "Eu lembro que " + String.join("; ", p) + ".";
     }
 
+    /** Resumo curto para a lista de versões: "Bruno · 3 fatos · 2 anotações". */
+    public String descricaoCurta() {
+        List<String> p = new ArrayList<>();
+        if (nome != null) p.add(nome);
+        int fatos = (cidade != null ? 1 : 0) + (idade != null ? 1 : 0) + gostos.size() + naoGosta.size() + favoritos.size();
+        if (fatos > 0) p.add(fatos + (fatos == 1 ? " fato" : " fatos"));
+        if (!notas.isEmpty()) p.add(notas.size() + (notas.size() == 1 ? " anotação" : " anotações"));
+        return p.isEmpty() ? "vazia" : String.join(" · ", p);
+    }
+
     private static String capitalizar(String w) {
         if (w.isEmpty()) return w;
         int primeiro = w.codePointAt(0);

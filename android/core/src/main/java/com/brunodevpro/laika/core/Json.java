@@ -5,12 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** JSON mínimo para o memoria.json (o core roda também fora do Android, sem org.json). */
-final class Json {
+/** JSON mínimo (memoria.json, versões, conversa) (o core roda também fora do Android, sem org.json). */
+public final class Json {
     private Json() {
     }
 
-    static Object ler(String s) {
+    public static Object ler(String s) {
         Leitor l = new Leitor(s);
         Object v = l.valor();
         l.espacos();
@@ -127,7 +127,7 @@ final class Json {
         }
     }
 
-    static String escrever(Object v) {
+    public static String escrever(Object v) {
         StringBuilder sb = new StringBuilder();
         escrever(v, sb, 0);
         return sb.toString();

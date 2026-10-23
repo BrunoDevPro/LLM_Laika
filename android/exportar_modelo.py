@@ -9,7 +9,9 @@ Gera em android/app/src/main/assets/:
   laika_rag_mini.db    índice RAG pequeno (data/modern + os livros passados em --livros)
 
 O app não usa PyTorch: o transformer é refeito em Java (android/core). Por isso os pesos
-vão num formato próprio, na ordem que o Java espera (ver ModelWeights.java).
+vão num formato próprio, na ordem que o Java espera (ver Modelo.java e ConversorPt.java).
+O app também converte os .pt sozinho (menu Versões → Importar atualização); este script
+serve para montar o APK.
 Os pesos ficam em float16 para o APK ficar menor; o cálculo no celular é em float32.
 """
 
@@ -49,6 +51,10 @@ def export_weights(ckpt_path, out_path):
                             cfg["heads"], cfg["layers"]))
         for name in tensor_order(cfg["layers"]):
             f.write(state[name].float().numpy().astype("<f2").tobytes())
+        # Rodapé opcional (o app mostra na lista de versões): val loss, step e se é o modelo de chat.
+        val = ckpt.get("val_loss")
+        f.write(b"INFO" + struct.pack("<dqb", float("nan") if val is None else float(val),
+                                      int(ckpt.get("step", -1)), 1 if ckpt.get("finetuned") else 0))
     print(f"{out_path.name}: {out_path.stat().st_size / 1e6:.1f} MB "
           f"(val loss {ckpt.get('val_loss', float('nan')):.3f})")
 

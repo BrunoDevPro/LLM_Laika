@@ -25,6 +25,8 @@ test {
     // Arquivos gerados por exportar_modelo.py e core/referencias.py (os testes são pulados se faltarem).
     systemProperty "laika.assets", file("../app/src/main/assets").absolutePath
     systemProperty "laika.referencias", file("build/referencias").absolutePath
+    // Pasta com finetuned.pt, pretrain_best.pt e tokenizer.json (testes da importação no app).
+    systemProperty "laika.checkpoints", System.getenv("LAIKA_CHECKPOINTS") ?: file("../../checkpoints").absolutePath
     testLogging {
         events "passed", "skipped", "failed"
         showStandardStreams = true
