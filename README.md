@@ -8,7 +8,9 @@ com busca nos textos (RAG) e memória do usuário.
 ## No celular (Android)
 
 A pasta `android/` tem um app que roda a Laika no celular, sem internet (RAG e memória incluídos).
-Veja `android/LEIA-ME.md` para instalar o APK e para gerá-lo de novo depois de um treino.
+Pela tela **Colab** do app dá para ligar as células do treino no Colab sem deixar o Colab aberto
+(GitHub Actions + [Colab CLI](https://github.com/googlecolab/google-colab-cli)) e baixar o modelo novo.
+Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Colab e gerar o APK de novo.
 
 ## Como rodar (Google Colab)
 
@@ -22,8 +24,11 @@ Veja `android/LEIA-ME.md` para instalar o APK e para gerá-lo de novo depois de 
 | **Só refazer o fine-tuning** (usando o pré-treino que já está no Drive) | 1, 4, 5 |
 | Atualizar livros/artigos e o índice de busca | 1, 2 |
 | Só conversar | 1, 5 |
+| Levar o modelo para o celular | 1, 6 |
+| Ligar as células pelo app, sem deixar o Colab aberto | 0 (uma vez só) |
 
-As células são: (1) preparar, (2) dados, (3) pré-treino, (4) fine-tuning, (5) conversa.
+As células são: (0) ligar o app ao Colab, (1) preparar, (2) dados, (3) pré-treino, (4) fine-tuning,
+(5) conversa e (6) exportar para o celular (`laika_pacote.zip`).
 
 > O repositório precisa ser **público** para o Colab conseguir clonar sem token.
 
@@ -45,6 +50,8 @@ checkpoints e memória). Se a sessão cair, rode a célula 1 e continue de onde 
 | `model.py` / `config.py` | Arquitetura e presets (`tiny` para CPU, `colab` para GPU) |
 | `windows/` | Scripts do pacote para rodar no Windows (CPU): `instalar.bat`, `conversar.bat`, `rodar.py`... |
 | `CLAUDE.md` | Guia do projeto para o Claude Code: arquitetura, decisões, limitações e plano futuro |
+| `SUGESTOES.md` | Ideias para melhorar a LLM além do plano do `CLAUDE.md` |
+| `colab/laika_colab.py` | Roda células do `colab.ipynb` pelo Colab CLI (usado pelo workflow `.github/workflows/colab.yml`, que o app dispara) |
 | `data/modern/` | 130 textos em português moderno escritos para o projeto: 20 maiores e 110 simples (`simples_*.txt`); entram 3x no pré-treino |
 | `data/qa/pergeresp.txt` | ~4000 perguntas e respostas (gerado por `tools/gerar_pergeresp.py`) |
 | `data/qa/leitura.txt` | ~220 perguntas de interpretação com "Contexto:", o mesmo formato do RAG |

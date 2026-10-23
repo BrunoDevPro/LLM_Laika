@@ -1,4 +1,4 @@
-package com.brunodevpro.laika.core.treino;
+package com.brunodevpro.laika.core.dados;
 
 import androidx.sqlite.SQLiteConnection;
 import androidx.sqlite.SQLiteStatement;
@@ -12,12 +12,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * O "python rag.py build" no celular: divide wiki/, modern/ e books/ em trechos de ~80
  * palavras (sem cortar frases) e monta a tabela FTS5 "passages" igual à do rag.py.
  */
 public final class ConstrutorIndice {
+    /** Fim de frase, como o _SENTENCE_SPLIT do data_utils.py (usado pelo rag.py). */
+    static final Pattern FRASES = Pattern.compile("(?<=[.!?…])\\s+", Texto.UNICODE);
+
     private ConstrutorIndice() {
     }
 
@@ -29,7 +33,7 @@ public final class ConstrutorIndice {
         List<String> r = new ArrayList<>();
         List<String> atual = new ArrayList<>();
         int conta = 0;
-        for (String frase : DadosChat.FRASES.split(texto, -1)) {
+        for (String frase : FRASES.split(texto, -1)) {
             int n = Texto.separar(frase).length;
             if (!atual.isEmpty() && conta + n > 80) {
                 r.add(String.join(" ", atual));

@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,17 +32,15 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Versões e backups: a versão em uso, importar uma atualização (os arquivos de um treino novo),
- * fazer/usar/renomear/exportar/apagar backups.
+ * Versões e backups: a versão em uso, importar uma atualização (o zip do Colab ou os arquivos de um
+ * treino novo), fazer/usar/renomear/exportar/apagar backups.
  */
 public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte {
     private static final long INDICE_GRANDE = 50L << 20;
 
     private Motor motor;
     private LinearLayout conteudo;
-    private View tarefa;
-    private TextView tarefaTexto;
-    private ProgressBar tarefaBarra;
+    private PainelTarefa painel;
     private boolean estavaOcupado;
 
     // Exportação pendente (enquanto o usuário escolhe onde salvar)
@@ -67,9 +64,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         setContentView(R.layout.activity_versoes);
         motor = Motor.get(this);
         conteudo = findViewById(R.id.conteudo);
-        tarefa = findViewById(R.id.tarefa);
-        tarefaTexto = findViewById(R.id.tarefa_texto);
-        tarefaBarra = findViewById(R.id.tarefa_barra);
+        painel = new PainelTarefa(this, motor);
         findViewById(R.id.voltar).setOnClickListener(v -> finish());
         if (salvo != null) {
             exportarId = salvo.getString("exportarId");
@@ -110,18 +105,8 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
 
     @Override
     public void estadoMudou() {
-        String t = motor.tarefa;
-        tarefa.setVisibility(t != null ? View.VISIBLE : View.GONE);
-        if (t != null) {
-            int p = motor.progresso;
-            tarefaTexto.setText(p >= 0 ? String.format(Locale.getDefault(), "%s %d%%", t, p) : t);
-            tarefaBarra.setIndeterminate(p < 0);
-            if (p >= 0) tarefaBarra.setProgress(p);
-        }
+        painel.atualizar();
         boolean ocupado = motor.ocupado();
-        // Mantém a tela acesa durante importações e exportações longas.
-        if (ocupado) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (estavaOcupado != ocupado) montar();
         estavaOcupado = ocupado;
     }
@@ -251,8 +236,10 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         // Atualização
         secao("ATUALIZAR");
         LinearLayout u = cartao(false);
-        u.addView(texto("Importar uma atualização", 16, R.color.topo_texto, true));
-        TextView ajuda = texto("Escolha de uma vez os arquivos do treino novo, baixados do Google Drive: "
+        u.addView(texto("Usar um modelo novo", 16, R.color.topo_texto, true));
+        TextView ajuda = texto("O jeito mais fácil: a tela Colab roda o treino na nuvem e baixa o resultado.\n\n"
+                + "Ou escolha um arquivo baixado do Google Drive: o laika_pacote.zip (célula 6 do Colab: modelo, "
+                + "tokenizer e, se marcado, o índice ou os textos para o celular montar o índice) ou, de uma vez, "
                 + "finetuned.pt, pretrain_best.pt e tokenizer.json (e, se quiser, laika_rag.db e memoria.json). "
                 + "Também aceita um backup .zip exportado pelo app.\n\n"
                 + "Antes de trocar, a versão em uso é guardada como backup.", 13, R.color.texto_laika, false);
@@ -260,7 +247,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         u.addView(ajuda);
         LinearLayout lu = linhaDeBotoes(u);
         botao(lu, "Escolher arquivos", true, v -> escolherArquivos.launch(new String[]{"*/*"}));
-        botao(lu, "Treinar no celular", false, v -> startActivity(new android.content.Intent(this, TreinoActivity.class)));
+        botao(lu, "Colab", false, v -> startActivity(new android.content.Intent(this, ColabActivity.class)));
 
         // Backups
         secao("BACKUPS (" + backups.size() + ")");

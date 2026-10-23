@@ -20,6 +20,7 @@ import java.util.Map;
  *   laika_*.bin, tokenizer.json / tokenizer.txt, laika_rag.db, memoria.json
  *   .zip de backup exportado pelo app -> vira um backup novo
  * e confere se o modelo e o tokenizer combinam antes de trocar qualquer coisa.
+ * Os arquivos de dentro de um laika_pacote.zip chegam aqui pelo {@link Pacote}.
  */
 public final class Importador {
     /** Abre um laika_rag.db para conferir e devolve o número de trechos (lança erro se não servir). */
@@ -166,7 +167,7 @@ public final class Importador {
             }
         } else {
             throw new IOException(nome + ": tipo de arquivo não reconhecido. Use finetuned.pt, pretrain_best.pt, "
-                    + "tokenizer.json, laika_rag.db, memoria.json ou um backup .zip.");
+                    + "tokenizer.json, laika_rag.db, memoria.json, o laika_pacote.zip do Colab ou um backup .zip.");
         }
     }
 

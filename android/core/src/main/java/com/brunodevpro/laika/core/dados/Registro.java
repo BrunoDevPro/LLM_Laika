@@ -1,14 +1,14 @@
-package com.brunodevpro.laika.core.treino;
+package com.brunodevpro.laika.core.dados;
 
-/** Para onde vão as mensagens e o progresso de um trabalho de treino (a tela, a notificação, o teste). */
+/** Para onde vão as mensagens e o progresso de um trabalho longo (a tela, a notificação, o teste). */
 public interface Registro {
-    /** Uma linha de log, como a saída das células do Colab. */
+    /** Uma linha de log. */
     void log(String linha);
 
     /** Progresso de 0 a 1 (ou -1 se não dá para medir) e um texto curto. */
     void progresso(double fracao, String texto);
 
-    /** true quando o usuário pediu para parar: o trabalho salva o que tem e termina. */
+    /** true quando o usuário pediu para parar. */
     boolean parar();
 
     /** Registro que só imprime (testes). */

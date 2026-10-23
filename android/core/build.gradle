@@ -1,4 +1,5 @@
-// Núcleo em Java puro: tokenizer, transformer com KV cache, RAG, memória e geração.
+// Núcleo em Java puro: tokenizer, transformer com KV cache, RAG, memória, geração, versões,
+// importação (inclusive o zip do Colab) e o cliente do GitHub que liga as células do Colab.
 // Roda no Android (app) e no computador (testes que comparam com o Python/PyTorch).
 plugins {
     id "java-library"
@@ -18,18 +19,11 @@ dependencies {
     testImplementation "androidx.sqlite:sqlite-bundled:${rootProject.sqliteVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
-    // OpenGL ES do Mesa no PC, para testar os shaders do treino contra o PyTorch
-    testImplementation "org.lwjgl:lwjgl:3.3.4"
-    testImplementation "org.lwjgl:lwjgl-egl:3.3.4"
-    testImplementation "org.lwjgl:lwjgl-opengles:3.3.4"
-    testRuntimeOnly "org.lwjgl:lwjgl:3.3.4:natives-linux"
-    testRuntimeOnly "org.lwjgl:lwjgl-opengles:3.3.4:natives-linux"
 }
 
 test {
     useJUnitPlatform()
-    maxHeapSize = "3g"
-    environment "EGL_PLATFORM", "surfaceless"  // Mesa sem janela
+    maxHeapSize = "2g"
     // Arquivos gerados por exportar_modelo.py e core/referencias.py (os testes são pulados se faltarem).
     systemProperty "laika.assets", file("../app/src/main/assets").absolutePath
     systemProperty "laika.referencias", file("build/referencias").absolutePath

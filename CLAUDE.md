@@ -2,7 +2,7 @@
 
 Este arquivo é lido automaticamente pelo Claude Code. Ele resume o que o projeto é, como está
 organizado, por que as decisões foram tomadas, os números medidos e os próximos passos planejados.
-Escrito em 22/10/2026.
+Escrito em 22/10/2026; atualizado em 23/10/2026 (app 1.2: Colab pelo app, zip único, sem treino no celular).
 
 ## 1. O que é
 
@@ -54,9 +54,13 @@ Claude Code tiver PyTorch disponível, vale rodar um teste ponta a ponta com `--
 | `memory.py` | Memória por expressões regulares; salva em `checkpoints/memoria.json`. Responde direto "qual é o meu nome", "o que você lembra de mim", "esqueça tudo"; anotações relacionadas entram no Contexto. Não muda o prompt de perguntas normais. |
 | `data_utils.py` | Tokens especiais, limpeza do Gutenberg, leitura dos arquivos de QA, exemplos sintéticos, resumo extrativo, limpeza da Wikipédia e geração de "O que é X?", e as funções do RAG: `content_words`, `wants_rag`, `rag_question`, `fit_context`, `split_example`. |
 | `prepare_data.py` | Baixa livros pt do catálogo CSV do Gutenberg (`--max-books 500`, grava `data/books/titulos.tsv`) e artigos da Wikipédia via Hugging Face `wikimedia/wikipedia` `20231101.pt` em streaming (`--wiki 100000`). |
-| `colab.ipynb` | 5 células: (1) preparar/Drive, (2) dados + índice RAG, (3) pré-treino (`MODO = "pular" / "continuar" / "do_zero"`), (4) fine-tuning, (5) conversar. |
+| `colab.ipynb` | 7 células: (0) ligar o app ao Colab (**só no navegador**, uma vez: login `gcloud` com os escopos do Colab CLI e grava o segredo `COLAB_ADC` no GitHub), (1) preparar/Drive (define `rodar()`, que para a célula se o comando falhar), (2) dados + índice RAG, (3) pré-treino (`MODO = "pular" / "continuar" / "do_zero"`), (4) fine-tuning, (5) conversar (**só no navegador**), (6) exportar para o celular (`laika_pacote.zip`: modelo e, opcionalmente, índice e textos). Os campos são formulários do Colab (`#@param`), que o app preenche. A primeira linha de cada célula é `# N) TÍTULO` (e `[só no navegador]` quando for o caso): o app e o `laika_colab.py` dependem disso. |
+| `colab/laika_colab.py` | Orquestrador do **Colab CLI** (`google-colab-cli`), rodado pelo GitHub Actions: lê as células do notebook, aplica os parâmetros, liga a máquina (`colab new --gpu`), monta o Drive (repassando ao app o link de autorização, se vier), roda cada célula com `colab exec` (marca de fim + arquivo de estado na máquina, para sobreviver à queda da conexão), baixa o zip da célula 6 e desliga a máquina. Publica o andamento na verificação "Laika no Colab" (check run) que o app lê. Só biblioteca padrão. `python colab/laika_colab.py celulas` mostra as células em JSON. |
+| `colab/teste_laika_colab.py` | Testes do orquestrador com um `colab` falso (kernel Python persistente de verdade, queda de conexão, kernel que reinicia, autorização do Drive, GPU recusada, cancelamento) e uma API do GitHub falsa. `python colab/teste_laika_colab.py`. |
+| `.github/workflows/colab.yml` | Workflow disparado pelo app (`workflow_dispatch`: `celulas`, `gpu`, `parametros` em JSON, `pedido`). Uma execução por vez (`concurrency`), limite de 355 min, guarda o zip como artefato `laika_pacote` (14 dias) e sempre roda `colab stop` no fim. `sinal.yml`: o app avisa "Drive autorizado" disparando-o com `run-name = drive-ok-<id>`. |
+| `SUGESTOES.md` | Ideias de melhoria da LLM que **não** estão no plano da seção 9 (arquitetura, dados, fine-tuning, celular, processo). |
 | `tools/gerar_pergeresp.py` | **Gera** `data/qa/pergeresp.txt`, `identidade.txt`, `leitura.txt` e `data/modern/simples_*.txt` a partir das tabelas em `tools/dados_extra*.py`, `tools/leitura.py`, `tools/textos_simples*.py`. |
-| `android/` | **App Android** (APK) que roda a Laika no celular, sem PyTorch: o transformer com KV cache, o tokenizer, o RAG e a memória reescritos em Java (`android/core`), conferidos contra o Python por `core/referencias.py` + `gradle :core:test`. `exportar_modelo.py` converte os checkpoints (pesos em float16) para `app/src/main/assets/` (fora do Git). Ver seção 6b e `android/LEIA-ME.md`. |
+| `android/` | **App Android** (APK) que roda a Laika no celular, sem PyTorch: o transformer com KV cache, o tokenizer, o RAG e a memória reescritos em Java (`android/core`), conferidos contra o Python por `core/referencias.py` + `gradle :core:test`. Também liga as células do Colab pela tela **Colab** (seção 6c) e importa o `laika_pacote.zip`. `exportar_modelo.py` converte os checkpoints (pesos em float16) para `app/src/main/assets/` (fora do Git). Ver seção 6b e `android/LEIA-ME.md`. |
 | `windows/` | Scripts do pacote para Windows (`instalar.bat`, `conversar.bat`, `completar_texto.bat`, `instalar_indice.bat`, `rodar.py`, `LEIA-ME.txt`). Ver seção 6. |
 
 ## 4. Formatos
@@ -86,6 +90,10 @@ python chat.py
 
 # Regenerar exemplos escritos
 python tools/gerar_pergeresp.py
+
+# Orquestrador do Colab CLI (usado pelo GitHub Actions; os testes usam um CLI falso)
+python colab/laika_colab.py celulas
+python colab/teste_laika_colab.py
 ```
 
 Opções úteis: `finetune.py --epochs 4 --max-qa-repeat 3 --patience 3 --qa-share 0.25 --rag-share 0.5 --no-rag`;
@@ -111,22 +119,53 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
   `Memoria` (mesmo `memoria.json`), `Texto` (`content_words`, `wants_rag`, `fit_context`).
   **Qualquer mudança no formato do prompt, no `rag.py`, no `memory.py` ou no `model.py` precisa ser
   repetida aqui**; rode `python android/core/referencias.py --checkpoints checkpoints` e `./gradlew :core:test`.
-- `app/`: uma tela de chat (Views, sem Compose), `Motor` com uma thread de fundo. SQLite próprio
+- `app/`: telas de chat, versões e Colab (Views, sem Compose), `Motor` com uma thread de fundo. SQLite próprio
   (`androidx.sqlite:sqlite-bundled`, tem FTS5). O índice pequeno (`laika_rag_mini.db`) vai no APK; o
   `laika_rag.db` completo é importado pelo menu (não cabe no APK). minSdk 26, targetSdk 35.
 - Conversa no processador (com 7M parâmetros é mais rápido, ~5 ms/token no PC). Rever com o modelo de 100M.
 - **Versões e backups** (`core/Armazem`): versão = modelos + tokenizer + índice + memória + conversa; arquivos
   grandes em `blobs/`, compartilhados entre backups. `ConversorPt` lê os `.pt` (pickle mínimo) no celular, com
   saída idêntica ao `exportar_modelo.py` (que agora grava um rodapé `INFO` com val loss, step e se é de chat).
-- **Treino no celular** (`core/treino`, tela `TreinoActivity`, `TreinoService` em primeiro plano): forward e
-  backward do TinyLLM escritos à mão em compute shaders GLSL ES 3.1 (`Shaders.java`, grupos de 128 threads),
-  AdamW, corte do gradiente, dropout com máscara refeita por semente, acumulação de gradiente (micro-lotes).
-  Port do `train.py` (tokens uint16 em disco, retomada completa), `finetune.py`, BPE (`TreinadorBpe`, igual ao
-  da biblioteca tokenizers) e `rag.py build`. Os dados vêm do Colab pela célula 6 (`laika_dados.zip`).
-  Testes no PC com o Mesa (`apt install libegl-mesa0 libgles2`): `referencias_treino.py` + `RedeGpuTest`,
-  `TreinadorBpeTest`, `PipelineTest`. **Mudanças no `model.py`, `train.py` ou `finetune.py` precisam ser repetidas aqui.**
+- **Zip único** (`core/Pacote`): o `laika_pacote.zip` da célula 6 (ou o artefato baixado pela tela Colab, ou o
+  `laika_dados.zip` antigo) é lido direto do fluxo; `Pacote.tipo()` olha só a primeira entrada (backup do app,
+  checkpoint do PyTorch ou pacote). Modelos, tokenizer, índice e memória viram entradas do `Importador`
+  (reconhecidas pelo conteúdo); os textos de `books/`, `wiki/` e `modern/` vão para um `Corpus` temporário e o
+  celular monta o índice (`core/dados/ConstrutorIndice`, igual ao `rag.py build`, mais os `data/modern` que vão
+  no APK). Tudo vira uma versão nova; a anterior vai para os backups. Importações longas rodam no
+  `TrabalhoService` (primeiro plano, `dataSync`) e podem ser canceladas.
+- **O treino no celular (GPU) foi retirado** na versão 1.2 do app, a pedido do usuário; o treino fica no Colab,
+  ligado pela tela Colab. O que sobrou dele é só a montagem do índice a partir de textos.
+- Testes do núcleo: `ComparaComPythonTest`, `VersoesTest`, `PacoteTest`, `dados/IndiceTest` (índice igual ao do
+  `rag.py`), `colab/ColabTest` (leitor do notebook igual ao do `laika_colab.py` e o cliente do GitHub contra um
+  servidor falso). Com os checkpoints: `LAIKA_CHECKPOINTS=<pasta> LAIKA_LIVROS=<pasta com um livro> ./gradlew :core:test`.
 - Só o modelo em `model.py` (posições aprendidas, GELU exato, pesos compartilhados) é suportado; RoPE
   (Fase 2) exige mudar `Modelo.java` e o formato do `exportar_modelo.py`.
+
+## 6c. Colab pelo app (Colab CLI, sem deixar o Colab aberto)
+
+```
+app (tela Colab) --API do GitHub--> workflow colab.yml (runner Linux) --Colab CLI--> máquina do Colab (GPU + Drive)
+       ^   verificação "Laika no Colab" (andamento, link do Drive, últimas linhas)  |
+       '--- artefato laika_pacote (zip da célula 6) <-------------------------------'
+```
+
+- O Colab CLI (`pip install google-colab-cli`, Python ≥ 3.12, Linux/macOS) não roda no Android; por isso o
+  runner do GitHub Actions faz a ponte. A permissão do Google vem do segredo `COLAB_ADC` (credencial ADC do
+  `gcloud` com os escopos `openid`, `cloud-platform`, `userinfo.email` e `colaboratory`), gravado pela célula 0.
+- `core/colab/Caderno` lê as células como o `laika_colab.py` (o teste compara os dois); `core/colab/GitHub` é o
+  cliente REST (disparo com `return_run_details`, procura pelo código do pedido no `run-name` como reserva,
+  verificação, cancelar, `sinal.yml`, artefatos com redirecionamento sem o token).
+- No app: `ColabActivity` (configuração, células com os campos `#@param`, atalhos, GPU, execuções com o andamento
+  ao vivo, autorização do Drive, cancelar, registro, "Modelos prontos"), `Colab` (token em `noBackupFilesDir`,
+  execuções acompanhadas), `ColabJob` (JobScheduler, consulta a cada ~3 min e notifica) e `ColabReceiver`
+  (botão "Já autorizei" da notificação).
+- Antes de funcionar: o branch com `.github/workflows/` precisa estar no `main` (o `workflow_dispatch` só
+  aparece para workflows do branch principal); token fine-grained com Actions (leitura e escrita), Secrets
+  (leitura e escrita) e Contents (leitura); rodar a célula 0 no navegador uma vez.
+- O repositório é público: os registros do Actions, a verificação e os artefatos também são. O orquestrador
+  tira e-mails e tokens do que publica e não imprime o link de autorização no registro (só na verificação).
+- **Não testado com o Colab de verdade** (o ambiente de desenvolvimento não tem a conta Google): só com o CLI
+  falso e a API falsa. Na primeira vez, acompanhe pela tela Colab e pelo registro do Actions.
 
 ## 7. Decisões e lições (não desfazer sem motivo)
 
@@ -152,7 +191,9 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
 - O `finetuned.pt` é sobrescrito sem backup.
 - Memória baseada em expressões regulares (frases fora dos padrões não são guardadas).
 - Busca sem stemming real (só prefixo de 5 letras) e sem embeddings.
-- Não há testes automatizados nem script de avaliação.
+- Não há testes automatizados do treino em Python nem script de avaliação (só os do app e do orquestrador do Colab).
+- O controle do Colab pelo app depende do Colab CLI (ferramenta nova do Google; a interface pode mudar) e não
+  foi testado contra o Colab de verdade.
 
 ## 9. Plano futuro (combinado com o usuário, ainda não implementado)
 
@@ -199,6 +240,11 @@ opcional: ~30M, contexto 1024, ~600M tokens.
 - [ ] KV cache obrigatório; opcional salvar pesos em fp16 para o arquivo ficar menor.
 - [ ] Tempo estimado por mensagem no processador (4–8 núcleos), com cache: 100M ~3–6 s numa pergunta com RAG, ~6–12 s com ~2000 tokens de prompt. Sem cache seria de dezenas de segundos a minutos.
 - [ ] Atualizar o pacote e o LEIA-ME.
+
+### Mais ideias
+Ver `SUGESTOES.md`: 25 sugestões que não estão neste plano (RMSNorm/SwiGLU, GQA, WSD, annealing com dados
+melhores, ortografia antiga, exemplos de "não sei", contexto errado de propósito, 👍/👎 no app → DPO,
+int8 e decodificação especulativa no celular, histórico de treinos...).
 
 ### Alternativa discutida
 Fazer só o fine-tuning de um modelo aberto já treinado em português (ex.: **Tucano2-0.6B**, licença

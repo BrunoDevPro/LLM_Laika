@@ -25,15 +25,18 @@ public final class Laika {
         public double topP = 0.9;
         public double penalidade = 1.15;
         public int maxNovos = 80;
+        /** Saída: quantos tokens a última chamada de gerar() produziu. */
+        public int gerados;
     }
 
-    /** Prompt pronto e o título do artigo usado pelo RAG (ou null). */
+    /** Prompt pronto, o título do artigo usado pelo RAG e o trecho encontrado (ou null). */
     public static final class Prompt {
-        public final String texto, fonte;
+        public final String texto, fonte, trecho;
 
-        Prompt(String texto, String fonte) {
+        Prompt(String texto, String fonte, String trecho) {
             this.texto = texto;
             this.fonte = fonte;
+            this.trecho = trecho;
         }
     }
 
@@ -51,7 +54,7 @@ public final class Laika {
 
     public Prompt montarPrompt(String pergunta, IndiceRag rag, Memoria memoria, int maxNovos) {
         List<String> partes = new ArrayList<>();
-        String fonte = null;
+        String fonte = null, trecho = null;
         if (memoria != null) {
             String nota = memoria.contextoPara(pergunta);
             if (!nota.isEmpty()) partes.add(nota);
@@ -61,16 +64,17 @@ public final class Laika {
             if (hit != null) {
                 partes.add(hit.texto);
                 fonte = hit.titulo;
+                trecho = hit.texto;
             }
         }
         String simples = Texto.USER + " " + pergunta + " " + Texto.ASSISTANT;
-        if (partes.isEmpty()) return new Prompt(simples, null);
+        if (partes.isEmpty()) return new Prompt(simples, null, null);
         int orcamento = modelo.block - maxNovos;
         String comContexto = Texto.ajustarContexto(
                 t -> tok.codificar(Texto.USER + " " + t + " " + Texto.ASSISTANT).length,
                 pergunta, String.join(" ", partes), orcamento);
-        if (comContexto == null) return new Prompt(simples, null);
-        return new Prompt(Texto.USER + " " + comContexto + " " + Texto.ASSISTANT, fonte);
+        if (comContexto == null) return new Prompt(simples, null, null);
+        return new Prompt(Texto.USER + " " + comContexto + " " + Texto.ASSISTANT, fonte, trecho);
     }
 
     public static String comCitacao(String resposta, String fonte) {
@@ -117,6 +121,7 @@ public final class Laika {
             ids[n++] = proximo;
             if (aoGerar != null) aoGerar.parcial(semPedacoIncompleto(tok.decodificar(ids, promptLen, n)));
         }
+        op.gerados = n - promptLen;
         return Texto.aparar(tok.decodificar(ids, promptLen, n));
     }
 

@@ -15,14 +15,22 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver;
 
 import com.brunodevpro.laika.core.Armazem;
 import com.brunodevpro.laika.core.Importador;
-import com.brunodevpro.laika.core.Json;
 import com.brunodevpro.laika.core.IndiceRag;
+import com.brunodevpro.laika.core.Json;
 import com.brunodevpro.laika.core.Laika;
 import com.brunodevpro.laika.core.Memoria;
 import com.brunodevpro.laika.core.Modelo;
+import com.brunodevpro.laika.core.Pacote;
 import com.brunodevpro.laika.core.Tokenizador;
+import com.brunodevpro.laika.core.colab.GitHub;
+import com.brunodevpro.laika.core.dados.ConstrutorIndice;
+import com.brunodevpro.laika.core.dados.Corpus;
+import com.brunodevpro.laika.core.dados.Parado;
+import com.brunodevpro.laika.core.dados.Registro;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,14 +52,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tudo o que não é tela: a versão em uso (modelo, tokenizer, índice RAG, memória, conversa),
- * os backups e a geração das respostas. Vive enquanto o app estiver aberto.
- * O trabalho pesado roda numa única thread de fundo, em ordem.
+ * os backups, as importações (inclusive o zip do Colab) e a geração das respostas.
+ * Vive enquanto o app estiver aberto. O trabalho pesado roda numa única thread de fundo, em ordem.
  */
 final class Motor {
     /** Uma mensagem da conversa. */
     static final class Mensagem {
         final boolean usuario, aviso;
-        volatile String texto, fonte, detalhe;
+        /** trecho: o texto que o RAG achou e entrou no prompt (para "Ver o trecho usado"). */
+        volatile String texto, fonte, detalhe, trecho;
 
         Mensagem(boolean usuario, boolean aviso, String texto) {
             this.usuario = usuario;
@@ -87,7 +96,8 @@ final class Motor {
         return instancia;
     }
 
-    private static final String INDICE_MINI = "laika_rag_mini.db";
+    /** Tamanhos de resposta do menu (tokens novos; o chat.py usa 80). */
+    static final int[] TAMANHOS = {40, 80, 160};
 
     private final Context ctx;
     private final SharedPreferences prefs;
@@ -97,7 +107,7 @@ final class Motor {
         t.setDaemon(true);
         return t;
     });
-    private final AtomicBoolean cancelar = new AtomicBoolean();
+    private final AtomicBoolean cancelar = new AtomicBoolean(), pararTarefa = new AtomicBoolean();
     private final Random rng = new Random();
     private final Set<Ouvinte> ouvintes = new LinkedHashSet<>();
     private final int threads = Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors()));
@@ -117,13 +127,16 @@ final class Motor {
     volatile String tarefa;
     /** 0..100, ou -1 se não dá para medir. */
     volatile int progresso = -1;
+    /** A tarefa em andamento pode ser cancelada (importação, índice, download). */
+    volatile boolean tarefaCancelavel;
     volatile String nomeVersao = "";
-    volatile String descricaoIndice = "";
+    volatile String descricaoIndice = "", descricaoModelo = "";
     volatile boolean temBase;
 
     // Opções do app (valem para todas as versões)
-    boolean mostrarFontes, usarRag, usarMemoria, modoCompletar;
+    boolean mostrarFontes, usarRag, usarMemoria, modoCompletar, lerEmVozAlta;
     double temperatura;
+    int tamanhoResposta;
 
     private Motor(Context ctx) {
         this.ctx = ctx;
@@ -131,14 +144,17 @@ final class Motor {
         mostrarFontes = prefs.getBoolean("fontes", true);
         usarRag = prefs.getBoolean("rag", true);
         usarMemoria = prefs.getBoolean("memoria", true);
+        lerEmVozAlta = prefs.getBoolean("voz", false);
         temperatura = prefs.getFloat("temperatura", 0.7f);
+        tamanhoResposta = prefs.getInt("tamanho", 80);
         tarefa = "Carregando a Laika…";
         fundo.execute(this::iniciar);
     }
 
     void salvarOpcoes() {
         prefs.edit().putBoolean("fontes", mostrarFontes).putBoolean("rag", usarRag)
-                .putBoolean("memoria", usarMemoria).putFloat("temperatura", (float) temperatura).apply();
+                .putBoolean("memoria", usarMemoria).putBoolean("voz", lerEmVozAlta)
+                .putFloat("temperatura", (float) temperatura).putInt("tamanho", tamanhoResposta).apply();
         avisarEstado();
     }
 
@@ -152,6 +168,12 @@ final class Motor {
 
     boolean ocupado() {
         return tarefa != null;
+    }
+
+    /** Pede para parar a tarefa longa em andamento (ela desfaz o que estava fazendo). */
+    void cancelarTarefa() {
+        pararTarefa.set(true);
+        if (tarefa != null) tarefa("Cancelando…", -1);
     }
 
     // ---------- avisos para as telas ----------
@@ -197,7 +219,7 @@ final class Motor {
         return adicionar(new Mensagem(false, true, texto));
     }
 
-    private static String agora() {
+    static String agora() {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR")).format(new Date());
     }
 
@@ -255,6 +277,55 @@ final class Motor {
             mem.delete();
         }
         if (!trocas.isEmpty() || memoria != null) armazem.aplicar(trocas, null, memoria);
+        // O app 1.1 treinava no celular. Um resultado de treino que não foi usado vira um backup;
+        // o resto (dados importados, tokens, estado do treino) não serve mais e só ocupa espaço.
+        File treino = new File(ctx.getFilesDir(), "laika/treino");
+        if (treino.exists() && guardarTreinoAntigo(new File(treino, "saida"))) apagarPasta(treino);
+        apagarPasta(new File(ctx.getFilesDir(), "laika/dados"));
+    }
+
+    /** Guarda laika/treino/saida (app 1.1) como backup. false se não conseguiu (aí nada é apagado). */
+    private boolean guardarTreinoAntigo(File saida) {
+        File chatBin = new File(saida, "laika_chat.bin"), tokTxt = new File(saida, "tokenizer.txt");
+        if (!chatBin.exists() || !tokTxt.exists()) return true;
+        try {
+            String[][] papeis = {{Armazem.CHAT, "laika_chat.bin", "bin"}, {Armazem.BASE, "laika_base.bin", "bin"},
+                    {Armazem.TOKENIZER, "tokenizer.txt", "txt"}, {Armazem.INDICE, "laika_rag.db", "db"}};
+            // Primeiro confere tudo (sem mexer em nada); só depois move os arquivos para os blobs.
+            Map<String, String> descricoes = new LinkedHashMap<>();
+            for (String[] p : papeis) {
+                File f = new File(saida, p[1]);
+                if (!f.exists()) continue;
+                if (p[2].equals("bin")) {
+                    try (InputStream in = new FileInputStream(f)) {
+                        descricoes.put(p[0], com.brunodevpro.laika.core.ConversorPt.lerBin(in).descricao());
+                    }
+                } else if (p[2].equals("txt")) {
+                    try (InputStream in = new FileInputStream(f)) {
+                        descricoes.put(p[0], Armazem.descricaoTokenizer(in));
+                    }
+                } else {
+                    descricoes.put(p[0], String.format(Locale.getDefault(), "índice com %,d trechos", conferirIndice(f)));
+                }
+            }
+            Map<String, Armazem.Arquivo> arqs = new LinkedHashMap<>();
+            for (String[] p : papeis) {
+                if (descricoes.containsKey(p[0])) {
+                    arqs.put(p[0], armazem.guardar(new File(saida, p[1]), p[2], p[1] + " (treino no celular)",
+                            descricoes.get(p[0])));
+                }
+            }
+            armazem.backupDeArquivos("Treino no celular (app 1.1)", arqs);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static void apagarPasta(File f) {
+        File[] fs = f.listFiles();
+        if (fs != null) for (File x : fs) apagarPasta(x);
+        f.delete();
     }
 
     private static SQLiteConnection abrirSomenteLeitura(File f) {
@@ -285,10 +356,12 @@ final class Motor {
         erro = null;
         Armazem.Versao v = armazem.atual();
         nomeVersao = v.nome;
+        Armazem.Arquivo arqChat = v.arquivos.get(Armazem.CHAT);
+        descricaoModelo = arqChat.descricao == null ? "" : arqChat.descricao;
         try (InputStream in = armazem.abrir(v.arquivos.get(Armazem.TOKENIZER).ref)) {
             tok = new Tokenizador(in);
         }
-        try (InputStream in = armazem.abrir(v.arquivos.get(Armazem.CHAT).ref)) {
+        try (InputStream in = armazem.abrir(arqChat.ref)) {
             chat = new Laika(new Modelo(in, threads), tok);
         }
         Armazem.Arquivo b = v.arquivos.get(Armazem.BASE);
@@ -353,6 +426,7 @@ final class Motor {
                 Mensagem msg = new Mensagem(Boolean.TRUE.equals(m.get("u")), false, String.valueOf(m.get("t")));
                 msg.fonte = (String) m.get("f");
                 msg.detalhe = (String) m.get("d");
+                msg.trecho = (String) m.get("c");
                 r.add(msg);
             }
         } catch (Exception e) {
@@ -371,6 +445,7 @@ final class Motor {
             o.put("t", m.texto);
             if (m.fonte != null) o.put("f", m.fonte);
             if (m.detalhe != null) o.put("d", m.detalhe);
+            if (m.trecho != null) o.put("c", m.trecho);
             lista.add(o);
         }
         String json = Json.escrever(lista);
@@ -388,6 +463,18 @@ final class Motor {
         conversa.clear();
         for (Ouvinte o : new ArrayList<>(ouvintes)) o.conversaTrocada();
         salvarConversa();
+    }
+
+    /** A conversa como texto, para compartilhar. */
+    String conversaEmTexto() {
+        StringBuilder sb = new StringBuilder();
+        for (Mensagem m : conversa) {
+            if (m.aviso) continue;
+            sb.append(m.usuario ? "Você: " : "Laika: ").append(m.texto);
+            if (m.fonte != null) sb.append(" *").append(m.fonte);
+            sb.append("\n\n");
+        }
+        return sb.toString().trim();
     }
 
     // ---------- conversa ----------
@@ -411,17 +498,43 @@ final class Motor {
         Mensagem eu = new Mensagem(true, false, texto);
         conversa.add(eu);
         for (Ouvinte o : new ArrayList<>(ouvintes)) o.mensagemNova(eu);
+        responder(texto, null);
+    }
+
+    /** A pergunta que gerou esta resposta (a mensagem do usuário logo antes), ou null. */
+    String perguntaDe(Mensagem resposta) {
+        int i = conversa.indexOf(resposta);
+        for (int k = i - 1; k >= 0; k--) {
+            Mensagem m = conversa.get(k);
+            if (m.aviso) continue;
+            return m.usuario ? m.texto : null;
+        }
+        return null;
+    }
+
+    /** Gera outra resposta para a mesma pergunta, no lugar desta. */
+    void gerarDeNovo(Mensagem resposta) {
+        String pergunta = perguntaDe(resposta);
+        if (pergunta == null || gerando) return;
+        resposta.texto = "…";
+        resposta.fonte = resposta.detalhe = resposta.trecho = null;
+        mudou(resposta);
+        responder(pergunta, resposta);
+    }
+
+    private void responder(String texto, Mensagem existente) {
         gerando = true;
         cancelar.set(false);
         avisarEstado();
         final boolean completar = modoCompletar, fontes = mostrarFontes, comRag = usarRag, comMemoria = usarMemoria;
         final double temp = temperatura;
+        final int tamanho = tamanhoResposta;
         fundo.execute(() -> {
-            Mensagem resp = adicionar(new Mensagem(false, false, "…"));
+            Mensagem resp = existente != null ? existente : adicionar(new Mensagem(false, false, "…"));
             long t0 = System.nanoTime();
+            Laika.Opcoes op = new Laika.Opcoes();
             try {
                 if (!pronto) throw new IllegalStateException(erro != null ? erro : "o modelo ainda está carregando");
-                Laika.Opcoes op = new Laika.Opcoes();
                 op.temperatura = temp;
                 if (completar && refBase != null) {
                     if (base == null) {
@@ -431,7 +544,7 @@ final class Motor {
                             base = new Laika(new Modelo(in, threads), tok);
                         }
                     }
-                    op.maxNovos = 160;
+                    op.maxNovos = tamanho * 2;
                     String r = base.gerar(texto, op, false, rng, parcial -> {
                         resp.texto = texto + " " + parcial;
                         mudou(resp);
@@ -442,6 +555,7 @@ final class Motor {
                     if (direto != null) {
                         resp.texto = direto;
                     } else {
+                        op.maxNovos = tamanho;
                         Laika.Prompt p = chat.montarPrompt(texto, comRag ? rag : null, comMemoria ? memoria : null,
                                 op.maxNovos);
                         String r = chat.gerar(p.texto, op, true, rng, parcial -> {
@@ -450,9 +564,12 @@ final class Motor {
                         }, cancelar::get);
                         resp.texto = r.isEmpty() ? "…" : r;
                         if (fontes) resp.fonte = p.fonte;
+                        resp.trecho = p.trecho;
                     }
                 }
-                resp.detalhe = String.format(Locale.getDefault(), "%.1f s%s", (System.nanoTime() - t0) / 1e9,
+                double seg = (System.nanoTime() - t0) / 1e9;
+                resp.detalhe = String.format(Locale.getDefault(), "%.1f s%s%s", seg,
+                        op.gerados > 0 ? String.format(Locale.getDefault(), " · %d tokens/s", Math.round(op.gerados / seg)) : "",
                         cancelar.get() ? " · interrompida" : "");
             } catch (Throwable e) {
                 resp.texto = "Erro: " + e.getMessage();
@@ -466,14 +583,27 @@ final class Motor {
 
     // ---------- versões e backups ----------
 
-    private void emFundo(String titulo, Tarefa t) {
+    /** longa: importação/exportação/download, que segue com a tela apagada (TrabalhoService). */
+    private void emFundo(String titulo, boolean longa, Tarefa t) {
         cancelar.set(true);  // para uma resposta em andamento antes de mexer na versão
+        pararTarefa.set(false);
+        tarefaCancelavel = longa;
         tarefa(titulo, -1);
+        if (longa) TrabalhoService.iniciar(ctx);
         fundo.execute(() -> {
             try {
                 t.rodar();
             } catch (Throwable e) {
-                avisarUsuario("Não deu certo", e.getMessage() == null ? e.toString() : e.getMessage());
+                if (cancelado(e)) {
+                    try {
+                        armazem.limparBlobs();
+                    } catch (IOException ignorado) {
+                        // sobra lixo até a próxima importação
+                    }
+                    avisarUsuario(null, "Cancelado.");
+                } else {
+                    avisarUsuario("Não deu certo", e.getMessage() == null ? e.toString() : e.getMessage());
+                }
                 if (!pronto) {
                     try {
                         carregarVersao();
@@ -482,8 +612,14 @@ final class Motor {
                     }
                 }
             }
+            tarefaCancelavel = false;
             tarefa(null, -1);
         });
+    }
+
+    private static boolean cancelado(Throwable e) {
+        for (Throwable x = e; x != null; x = x.getCause()) if (x instanceof Parado) return true;
+        return false;
     }
 
     private interface Tarefa {
@@ -493,6 +629,7 @@ final class Motor {
     private Armazem.Progresso progresso(String titulo) {
         int[] ultimo = {-2};
         return (feito, total) -> {
+            if (pararTarefa.get()) throw new Parado();
             int pct = total > 0 ? (int) Math.min(100, feito * 100 / total) : -1;
             if (pct != ultimo[0]) {
                 ultimo[0] = pct;
@@ -502,7 +639,7 @@ final class Motor {
     }
 
     void fazerBackup(String nome) {
-        emFundo("Fazendo backup…", () -> {
+        emFundo("Fazendo backup…", false, () -> {
             armazem.fazerBackup(nome);
             avisarUsuario(null, "Backup \"" + nome + "\" criado.");
         });
@@ -510,7 +647,7 @@ final class Motor {
 
     /** guardarAtualComo != null: guarda a versão em uso como backup antes de trocar. */
     void usarBackup(String id, String guardarAtualComo) {
-        emFundo("Trocando de versão…", () -> {
+        emFundo("Trocando de versão…", false, () -> {
             if (guardarAtualComo != null) armazem.fazerBackup(guardarAtualComo);
             armazem.usarBackup(id);
             carregarVersao();
@@ -520,18 +657,18 @@ final class Motor {
     }
 
     void renomear(String id, String nome) {
-        emFundo("Renomeando…", () -> {
+        emFundo("Renomeando…", false, () -> {
             armazem.renomear(id, nome);
             if (id == null) nomeVersao = nome;
         });
     }
 
     void apagarBackup(String id) {
-        emFundo("Apagando backup…", () -> armazem.apagar(id));
+        emFundo("Apagando backup…", false, () -> armazem.apagar(id));
     }
 
     void exportar(String id, Uri destino, boolean incluirIndice) {
-        emFundo("Exportando…", () -> {
+        emFundo("Exportando…", true, () -> {
             try (OutputStream out = ctx.getContentResolver().openOutputStream(destino)) {
                 if (out == null) throw new IOException("não consegui criar o arquivo");
                 armazem.exportar(id, out, incluirIndice, progresso("Exportando…"));
@@ -559,124 +696,204 @@ final class Motor {
         return -1;
     }
 
-    /** O arquivo do índice da versão em uso (o do APK é copiado para um arquivo). */
-    File arquivoDoIndiceAtual() throws IOException {
-        Armazem.Arquivo ind = armazem.atual().arquivos.get(Armazem.INDICE);
-        File f = armazem.arquivo(ind.ref);
-        return f != null ? f : indiceDeFabrica(ind.ref.substring(Armazem.FABRICA.length()));
+    // ---------- importar ----------
+
+    /** Um arquivo a importar: escolhido no seletor ou baixado do Colab. */
+    private interface Fonte {
+        String nome();
+
+        long tamanho();
+
+        InputStream abrir() throws IOException;
     }
 
-    /**
-     * Usa o que o treino no celular produziu (treino/saida: tokenizer, modelo base, modelo de chat,
-     * índice) como uma atualização: confere se combinam, guarda a versão em uso como backup e troca.
-     */
-    void usarResultadoDoTreino(File saida) {
-        emFundo("Aplicando o resultado do treino…", () -> {
-            List<Importador.Entrada> entradas = new ArrayList<>();
+    private Fonte fonte(Uri u) {
+        String nome = nomeDoArquivo(ctx, u);
+        long tam = tamanhoDoArquivo(ctx, u);
+        return new Fonte() {
+            public String nome() {
+                return nome;
+            }
+
+            public long tamanho() {
+                return tam;
+            }
+
+            public InputStream abrir() throws IOException {
+                InputStream in = ctx.getContentResolver().openInputStream(u);
+                if (in == null) throw new IOException("não consegui abrir " + nome);
+                return in;
+            }
+        };
+    }
+
+    private static Fonte fonte(File f, String nome) {
+        return new Fonte() {
+            public String nome() {
+                return nome;
+            }
+
+            public long tamanho() {
+                return f.length();
+            }
+
+            public InputStream abrir() throws IOException {
+                return new FileInputStream(f);
+            }
+        };
+    }
+
+    /** Importa os arquivos escolhidos no seletor: uma atualização, o zip do Colab ou backups .zip. */
+    void importar(List<Uri> uris) {
+        List<Fonte> fontes = new ArrayList<>();
+        for (Uri u : uris) fontes.add(fonte(u));
+        emFundo("Importando…", true, () -> importarFontes(fontes, null));
+    }
+
+    /** Baixa o zip pronto de uma execução do Colab e o usa como versão nova. */
+    void baixarDoColab(GitHub github, GitHub.Artefato a) {
+        emFundo("Baixando do Colab…", true, () -> {
+            File zip = new File(ctx.getCacheDir(), "colab_" + a.id + ".zip");
+            if (a.tamanho > 0 && ctx.getFilesDir().getUsableSpace() < a.tamanho * 3 + (100L << 20)) {
+                throw new IOException(String.format(Locale.getDefault(),
+                        "falta espaço no celular: o zip tem %d MB e precisa de uns %d MB livres", a.tamanho >> 20,
+                        (a.tamanho * 3 >> 20) + 100));
+            }
             try {
-                for (String n : new String[]{"tokenizer.txt", "laika_base.bin", "laika_chat.bin", "laika_rag.db"}) {
-                    File f = new File(saida, n);
-                    if (!f.exists()) continue;
-                    File tmp = armazem.temporario("x");
-                    if (n.endsWith(".db")) {
-                        // O índice pode ter centenas de MB: um link para o mesmo arquivo em vez de uma cópia
-                        // (se algo der errado, o original continua em saida/).
-                        try {
-                            Files.createLink(tmp.toPath(), f.toPath());
-                        } catch (Exception semLink) {
-                            try (InputStream in = new java.io.FileInputStream(f)) {
-                                Armazem.copiar(in, tmp, -1, null);
-                            }
-                        }
-                    } else {
-                        try (InputStream in = new java.io.FileInputStream(f)) {
-                            Armazem.copiar(in, tmp, -1, null);
-                        }
+                github.baixar(a, zip, progresso("Baixando do Colab…"), pararTarefa::get);
+                importarFontes(List.of(fonte(zip, "laika_pacote.zip")), "Colab de " + agora());
+            } finally {
+                zip.delete();
+            }
+        });
+    }
+
+    private void importarFontes(List<Fonte> fontes, String nomeNovo) throws Exception {
+        List<Importador.Entrada> entradas = new ArrayList<>();
+        List<String> feitos = new ArrayList<>(), avisos = new ArrayList<>();
+        long total = 0;
+        for (Fonte f : fontes) total += Math.max(0, f.tamanho());
+        if (total > 0 && ctx.getFilesDir().getUsableSpace() < total * 2 + (100L << 20)) {
+            throw new IOException(String.format(Locale.getDefault(),
+                    "falta espaço no celular: os arquivos têm %d MB e a importação precisa de mais ou menos o dobro",
+                    total >> 20));
+        }
+        File pastaCorpus = new File(ctx.getCacheDir(), "corpus");
+        apagarPasta(pastaCorpus);
+        Corpus corpus = new Corpus(pastaCorpus);
+        int textos = 0;
+        boolean temIndice = false;
+        try {
+            int i = 0;
+            for (Fonte f : fontes) {
+                i++;
+                String nome = f.nome();
+                String titulo = (fontes.size() > 1 ? "(" + i + "/" + fontes.size() + ") " : "") + "Lendo " + nome + "…";
+                try (InputStream bruto = f.abrir()) {
+                    BufferedInputStream in = new BufferedInputStream(bruto, 1 << 16);
+                    String tipo = Pacote.tipo(in);
+                    if (Pacote.BACKUP.equals(tipo)) {
+                        // Backup exportado: lido direto, sem cópia temporária.
+                        Armazem.Versao b = armazem.importarBackup(in, f.tamanho(), progresso("Importando " + nome + "…"));
+                        feitos.add("backup \"" + b.nome + "\"");
+                        continue;
                     }
-                    entradas.add(new Importador.Entrada(tmp, n + " (treinado no celular)"));
+                    if (Pacote.PACOTE.equals(tipo)) {
+                        Pacote p = Pacote.extrair(in, f.tamanho(), armazem, corpus, progresso(titulo));
+                        entradas.addAll(p.entradas);
+                        textos += p.textos;
+                        temIndice |= p.temIndice();
+                        if (!p.ignorados.isEmpty()) {
+                            avisos.add(String.format(Locale.getDefault(), "%d arquivo(s) do zip não servem para o app e "
+                                    + "foram ignorados (ex.: %s)", p.ignorados.size(), p.ignorados.get(0)));
+                        }
+                        continue;
+                    }
+                    File tmp = armazem.temporario("x");
+                    Armazem.copiar(in, tmp, f.tamanho(), progresso(titulo));
+                    entradas.add(new Importador.Entrada(tmp, nome));
+                    if (nome.toLowerCase(Locale.ROOT).endsWith(".db")) temIndice = true;
                 }
-                if (entradas.isEmpty()) throw new IOException("ainda não há resultado do treino");
-                Importador.Resultado r = new Importador(armazem, Motor::conferirIndice).importar(entradas);
-                entradas.clear();
+            }
+            if (textos > 0) {
+                if (temIndice) avisos.add("os textos do zip não foram usados, porque ele já trazia o índice pronto");
+                else entradas.add(montarIndice(corpus));
+            }
+            tarefaCancelavel = false;
+            tarefa("Convertendo e conferindo os arquivos…", -1);
+            Importador.Resultado r = new Importador(armazem, Motor::conferirIndice).importar(entradas);
+            entradas.clear();
+            for (Armazem.Versao b : r.backupsImportados) feitos.add("backup \"" + b.nome + "\"");
+            String nomeVersaoNova = null;
+            if (r.mudaVersao()) {
+                tarefa("Aplicando a atualização…", -1);
                 String quando = agora();
                 if (armazem.backupIgualAoAtual() == null) {
-                    armazem.fazerBackup(nomeVersao + " (antes do treino de " + quando + ")");
+                    armazem.fazerBackup(nomeVersao + " (antes da atualização de " + quando + ")");
                 }
-                String nome = "Treino no celular de " + quando;
-                armazem.aplicar(r.trocas, nome, null);
+                nomeVersaoNova = nomeNovo != null ? nomeNovo : "Atualização de " + quando;
+                armazem.aplicar(r.trocas, nomeVersaoNova, r.memoria);
                 carregarVersao();
-                aviso("Usando o modelo treinado no celular: " + String.join(", ", r.feitos) + ".");
-                avisarUsuario("Resultado do treino aplicado", "Agora usando \"" + nome + "\" com: " + String.join(", ", r.feitos)
-                        + ".\n\nA versão anterior foi guardada nos backups."
-                        + (r.avisos.isEmpty() ? "" : "\n\nAtenção: " + String.join("; ", r.avisos) + "."));
-            } finally {
-                for (Importador.Entrada e : entradas) e.arquivo.delete();
+                aviso("Atualização aplicada: " + String.join(", ", r.feitos) + ".");
             }
-        });
+            StringBuilder msg = new StringBuilder();
+            if (nomeVersaoNova != null) {
+                msg.append("Agora usando \"").append(nomeVersaoNova).append("\" com: ")
+                        .append(String.join(", ", r.feitos)).append(".\n\nA versão anterior foi guardada nos backups.");
+            }
+            if (!feitos.isEmpty()) {
+                if (msg.length() > 0) msg.append("\n\n");
+                msg.append("Importado para a lista de backups: ").append(String.join(", ", feitos)).append('.');
+            }
+            avisos.addAll(r.avisos);
+            if (!avisos.isEmpty()) msg.append("\n\nAtenção: ").append(String.join("; ", avisos)).append('.');
+            avisarUsuario("Importação concluída", msg.length() == 0 ? "Nada para importar." : msg.toString());
+        } finally {
+            for (Importador.Entrada e : entradas) e.arquivo.delete();
+            corpus.apagar();
+        }
     }
 
-    /** Importa os arquivos de uma atualização (ou backups .zip) escolhidos no seletor. */
-    void importar(List<Uri> uris) {
-        emFundo("Importando…", () -> {
-            List<Importador.Entrada> entradas = new ArrayList<>();
-            List<String> feitos = new ArrayList<>();
-            long total = 0;
-            for (Uri u : uris) total += Math.max(0, tamanhoDoArquivo(ctx, u));
-            if (total > 0 && ctx.getFilesDir().getUsableSpace() < total * 2 + (100L << 20)) {
-                throw new IOException(String.format(Locale.getDefault(),
-                        "falta espaço no celular: os arquivos têm %d MB e a importação precisa de mais ou menos o dobro",
-                        total >> 20));
+    /** O "rag.py build" no celular, com os textos que vieram no zip (e os textos próprios do APK). */
+    private Importador.Entrada montarIndice(Corpus corpus) throws IOException {
+        corpus.garantirModerno(new Corpus.Fabrica() {
+            @Override
+            public String[] listar(String pasta) throws IOException {
+                String[] r = ctx.getAssets().list("dados/" + pasta);
+                return r == null ? new String[0] : r;
             }
-            try {
-                int i = 0;
-                for (Uri u : uris) {
-                    i++;
-                    String nome = nomeDoArquivo(ctx, u);
-                    long tam = tamanhoDoArquivo(ctx, u);
-                    String titulo = (uris.size() > 1 ? "(" + i + "/" + uris.size() + ") " : "") + "Copiando " + nome + "…";
-                    try (InputStream in = ctx.getContentResolver().openInputStream(u)) {
-                        if (in == null) throw new IOException("não consegui abrir " + nome);
-                        if (nome.toLowerCase(Locale.ROOT).endsWith(".zip")) {
-                            // Backup exportado: lido direto, sem cópia temporária.
-                            Armazem.Versao b = armazem.importarBackup(in, tam, progresso("Importando " + nome + "…"));
-                            feitos.add("backup \"" + b.nome + "\"");
-                            continue;
-                        }
-                        File tmp = armazem.temporario("x");
-                        Armazem.copiar(in, tmp, tam, progresso(titulo));
-                        entradas.add(new Importador.Entrada(tmp, nome));
-                    }
-                }
-                tarefa("Convertendo e conferindo os arquivos…", -1);
-                Importador.Resultado r = new Importador(armazem, Motor::conferirIndice).importar(entradas);
-                entradas.clear();
-                for (Armazem.Versao b : r.backupsImportados) feitos.add("backup \"" + b.nome + "\"");
-                String nomeNovo = null;
-                if (r.mudaVersao()) {
-                    tarefa("Aplicando a atualização…", -1);
-                    String quando = agora();
-                    if (armazem.backupIgualAoAtual() == null) {
-                        armazem.fazerBackup(nomeVersao + " (antes da atualização de " + quando + ")");
-                    }
-                    nomeNovo = "Atualização de " + quando;
-                    armazem.aplicar(r.trocas, nomeNovo, r.memoria);
-                    carregarVersao();
-                    aviso("Atualização aplicada: " + String.join(", ", r.feitos) + ".");
-                }
-                StringBuilder msg = new StringBuilder();
-                if (nomeNovo != null) {
-                    msg.append("Agora usando \"").append(nomeNovo).append("\" com: ")
-                            .append(String.join(", ", r.feitos)).append(".\n\nA versão anterior foi guardada nos backups.");
-                }
-                if (!feitos.isEmpty()) {
-                    if (msg.length() > 0) msg.append("\n\n");
-                    msg.append("Importado para a lista de backups: ").append(String.join(", ", feitos)).append('.');
-                }
-                if (!r.avisos.isEmpty()) msg.append("\n\nAtenção: ").append(String.join("; ", r.avisos)).append('.');
-                avisarUsuario("Importação concluída", msg.length() == 0 ? "Nada para importar." : msg.toString());
-            } finally {
-                for (Importador.Entrada e : entradas) e.arquivo.delete();
+
+            @Override
+            public InputStream abrir(String caminho) throws IOException {
+                return ctx.getAssets().open("dados/" + caminho);
             }
         });
+        String resumo = corpus.resumo();
+        tarefa("Montando o índice do RAG (" + resumo + ")…", -1);
+        File db = armazem.temporario("db");
+        SQLiteConnection con = new BundledSQLiteDriver().open(db.getPath());
+        try {
+            ConstrutorIndice.construir(corpus, con, new Registro() {
+                @Override
+                public void log(String linha) {
+                }
+
+                @Override
+                public void progresso(double fracao, String texto) {
+                    tarefa("Montando o índice do RAG: " + texto.replace("Índice: ", ""), fracao < 0 ? -1 : (int) (fracao * 100));
+                }
+
+                @Override
+                public boolean parar() {
+                    return pararTarefa.get();
+                }
+            });
+        } catch (IOException | RuntimeException e) {
+            con.close();
+            db.delete();
+            throw e;
+        }
+        con.close();
+        return new Importador.Entrada(db, "índice montado no celular com " + resumo);
     }
 }

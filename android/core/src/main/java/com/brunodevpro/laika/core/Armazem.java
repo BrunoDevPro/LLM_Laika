@@ -494,6 +494,26 @@ public final class Armazem {
         zip.flush();
     }
 
+    /**
+     * Um backup novo com estes arquivos (papel -> arquivo já guardado nos blobs), sem trocar a versão em
+     * uso. Sem índice, usa o pequeno do app.
+     */
+    public Versao backupDeArquivos(String nome, Map<String, Arquivo> arquivos) throws IOException {
+        if (!arquivos.containsKey(CHAT) || !arquivos.containsKey(TOKENIZER)) {
+            throw new IOException("um backup precisa do modelo de chat e do tokenizer");
+        }
+        String id = "b" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 6);
+        File pasta = new File(backupsDir, id);
+        pasta.mkdirs();
+        Versao b = new Versao(id, pasta);
+        b.nome = nome;
+        b.criado = b.alterado = System.currentTimeMillis();
+        b.arquivos.putAll(arquivos);
+        if (!b.arquivos.containsKey(INDICE)) b.arquivos.put(INDICE, arquivosDeFabrica().get(INDICE));
+        gravar(b);
+        return b;
+    }
+
     /** Lê um .zip exportado e o guarda como um backup novo (não troca a versão em uso). */
     @SuppressWarnings("unchecked")
     public Versao importarBackup(InputStream entrada, long total, Progresso p) throws IOException {

@@ -1,0 +1,20 @@
+# Aviso do app para uma execução do "Laika no Colab" que está esperando (ex.: "drive-ok-<id>" depois
+# que o usuário autorizou o Google Drive). O laika_colab.py procura uma execução com esse nome.
+name: Laika sinal
+run-name: ${{ inputs.sinal }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      sinal:
+        description: "Aviso para uma execução do Colab (ex.: drive-ok-123456789)"
+        required: true
+
+permissions: {}
+
+jobs:
+  sinal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "Aviso recebido"

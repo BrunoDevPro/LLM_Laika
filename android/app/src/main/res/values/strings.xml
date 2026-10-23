@@ -10,5 +10,6 @@
     <string name="voltar">Voltar</string>
     <string name="ola">Olá! Eu sou a Laika.</string>
     <string name="ola_sub">Uma IA pequena, treinada do zero em português,\nrodando inteira no seu celular.</string>
-    <string name="treinar">Treinar no celular</string>
+    <string name="colab">Colab</string>
+    <string name="cancelar">Cancelar</string>
 </resources>

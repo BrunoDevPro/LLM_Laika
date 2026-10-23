@@ -2,6 +2,8 @@
 
 App de conversa com a Laika rodando **inteira no celular**, sem internet: o mesmo modelo do
 `finetuned.pt`, o tokenizer, a busca nos textos (RAG) com citação `*Título` e a memória do usuário.
+Pela tela **Colab**, o app também liga as células do treino no Google Colab, sem você deixar o Colab
+aberto, e traz o modelo novo de volta para o celular.
 
 ## Instalar
 
@@ -9,7 +11,7 @@ App de conversa com a Laika rodando **inteira no celular**, sem internet: o mesm
 2. O Android vai pedir para permitir "instalar apps desta fonte" (o app não vem da Play Store). Permita.
 3. Abra a Laika. Ela carrega em poucos segundos e já responde.
 
-Requer Android 8.0 ou mais novo. O APK tem ~36 MB.
+Requer Android 8.0 ou mais novo. O APK tem ~36 MB. A conversa não usa a internet; só a tela Colab usa.
 
 ## O índice completo do RAG (opcional, recomendado)
 
@@ -23,10 +25,19 @@ Wikipédia e nos 495 livros, importe o `laika_rag.db` (~640 MB):
 
 ## Atualizar depois de um treino no Colab
 
-Não precisa de computador: no celular, baixe do Drive (`Meu Drive/LLM_Laika/checkpoints`) o
-`finetuned.pt`, o `pretrain_best.pt` e o `tokenizer.json` (e, se quiser, `rag/laika_rag.db`).
-No app: botão de versões (no topo) → **Escolher arquivos** → selecione todos de uma vez.
-O app converte os `.pt` sozinho, confere se combinam e guarda a versão anterior como backup.
+**Pela tela Colab (mais fácil):** depois que a célula 6 rodar pelo app, o modelo aparece em
+**Modelos prontos**: toque em **Baixar e usar**.
+
+**Pelo Google Drive:** no Colab, rode a célula *6) EXPORTAR PARA O CELULAR*; ela grava
+`Meu Drive/LLM_Laika/laika_pacote.zip`. No celular, baixe o arquivo pelo app do Drive e, na Laika:
+botão de versões (no topo) → **Escolher arquivos** → o zip.
+
+O zip pode ter o modelo (`finetuned.pt`, `pretrain_best.pt`, `tokenizer.json`), o índice
+(`laika_rag.db`, se marcar `INDICE`) e/ou os livros e artigos (se marcar `TEXTOS`: o celular monta o
+índice do RAG com eles, junto com os textos próprios que já vêm no app). Também dá para escolher os
+arquivos soltos de `Meu Drive/LLM_Laika/checkpoints` de uma vez. O app converte os `.pt` sozinho,
+confere se combinam e guarda a versão anterior como backup. Importações longas continuam com a tela
+apagada (fica uma notificação com o progresso e o botão Cancelar).
 
 ## Versões e backups
 
@@ -35,36 +46,49 @@ fazer backup (com nome editável), usar um backup, renomear, exportar como `.zip
 Drive) e importar de volta. Os backups compartilham os arquivos iguais, então guardar várias versões
 não repete os 640 MB do índice.
 
-## Treinar no celular
+## Colab pelo app (treinar na nuvem)
 
-Menu ⋮ → **Treinar no celular**. As mesmas etapas do Colab, rodando na GPU do celular
-(OpenGL ES 3.1, compute shaders) com a tela apagada (fica uma notificação com o progresso e o botão Parar):
+Menu ⋮ → **Colab: treinar na nuvem**. O app pede ao GitHub Actions do repositório para ligar uma
+máquina do Colab (com o [Colab CLI](https://github.com/googlecolab/google-colab-cli)), rodar as células
+escolhidas com os parâmetros da tela (os mesmos campos do `colab.ipynb`: `MODO`, `EPOCAS`...) e
+desligar a máquina no fim. Tudo continua sendo salvo no seu Google Drive, como no navegador.
 
-1. **Dados**: no Colab, rode a célula *6) EXPORTAR DADOS PARA O CELULAR*; ela grava
-   `Meu Drive/LLM_Laika/laika_dados.zip`. Baixe no celular e importe. (Os textos próprios e as
-   perguntas escritas já vêm no app.)
-2. **Índice do RAG**: o `rag.py build`.
-3. **Pré-treino**: continuar do modelo em uso, do zero (treina um tokenizer novo) ou retomar um
-   treino parado (o estado completo é salvo a cada validação e ao parar).
-4. **Fine-tuning**: o `finetune.py` (exemplos escritos, sintéticos, Wikipédia, RAG, 8 respostas de teste por época).
-5. **Usar o resultado**: vira uma versão nova (a anterior vai para os backups).
+Uma vez só:
 
-Tempo: o pré-treino completo do preset `colab` (10.000 passos, ~164 M tokens) são ~7,5 PFLOP; numa
-GPU de celular isso leva muitas horas (o app mostra tokens/s e o tempo que falta). O fine-tuning leva
-de minutos a uma hora. Deixe o celular carregando; ele esquenta.
+1. No GitHub, junte este branch ao `main` (o workflow `.github/workflows/colab.yml` precisa estar no
+   branch principal).
+2. Crie um token em <https://github.com/settings/personal-access-tokens/new> ("fine-grained"), só
+   para o repositório LLM_Laika, com as permissões **Actions** (leitura e escrita), **Secrets**
+   (leitura e escrita) e **Contents** (leitura).
+3. No Colab (navegador), rode a célula **0** do `colab.ipynb`: ela faz o login do Google com as
+   permissões do Colab CLI e guarda essa permissão no GitHub (segredo `COLAB_ADC`), usando o token.
+4. No app, tela Colab: cole o repositório e o token.
 
-Conferido no PC com o Mesa (a mesma GPU "de mentira" roda os mesmos shaders): perda, gradientes de
-todos os parâmetros e o passo do AdamW iguais ao PyTorch; tokenizer treinado igual ao da biblioteca
-tokenizers; índice igual ao do `rag.py`; pré-treino com parada e retomada e fine-tuning de ponta a ponta.
+Depois: marque as células (a 1 sempre roda antes; há atalhos como "Só fine-tuning"), escolha a GPU e
+toque em **Rodar no Colab**. A tela mostra cada célula (✓, ⏳, ✗) e as últimas linhas da saída; dá para
+cancelar. Pode fechar o app: ele avisa por notificação quando o Colab terminar e quando precisar de
+você. Na primeira vez, o Colab pode pedir **autorização para usar o Google Drive**: toque em
+**Autorizar**, permita o acesso e depois em **Já autorizei**.
+
+Cuidados: o repositório é público, então os registros do GitHub Actions e o zip do modelo (guardado
+por 14 dias como artefato) também ficam visíveis para quem entrar no repositório. O app tira e-mails
+e tokens do que publica. A máquina do Colab gasta unidades de computação enquanto está ligada (uma
+execução para sozinha no fim ou em até 6 horas). A ponte pelo Colab CLI foi testada só com um Colab
+de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela Colab.
 
 ## O que tem no app
 
 - Conversa em bolhas, com a resposta aparecendo palavra por palavra e um botão para parar.
+- Toque numa resposta: copiar, compartilhar, selecionar parte do texto, **ouvir**, **ver o trecho que
+  a Laika leu** (o contexto do RAG) e **gerar outra resposta**. Nas suas mensagens: editar e enviar de novo.
 - RAG igual ao `chat.py`: mesmas regras (`wants_rag`, limite de confiança) e a fonte no fim (`*Título`).
 - Memória igual ao `memory.py` ("meu nome é…", "lembre que…", "o que você lembra de mim?"),
   salva no celular no mesmo formato do `memoria.json`.
-- Menu: fontes, RAG, memória, **modo completar texto** (o `--base`, com o `pretrain_best.pt`),
-  criatividade (temperatura), versões e backups, treinar no celular, limpar a conversa.
+- Menu: fontes, RAG, memória, **modo completar texto** (o `--base`, com o `pretrain_best.pt`), ler as
+  respostas em voz alta, criatividade (temperatura), tamanho das respostas, versões e backups, Colab,
+  compartilhar a conversa, limpar a conversa.
+- Cada resposta mostra o tempo e a velocidade (tokens por segundo).
+- Se a versão em uso não abrir, o app oferece voltar para o backup mais recente.
 - Os comandos do `chat.py` também funcionam: `/fontes`, `/rag`, `/memoria`.
 
 ## Como funciona
@@ -82,15 +106,17 @@ O PyTorch não roda no Android, então o transformer foi reescrito em Java (`cor
 
 Os pesos vão no APK em float16 (13,7 MB por modelo); a conta é feita em float32.
 
-**Conversa no processador, treino na GPU:** para responder, um token por vez, o modelo de ~7 milhões
-de parâmetros é mais rápido no processador (com o cache de atenção, poucos milissegundos por token).
-Para treinar, as contas são em lotes grandes e a GPU vale a pena (`core/treino`).
+**Conversa no processador:** para responder, um token por vez, o modelo de ~7 milhões de parâmetros é
+mais rápido no processador (com o cache de atenção, poucos milissegundos por token). O treino fica no
+Colab (tela Colab).
 
 ### Conferido contra o Python
 
 `core/referencias.py` gera as respostas do código original e `gradle :core:test` compara:
 612 textos tokenizados iguais, logits com diferença máxima de ~1e-5 para o PyTorch,
 geração gulosa idêntica (com cache e passando da janela de 256), busca do RAG, memória e prompt iguais.
+Também: o índice montado no celular igual ao do `rag.py build`, o zip do Colab virando uma versão nova,
+o leitor do `colab.ipynb` igual ao do `colab/laika_colab.py` e o cliente do GitHub contra um servidor falso.
 
 ## Gerar o APK de novo (depois de um novo treino)
 
@@ -101,9 +127,8 @@ Precisa de JDK 17+ e do Android SDK (ou do Android Studio).
 python android/exportar_modelo.py --checkpoints checkpoints --livros data/books
 #    (--livros entra no índice pequeno que vai dentro do APK; use uma pasta com poucos livros)
 
-# 2) Opcional: confere o Java contra o Python (treino na GPU precisa do Mesa: apt install libegl-mesa0 libgles2)
+# 2) Opcional: confere o Java contra o Python
 python android/core/referencias.py --checkpoints checkpoints
-python android/core/referencias_treino.py data/books/gutenberg_24455.txt
 cd android && LAIKA_CHECKPOINTS=../checkpoints LAIKA_LIVROS=<pasta com um livro e titulos.tsv> ./gradlew :core:test
 
 # 3) Monta o APK
