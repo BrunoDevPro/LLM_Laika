@@ -64,7 +64,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
 
     private Motor motor;
     private PainelTarefa painel;
-    private LinearLayout caixaConfig, caixaCelulas, caixaExecucoes, caixaModelos, caixaAjuda;
+    private LinearLayout caixaConfig, caixaCelulas, caixaExecucoes, caixaModelos, caixaConta;
     private final ExecutorService rede = Executors.newSingleThreadExecutor();
     private final Handler ui = new Handler(Looper.getMainLooper());
 
@@ -106,7 +106,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         caixaCelulas = caixa(conteudo);
         caixaExecucoes = caixa(conteudo);
         caixaModelos = caixa(conteudo);
-        caixaAjuda = caixa(conteudo);
+        caixaConta = caixa(conteudo);
 
         View topo = findViewById(R.id.topo), rolagem = findViewById(R.id.rolagem);
         int topoPad = topo.getPaddingTop();
@@ -339,7 +339,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         montarCelulas();
         montarExecucoes();
         montarModelos();
-        montarAjuda();
+        montarConta();
     }
 
     // --- configuração ---
@@ -510,7 +510,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         cb.setChecked(sempre || marcadas.contains(c.numero));
         ligado(cb, !sempre && !c.soNavegador);
         k.addView(cb);
-        String desc = c.soNavegador ? "Só no navegador (" + (c.numero == 0 ? "rode uma vez no Colab: veja Ajuda" : "conversa interativa")
+        String desc = c.soNavegador ? "Só no navegador (" + (c.numero == 0 ? "rode uma vez para ligar o app ao Colab" : "conversa interativa")
                 + ")." : sempre ? "Sempre roda antes das outras (monta o Drive, baixa o código)." : resumo(c);
         TextView d = texto(desc, 12, R.color.aviso, false);
         d.setPadding(dp(32), 0, 0, dp(2));
@@ -861,22 +861,17 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                 .setNegativeButton("Cancelar", null).show();
     }
 
-    // --- ajuda ---
+    // --- conta ---
 
-    private void montarAjuda() {
-        caixaAjuda.removeAllViews();
-        secao(caixaAjuda, "AJUDA");
-        LinearLayout c = cartao(caixaAjuda);
-        c.addView(texto("• A célula 1 (preparar) sempre roda antes. As células 0 e 5 só funcionam no navegador.\n"
-                + "• Uma máquina do Colab por vez: um pedido novo espera o anterior terminar.\n"
-                + "• As GPUs que o Colab libera dependem do plano da sua conta Google. Se a escolhida for recusada, "
-                + "a execução para logo no começo e diz isso (tente outra ou sem GPU).\n"
-                + "• Tudo o que as células gravam fica no seu Google Drive (pasta LLM_Laika), como no navegador.\n"
-                + "• Na primeira vez, o Colab pode pedir autorização para usar o Drive: o app avisa e mostra o link.\n"
-                + "• A permissão do Google guardada no GitHub (segredo COLAB_ADC) pode ser trocada rodando a "
-                + "célula 0 de novo.", 13, R.color.texto_laika, false));
+    /** Atalhos da conexão (sem textos de ajuda): abrir o caderno no Colab e trocar o token. */
+    private void montarConta() {
+        caixaConta.removeAllViews();
+        if (!Colab.configurado(this)) return;
+        secao(caixaConta, "CONEXÃO");
+        LinearLayout c = cartao(caixaConta);
+        c.addView(texto("Repositório: " + Colab.repo(this), 13, R.color.texto_laika, false));
         LinearLayout l = linha(c);
         botao(l, "Abrir no Colab", false, v -> abrirLink(urlColab()));
-        if (Colab.configurado(this)) botao(l, "Trocar o token", false, v -> trocarToken());
+        botao(l, "Trocar o token", false, v -> trocarToken());
     }
 }

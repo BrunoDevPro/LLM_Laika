@@ -1,10 +1,11 @@
-"""Gera data/qa/pergeresp.txt e data/qa/identidade.txt.
+"""Gera data/qa/pergeresp.txt, identidade.txt, leitura.txt e conversas.jsonl (várias trocas).
 
 Rode:  python tools/gerar_pergeresp.py
 ATENÇÃO: sobrescreve esses dois arquivos. Para adicionar perguntas suas sem perder nada,
 crie outro arquivo em data/qa/ (por exemplo data/qa/meus_exemplos.txt).
 """
 
+import json
 import random
 import re
 import sys
@@ -1359,6 +1360,55 @@ def generic_sections():
     return secs, leitura
 
 
+MAIS = ["Me fale mais.", "Conte mais sobre isso.", "Explique melhor.", "Pode dar mais detalhes?", "Fale mais sobre isso."]
+RESUMIR = ["Resuma isso em uma frase.", "Agora resuma em uma frase.", "Pode resumir?"]
+NOMES_CONVERSA = ["Ana", "Bruna", "Carla", "Daniel", "Eduardo", "Fernanda", "Gabriel", "Helena", "Igor", "Júlia",
+         "Lucas", "Mariana", "Nicolas", "Olívia", "Pedro", "Rafaela", "Sofia", "Tiago", "Vitória", "Mateus"]
+
+
+def conversas():
+    """Conversas de várias trocas para a memória de IA (o chat põe as últimas mensagens no prompt).
+
+    No fine-tuning, só a última resposta é treinada; as anteriores mostram por que ela faz sentido:
+    "Qual é a capital da França?" ... "E da Itália?", "O que é X?" ... "Me fale mais.".
+    """
+    convs = []
+    paises = [(p, prep, c) for p, prep, c, *_ in CAPITAIS + D3.CAPITAIS_2]
+    for lista in (paises, ESTADOS):
+        for i, (lugar, prep, capital) in enumerate(lista):
+            outro, prep2, capital2 = lista[(i * 7 + 3) % len(lista)]
+            if outro == lugar:
+                continue
+            convs.append([(f"Qual é a capital {prep} {lugar}?", f"A capital {prep} {lugar} é {capital}."),
+                          (f"E {prep2} {outro}?", f"A capital {prep2} {outro} é {capital2}.")])
+    temas = [(t, False) for t in TEMAS] + [(t, True) for t in TEMAS_PASSADO]
+    for i, ((assunto, curta, texto), passado) in enumerate(temas):
+        q = pergunta_curta(assunto, passado)
+        convs.append([(q, curta), (MAIS[i % len(MAIS)], texto)])
+        if i % 3 == 0:
+            convs.append([(PEDIDOS_TEXTO[i % len(PEDIDOS_TEXTO)].format(assunto), texto),
+                          (RESUMIR[i % len(RESUMIR)], curta)])
+        if i % 4 == 1 and i + 1 < len(temas):
+            (assunto2, curta2, _), _ = temas[i + 1]
+            convs.append([(q, curta), (f"E {assunto2}?", curta2)])
+        if i % 5 == 2:
+            convs.append([(q, curta), ("Do que estávamos falando?", f"Estávamos falando sobre {assunto}.")])
+        if i % 6 == 3:
+            convs.append([(q, curta), ("Pode repetir?", curta)])
+        if i % 7 == 4:
+            convs.append([(q, curta), (MAIS[(i + 1) % len(MAIS)], texto),
+                          ("Obrigado!", "De nada! Se quiser saber mais alguma coisa, é só perguntar.")])
+    for i, nome in enumerate(NOMES_CONVERSA):
+        pergunta = ["Qual é o meu nome?", "Como eu me chamo?", "Você lembra o meu nome?"][i % 3]
+        resposta = [f"Seu nome é {nome}.", f"Você se chama {nome}.", f"Lembro, sim: seu nome é {nome}."][i % 3]
+        convs.append([(f"Meu nome é {nome}.", f"Prazer, {nome}! Vou lembrar o seu nome."), (pergunta, resposta)])
+    convs.append([("Qual é o seu nome?", "Meu nome é Laika."),
+                  ("E o meu?", "Você ainda não me disse o seu nome. Como você se chama?")])
+    convs.append([("Oi", "Olá! Eu sou a Laika. Como posso ajudar?"), ("Tudo bem?", "Tudo bem, e você?"),
+                  ("Estou bem.", "Que bom! Em que posso ajudar hoje?")])
+    return convs
+
+
 def _chave(question):
     return " ".join(re.sub(r"[^\w\s]", " ", question.lower()).split())
 
@@ -1501,6 +1551,11 @@ def build():
     with open(QA_DIR / "identidade.txt", "w", encoding="utf-8") as f:
         f.write("# Quem é a Laika. Este arquivo tem peso maior no fine-tuning.\n\n")
         f.write("\n".join(ex(q, a) for q, a in identidade) + "\n")
+    convs = conversas()
+    with open(QA_DIR / "conversas.jsonl", "w", encoding="utf-8") as f:
+        for c in convs:
+            f.write(json.dumps(c, ensure_ascii=False) + "\n")
+    print(f"conversas.jsonl: {len(convs)} conversas de várias trocas (memória de IA)")
     leitura, _ = leitura_examples()
     leitura += leitura_simples() + leitura_genericas
     with open(QA_DIR / "leitura.txt", "w", encoding="utf-8") as f:

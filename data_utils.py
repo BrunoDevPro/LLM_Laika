@@ -98,8 +98,12 @@ def _content_words(sentence):
     return words
 
 
-def _chat(question, answer):
+def chat_turn(question, answer):
+    """Uma troca no formato do chat. Uma conversa é uma sequência delas separadas por espaço."""
     return f"{USER_TOKEN} {question} {ASSISTANT_TOKEN} {answer} {END_TOKEN}"
+
+
+MAX_HISTORY = 5  # trocas anteriores que o chat pode pôr no prompt ("memória de IA")
 
 
 SUMMARY_REQUESTS = ["Resuma o texto: {}", "Resuma: {}", "Faça um resumo do texto: {}",
@@ -139,7 +143,7 @@ def summary_examples(texts, n, seed=0, min_words=40, max_words=90):
             if 3 <= len(para) <= 6 and min_words <= words <= max_words:
                 candidates.append(para)
     rng.shuffle(candidates)
-    return [_chat(rng.choice(SUMMARY_REQUESTS).format(" ".join(p)), extractive_summary(p))
+    return [chat_turn(rng.choice(SUMMARY_REQUESTS).format(" ".join(p)), extractive_summary(p))
             for p in candidates[:n]]
 
 
@@ -192,7 +196,89 @@ def wiki_definition(title, first_paragraph):
         question = f"Quem foi {subject}?" if has_dates else f"O que foi {subject}?"
     else:
         question = f"O que são {subject}?" if verb == "são" else f"O que foram {subject}?"
-    return _chat(question, sentence)
+    return chat_turn(question, sentence)
+
+
+# ---------- Leitura com contexto, a partir dos trechos da Wikipédia ----------
+# Perguntas como as do chat ("Onde X nasceu?", "O que X inventou?") com o trecho do artigo como
+# Contexto e a frase que responde como resposta: ensina o modelo a responder com o contexto, sem
+# copiar a pergunta nem inventar. Uma parte vem com o trecho de OUTRO artigo e a resposta "não sei".
+
+_YEAR = r"\b(?:1\d{3}|20\d{2})\b"
+_READING = [
+    (re.compile(r"\bnasceu (?:em|no|na) [A-ZÁÉÍÓÚÂÊÔÃÕ]"), ["Onde {x} nasceu?", "Onde nasceu {x}?"]),
+    (re.compile(r"\bnasceu\b.*" + _YEAR), ["Quando {x} nasceu?", "Em que ano {x} nasceu?"]),
+    (re.compile(r"\b(?:morreu|faleceu)\b.*" + _YEAR), ["Quando {x} morreu?", "Em que ano {x} morreu?"]),
+    (re.compile(r"\b(?:fica|está situad[oa]|está localizad[oa]|situa-se|localiza-se)\b"),
+     ["Onde fica {x}?", "Em que lugar fica {x}?"]),
+    (re.compile(r"\b(fundad[oa]|criad[oa]|inaugurad[oa]|construíd[oa])\s+em\b.*" + _YEAR),
+     ["Quando {x} foi {v}?"]),
+    (re.compile(r"\b(inventou|criou|desenvolveu|projetou|construiu|escreveu|compôs|pintou|dirigiu|descobriu|"
+                r"fundou|gravou|publicou|venceu|conquistou)\b"), ["O que {x} {v}?"]),
+    (re.compile(r"\b[\d.]+ habitantes\b"), ["Quantos habitantes tem {x}?", "Qual é a população de {x}?"]),
+    (re.compile(r"\b(conhecid[oa]|famos[oa]) (?:por|pel[oa]s?)\b"), ["Pelo que {x} é {v}?"]),
+]
+_PRONOUN = re.compile(r"^(?:Ele|Ela)\s+")
+_ABOUT = re.compile(r"^(?:Ele|Ela|O município|A cidade|O país|O estado|A ilha|O rio|A espécie)\b")
+NOT_IN_CONTEXT = "O trecho que encontrei não fala sobre isso, então não sei responder com certeza."
+
+
+def _reading_pairs(title, text, pos):
+    """(pergunta, resposta) que o próprio trecho responde."""
+    x = _PAREN.sub("", title).strip()
+    if not x or len(x) > 50 or x.startswith("Lista"):
+        return []
+    pairs = []
+    if pos == 0:
+        definition = wiki_definition(title, text)
+        if definition:
+            pairs.append(split_example(definition))
+    name_words = set(content_words(x))
+    for sentence in _SENTENCE_SPLIT.split(text):
+        sentence = re.sub(r"\s+", " ", _PAREN.sub("", sentence)).strip().replace(" ,", ",")
+        if not sentence.endswith(".") or not 6 <= len(sentence.split()) <= 45:
+            continue
+        about = _ABOUT.match(sentence) or name_words & set(content_words(sentence))
+        if not about:
+            continue
+        for pattern, forms in _READING:
+            m = pattern.search(sentence)
+            if m:
+                verb = m.group(1) if m.groups() else ""
+                answer = _PRONOUN.sub(x + " ", sentence, count=1)
+                pairs.append((forms[len(pairs) % len(forms)].format(x=x, v=verb), answer))
+                break
+    return pairs
+
+
+def reading_examples(passages, n, chunks=1, seed=0, negative_share=0.1):
+    """Até n exemplos 'Contexto: <trecho> / Pergunta: ...' a partir de [(título, trecho, posição)].
+
+    chunks > 1 (modelos com janela de 512+): às vezes junta outro trecho do mesmo artigo, como o chat
+    faz. Uma fração (negative_share) usa o trecho de outro artigo e responde que não sabe.
+    """
+    import random
+
+    rng = random.Random(seed)
+    by_title = {}
+    for title, text, pos in passages:
+        by_title.setdefault(title, []).append(text)
+    found = [(title, text, q, a) for title, text, pos in passages for q, a in _reading_pairs(title, text, pos)]
+    rng.shuffle(found)
+    titles = list(by_title)
+    examples = []
+    for title, text, question, answer in found[:n]:
+        if len(titles) > 1 and rng.random() < negative_share:
+            other = rng.choice(titles)
+            if other != title:
+                examples.append(chat_turn(rag_question(question, rng.choice(by_title[other])), NOT_IN_CONTEXT))
+                continue
+        context = [text]
+        siblings = [t for t in by_title[title] if t != text]
+        if chunks > 1 and siblings and rng.random() < 0.5:
+            context.insert(rng.randint(0, 1), rng.choice(siblings))
+        examples.append(chat_turn(rag_question(question, " ".join(context)), answer))
+    return examples
 
 
 def synthetic_examples(book_texts, n, seed=0, summary_texts=None, summary_share=0.2):
@@ -254,7 +340,7 @@ def synthetic_examples(book_texts, n, seed=0, summary_texts=None, summary_share=
                 "Complete a frase: {}", "Termine a frase: {}", "Complete: {}",
             ]).format(" ".join(words[:cut]))
 
-        example = _chat(question, answer)
+        example = chat_turn(question, answer)
         if example not in seen:
             seen.add(example)
             examples.append(example)
@@ -319,9 +405,64 @@ def request_topic(question):
     return topic if content_words(topic) else None
 
 
-def rag_query(question):
-    """O que procurar no RAG: o assunto, nos pedidos "... sobre X"; senão, a pergunta inteira."""
-    return request_topic(question) or question
+_NAME_STRIP = ".,;:!?¿¡\"'()[]«»“”‘’"
+_NAME_LINKS = {"de", "da", "do", "dos", "das", "e"}
+
+
+def question_name(question):
+    """O nome próprio mais longo da pergunta ("Santos Dumont" em "O que Santos Dumont inventou?"), ou None.
+
+    Palavras com maiúscula que não são stopwords, ligadas por "de/da/do/dos/das/e". A primeira palavra
+    da frase só conta se a seguinte também for nome (senão "Compare..." viraria nome).
+    """
+    words = question.split()
+    flags = []
+    for raw in words:
+        word = raw.strip(_NAME_STRIP)
+        flags.append(bool(word) and word[0].isupper() and normalize(word) not in _STOPWORDS)
+    if len(flags) > 1 and not flags[1]:
+        flags[0] = False
+    elif len(flags) == 1:
+        flags[0] = False
+    runs, run, links = [], [], []
+    for raw, is_name in zip(words, flags):
+        word = raw.strip(_NAME_STRIP)
+        if is_name:
+            run += links + [word]
+            links = []
+        elif run and word in _NAME_LINKS:
+            links.append(word)
+        else:
+            if run:
+                runs.append(run)
+            run, links = [], []
+        if run and raw.rstrip(_NAME_STRIP) != raw:  # pontuação depois da palavra fecha o nome
+            runs.append(run)
+            run, links = [], []
+    if run:
+        runs.append(run)
+    if not runs:
+        return None
+    name = " ".join(max(runs, key=len))
+    return name if content_words(name) else None
+
+
+def rag_queries(question):
+    """O que procurar no RAG, em ordem: o assunto, nos pedidos "... sobre X"; senão, a pergunta inteira
+    e, se ela não achar nada com confiança, só o nome próprio ("O que Santos Dumont inventou?")."""
+    topic = request_topic(question)
+    if topic:
+        return [topic]
+    queries = [question]
+    name = question_name(question)
+    if name and content_words(name) != content_words(question):
+        queries.append(name)
+    return queries
+
+
+def rag_chunks(block_size):
+    """Quantos trechos do RAG cabem no prompt: 1 com janela de 256, 2 com 512, 3 com 768 ou mais."""
+    return min(3, max(1, block_size // 256))
 
 
 def wants_rag(question):
@@ -371,7 +512,15 @@ def fit_context(count_tokens, question, context, budget, max_words=MAX_CONTEXT_W
 
 
 def split_example(example):
-    """'<|user|> P <|assistant|> R <|end|>' -> (P, R)."""
-    user_part, answer = example.split(ASSISTANT_TOKEN, 1)
+    """'<|user|> P <|assistant|> R <|end|>' -> (P, R). Numa conversa, devolve a última troca."""
+    _, question, answer = split_conversation(example)
+    return question, answer
+
+
+def split_conversation(example):
+    """Conversa -> (trocas anteriores como texto, ou "", última pergunta, última resposta)."""
+    cut = example.rfind(USER_TOKEN)
+    history, last = example[:cut].strip(), example[cut:]
+    user_part, answer = last.split(ASSISTANT_TOKEN, 1)
     question = user_part.replace(USER_TOKEN, "").strip()
-    return question, answer.replace(END_TOKEN, "").strip()
+    return history, question, answer.replace(END_TOKEN, "").strip()

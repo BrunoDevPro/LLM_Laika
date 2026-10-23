@@ -24,7 +24,7 @@ import sqlite3
 import tempfile
 from pathlib import Path
 
-from data_utils import _SENTENCE_SPLIT, content_words, normalize, word_tokens
+from data_utils import _SENTENCE_SPLIT, content_words, normalize, rag_queries, word_tokens
 
 DEFAULT_DB = "data/rag/laika_rag.db"
 SOURCES = [("data/wiki", "wiki"), ("data/modern", "texto"), ("data/books", "livro")]
@@ -260,20 +260,47 @@ class RagIndex:
         results.sort(key=lambda r: r["score"], reverse=True)
         return results
 
-    def best(self, question, min_coverage=0.6, min_score=1.8):
-        """O trecho mais relevante, ou None se a busca não tiver confiança.
+    def best(self, question):
+        """O trecho mais relevante, ou None se a busca não tiver confiança."""
+        return _confident(self.search(question))
 
-        Contexto errado atrapalha mais do que nenhum contexto, então só aceita resultados
-        com nota alta (em geral, quando o assunto da pergunta é o título do artigo) ou que
-        venham dos textos de data/modern.
+    def contexts(self, question, k=1):
+        """Até k trechos confiáveis para a pergunta (lista vazia se nenhum).
+
+        Tenta cada consulta de rag_queries (a pergunta inteira e, se ela não achar nada com
+        confiança, só o nome próprio). Os trechos extras são do mesmo artigo do primeiro, na
+        ordem de quantas palavras da pergunta eles têm (empate: a nota da busca).
+        Na busca só pelo nome, os textos de data/modern também precisam da nota mínima: qualquer
+        texto que cite "França" cobre 100% da consulta "França".
         """
-        results = self.search(question)
-        if not results or results[0]["coverage"] < min_coverage:
-            return None
-        top = results[0]
-        if top["score"] >= min_score or top["kind"] == "texto":
-            return top
+        for i, query in enumerate(rag_queries(question)):
+            results = self.search(query)
+            top = _confident(results, any_text=i == 0)
+            if top is None:
+                continue
+            hits = [top]
+            if k > 1:
+                wanted = {_stem(w) for w in content_words(question)}
+                same = [r for r in results if r["title"] == top["title"] and r["text"] != top["text"]]
+                same.sort(key=lambda r: -len(wanted & {_stem(t) for t in word_tokens(r["text"])}))
+                hits += same[:k - 1]
+            return hits
+        return []
+
+
+def _confident(results, min_coverage=0.6, min_score=1.8, any_text=True):
+    """O primeiro resultado, se a busca tiver confiança; senão None.
+
+    Contexto errado atrapalha mais do que nenhum contexto, então só aceita resultados
+    com nota alta (em geral, quando o assunto da pergunta é o título do artigo) ou que
+    venham dos textos de data/modern (any_text).
+    """
+    if not results or results[0]["coverage"] < min_coverage:
         return None
+    top = results[0]
+    if top["score"] >= min_score or (any_text and top["kind"] == "texto"):
+        return top
+    return None
 
 
 def open_index(db_path=DEFAULT_DB, quiet=False):

@@ -22,8 +22,8 @@ sys.path.insert(0, str(ROOT))
 
 from tokenizers import Tokenizer  # noqa: E402
 
-from chat import build_prompt  # noqa: E402
-from data_utils import content_words, wants_rag  # noqa: E402
+from chat import build_prompt, end_penalty, min_answer_tokens  # noqa: E402
+from data_utils import content_words, question_name, rag_queries, wants_rag  # noqa: E402
 from memory import Memory  # noqa: E402
 from model import build_model  # noqa: E402
 from rag import RagIndex  # noqa: E402
@@ -40,6 +40,20 @@ PERGUNTAS = [
     "Quem descobriu o Brasil em 1500?", "Dê um exemplo de verbo", "O que é a Lua?",
     "Faça um texto sobre planárias.", "O que você sabe sobre vulcões?", "Escreva um parágrafo a respeito da Lua.",
     "Fale sobre você", "E o capitalismo?", "Me conte sobre a cidade de Roma",
+    "O que Santos Dumont inventou?", "Santos Dumont inventou o quê?", "Quando nasceu Machado de Assis?",
+    "Onde fica Roma?", "Compare Brasil e Portugal", "Quem foi Dom Pedro II?", "Você conhece o Rio de Janeiro?",
+    "Me fale de \"Santos Dumont\".", "Roma", "O vulcão Vesúvio fica em Nápoles?",
+]
+
+# Conversas anteriores para a "memória de IA" (histórico no prompt).
+HISTORICO = [
+    ("Qual é a capital da França?", "A capital da França é Paris."),
+    ("E da Itália?", "A capital da Itália é Roma."),
+    ("Meu nome é Ana.", "Prazer, Ana! Vou lembrar o seu nome."),
+    ("O que é um vulcão?", "Um vulcão é uma abertura na crosta da Terra por onde sai lava, cinzas e gases. "
+     "Ele pode ficar adormecido por muito tempo e depois entrar em erupção."),
+    ("Oi", "Oi! Tudo bem? Em que posso ajudar?"),
+    ("Conte uma história curta.", "Era uma vez uma cadela chamada Laika, que foi ao espaço em 1957. " * 4),
 ]
 
 MEMORIA = [
@@ -138,8 +152,10 @@ def main():
     for p in PERGUNTAS:
         top = [[r["title"], round(r["score"], 6), r["coverage"]] for r in rag.search(p)[:8]]
         best = rag.best(p)
+        contextos = {str(k): [[h["title"], h["text"]] for h in rag.contexts(p, k)] for k in (1, 2, 3)}
         linhas.append({"pergunta": p, "palavras": content_words(p), "quer_rag": wants_rag(p), "top": top,
-                       "melhor": best["title"] if best else None})
+                       "melhor": best["title"] if best else None, "nome": question_name(p),
+                       "consultas": rag_queries(p), "contextos": contextos})
     gravar("rag.jsonl", linhas)
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -161,7 +177,20 @@ def main():
         linhas.append({"pergunta": "vulcão de argila", "memoria": True,
                        "prompt": build_prompt("vulcão de argila", tok, 256, rag, mem, 80)[0],
                        "fonte": build_prompt("vulcão de argila", tok, 256, rag, mem, 80)[1]})
+        # Com histórico, janelas e tamanhos de resposta diferentes.
+        rng = random.Random(2)
+        for i, p in enumerate(PERGUNTAS):
+            for bloco, max_novos in ((256, 80), (256, 120), (512, 80), (512, 120)):
+                n = rng.randint(0, len(HISTORICO))
+                hist = HISTORICO[:n] if i % 2 else HISTORICO[len(HISTORICO) - n:]
+                prompt, fonte = build_prompt(p, tok, bloco, rag, mem if i % 3 == 0 else None, max_novos, hist)
+                linhas.append({"pergunta": p, "memoria": i % 3 == 0, "bloco": bloco, "max_novos": max_novos,
+                               "historico": [list(t) for t in hist], "prompt": prompt, "fonte": fonte})
         gravar("prompt.jsonl", linhas)
+
+    gravar("penalidade.jsonl", [{"max_novos": m, "minimo": min_answer_tokens(m),
+                                 "valores": [end_penalty(k, min_answer_tokens(m)) for k in range(70)]}
+                                for m in (16, 40, 60, 61, 80, 100, 120)])
 
 
 if __name__ == "__main__":

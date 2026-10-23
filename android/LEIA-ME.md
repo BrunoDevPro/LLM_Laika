@@ -2,7 +2,7 @@
 
 App de conversa com a Laika rodando **inteira no celular**, sem internet: o mesmo modelo do
 `finetuned.pt`, o tokenizer, a busca nos textos (RAG) com citação `*Título` e a memória do usuário.
-Pela tela **Colab**, o app também liga as células do treino no Google Colab, sem você deixar o Colab
+Pela tela **Treinar**, o app também liga as células do treino no Google Colab, sem você deixar o Colab
 aberto, e traz o modelo novo de volta para o celular.
 
 ## Instalar
@@ -11,7 +11,7 @@ aberto, e traz o modelo novo de volta para o celular.
 2. O Android vai pedir para permitir "instalar apps desta fonte" (o app não vem da Play Store). Permita.
 3. Abra a Laika. Ela carrega em poucos segundos e já responde.
 
-Requer Android 8.0 ou mais novo. O APK tem ~36 MB. A conversa não usa a internet; só a tela Colab usa.
+Requer Android 8.0 ou mais novo. O APK tem ~36 MB. A conversa não usa a internet; só a tela Treinar usa.
 
 ## O índice completo do RAG (opcional, recomendado)
 
@@ -25,7 +25,7 @@ Wikipédia e nos 495 livros, importe o `laika_rag.db` (~640 MB):
 
 ## Atualizar depois de um treino no Colab
 
-**Pela tela Colab (mais fácil):** depois que a célula 6 rodar pelo app, o modelo aparece em
+**Pela tela Treinar (mais fácil):** depois que a célula 6 rodar pelo app, o modelo aparece em
 **Modelos prontos**: toque em **Baixar e usar**.
 
 **Pelo Google Drive:** no Colab, rode a célula *6) EXPORTAR PARA O CELULAR*; ela grava
@@ -41,14 +41,15 @@ apagada (fica uma notificação com o progresso e o botão Cancelar).
 
 ## Versões e backups
 
-Cada versão guarda tudo: modelos, tokenizer, índice do RAG, memória e conversa. No botão do topo:
-fazer backup (com nome editável), usar um backup, renomear, exportar como `.zip` (para guardar no
+Cada versão guarda tudo: modelos, tokenizer, índice do RAG, memória e conversa. O botão do topo (o nome
+da versão) abre um painel com todos os modelos do celular: um toque troca de modelo. Em **Versões e
+backups**: fazer backup (com nome editável), usar um backup, renomear, exportar como `.zip` (para guardar no
 Drive) e importar de volta. Os backups compartilham os arquivos iguais, então guardar várias versões
 não repete os 640 MB do índice.
 
 ## Colab pelo app (treinar na nuvem)
 
-Menu ⋮ → **Colab: treinar na nuvem**. O app pede ao GitHub Actions do repositório para ligar uma
+Menu ⋮ → **Treinar**. O app pede ao GitHub Actions do repositório para ligar uma
 máquina do Colab (com o [Colab CLI](https://github.com/googlecolab/google-colab-cli)), rodar as células
 escolhidas com os parâmetros da tela (os mesmos campos do `colab.ipynb`: `MODO`, `EPOCAS`...) e
 desligar a máquina no fim. Tudo continua sendo salvo no seu Google Drive, como no navegador.
@@ -62,7 +63,7 @@ Uma vez só:
    (leitura e escrita) e **Contents** (leitura).
 3. No Colab (navegador), rode a célula **0** do `colab.ipynb`: ela faz o login do Google com as
    permissões do Colab CLI e guarda essa permissão no GitHub (segredo `COLAB_ADC`), usando o token.
-4. No app, tela Colab: cole o repositório e o token.
+4. No app, tela Treinar: cole o repositório e o token.
 
 Depois: marque as células (a 1 sempre roda antes; há atalhos como "Só fine-tuning", "1 milhão de artigos"
 e "Modelo de 50M"), escolha a GPU e toque em **Rodar no Colab**. A tela mostra cada célula (✓, ⏳, ✗)
@@ -74,19 +75,26 @@ Cuidados: o repositório é público, então os registros do GitHub Actions e o 
 por 14 dias como artefato) também ficam visíveis para quem entrar no repositório. O app tira e-mails
 e tokens do que publica. A máquina do Colab gasta unidades de computação enquanto está ligada (uma
 execução para sozinha no fim ou em até 6 horas). A ponte pelo Colab CLI foi testada só com um Colab
-de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela Colab.
+de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela Treinar.
 
 ## O que tem no app
 
-- Conversa em bolhas, com a resposta aparecendo palavra por palavra e um botão para parar.
-- Toque numa resposta: copiar, compartilhar, selecionar parte do texto, **ouvir**, **ver o trecho que
-  a Laika leu** (o contexto do RAG) e **gerar outra resposta**. Nas suas mensagens: editar e enviar de novo.
-- RAG igual ao `chat.py`: mesmas regras (`wants_rag`, limite de confiança) e a fonte no fim (`*Título`).
-- Memória igual ao `memory.py` ("meu nome é…", "lembre que…", "o que você lembra de mim?"),
+- Conversa em bolhas, com pontinhos enquanto a Laika pensa, a resposta aparecendo palavra por palavra e
+  um botão para parar. Se você rolar para cima, a tela não puxa para baixo; o botão ↓ volta para o fim.
+- O teclado só abre quando você toca no campo de mensagem.
+- Toque numa resposta: copiar, compartilhar, selecionar parte do texto, **ver o trecho que a Laika leu**
+  (o contexto do RAG) e **gerar outra resposta**. Nas suas mensagens: editar e enviar de novo.
+- RAG igual ao `chat.py`: mesmas regras (`wants_rag`, limite de confiança, busca pelo nome próprio, até
+  3 trechos conforme a janela) e a fonte no fim (`*Título`).
+- **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
+  dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Limpar a conversa zera.
+- Memória do usuário igual ao `memory.py` ("meu nome é…", "lembre que…", "o que você lembra de mim?"),
   salva no celular no mesmo formato do `memoria.json`.
-- Menu: fontes, RAG, memória, **modo completar texto** (o `--base`, com o `pretrain_best.pt`), ler as
-  respostas em voz alta, criatividade (temperatura), tamanho das respostas, versões e backups, Colab,
-  compartilhar a conversa, limpar a conversa.
+- Menu ⋮: **Opções** (um grupo que abre e fecha com as caixinhas: mostrar fontes, buscar nos textos,
+  memória do usuário, memória de IA e **modo completar texto**, o `--base` com o `pretrain_best.pt`),
+  barrinhas de **criatividade** (temperatura de 0,10 a 1,50, de 0,01 em 0,01) e de **tamanho das
+  respostas** (16 a 120 tokens; quanto maior, mais a Laika tenta escrever), o que a Laika lembra de
+  você, versões e backups, **Treinar** e limpar a conversa.
 - Cada resposta mostra o tempo e a velocidade (tokens por segundo).
 - Se a versão em uso não abrir, o app oferece voltar para o backup mais recente.
 - Modelos grandes (como o de 50M, ~260 MB de memória): o app mantém um carregado por vez. Ao trocar entre
@@ -110,13 +118,14 @@ Os pesos vão no APK em float16 (13,7 MB por modelo); a conta é feita em float3
 
 **Conversa no processador:** para responder, um token por vez, o modelo de ~7 milhões de parâmetros é
 mais rápido no processador (com o cache de atenção, poucos milissegundos por token). O treino fica no
-Colab (tela Colab).
+Colab (tela Treinar).
 
 ### Conferido contra o Python
 
 `core/referencias.py` gera as respostas do código original e `gradle :core:test` compara:
-612 textos tokenizados iguais, logits com diferença máxima de ~1e-5 para o PyTorch,
-geração gulosa idêntica (com cache e passando da janela de 256), busca do RAG, memória e prompt iguais.
+666 textos tokenizados iguais, logits com diferença máxima de ~1e-5 para o PyTorch,
+geração gulosa idêntica (com cache e passando da janela de 256), busca do RAG (nome próprio e vários
+trechos), memória, prompt (com histórico, janelas de 256 e 512) e a penalidade do fim iguais.
 Também: o índice montado no celular igual ao do `rag.py build`, o zip do Colab virando uma versão nova,
 o leitor do `colab.ipynb` igual ao do `colab/laika_colab.py` e o cliente do GitHub contra um servidor falso.
 

@@ -20353,13 +20353,13 @@
 <|assistant|> Oi! Pode continuar, estou lendo. <|end|>
 
 <|user|> Por quê?
-<|assistant|> Por que o quê? Eu leio uma mensagem de cada vez e não vejo as anteriores, então me diga de novo o assunto. <|end|>
+<|assistant|> Por que o quê? Me diga o assunto, que eu tento explicar. <|end|>
 
 <|user|> Como assim?
-<|assistant|> Desculpe se não fui clara. Como eu leio uma mensagem de cada vez, pode repetir a pergunta com mais detalhes? <|end|>
+<|assistant|> Desculpe se não fui clara. Pode repetir a pergunta com mais detalhes? <|end|>
 
 <|user|> Pode explicar de novo?
-<|assistant|> Claro! Me diga qual é o assunto, porque eu vejo uma mensagem de cada vez. <|end|>
+<|assistant|> Claro! Qual é o assunto? <|end|>
 
 <|user|> Pode dar um exemplo?
 <|assistant|> Posso, sim! Exemplo de quê? Me diga o assunto. <|end|>
@@ -20371,7 +20371,7 @@
 <|assistant|> Continuar o quê? Se for uma história, me mande o começo que eu continuo. <|end|>
 
 <|user|> Me fale mais sobre isso.
-<|assistant|> Sobre o quê, exatamente? Eu vejo uma mensagem de cada vez, então me diga o assunto. <|end|>
+<|assistant|> Sobre o quê, exatamente? Me diga o assunto. <|end|>
 
 <|user|> Sério?
 <|assistant|> Sério! Se quiser, pode me perguntar mais sobre o assunto. <|end|>
@@ -20380,10 +20380,10 @@
 <|assistant|> Eu posso errar, porque sou um modelo pequeno. Se for importante, confira em outra fonte. <|end|>
 
 <|user|> Pode repetir?
-<|assistant|> Eu não consigo ver a mensagem anterior. Pode fazer a pergunta de novo? <|end|>
+<|assistant|> Ainda não falei nada nesta conversa. O que você quer saber? <|end|>
 
 <|user|> Resuma o que você disse.
-<|assistant|> Eu não vejo as mensagens anteriores. Se você colar o texto, eu faço um resumo. <|end|>
+<|assistant|> Ainda não falei nada para resumir. Se você mandar um texto, eu faço um resumo. <|end|>
 
 <|user|> Explique de um jeito mais simples.
 <|assistant|> Claro! Qual assunto você quer que eu explique de um jeito mais simples? <|end|>
@@ -20398,7 +20398,7 @@
 <|assistant|> O que mais você quer saber? Pode perguntar. <|end|>
 
 <|user|> Só isso?
-<|assistant|> Posso falar mais, se você me disser o assunto. Eu vejo uma mensagem de cada vez. <|end|>
+<|assistant|> Posso falar mais, se você me disser o assunto. <|end|>
 
 <|user|> Não foi isso que eu perguntei.
 <|assistant|> Desculpe! Pode refazer a pergunta com outras palavras? Vou tentar de novo. <|end|>
@@ -20425,16 +20425,16 @@
 <|assistant|> Vamos! Que tal um assunto novo? Pode ser sobre o espaço, sobre bichos ou sobre o que você quiser. <|end|>
 
 <|user|> Do que estávamos falando?
-<|assistant|> Eu não guardo as mensagens anteriores da conversa, então não sei. Me lembre o assunto que a gente continua. <|end|>
+<|assistant|> Ainda não falamos de nenhum assunto nesta conversa. Sobre o que você quer conversar? <|end|>
 
 <|user|> Você lembra do que eu disse?
-<|assistant|> Eu não vejo as mensagens anteriores, mas guardo algumas informações que você pede para eu lembrar, como o seu nome. Para isso, diga: lembre que... <|end|>
+<|assistant|> Eu lembro das últimas mensagens da conversa, quando a memória de IA está ligada, e guardo o que você pede para eu lembrar, como o seu nome. Para isso, diga: lembre que... <|end|>
 
 <|user|> Por que você disse isso?
 <|assistant|> Eu escolho as palavras com base no que aprendi, e às vezes erro. Se a resposta pareceu estranha, pode perguntar de novo que eu tento melhorar. <|end|>
 
 <|user|> Explica isso aí.
-<|assistant|> Claro! Me diga o que é isso aí, porque eu vejo só a sua última mensagem. <|end|>
+<|assistant|> Claro! Me diga o que é isso aí. <|end|>
 
 <|user|> E agora?
 <|assistant|> Agora você pode me fazer outra pergunta ou me contar o que precisa. <|end|>

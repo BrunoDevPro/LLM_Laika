@@ -65,7 +65,7 @@ Também funciona localmente: `pip install torch tokenizers`, coloque `.txt` em `
 ## RAG: busca nos livros e artigos
 
 Um modelo de ~7M de parâmetros não consegue guardar o que leu em 100 mil artigos. Com o RAG, antes de
-responder, o chat procura o trecho mais parecido com a pergunta e o coloca no prompt:
+responder, o chat procura os trechos mais parecidos com a pergunta e os coloca no prompt:
 
 ```
 <|user|> Contexto: Um vulcão é uma estrutura geológica criada quando o magma...
@@ -74,8 +74,15 @@ Pergunta: O que é um vulcão? <|assistant|>
 
 - O RAG só entra em perguntas que pedem informação. Conversa, perguntas sobre a Laika ou sobre você,
   contas e pedidos como "Corrija...", "Resuma..." vão sem contexto.
-- O fine-tuning ensina o modelo a usar esse formato: `leitura.txt` mais ~50% das perguntas que pedem
-  informação, treinadas com o trecho achado pela busca (`--rag-share`).
+- Com janela de 256 tokens entra 1 trecho; com 512 (preset `colab_50m`), até 2; com 768 ou mais, até 3.
+  Os trechos extras são do mesmo artigo, os que têm mais palavras da pergunta.
+- Se a pergunta inteira não acha nada com confiança, a busca tenta só o **nome próprio** dela
+  ("O que Santos Dumont inventou?" → "Santos Dumont").
+- O fine-tuning ensina o modelo a usar esse formato: `leitura.txt`, ~50% das perguntas que pedem
+  informação, treinadas com os trechos achados pela busca (`--rag-share`), e ~20 mil perguntas tiradas
+  dos próprios artigos da Wikipédia ("Onde X nasceu?", "Quando X foi fundada?", "O que X inventou?",
+  "Quantos habitantes tem X?"), com o trecho como Contexto (`--wiki-leitura`). Em 10% delas o trecho é
+  de outro artigo e a resposta é "não sei", para o modelo não inventar a partir de um contexto errado.
 - Quando o RAG é usado, a resposta termina com `*Nome do artigo`, por exemplo: `Um vulcão é ... *Vulcão`.
   `/fontes` liga ou desliga esse asterisco e `/rag` liga ou desliga a busca.
 - Testar a busca sem o modelo: `python rag.py search "Quem foi Santos Dumont?"`.
@@ -86,15 +93,29 @@ A Laika guarda o que você conta: "meu nome é Ana", "eu moro em Recife", "eu go
 "minha cor favorita é azul", "lembre que amanhã tenho prova". Depois responde "qual é o meu nome?",
 "o que você lembra de mim?" e usa as anotações como contexto. "Esqueça tudo" apaga a memória.
 
-A memória fica **fora do modelo**, num arquivo no Drive, e não entra nas perguntas normais. A janela do
-modelo tem só 256 tokens e ele foi treinado com uma pergunta por vez, então colocar o histórico da conversa
-no prompt atrapalharia as respostas.
+Essa memória fica **fora do modelo**, num arquivo no Drive, e vale entre conversas.
+
+**Memória de IA (histórico da conversa):** as últimas trocas da conversa (até 5) entram no prompt antes
+da pergunta, quantas couberem na janela depois do contexto do RAG e do espaço da resposta:
+
+```
+<|user|> Qual é a capital da França? <|assistant|> A capital da França é Paris. <|end|> <|user|> E da Itália? <|assistant|>
+```
+
+Assim a Laika entende "E da Itália?", "Por quê?" ou "Resuma o que você disse". O fine-tuning treina
+isso com `data/qa/conversas.jsonl` (~1.000 conversas escritas pelo gerador) e com ~30% dos exemplos
+ganhando de 1 a 4 trocas anteriores (`--history-share`). No `chat.py`, `/limpar` esquece o histórico e
+`--no-history` desliga. Com a janela de 256 tokens cabem poucas trocas; com 512, umas 5.
 
 ## O que esperar
 
 - O **pré-treino** ensina português. Acompanhe o `val loss`: acima de ~4.5 o modelo ainda não aprendeu
   gramática; abaixo de ~3.5 as frases começam a fazer sentido. Teste com `python chat.py --base`.
 - O **fine-tuning** ensina o *formato* (pergunta → resposta curta → fim) e a usar o contexto do RAG.
+  A **taxa de aprendizado** (o tamanho do passo de cada ajuste dos pesos) é escolhida sozinha: 5e-5 até
+  20M de parâmetros e 1e-4 nos modelos maiores (`--lr` troca).
+- **Tamanho das respostas:** com `--max-new-tokens` (ou a barrinha do app) acima de 60, o `<|end|>` é
+  penalizado no começo da resposta, então a Laika tende a escrever mais (até 120 tokens no app).
 - Mais livros ajudam mais do que mais épocas: o `train.py` mostra os *tokens por parâmetro* (ideal ≈ 20).
 
 ## Como o fine-tuning evita "decorar" o pergeresp
@@ -109,7 +130,7 @@ Em 2 épocas (`--epochs`), cada lote mistura três coisas:
 3. Trechos de texto puros (`--replay`), para o modelo não esquecer o português.
 
 A cada época o script mostra respostas para 8 perguntas de teste. Se ele voltar a responder tudo com o
-pergeresp: `python finetune.py --synthetic 20000 --lr 3e-5` (mais exemplos dos livros na mistura). Não precisa
+pergeresp: `python finetune.py --synthetic 20000 --lr 3e-5` (mais exemplos dos livros e um passo menor). Não precisa
 refazer o pré-treino.
 
 ## Adicionando perguntas
