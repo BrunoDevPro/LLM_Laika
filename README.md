@@ -38,6 +38,8 @@ checkpoints e memória). Se a sessão cair, rode a célula 1 e continue de onde 
 | `finetune.py` | Fine-tuning pergunta→resposta (loss só na resposta); não sobrescreve o pré-treino |
 | `chat.py` | Conversa com RAG e memória; `--base` completa texto com o modelo só pré-treinado |
 | `model.py` / `config.py` | Arquitetura e presets (`tiny` para CPU, `colab` para GPU) |
+| `windows/` | Scripts do pacote para rodar no Windows (CPU): `instalar.bat`, `conversar.bat`, `rodar.py`... |
+| `CLAUDE.md` | Guia do projeto para o Claude Code: arquitetura, decisões, limitações e plano futuro |
 | `data/modern/` | 130 textos em português moderno escritos para o projeto: 20 maiores e 110 simples (`simples_*.txt`); entram 3x no pré-treino |
 | `data/qa/pergeresp.txt` | ~4000 perguntas e respostas (gerado por `tools/gerar_pergeresp.py`) |
 | `data/qa/leitura.txt` | ~220 perguntas de interpretação com "Contexto:", o mesmo formato do RAG |

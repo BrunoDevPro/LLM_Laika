@@ -1,0 +1,35 @@
+LAIKA - rodando no seu computador (Windows)
+============================================
+
+1. INSTALE O PYTHON (só uma vez)
+   https://www.python.org/downloads/  (recomendado: Python 3.12)
+   Na instalação, marque "Add python.exe to PATH".
+
+2. O tokenizer já vem no pacote (checkpoints\tokenizer.json). Não precisa fazer nada.
+
+3. (OPCIONAL) ÍNDICE DE BUSCA COMPLETO (RAG) - laika_rag.db
+   Baixe o laika_rag.db pelo link que você recebeu. Depois, escolha UMA opção:
+     a) Arraste o arquivo laika_rag.db para cima do instalar_indice.bat; ou
+     b) Deixe o arquivo na pasta Downloads (a Laika procura lá sozinha); ou
+     c) Coloque o arquivo na pasta "data\rag" daqui.
+   Ao abrir o conversar.bat, deve aparecer "Usando o índice RAG completo".
+   Sem ele, a Laika monta sozinha um índice pequeno com os textos de data\modern
+   (funciona, mas só acha informações desses textos).
+
+4. INSTALE AS BIBLIOTECAS (só uma vez)
+   Dê dois cliques em instalar.bat. Ele baixa o PyTorch (cerca de 200 MB) e o
+   tokenizers num ambiente separado (pasta .venv), sem mexer no resto do PC.
+
+5. CONVERSE
+   Dê dois cliques em conversar.bat.
+   Comandos: /fontes, /rag, /memoria, e "sair" para encerrar.
+   A memória fica em checkpoints\memoria.json.
+
+   completar_texto.bat usa o modelo só pré-treinado, que continua o texto que
+   você começar.
+
+Roda no processador (CPU); não precisa de placa de vídeo. Cada resposta leva
+alguns segundos.
+
+Para atualizar depois de um novo fine-tuning no Colab, baixe o novo
+finetuned.pt do Drive e substitua o arquivo da pasta checkpoints.
