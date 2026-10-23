@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Tema.Laika" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/marinho</item>
+        <item name="android:colorAccent">@color/azul</item>
+        <item name="android:windowBackground">@color/fundo</item>
+        <item name="android:textColorHighlight">#552A5CB8</item>
+    </style>
+</resources>

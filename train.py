@@ -1,7 +1,11 @@
-"""Pré-treinamento: aprende português a partir dos livros em data/books/*.txt."""
+"""Pré-treinamento: aprende português a partir dos textos em data/books, data/wiki e data/modern."""
 
 import argparse
+import hashlib
+import json
 import math
+import os
+import random
 import time
 from pathlib import Path
 
@@ -23,22 +27,40 @@ parser.add_argument("--modern-repeat", type=int, default=3,
 parser.add_argument("--qa", default="data/qa")
 parser.add_argument("--out", default="checkpoints")
 parser.add_argument("--max-steps", type=int, default=None)
+parser.add_argument("--batch-size", type=int, default=None, help="troca o lote do preset (testes rápidos)")
+parser.add_argument("--eval-iters", type=int, default=None, help="troca o nº de lotes da validação")
+parser.add_argument("--eval-every", type=int, default=None, help="troca de quantos em quantos passos validar")
+parser.add_argument("--tokens-dir", default="data/tokens",
+                    help="onde guardar os textos já tokenizados (uint16 em disco, lidos com memmap)")
 parser.add_argument("--resume", action="store_true",
-                    help="continua a partir de checkpoints/pretrain_best.pt (mesmo tokenizer e tamanho)")
+                    help="continua: retoma um treino interrompido (pretrain_last.pt) do ponto em que parou, "
+                         "ou parte dos pesos do pretrain_best.pt com um agendamento novo")
 args = parser.parse_args()
 
 cfg = dict(PRESETS[args.preset])
-if args.max_steps:
-    cfg["max_steps"] = args.max_steps
+cfg.setdefault("accum", 1)
+cfg["preset"] = args.preset
+for chave, valor in [("max_steps", args.max_steps), ("batch_size", args.batch_size), ("eval_iters", args.eval_iters),
+                     ("eval_every", args.eval_every)]:
+    if valor:
+        cfg[chave] = valor
+ARQUITETURA = ("vocab_size", "block_size", "embed_size", "heads", "layers")
 
 out_dir = Path(args.out)
 out_dir.mkdir(exist_ok=True)
 tokenizer_path = out_dir / "tokenizer.json"
 best_path = out_dir / "pretrain_best.pt"
+last_path = out_dir / "pretrain_last.pt"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 use_cuda = device == "cuda"
-print("Dispositivo:", device)
+# bf16 na A100/L4/H100 (não precisa do GradScaler); fp16 na T4.
+bf16 = use_cuda and torch.cuda.is_bf16_supported()
+amp_dtype = torch.bfloat16 if bf16 else torch.float16
+if use_cuda:
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+print("Dispositivo:", device, "(bf16)" if bf16 else "(fp16)" if use_cuda else "")
 
 book_files = []
 for folder in args.books:
@@ -72,46 +94,86 @@ cfg["vocab_size"] = tokenizer.get_vocab_size()
 eot_id = tokenizer.token_to_id(EOT_TOKEN)
 
 
-# ---------- Dados ----------
+# ---------- Dados: tokens em disco ----------
+# Validação = os últimos 5% de CADA arquivo (antes era só o fim do último livro, o que media um
+# livro só). Os tokens vão para dois arquivos uint16 (treino e validação) lidos com np.memmap:
+# com 1 milhão de artigos (~450 M tokens) eles não caberiam na RAM como antes. Se os textos e o
+# tokenizer não mudaram, os arquivos da execução anterior são reaproveitados.
+def assinatura(files):
+    h = hashlib.sha1(tokenizer_path.read_bytes())
+    h.update(f"repeat={args.modern_repeat}".encode())
+    for f in files:
+        h.update(f"{f.parent.name}/{f.name}:{f.stat().st_size}\n".encode())
+    return h.hexdigest()[:16]
+
+
+def tokenizar_para_disco(files, pasta):
+    pasta.mkdir(parents=True, exist_ok=True)
+    sig = assinatura(files)
+    meta, treino, val = pasta / f"{sig}.json", pasta / f"{sig}_treino.bin", pasta / f"{sig}_val.bin"
+    if meta.exists() and treino.exists() and val.exists():
+        print(f"Tokens já calculados em {pasta} ({sig}).")
+    else:
+        for antigo in pasta.iterdir():  # caches de outros textos/tokenizers só ocupam espaço
+            if not antigo.name.startswith(sig):
+                antigo.unlink()
+        dtype = np.uint16 if tokenizer.get_vocab_size() <= 65535 else np.uint32
+        n_treino = n_val = 0
+        inicio = time.time()
+        with open(treino, "wb") as ft, open(val, "wb") as fv:
+            for i in range(0, len(files), 16):
+                grupo = files[i:i + 16]
+                # encode_batch tokeniza os arquivos em paralelo; cada arquivo dá os mesmos tokens que antes
+                codigos = tokenizer.encode_batch([p.read_text(encoding="utf-8") for p in grupo])
+                for path, enc in zip(grupo, codigos):
+                    ids = np.array(enc.ids + [eot_id], dtype=dtype)
+                    cut = int(len(ids) * 0.95)
+                    repeat = args.modern_repeat if path.parent.name == "modern" else 1
+                    for _ in range(max(1, repeat)):
+                        ft.write(ids[:cut].tobytes())
+                    fv.write(ids[cut:].tobytes())
+                    n_treino += cut * max(1, repeat)
+                    n_val += len(ids) - cut
+                feitos = min(i + 16, len(files))
+                if feitos % 160 < 16 or feitos == len(files):
+                    print(f"  tokenizados {feitos}/{len(files)} arquivos ({n_treino:,} tokens, "
+                          f"{time.time() - inicio:.0f}s)", flush=True)
+        meta.write_text(json.dumps({"treino": n_treino, "val": n_val, "dtype": np.dtype(dtype).name}))
+    info = json.loads(meta.read_text())
+    return (np.memmap(treino, dtype=info["dtype"], mode="r"), np.memmap(val, dtype=info["dtype"], mode="r"))
+
+
 block = cfg["block_size"]
-# Validação = os últimos 5% de CADA livro (antes era só o fim do último livro,
-# o que media um livro só e deixava o val loss enviesado).
-# Arrays numpy por arquivo: com 100 mil artigos, listas do Python estourariam a RAM.
-train_parts, val_parts = [], []
-for i, path in enumerate(book_files):
-    book_ids = np.array(tokenizer.encode(path.read_text(encoding="utf-8")).ids + [eot_id], dtype=np.int32)
-    cut = int(len(book_ids) * 0.95)
-    repeat = args.modern_repeat if path.parent.name == "modern" else 1
-    train_parts.extend([book_ids[:cut]] * max(1, repeat))
-    val_parts.append(book_ids[cut:])
-    if (i + 1) % 100 == 0:
-        print(f"  tokenizados {i + 1}/{len(book_files)} arquivos", flush=True)
-train_data = torch.from_numpy(np.concatenate(train_parts)).long()
-val_data = torch.from_numpy(np.concatenate(val_parts)).long()
-del train_parts, val_parts
-data = train_data
+train_data, val_data = tokenizar_para_disco(book_files, Path(args.tokens_dir))
 if len(val_data) < block * 10 or len(train_data) < block * 100:
     raise SystemExit(f"Poucos dados ({len(train_data)} tokens). Adicione mais livros.")
 
 # Parâmetros vs. tokens: regra prática ~20 tokens de treino por parâmetro.
 model = build_model(cfg).to(device)
 n_params = model.num_params()
-print(f"Tokens: {len(data):,} | Parâmetros: {n_params:,} | "
-      f"tokens/parâmetro: {len(train_data) / n_params:.1f} (ideal ≈ 20)")
+tokens_por_passo = cfg["batch_size"] * cfg["accum"] * block
+print(f"Tokens: {len(train_data):,} | Parâmetros: {n_params:,} | "
+      f"tokens/parâmetro: {len(train_data) / n_params:.1f} (ideal ≈ 20) | "
+      f"{tokens_por_passo:,} tokens por passo, {cfg['max_steps']:,} passos "
+      f"(~{tokens_por_passo * cfg['max_steps'] / max(1, len(train_data)):.1f} passadas pelos dados)")
 
-if args.resume and best_path.exists():
-    ckpt = torch.load(best_path, map_location=device)
-    if ckpt["config"]["vocab_size"] != cfg["vocab_size"]:
-        raise SystemExit("vocab_size do checkpoint não bate com o tokenizer atual.")
-    model.load_state_dict(ckpt["model"])
-    print(f"Pesos carregados de {best_path} (val loss {ckpt['val_loss']:.4f})")
+
+def mesma_arquitetura(config):
+    return all(config.get(k) == cfg[k] for k in ARQUITETURA)
+
+
+def descrever(config):
+    return (f"preset {config.get('preset', '?')}: {config['embed_size']} dim, {config['layers']} camadas, "
+            f"contexto {config['block_size']}, vocabulário {config['vocab_size']}")
 
 
 def get_batch(source):
-    starts = torch.randint(0, len(source) - block - 1, (cfg["batch_size"],))
-    x = torch.stack([source[i:i + block] for i in starts])
-    y = torch.stack([source[i + 1:i + block + 1] for i in starts])
-    return x.to(device), y.to(device)
+    starts = np.random.randint(0, len(source) - block - 1, size=cfg["batch_size"])
+    x = torch.from_numpy(np.stack([source[i:i + block] for i in starts]).astype(np.int64))
+    y = torch.from_numpy(np.stack([source[i + 1:i + block + 1] for i in starts]).astype(np.int64))
+    if use_cuda:
+        return x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
+    return x, y
 
 
 @torch.no_grad()
@@ -120,7 +182,7 @@ def evaluate():
     losses = []
     for _ in range(cfg["eval_iters"]):
         x, y = get_batch(val_data)
-        with torch.autocast(device_type=device, dtype=torch.float16, enabled=use_cuda):
+        with torch.autocast(device_type=device, dtype=amp_dtype, enabled=use_cuda):
             logits = model(x)
         losses.append(F.cross_entropy(logits.float().view(-1, logits.size(-1)), y.view(-1)).item())
     model.train()
@@ -134,7 +196,7 @@ optimizer = torch.optim.AdamW(
     [{"params": decay, "weight_decay": 0.1}, {"params": no_decay, "weight_decay": 0.0}],
     lr=cfg["learning_rate"], betas=(0.9, 0.95),
 )
-scaler = torch.amp.GradScaler("cuda", enabled=use_cuda)
+scaler = torch.amp.GradScaler("cuda", enabled=use_cuda and not bf16)
 
 
 def lr_at(step):
@@ -144,17 +206,57 @@ def lr_at(step):
     return cfg["learning_rate"] * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * min(progress, 1.0))))
 
 
+# ---------- De onde começar ----------
+start_step, best_val, evals_without_gain, retomado = 0, float("inf"), 0, False
+if args.resume and last_path.exists():
+    last = torch.load(last_path, map_location=device, weights_only=False)
+    if not mesma_arquitetura(last["config"]):
+        raise SystemExit(f"O treino interrompido no Drive é do {descrever(last['config'])}. Para trocar de "
+                         f"preset ({args.preset}), use MODO = \"do_zero\".")
+    if last["step"] < cfg["max_steps"]:
+        model.load_state_dict(last["model"])
+        optimizer.load_state_dict(last["optimizer"])
+        scaler.load_state_dict(last["scaler"])
+        start_step, best_val, evals_without_gain = last["step"], last["best_val"], last["evals_without_gain"]
+        torch.set_rng_state(last["rng_torch"].cpu())
+        np.random.set_state(last["rng_numpy"])
+        random.setstate(last["rng_python"])
+        if use_cuda and last.get("rng_cuda") is not None:
+            torch.cuda.set_rng_state(last["rng_cuda"].cpu())
+        retomado = True
+        print(f"Retomando o treino interrompido no passo {start_step} (melhor val loss até aqui {best_val:.4f}).")
+    del last
+if not retomado and args.resume and best_path.exists():
+    ckpt = torch.load(best_path, map_location=device, weights_only=False)
+    if not mesma_arquitetura(ckpt["config"]):
+        raise SystemExit(f"O pré-treino do Drive é do {descrever(ckpt['config'])}. Para trocar de preset "
+                         f"({args.preset}), use MODO = \"do_zero\".")
+    model.load_state_dict(ckpt["model"])
+    print(f"Pesos carregados de {best_path} (val loss {ckpt['val_loss']:.4f}); agendamento novo.")
+    del ckpt
+
+
+def salvar_ultimo(step):
+    """Estado completo (pesos, otimizador, passo, sorteios) para continuar se a sessão cair."""
+    tmp = last_path.with_suffix(".tmp")
+    torch.save({"model": model.state_dict(), "optimizer": optimizer.state_dict(), "scaler": scaler.state_dict(),
+                "config": cfg, "step": step, "best_val": best_val, "evals_without_gain": evals_without_gain,
+                "rng_torch": torch.get_rng_state(), "rng_numpy": np.random.get_state(),
+                "rng_python": random.getstate(), "rng_cuda": torch.cuda.get_rng_state() if use_cuda else None},
+               tmp)
+    os.replace(tmp, last_path)
+
+
 # ---------- Treino ----------
-best_val = float("inf")
-evals_without_gain = 0
 start = time.time()
+tokens_feitos, inicio_janela = 0, time.time()
 model.train()
 
-for step in range(cfg["max_steps"] + 1):
+for step in range(start_step, cfg["max_steps"] + 1):
     for group in optimizer.param_groups:
         group["lr"] = lr_at(step)
 
-    if step % cfg["eval_every"] == 0:
+    if step % cfg["eval_every"] == 0 and not (retomado and step == start_step):
         val_loss = evaluate()
         marker = ""
         if val_loss < best_val:
@@ -170,22 +272,30 @@ for step in range(cfg["max_steps"] + 1):
             break
         if step == cfg["max_steps"]:
             break
-
-    x, y = get_batch(train_data)
-    with torch.autocast(device_type=device, dtype=torch.float16, enabled=use_cuda):
-        logits = model(x)
-    loss = F.cross_entropy(logits.float().view(-1, logits.size(-1)), y.view(-1))
+        salvar_ultimo(step)
 
     optimizer.zero_grad(set_to_none=True)
-    scaler.scale(loss).backward()
+    for _ in range(cfg["accum"]):  # acumulação: o lote efetivo é batch_size × accum
+        x, y = get_batch(train_data)
+        with torch.autocast(device_type=device, dtype=amp_dtype, enabled=use_cuda):
+            logits = model(x)
+        loss = F.cross_entropy(logits.float().view(-1, logits.size(-1)), y.view(-1)) / cfg["accum"]
+        scaler.scale(loss).backward()
     scaler.unscale_(optimizer)
     torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
     scaler.step(optimizer)
     scaler.update()
+    tokens_feitos += tokens_por_passo
 
     if step % 100 == 0:
-        print(f"step {step:>6} | train loss {loss.item():.4f}", flush=True)
+        agora = time.time()
+        print(f"step {step:>6} | train loss {loss.item() * cfg['accum']:.4f} | "
+              f"{tokens_feitos / max(1e-9, agora - inicio_janela):,.0f} tokens/s", flush=True)
+        tokens_feitos, inicio_janela = 0, agora
 
+# Terminou (passos ou early stopping): o próximo "continuar" parte do melhor, com agendamento novo.
+if last_path.exists():
+    last_path.unlink()
 print("=" * 40)
 print(f"Pré-treino concluído. Melhor val loss: {best_val:.4f} -> {best_path}")
 print("Referência: val loss > 4.5 = ainda não aprendeu gramática; < 3.5 = frases já fazem sentido.")

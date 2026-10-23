@@ -18,7 +18,7 @@ from pathlib import Path
 import torch
 
 from data_utils import (USER_TOKEN, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN,
-                        fit_context, wants_rag)
+                        fit_context, rag_query, wants_rag)
 from model import build_model
 
 
@@ -50,7 +50,7 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
         if note:
             context_parts.append(note)
     if rag is not None and wants_rag(question):
-        hit = rag.best(question)
+        hit = rag.best(rag_query(question))
         if hit:
             context_parts.append(hit["text"])
             source = hit["title"]

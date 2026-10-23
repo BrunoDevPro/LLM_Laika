@@ -6,6 +6,7 @@ crie outro arquivo em data/qa/ (por exemplo data/qa/meus_exemplos.txt).
 """
 
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -20,6 +21,16 @@ import leitura as L  # noqa: E402
 import dados_extra3 as D3  # noqa: E402
 from textos_simples import TEXTOS_1  # noqa: E402
 from textos_simples2 import TEXTOS_2  # noqa: E402
+import genericas_temas1 as TG1  # noqa: E402
+import genericas_temas2 as TG2  # noqa: E402
+import genericas_temas3 as TG3  # noqa: E402
+import genericas_temas4 as TG4  # noqa: E402
+import genericas_temas5 as TG5  # noqa: E402
+import genericas_perguntas1 as GP1  # noqa: E402
+import genericas_perguntas2 as GP2  # noqa: E402
+import genericas_perguntas3 as GP3  # noqa: E402
+import genericas_conversa as GC  # noqa: E402
+import genericas_extra as GE  # noqa: E402
 
 TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
 QA_DIR = ROOT / "data" / "qa"
@@ -1129,6 +1140,229 @@ def write_simple_texts():
         (MODERN_DIR / f"simples_{i:03d}.txt").write_text(f"{titulo}\n\n{texto}\n", encoding="utf-8")
 
 
+# =====================================================================
+# PERGUNTAS GENÉRICAS (tools/genericas_*.py)
+# =====================================================================
+# Cada tema é (assunto com artigo, resposta curta, texto de um parágrafo). Daí saem: "O que é X?",
+# pedidos de texto ("Faça um texto sobre X."), texto curto, "E X?", resumo do parágrafo e
+# leitura com Contexto (vai para leitura.txt).
+TEMAS = (TG1.TEMAS_ANIMAIS + TG1.TEMAS_PLANTAS + TG1.TEMAS_NATUREZA + TG1.TEMAS_ESPACO
+         + TG2.TEMAS_CIENCIA + TG2.TEMAS_CORPO + TG2.TEMAS_TECNOLOGIA
+         + TG3.TEMAS_SOCIEDADE + TG4.TEMAS_CULTURA + TG4.TEMAS_LUGARES + TG4.TEMAS_COTIDIANO
+         + TG5.TEMAS_TERRA + TG5.TEMAS_ANIMAIS_2 + TG5.TEMAS_SAUDE_2 + TG5.TEMAS_ESPORTES_FESTAS
+         + TG5.TEMAS_PROFISSOES)
+TEMAS_PASSADO = TG3.TEMAS_HISTORIA  # "O que foi X?" em vez de "O que é X?"
+
+PERGUNTA_CURTA = {
+    "os povos indígenas do Brasil": "Quem são os povos indígenas do Brasil?",
+    "os quilombos": "O que eram os quilombos?",
+    "Zumbi dos Palmares": "Quem foi Zumbi dos Palmares?",
+    "Tiradentes": "Quem foi Tiradentes?",
+    "Dom Pedro II": "Quem foi Dom Pedro II?",
+    "Brasília": "O que é Brasília?",
+    "o SUS": "O que é o SUS?",
+    "a ONU": "O que é a ONU?",
+    "a Declaração Universal dos Direitos Humanos": "O que é a Declaração Universal dos Direitos Humanos?",
+    "a Constituição de 1988": "O que é a Constituição de 1988?",
+    "os vikings": "Quem foram os vikings?",
+    "a invenção da escrita": "Quando a escrita foi inventada?",
+    "a imigração no Brasil": "Como foi a imigração no Brasil?",
+    "as pirâmides do Egito": "O que são as pirâmides do Egito?",
+    "a chegada dos portugueses ao Brasil": "Como foi a chegada dos portugueses ao Brasil?",
+    "a chegada do homem à Lua": "Quando o homem chegou à Lua?",
+    "o Saci-Pererê": "Quem é o Saci-Pererê?",
+    "o Curupira": "Quem é o Curupira?",
+    "a Iara": "Quem é a Iara?",
+    "a lenda do boto": "Qual é a lenda do boto?",
+    "os professores": "O que faz um professor?",
+    "as regiões do Brasil": "Quais são as regiões do Brasil?",
+    "os continentes": "Quais são os continentes?",
+    "os oceanos": "Quais são os oceanos?",
+    "a energia elétrica em casa": "Como a energia elétrica chega às casas?",
+    "a esquerda e a direita na política": "O que são esquerda e direita na política?",
+    "o Brasil": "Como é o Brasil?",
+    "as cidades": "O que é uma cidade?",
+    "os mapas": "O que é um mapa?",
+    "o clima do Brasil": "Como é o clima do Brasil?",
+    "as Olimpíadas do Rio": "Como foram as Olimpíadas do Rio?",
+    "o Dia das Mães": "Quando é o Dia das Mães?",
+    "os médicos": "O que faz um médico?",
+    "os enfermeiros": "O que faz um enfermeiro?",
+    "os bombeiros": "O que fazem os bombeiros?",
+    "os agricultores": "O que fazem os agricultores?",
+    "os cientistas": "O que fazem os cientistas?",
+    "os engenheiros": "O que fazem os engenheiros?",
+    "os programadores": "O que faz um programador?",
+    "os jornalistas": "O que fazem os jornalistas?",
+    "a cozinha": "O que é cozinhar?",
+    "o lixo": "O que é lixo?",
+    "a água potável": "O que é água potável?",
+    "o trabalho infantil": "O que é trabalho infantil?",
+    "os estados da matéria": "Quais são os estados da matéria?",
+    "as estações do ano": "Quais são as estações do ano?",
+    "as fases da Lua": "Quais são as fases da Lua?",
+    "os três poderes": "Quais são os três poderes?",
+}
+
+PEDIDOS_TEXTO = ["Faça um texto sobre {}.", "Escreva um texto sobre {}.", "Fale sobre {}.", "Me fale sobre {}.",
+                 "Me conte sobre {}.", "O que você sabe sobre {}?", "Escreva um parágrafo sobre {}.",
+                 "Fale um pouco sobre {}.", "Quero saber mais sobre {}.", "Me dê informações sobre {}.",
+                 "Faça uma redação curta sobre {}.", "Conte o que você sabe sobre {}."]
+PEDIDOS_CURTO = ["Escreva um texto curto sobre {}.", "Em duas frases, fale sobre {}.",
+                 "Fale rapidamente sobre {}.", "Faça um resumo sobre {}."]
+PEDIDOS_RESUMO_FRASE = ["Resuma em uma frase: {}", "Resuma este texto em uma frase: {}",
+                        "Qual é a ideia principal deste texto? {}", "Faça um resumo curto: {}"]
+# Pares óbvios demais para perguntar "X e Y são a mesma coisa?".
+OPOSTOS = {"hemisfério norte", "Brasil Colônia", "Idade Média", "inflação", "importação", "débito", "salário bruto",
+           "eclipse solar", "energia renovável", "presidente", "monarquia", "democracia", "lixo orgânico",
+           "emprego formal", "país desenvolvido"}
+NUMERAIS = {"dois", "duas", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez"}
+_FRASES = re.compile(r"(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÂÊÔÃÕÇ])")
+
+
+def duas_frases(texto):
+    return " ".join(_FRASES.split(texto)[:2])
+
+
+def pergunta_curta(assunto, passado=False):
+    if assunto in PERGUNTA_CURTA:
+        return PERGUNTA_CURTA[assunto]
+    art, _, resto = assunto.partition(" ")
+    plural = art in ("os", "as")
+    if not passado and plural and resto[:1].islower() and resto.split()[0] not in NUMERAIS:
+        return f"O que são {resto}?"  # "O que são planárias?" soa melhor que "O que são as planárias?"
+    verbo = ("foram" if plural else "foi") if passado else ("são" if plural else "é")
+    return f"O que {verbo} {assunto}?"
+
+
+def sem_artigo(assunto, i):
+    """Em parte dos pedidos, tira o artigo do plural: "Faça um texto sobre planárias." (como o usuário escreve)."""
+    art, _, resto = assunto.partition(" ")
+    if art in ("os", "as") and resto[:1].islower() and resto.split()[0] not in NUMERAIS and i % 2 == 1:
+        return resto
+    return assunto
+
+
+def de_artigo(x):
+    art, _, resto = x.partition(" ")
+    return {"o": "do", "a": "da", "os": "dos", "as": "das"}.get(art, "de " + art) + " " + resto if resto else "de " + x
+
+
+def generic_sections():
+    """Seções novas de perguntas genéricas e os exemplos com Contexto para o leitura.txt."""
+    secs, leitura = [], []
+
+    definicoes, textos, seguimentos, resumos = [], [], [], []
+    temas = [(t, False) for t in TEMAS] + [(t, True) for t in TEMAS_PASSADO]
+    for i, ((assunto, curta, texto), passado) in enumerate(temas):
+        q = pergunta_curta(assunto, passado)
+        definicoes.append((q, curta))
+        textos.append((PEDIDOS_TEXTO[i % len(PEDIDOS_TEXTO)].format(sem_artigo(assunto, i)), texto))
+        if i % 2 == 0:
+            textos.append((PEDIDOS_CURTO[(i // 2) % len(PEDIDOS_CURTO)].format(assunto), duas_frases(texto)))
+        if i % 3 == 0:
+            seguimentos.append((f"E {assunto}?", curta))
+        if i % 4 == 2:
+            seguimentos.append((f"Você sabe algo sobre {assunto}?", "Sei, sim. " + curta))
+        if i % 2 == 1:
+            resumos.append((PEDIDOS_RESUMO_FRASE[(i // 2) % len(PEDIDOS_RESUMO_FRASE)].format(texto), curta))
+        if i % 3 == 0:
+            leitura.append(ex(rag_question(q, texto), curta))
+        elif i % 3 == 1:
+            leitura.append(ex(rag_question(PEDIDOS_CURTO[0].format(assunto), texto), duas_frases(texto)))
+    secs += [("Genéricas: o que é", definicoes), ("Genéricas: pedidos de texto", textos),
+             ("Genéricas: E X?", seguimentos), ("Genéricas: resumo em uma frase", resumos)]
+
+    porque = []
+    for i, (q, a) in enumerate(GP1.POR_QUE + GE.POR_QUE_2):
+        porque.append((q, a))
+        if i % 2 == 0:
+            resto = q[len("Por que "):].rstrip("?")
+            porque.append((["Você sabe por que {}?", "Me explique por que {}.", "Explique por que {}."][(i // 2) % 3]
+                           .format(resto), a))
+    secs.append(("Genéricas: por quê", porque))
+
+    como = []
+    for i, (q, a) in enumerate(GP1.COMO + GE.COMO_2):
+        como.append((q, a))
+        resto = q[len("Como "):].rstrip("?")
+        if i % 2 == 0:
+            forma = ["Me ensine a {}.", "Qual é a melhor forma de {}?", "Como eu faço para {}?"][(i // 2) % 3]
+            if (forma.startswith("Como eu faço") and resto.startswith("fazer ")) or (forma.startswith("Qual") and "melhor" in resto):
+                forma = "Me ensine a {}."
+            if forma.startswith("Me ensine") and resto.startswith("aprender a "):
+                resto = resto[len("aprender a "):]
+            como.append((forma.format(resto), a))
+    for i, (q, a) in enumerate(GP1.O_QUE_FAZER):
+        como.append((q, a))
+        if i % 2 == 0 and "a gente" not in q:
+            como.append((f"O que eu devo fazer {q[len('O que fazer '):].rstrip('?')}?", a))
+    secs.append(("Genéricas: como fazer e o que fazer", como))
+
+    dif = []
+    for i, (x, y, a) in enumerate(GP2.DIFERENCAS + GE.DIFERENCAS_2):
+        dif.append((f"Qual é a diferença entre {x} e {y}?", a))
+        if i % 3 == 2 and x not in OPOSTOS:
+            dif.append((f"{cap(x)} e {y} são a mesma coisa?", "Não. " + a))
+        elif i % 3 != 0:
+            dif.append((f"Qual a diferença entre {y} e {x}?", a))
+    secs.append(("Genéricas: diferenças", dif))
+
+    serve = []
+    for i, (q, a) in enumerate(GP2.PARA_QUE):
+        serve.append((q, a))
+        alvo = q.split(" ", 3)[3].rstrip("?")  # "Para que serve(m) X?" -> X
+        if i % 2 == 0 and alvo.split()[0] in ("o", "a", "os", "as", "um", "uma"):
+            serve.append((f"Qual é a função {de_artigo(alvo)}?", a))
+    for i, (q, a) in enumerate(GP2.COMO_FUNCIONA):
+        serve.append((q, a))
+        if i % 2 == 0:
+            serve.append((f"Me explique como funciona {q[len('Como funciona '):].rstrip('?')}.", a))
+    secs.append(("Genéricas: para que serve e como funciona", serve))
+
+    mito = []
+    for i, (q, a) in enumerate(GP2.VERDADE_OU_MITO):
+        mito.append((q, a))
+        if i % 2 == 0:
+            mito.append((f"Verdade ou mito: {q[len('É verdade que '):]}", a))
+    secs.append(("Genéricas: verdade ou mito", mito))
+
+    listas = []
+    for i, (q, a) in enumerate(GP3.LISTAS + GE.LISTAS_2):
+        listas.append((q, a))
+        if q.startswith("Cite ") and i % 3 == 0:
+            listas.append(("Diga " + q[len("Cite "):], a))
+    secs.append(("Genéricas: listas", listas))
+
+    pessoas = []
+    for i, (q, a) in enumerate(GP3.PESSOAS_FAMOSAS + GE.PESSOAS_2):
+        pessoas.append((q, a))
+        if q.startswith(("Quem foi ", "Quem é ")) and i % 2 == 0:
+            pessoas.append((f"Me fale sobre {q.split(' ', 2)[2].rstrip('?')}.", a))
+    pessoas += GP3.QUANDO_ONDE
+    secs.append(("Genéricas: pessoas, datas e lugares", pessoas))
+
+    secs.append(("Genéricas: opiniões e conselhos", GP3.OPINIOES + GE.OPINIOES_2))
+    secs.append(("Genéricas: conversa livre", list(GE.CONVERSA_LIVRE)))
+    secs.append(("Genéricas: mensagens incompletas e pedidos de continuação", GC.INCOMPLETAS + GC.SEGUIMENTO))
+    secs.append(("Genéricas: limites e apoio", GC.LIMITES + GC.APOIO))
+
+    escrita = []
+    for i, (q, a) in enumerate(GC.ESCRITA + GE.ESCRITA_2):
+        escrita.append((q, a))
+        if i % 3 == 0 and q.startswith(("Escreva um poema", "Faça um poema", "Escreva uma história", "Conte uma história")):
+            troca = {"Escreva": "Crie", "Faça": "Escreva", "Conte": "Invente"}
+            verbo, resto = q.split(" ", 1)
+            escrita.append((f"{troca[verbo]} {resto}", a))
+    secs.append(("Genéricas: escrita (poemas, histórias, mensagens)", escrita))
+    secs.append(("Genéricas: curiosidades", GC.CURIOSIDADES + GE.CURIOSIDADES_2))
+    return secs, leitura
+
+
+def _chave(question):
+    return " ".join(re.sub(r"[^\w\s]", " ", question.lower()).split())
+
+
 def build():
     rng = random.Random(42)
     sections = []
@@ -1232,6 +1466,28 @@ def build():
     sections += extra_sections_3(rng)
     write_simple_texts()
 
+    # Perguntas genéricas: só entram as que ainda não existem (mesma pergunta, ignorando pontuação).
+    identidade = IDENTIDADE + D3.IDENTIDADE_2
+    vistas = {_chave(q) for q, _ in identidade}
+    novas_id = [(q, a) for q, a in GC.IDENTIDADE_3 if _chave(q) not in vistas]
+    identidade = identidade + novas_id
+    vistas |= {_chave(q) for q, _ in novas_id}
+    vistas |= {_chave(item.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0]) for _, items in sections for item in items}
+    genericas, leitura_genericas = generic_sections()
+    repetidas = 0
+    for title, pares in genericas:
+        novos = []
+        for q, a in pares:
+            if _chave(q) in vistas:
+                repetidas += 1
+                continue
+            vistas.add(_chave(q))
+            novos.append(ex(q, a))
+        sections.append((title, novos))
+    novas = sum(len(items) for title, items in sections if title.startswith("Genéricas"))
+    print(f"Perguntas genéricas: {novas} novas no pergeresp + {len(novas_id)} de identidade + "
+          f"{len(leitura_genericas)} com Contexto ({repetidas} repetidas foram puladas)")
+
     header = ("# Gerado por tools/gerar_pergeresp.py. Linhas começando com # são comentários.\n"
               "# Para adicionar exemplos seus, crie outro .txt em data/qa/.\n\n")
     total = 0
@@ -1244,13 +1500,13 @@ def build():
             print(f"{title}: {len(items)}")
     with open(QA_DIR / "identidade.txt", "w", encoding="utf-8") as f:
         f.write("# Quem é a Laika. Este arquivo tem peso maior no fine-tuning.\n\n")
-        f.write("\n".join(ex(q, a) for q, a in IDENTIDADE + D3.IDENTIDADE_2) + "\n")
+        f.write("\n".join(ex(q, a) for q, a in identidade) + "\n")
     leitura, _ = leitura_examples()
-    leitura += leitura_simples()
+    leitura += leitura_simples() + leitura_genericas
     with open(QA_DIR / "leitura.txt", "w", encoding="utf-8") as f:
         f.write("# Interpretação de texto: Contexto + Pergunta, no mesmo formato que o RAG usa.\n\n")
         f.write("\n".join(leitura) + "\n")
-    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(IDENTIDADE) + len(D3.IDENTIDADE_2)} | leitura.txt: {len(leitura)}")
+    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(identidade)} | leitura.txt: {len(leitura)}")
 
 
 if __name__ == "__main__":

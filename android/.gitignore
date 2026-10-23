@@ -1,0 +1,8 @@
+.gradle/
+build/
+local.properties
+*.apk
+# Gerados por exportar_modelo.py a partir dos checkpoints (que também não ficam no Git)
+app/src/main/assets/laika_*.bin
+app/src/main/assets/laika_rag_mini.db
+app/src/main/assets/tokenizer.txt

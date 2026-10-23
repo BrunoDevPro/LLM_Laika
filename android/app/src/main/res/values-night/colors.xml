@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="marinho">#1E2457</color>
+    <color name="azul">#4C7EE0</color>
+
+    <color name="fundo">#0E1222</color>
+    <color name="topo">#151A30</color>
+    <color name="topo_texto">#FFFFFF</color>
+    <color name="topo_sub">#9AA5C6</color>
+    <color name="divisoria">#232A45</color>
+    <color name="bolha_usuario">#3567CC</color>
+    <color name="texto_usuario">#FFFFFF</color>
+    <color name="bolha_laika">#1C2238</color>
+    <color name="texto_laika">#E6E9F2</color>
+    <color name="fonte">#9AA8C8</color>
+    <color name="detalhe">#6C7493</color>
+    <color name="aviso">#8C93A3</color>
+    <color name="barra">#151A30</color>
+    <color name="campo">#1F2640</color>
+    <color name="borda">#2A3352</color>
+    <color name="cartao">#171D33</color>
+    <color name="chip">#212A4A</color>
+    <color name="chip_texto">#DCE4FA</color>
+    <color name="perigo">#FF7B6B</color>
+</resources>

@@ -5,4 +5,5 @@ data/books/
 data/wiki/
 data/qa_auto/
 data/rag/
+data/tokens/
 .ipynb_checkpoints/

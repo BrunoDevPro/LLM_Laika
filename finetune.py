@@ -1,8 +1,9 @@
 """Fine-tuning: ensina o formato pergunta -> resposta.
 
 Para o modelo não decorar o pergeresp (e responder tudo com ele), cada lote mistura:
-  1) exemplos escritos à mão do data/qa/*.txt (~25% dos exemplos de chat); o
-     identidade.txt (nome da Laika) tem peso extra;
+  1) exemplos escritos à mão do data/qa/*.txt (pelo menos ~25% dos exemplos de chat; com
+     ~7,5 mil exemplos, cada um aparece uma vez por época, ~37%); o identidade.txt (nome da
+     Laika) tem peso extra;
   2) exemplos sintéticos: "continue o texto", "frase com a palavra X", "complete a frase"
      (de todos os textos) e "resuma o texto" (trechos dos livros do Gutenberg), mais as
      perguntas "O que é X?" tiradas da Wikipédia (data/qa_auto/);
@@ -28,7 +29,7 @@ from tokenizers import Tokenizer
 
 from chat import build_prompt, generate, with_citation
 from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit_context, split_example,
-                        wants_rag, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
+                        rag_query, wants_rag, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
 from rag import open_index
 
@@ -53,7 +54,8 @@ parser.add_argument("--rag-share", type=float, default=0.5,
 parser.add_argument("--no-rag", action="store_true")
 parser.add_argument("--lr", type=float, default=5e-5)
 parser.add_argument("--batch-size", type=int, default=16)
-parser.add_argument("--synthetic", type=int, default=4000, help="nº de exemplos gerados dos livros")
+parser.add_argument("--synthetic", type=int, default=10000,
+                    help="nº de exemplos gerados dos livros (era 4000; subiu junto com os ~7,5 mil escritos à mão)")
 parser.add_argument("--qa-share", type=float, default=0.25, help="fração dos exemplos de chat vinda do pergeresp")
 parser.add_argument("--replay", type=float, default=0.25, help="fração de cada lote com texto puro dos livros")
 parser.add_argument("--val-fraction", type=float, default=0.1)
@@ -134,7 +136,7 @@ def add_context(examples, share):
     for example in examples:
         question, answer = split_example(example)
         if random.random() < share and wants_rag(question):
-            hit = rag.best(question)
+            hit = rag.best(rag_query(question))
             if hit:
                 def count(user_text):
                     return len(tokenizer.encode(

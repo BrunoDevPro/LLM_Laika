@@ -44,6 +44,21 @@ def _fav_phrase(key, info):
     if info.get("fem"):
         return f"sua {key} favorita é {info['valor']}"
     return f"seu {key} favorito é {info['valor']}"
+
+
+# Mensagem enviada pela metade ("Meu nome é", "Eu moro em"): pergunta o resto em vez de o modelo inventar.
+INCOMPLETE = [
+    (re.compile(r"^(?:meu nome (?:é|e)|me chamo|eu me chamo|pode me chamar de)\s*[.!]*$", re.I),
+     "Acho que a mensagem ficou pela metade. Qual é o seu nome?"),
+    (re.compile(r"^(?:eu )?moro(?: (?:em|no|na|nos|nas))?\s*[.!]*$", re.I),
+     "Faltou o final da frase. Onde você mora?"),
+    (re.compile(r"^(?:eu )?(?:n[ãa]o )?gosto(?: muito)?(?: (?:de|do|da|dos|das))?\s*[.!]*$", re.I),
+     "Faltou o final da frase. Do que você gosta?"),
+    (re.compile(r"^(?:eu )?tenho\s*[.!]*$", re.I),
+     "Faltou o final da frase. O que você tem?"),
+    (re.compile(r"^(?:por favor,? )?(?:lembre(?:-se)?|lembra|guarde|anote|memorize)(?: de)?(?: que)?\s*[.!:]*$", re.I),
+     "Claro! O que você quer que eu lembre?"),
+]
 ASK_ALL = re.compile(r"\bo que voc[eê] (?:sabe|lembra|guardou)(?: (?:sobre|de) mim)?\b", re.I)
 FORGET = re.compile(r"\b(esque[cç]a|apague|limpe|apaga|esquece) (?:tudo|a (?:sua )?mem[oó]ria|o que eu (?:te )?disse)\b", re.I)
 
@@ -125,6 +140,8 @@ class Memory:
         note = SAVE_NOTE.search(msg.strip())
         if note:
             text = _clean(note.group(1)).rstrip(".!")
+            if text.lower() in ("que", "de", "de que"):  # "Lembre que" sem o resto
+                return []
             if text and text not in d["notas"]:
                 d["notas"].append(text)
             return [f"Certo, vou lembrar: {text}."]
@@ -166,6 +183,9 @@ class Memory:
         if learned:
             self.save()
             return " ".join(learned)
+        for pattern, reply in INCOMPLETE:
+            if pattern.match(msg.strip()):
+                return reply
         return None
 
     def context_for(self, question):

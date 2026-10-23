@@ -306,15 +306,38 @@ def content_words(text):
     return words
 
 
+# "Faça um texto sobre X", "Me conte sobre X", "O que você sabe a respeito de X?": o assunto é X.
+_TOPIC = re.compile(r"(?:^|\s)(?:sobre|a respeito d[eoa]s?|acerca d[eoa]s?)\s+(.+)$", re.IGNORECASE)
+
+
+def request_topic(question):
+    """O assunto de um pedido como "Faça um texto sobre planárias." ("planárias"), ou None."""
+    m = _TOPIC.search(question.strip())
+    if not m:
+        return None
+    topic = m.group(1).strip(" .!?;:")
+    return topic if content_words(topic) else None
+
+
+def rag_query(question):
+    """O que procurar no RAG: o assunto, nos pedidos "... sobre X"; senão, a pergunta inteira."""
+    return request_topic(question) or question
+
+
 def wants_rag(question):
     """Decide se vale procurar contexto nos textos para esta pergunta.
 
     Não usa RAG para conversa e perguntas sobre a Laika ou o usuário (pronomes pessoais),
     para pedidos de tarefa ("Corrija...", "Resuma...", "Calcule..."), para mensagens que já
-    trazem um texto longo e para contas sem palavras.
+    trazem um texto longo e para contas sem palavras. Pedidos de texto sobre um assunto
+    ("Faça um texto sobre X", "Me conte sobre X") usam o RAG com o assunto, se ele não for
+    pessoal ("Fale sobre você").
     """
     if "Contexto:" in question or len(question.split()) > 40:
         return False
+    topic = request_topic(question)
+    if topic is not None:
+        return not (_PERSONAL & set(word_tokens(topic)))
     first_words = [w.lower().strip(",.!?:;") for w in question.strip().split()[:2]]
     if first_words and first_words[0] == "me":  # "Me conte...", "Me dê..."
         first_words = first_words[1:]

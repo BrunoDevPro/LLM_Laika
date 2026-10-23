@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cores do logo: azul-marinho, azul e dourado -->
+    <color name="marinho">#1E2457</color>
+    <color name="azul">#2A5CB8</color>
+
+    <color name="fundo">#F3F5FA</color>
+    <color name="topo">#FFFFFF</color>
+    <color name="topo_texto">#1E2457</color>
+    <color name="topo_sub">#5E6787</color>
+    <color name="divisoria">#E2E6EF</color>
+    <color name="bolha_usuario">#2A5CB8</color>
+    <color name="texto_usuario">#FFFFFF</color>
+    <color name="bolha_laika">#FFFFFF</color>
+    <color name="texto_laika">#1B1F2E</color>
+    <color name="fonte">#5B6B8C</color>
+    <color name="detalhe">#9AA1B5</color>
+    <color name="aviso">#6B7280</color>
+    <color name="barra">#FFFFFF</color>
+    <color name="campo">#EEF1F7</color>
+    <color name="borda">#DCE1EC</color>
+    <color name="cartao">#FFFFFF</color>
+    <color name="chip">#E8EEFA</color>
+    <color name="chip_texto">#1E2457</color>
+    <color name="perigo">#C0392B</color>
+</resources>

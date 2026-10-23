@@ -1,0 +1,91 @@
+# Roda células do colab.ipynb num Colab de verdade, sem navegador (Colab CLI), a pedido do app Laika.
+# O app dispara este workflow pela API do GitHub; o andamento aparece no app pela verificação
+# "Laika no Colab"; o zip da célula 6 vira o artefato "laika_pacote" (o app baixa em "Modelos prontos").
+# Antes da primeira vez: rode a célula 0 do colab.ipynb no navegador (grava o segredo COLAB_ADC).
+name: Laika no Colab
+run-name: "Colab: células ${{ inputs.celulas }} (${{ inputs.gpu }}) ${{ inputs.pedido }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      celulas:
+        description: "Células do colab.ipynb, separadas por vírgula (a 1 sempre roda antes)"
+        required: true
+        default: "4,6"
+      gpu:
+        description: "GPU do Colab"
+        type: choice
+        options: [T4, L4, G4, A100, H100, nenhuma]
+        default: T4
+      parametros:
+        description: 'Parâmetros das células em JSON, ex.: {"3": {"MODO": "continuar"}}'
+        required: false
+        default: "{}"
+      pedido:
+        description: "Identificação do pedido (o app usa para achar esta execução)"
+        required: false
+        default: ""
+
+# Uma máquina do Colab por vez: um pedido novo espera o anterior terminar.
+concurrency:
+  group: laika-colab
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read   # ler os avisos do app (workflow sinal.yml)
+  checks: write   # a verificação "Laika no Colab", que o app mostra
+
+jobs:
+  colab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      SESSAO: laika-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Instalar o Colab CLI
+        run: |
+          python3 -m venv "$RUNNER_TEMP/colab"
+          "$RUNNER_TEMP/colab/bin/pip" install -q "google-colab-cli>=0.7.5,<0.8"
+          echo "$RUNNER_TEMP/colab/bin" >> "$GITHUB_PATH"
+
+      - name: Permissão do Google (segredo COLAB_ADC)
+        env:
+          COLAB_ADC: ${{ secrets.COLAB_ADC }}
+        run: |
+          if [ -z "$COLAB_ADC" ]; then
+            echo "::error::Falta o segredo COLAB_ADC. Rode uma vez a célula 0 do colab.ipynb no navegador."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$COLAB_ADC" > "$RUNNER_TEMP/adc.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/adc.json" >> "$GITHUB_ENV"
+
+      - name: Rodar as células no Colab
+        env:
+          CELULAS: ${{ inputs.celulas }}
+          GPU: ${{ inputs.gpu }}
+          PARAMETROS: ${{ inputs.parametros }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >
+          python3 colab/laika_colab.py rodar --celulas "$CELULAS" --gpu "$GPU" --parametros "$PARAMETROS"
+          --sessao "$SESSAO" --ramo "$GITHUB_REF_NAME" --saida "$RUNNER_TEMP/saida" --prazo-min 340
+
+      - name: Guardar o zip para o app
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: laika_pacote
+          path: ${{ runner.temp }}/saida/pacote/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Desligar o Colab
+        if: always()
+        run: |
+          colab --auth=adc stop -s "$SESSAO" || true
+          rm -f "$RUNNER_TEMP/adc.json"
