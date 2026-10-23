@@ -122,10 +122,34 @@ public final class Texto {
         return s.substring(a, b);
     }
 
+    /** "Faça um texto sobre X", "Me conte sobre X": o assunto é X (o _TOPIC do data_utils.py). */
+    private static final Pattern TOPICO = Pattern.compile(
+            "(?:^|\\s)(?:sobre|a respeito d[eoa]s?|acerca d[eoa]s?)\\s+(.+)$",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | UNICODE);
+
+    /** O assunto de um pedido como "Faça um texto sobre planárias." ("planárias"), ou null (request_topic). */
+    public static String assuntoDoPedido(String pergunta) {
+        java.util.regex.Matcher m = TOPICO.matcher(aparar(pergunta));
+        if (!m.find()) return null;
+        String assunto = tirarPontas(m.group(1), " .!?;:");
+        return palavrasDeConteudo(assunto).isEmpty() ? null : assunto;
+    }
+
+    /** O que procurar no RAG: o assunto, nos pedidos "... sobre X"; senão, a pergunta (rag_query). */
+    public static String consultaRag(String pergunta) {
+        String assunto = assuntoDoPedido(pergunta);
+        return assunto != null ? assunto : pergunta;
+    }
+
     /** Decide se vale procurar contexto nos textos (mesma regra do wants_rag). */
     public static boolean querRag(String pergunta) {
         String[] todas = separar(pergunta);
         if (pergunta.contains("Contexto:") || todas.length > 40) return false;
+        String assunto = assuntoDoPedido(pergunta);
+        if (assunto != null) {
+            for (String w : palavras(assunto)) if (PERSONAL.contains(w)) return false;
+            return true;
+        }
         List<String> primeiras = new ArrayList<>();
         for (int i = 0; i < Math.min(2, todas.length); i++) {
             primeiras.add(tirarPontas(todas[i].toLowerCase(Locale.ROOT), ",.!?:;"));

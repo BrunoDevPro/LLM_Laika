@@ -60,7 +60,7 @@ public final class Laika {
             if (!nota.isEmpty()) partes.add(nota);
         }
         if (rag != null && Texto.querRag(pergunta)) {
-            IndiceRag.Trecho hit = rag.melhor(pergunta);
+            IndiceRag.Trecho hit = rag.melhor(Texto.consultaRag(pergunta));
             if (hit != null) {
                 partes.add(hit.texto);
                 fonte = hit.titulo;

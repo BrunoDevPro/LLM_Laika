@@ -119,7 +119,7 @@ final class Motor {
     private Laika chat, base;
     private IndiceRag rag;
     private Memoria memoria;
-    private String refBase;
+    private String refChat, refBase;
 
     volatile boolean pronto, gerando;
     volatile String erro;
@@ -361,9 +361,8 @@ final class Motor {
         try (InputStream in = armazem.abrir(v.arquivos.get(Armazem.TOKENIZER).ref)) {
             tok = new Tokenizador(in);
         }
-        try (InputStream in = armazem.abrir(arqChat.ref)) {
-            chat = new Laika(new Modelo(in, threads), tok);
-        }
+        refChat = arqChat.ref;
+        chat = carregar(refChat);
         Armazem.Arquivo b = v.arquivos.get(Armazem.BASE);
         refBase = b == null ? null : b.ref;
         temBase = b != null;
@@ -390,6 +389,20 @@ final class Motor {
             for (Ouvinte o : new ArrayList<>(ouvintes)) o.conversaTrocada();
         });
         pronto = true;
+    }
+
+    private Laika carregar(String ref) throws IOException {
+        try (InputStream in = armazem.abrir(ref)) {
+            return new Laika(new Modelo(in, threads), tok);
+        } catch (OutOfMemoryError e) {
+            throw new IOException("falta memória no celular para este modelo");
+        }
+    }
+
+    /** Modelos de dezenas de milhões de parâmetros (~200 MB na memória): só um carregado por vez. */
+    private static boolean grande(Laika l) {
+        Modelo m = l.modelo;
+        return 12L * m.dim * m.dim * m.layers > 20_000_000L;
     }
 
     /** O índice que vem no APK precisa virar arquivo para o SQLite abrir. */
@@ -538,11 +551,13 @@ final class Motor {
                 op.temperatura = temp;
                 if (completar && refBase != null) {
                     if (base == null) {
+                        if (chat != null && grande(chat)) {  // um modelo grande por vez
+                            chat.modelo.fechar();
+                            chat = null;
+                        }
                         resp.texto = "Carregando o modelo de completar texto…";
                         mudou(resp);
-                        try (InputStream in = armazem.abrir(refBase)) {
-                            base = new Laika(new Modelo(in, threads), tok);
-                        }
+                        base = carregar(refBase);
                     }
                     op.maxNovos = tamanho * 2;
                     String r = base.gerar(texto, op, false, rng, parcial -> {
@@ -555,6 +570,15 @@ final class Motor {
                     if (direto != null) {
                         resp.texto = direto;
                     } else {
+                        if (chat == null) {  // foi liberado para o modelo de completar texto (modelo grande)
+                            if (base != null) {
+                                base.modelo.fechar();
+                                base = null;
+                            }
+                            resp.texto = "Carregando o modelo de conversa…";
+                            mudou(resp);
+                            chat = carregar(refChat);
+                        }
                         op.maxNovos = tamanho;
                         Laika.Prompt p = chat.montarPrompt(texto, comRag ? rag : null, comMemoria ? memoria : null,
                                 op.maxNovos);
@@ -754,10 +778,10 @@ final class Motor {
     void baixarDoColab(GitHub github, GitHub.Artefato a) {
         emFundo("Baixando do Colab…", true, () -> {
             File zip = new File(ctx.getCacheDir(), "colab_" + a.id + ".zip");
-            if (a.tamanho > 0 && ctx.getFilesDir().getUsableSpace() < a.tamanho * 3 + (100L << 20)) {
+            if (a.tamanho > 0 && ctx.getFilesDir().getUsableSpace() < a.tamanho * 2 + (200L << 20)) {
                 throw new IOException(String.format(Locale.getDefault(),
                         "falta espaço no celular: o zip tem %d MB e precisa de uns %d MB livres", a.tamanho >> 20,
-                        (a.tamanho * 3 >> 20) + 100));
+                        (a.tamanho * 2 >> 20) + 200));
             }
             try {
                 github.baixar(a, zip, progresso("Baixando do Colab…"), pararTarefa::get);
@@ -773,10 +797,10 @@ final class Motor {
         List<String> feitos = new ArrayList<>(), avisos = new ArrayList<>();
         long total = 0;
         for (Fonte f : fontes) total += Math.max(0, f.tamanho());
-        if (total > 0 && ctx.getFilesDir().getUsableSpace() < total * 2 + (100L << 20)) {
+        if (total > 0 && ctx.getFilesDir().getUsableSpace() < total + total / 3 + (200L << 20)) {
             throw new IOException(String.format(Locale.getDefault(),
-                    "falta espaço no celular: os arquivos têm %d MB e a importação precisa de mais ou menos o dobro",
-                    total >> 20));
+                    "falta espaço no celular: os arquivos têm %d MB e a importação precisa de uns %d MB livres",
+                    total >> 20, (total + total / 3 >> 20) + 200));
         }
         File pastaCorpus = new File(ctx.getCacheDir(), "corpus");
         apagarPasta(pastaCorpus);

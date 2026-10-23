@@ -442,15 +442,27 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         }
         LinearLayout atalhos = cartao(caixaCelulas);
         atalhos.addView(texto("Atalhos", 13, R.color.topo_sub, true));
-        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos);
+        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos);
         botao(a1, "Só fine-tuning", false, v -> marcar(4, 6));
         botao(a1, "Tudo do zero", false, v -> {
-            marcar(2, 3, 4, 6);
             valores.put("3.MODO", "do_zero");
-            montarCelulas();
+            marcar(2, 3, 4, 6);
         });
         botao(a2, "Atualizar dados", false, v -> marcar(2));
         botao(a2, "Só exportar", false, v -> marcar(6));
+        // Baixar 1 milhão de artigos não precisa de GPU (economiza unidades); o treino vem depois.
+        botao(a3, "1 milhão de artigos", false, v -> {
+            valores.put("2.ARTIGOS", "1 milhão");
+            gpu = "nenhuma";
+            marcar(2);
+        });
+        // ~52M de parâmetros: tokenizer e modelo novos (do_zero), melhor na A100.
+        botao(a3, "Modelo de 50M", false, v -> {
+            valores.put("3.MODO", "do_zero");
+            valores.put("3.PRESET", "colab_50m");
+            gpu = "A100";
+            marcar(3, 4, 6);
+        });
         TextView g = texto("GPU: " + nomeGpu(gpu) + "  ▾", 15, R.color.topo_texto, true);
         g.setPadding(0, dp(12), 0, dp(4));
         g.setOnClickListener(v -> escolherGpu());
@@ -525,9 +537,18 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         return s.length() > 160 ? s.substring(0, 157) + "…" : s;
     }
 
+    /** O valor escolhido, ou o padrão do notebook se o guardado não vale mais (o parâmetro mudou de tipo). */
     private String valor(Caderno.Celula c, Caderno.Parametro p) {
-        String v = valores.get(c.numero + "." + p.nome);
-        return v != null ? v : Caderno.textoDoPadrao(p);
+        String chave = c.numero + "." + p.nome, v = valores.get(chave);
+        if (v != null) {
+            try {
+                Caderno.converter(p, v);
+                return v;
+            } catch (IllegalArgumentException naoVale) {
+                valores.remove(chave);
+            }
+        }
+        return Caderno.textoDoPadrao(p);
     }
 
     private void montarParametro(LinearLayout pai, Caderno.Celula c, Caderno.Parametro p) {

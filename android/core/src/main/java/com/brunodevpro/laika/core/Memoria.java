@@ -43,6 +43,21 @@ public final class Memoria {
     private static final Pattern ASK_LIKES = Pattern.compile("\\b(?:do que|o que) eu (?:n[ãa]o )?gosto\\b", F);
     private static final Pattern ASK_FAV = Pattern.compile(
             "\\bqual (?:é |e )?(?:a |o )?(?:minha|meu) ([a-zà-ÿ]+(?: [a-zà-ÿ]+)?) favorit[oa]", F);
+    /** Mensagem enviada pela metade ("Meu nome é"): pergunta o resto (igual ao INCOMPLETE do memory.py). */
+    private static final Pattern[] INCOMPLETA = {
+            Pattern.compile("^(?:meu nome (?:é|e)|me chamo|eu me chamo|pode me chamar de)\\s*[.!]*$", F),
+            Pattern.compile("^(?:eu )?moro(?: (?:em|no|na|nos|nas))?\\s*[.!]*$", F),
+            Pattern.compile("^(?:eu )?(?:n[ãa]o )?gosto(?: muito)?(?: (?:de|do|da|dos|das))?\\s*[.!]*$", F),
+            Pattern.compile("^(?:eu )?tenho\\s*[.!]*$", F),
+            Pattern.compile("^(?:por favor,? )?(?:lembre(?:-se)?|lembra|guarde|anote|memorize)(?: de)?(?: que)?\\s*[.!:]*$", F),
+    };
+    private static final String[] RESPOSTA_INCOMPLETA = {
+            "Acho que a mensagem ficou pela metade. Qual é o seu nome?",
+            "Faltou o final da frase. Onde você mora?",
+            "Faltou o final da frase. Do que você gosta?",
+            "Faltou o final da frase. O que você tem?",
+            "Claro! O que você quer que eu lembre?",
+    };
     private static final Pattern ASK_ALL = Pattern.compile("\\bo que voc[eê] (?:sabe|lembra|guardou)(?: (?:sobre|de) mim)?\\b", F);
     private static final Pattern FORGET = Pattern.compile(
             "\\b(esque[cç]a|apague|limpe|apaga|esquece) (?:tudo|a (?:sua )?mem[oó]ria|o que eu (?:te )?disse)\\b", F);
@@ -214,6 +229,8 @@ public final class Memoria {
             int b = t.length();
             while (b > 0 && (t.charAt(b - 1) == '.' || t.charAt(b - 1) == '!')) b--;
             t = t.substring(0, b);
+            String tl = t.toLowerCase(Locale.ROOT);
+            if (tl.equals("que") || tl.equals("de") || tl.equals("de que")) return aprendido;  // "Lembre que" sem o resto
             if (!t.isEmpty() && !notas.contains(t)) notas.add(t);
             aprendido.add("Certo, vou lembrar: " + t + ".");
             return aprendido;
@@ -266,6 +283,10 @@ public final class Memoria {
         if (!aprendido.isEmpty()) {
             salvar();
             return String.join(" ", aprendido);
+        }
+        String aparado = Texto.aparar(msg);
+        for (int i = 0; i < INCOMPLETA.length; i++) {
+            if (INCOMPLETA[i].matcher(aparado).matches()) return RESPOSTA_INCOMPLETA[i];
         }
         return null;
     }

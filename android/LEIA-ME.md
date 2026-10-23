@@ -64,11 +64,11 @@ Uma vez só:
    permissões do Colab CLI e guarda essa permissão no GitHub (segredo `COLAB_ADC`), usando o token.
 4. No app, tela Colab: cole o repositório e o token.
 
-Depois: marque as células (a 1 sempre roda antes; há atalhos como "Só fine-tuning"), escolha a GPU e
-toque em **Rodar no Colab**. A tela mostra cada célula (✓, ⏳, ✗) e as últimas linhas da saída; dá para
-cancelar. Pode fechar o app: ele avisa por notificação quando o Colab terminar e quando precisar de
-você. Na primeira vez, o Colab pode pedir **autorização para usar o Google Drive**: toque em
-**Autorizar**, permita o acesso e depois em **Já autorizei**.
+Depois: marque as células (a 1 sempre roda antes; há atalhos como "Só fine-tuning", "1 milhão de artigos"
+e "Modelo de 50M"), escolha a GPU e toque em **Rodar no Colab**. A tela mostra cada célula (✓, ⏳, ✗)
+e as últimas linhas da saída; dá para cancelar. Pode fechar o app: ele avisa por notificação quando o
+Colab terminar e quando precisar de você. Na primeira vez, o Colab pode pedir **autorização para usar o
+Google Drive**: toque em **Autorizar**, permita o acesso e depois em **Já autorizei**.
 
 Cuidados: o repositório é público, então os registros do GitHub Actions e o zip do modelo (guardado
 por 14 dias como artefato) também ficam visíveis para quem entrar no repositório. O app tira e-mails
@@ -89,6 +89,8 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   compartilhar a conversa, limpar a conversa.
 - Cada resposta mostra o tempo e a velocidade (tokens por segundo).
 - Se a versão em uso não abrir, o app oferece voltar para o backup mais recente.
+- Modelos grandes (como o de 50M, ~260 MB de memória): o app mantém um carregado por vez. Ao trocar entre
+  conversar e completar texto, ele libera o outro; se faltar memória, avisa em vez de fechar.
 - Os comandos do `chat.py` também funcionam: `/fontes`, `/rag`, `/memoria`.
 
 ## Como funciona

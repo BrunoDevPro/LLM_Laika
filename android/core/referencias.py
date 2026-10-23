@@ -38,6 +38,8 @@ PERGUNTAS = [
     "Como estudar melhor para a prova?", "O que tem no corpo humano?", "Qual a origem das catacumbas?",
     "Igrejas romanas antigas", "O que é um sarcófago?", "Corrija: eu fui na escola ontem",
     "Quem descobriu o Brasil em 1500?", "Dê um exemplo de verbo", "O que é a Lua?",
+    "Faça um texto sobre planárias.", "O que você sabe sobre vulcões?", "Escreva um parágrafo a respeito da Lua.",
+    "Fale sobre você", "E o capitalismo?", "Me conte sobre a cidade de Roma",
 ]
 
 MEMORIA = [
@@ -49,6 +51,7 @@ MEMORIA = [
     "O que você lembra de mim?", "Me chamo João e moro no Rio de Janeiro", "Quem sou eu?",
     "Você gosta de futebol?", "O que é um vulcão?", "Do que eu gosto?",
     "Esqueça tudo", "O que você sabe sobre mim?", "Qual é o meu nome?",
+    "Meu nome é", "Eu moro em", "Lembre que", "eu não gosto de", "Eu tenho", "Lembre-se:", "Meu nome é Bia.",
 ]
 
 
