@@ -5,7 +5,9 @@ organizado, por que as decisões foram tomadas, os números medidos e os próxim
 Escrito em 22/10/2026; atualizado em 23/10/2026 (app 1.2: Colab pelo app, zip único, sem treino no celular;
 app 1.3: preset de 50M, Wikipédia com até 1 milhão de artigos, +3.300 perguntas genéricas;
 app 1.4: memória de IA (histórico no prompt), RAG com vários trechos e busca pelo nome próprio, ~20 mil perguntas
-da Wikipédia com contexto, taxa de aprendizado automática, menu novo no app).
+da Wikipédia com contexto, taxa de aprendizado automática, menu novo no app; em 24/10/2026, app 1.5: memória de
+IA só em mensagens de seguimento, preset de 100M com RoPE e contexto 2048, cache de atenção no Python, Corpus
+Carolina e GigaVerbo, +2.040 perguntas com respostas longas, "por quê" e sim ou não).
 
 ## 1. O que é
 
@@ -16,7 +18,8 @@ em português**, com:
 - **RAG** (busca em artigos e livros com SQLite FTS5) que coloca um trecho como "Contexto:" no prompt e
   cita a fonte no fim da resposta (`... *Nome do artigo`);
 - **memória do usuário** (nome, cidade, gostos, "lembre que...") fora do modelo, em JSON;
-- **memória de IA**: as últimas trocas da conversa (até 5) entram no prompt, quantas couberem na janela;
+- **memória de IA**: as últimas trocas da conversa (até 5) entram no prompt, quantas couberem na janela, só quando a
+  mensagem depende da anterior (`follows_up`);
 - treino no **Google Colab** (arquivos no Google Drive) e um **pacote para rodar no Windows** (CPU).
 
 Repositório: `github.com/BrunoDevPro/LLM_Laika` (público, branch `main`).
@@ -32,7 +35,8 @@ O nome é uma homenagem à cadela Laika (Sputnik 2, 1957). A interface e os come
 | Dados no Drive | 495 livros (~17 M palavras) + ~99 mil artigos aproveitados de 100 mil (~31 M palavras, ~314 palavras/artigo) ≈ **80 M tokens** |
 | Índice RAG | `laika_rag.db` 636 MB, **1,09 milhão de trechos** (678 mil wiki, 413 mil livros, 124 textos) |
 | Velocidade de treino medida | T4: ~95 mil tokens/s com o modelo de 14M (≈ 9 TFLOPS efetivos) |
-| Exemplos de fine-tuning escritos | `pergeresp.txt` 7025 + `identidade.txt` 110 + `leitura.txt` 512 = **7647** (3333 deles são as perguntas genéricas de `tools/genericas_*.py`) + `conversas.jsonl` com **1061** conversas de 2 a 3 trocas |
+| Exemplos de fine-tuning escritos | `pergeresp.txt` 9065 + `identidade.txt` 110 + `leitura.txt` 512 = **9687** (3333 genéricas de `tools/genericas_*.py`; 627 respostas longas, 438 "por quê" e 975 sim ou não de `tools/longas*.py`, `porque*.py`, `simnao*.py`) + `conversas.jsonl` com **1061** conversas de 2 a 3 trocas |
+| Preset de 100M (`colab_100m`) | 103,5M parâmetros, RoPE, contexto 2048, vocabulário 24 mil, 8 mil passos de 262 mil tokens (~2,1 bilhões); **ainda não treinado**. Configuração completa em `TREINO_100M.md` |
 | Textos próprios (`data/modern/`) | 130 (20 maiores + 110 simples) |
 
 Os checkpoints atuais (`pretrain_best.pt`, `finetuned.pt`, `tokenizer.json`) ficam no Drive em
@@ -49,21 +53,23 @@ Claude Code tiver PyTorch disponível, vale rodar um teste ponta a ponta com `--
 
 | Arquivo | Função |
 |---|---|
-| `model.py` | `TinyLLM`: atenção causal (`F.scaled_dot_product_attention`, `is_causal=True`), pré-LayerNorm, GELU, pesos compartilhados entre embedding e saída, **posições aprendidas** (`pos_emb`, tamanho = `block_size`). `build_model(config)` cria a partir do dict salvo no checkpoint. |
-| `config.py` | Presets: `tiny` (CPU, ~1,3M), `colab` (~7M, o atual), `colab_big` (~14M) e `colab_50m` (~52M: 512 dim, 14 camadas, 8 cabeças, contexto 512, vocabulário 16 mil, lote 32 × acumulação 2; pede MODO `do_zero` e muitos dados, como a Wikipédia com 1 milhão de artigos). `accum` (acumulação de gradiente) é opcional no preset. |
-| `train.py` | Pré-treino. Lê `data/books`, `data/wiki` e `data/modern` (esta 3×). Treina o tokenizer BPE (byte-level) se não for `--resume`. Validação = últimos 5% de **cada** arquivo. Os tokens vão para `data/tokens/` (uint16, lidos com `np.memmap`, reaproveitados enquanto os textos e o tokenizer não mudam), então a RAM não limita o tamanho dos dados. Acumulação de gradiente (`accum`), bf16 na A100/L4 (fp16 + GradScaler na T4), TF32, early stopping, cosine com warmup. Salva o melhor em `checkpoints/pretrain_best.pt` (`model`, `config`, `step`, `val_loss`) e, a cada validação, `pretrain_last.pt` (pesos, otimizador, scaler, step, geradores aleatórios): `--resume` continua dele do ponto exato (ex.: depois do limite de 6 h do GitHub Actions); se o treino já tinha acabado, parte do melhor com um agendamento novo. O `last` é apagado no fim. |
-| `finetune.py` | Parte do `pretrain_best.pt` e grava `checkpoints/finetuned.pt` (**sobrescreve** a cada melhora, sem backup). Loss só nos tokens da **última** resposta. Taxa de aprendizado automática (`--lr`): 5e-5 até 20M de parâmetros, 1e-4 acima. Memória de IA: as conversas de `data/qa/conversas.jsonl` e ~30% dos outros exemplos (`--history-share`) ganham de 1 a 4 trocas curtas anteriores (só se couber no bloco). Leitura da Wikipédia: `--wiki-leitura 20000` perguntas tiradas dos trechos (`--wiki-mb 40` de artigos; "Onde X nasceu?", "Quando X foi fundada?", "O que X inventou?", "Quantos habitantes tem X?"...) com o trecho como Contexto; 10% com o trecho de outro artigo e resposta "não sei"; com janela ≥ 512, metade ganha um segundo trecho do mesmo artigo. Mistura em cada lote: exemplos escritos (`data/qa/`, pelo menos ~25%; com os 7,6 mil atuais cada um aparece 1× por época, ~37%; identidade com peso extra), sintéticos (`--synthetic 10000`: continue/complete/frase com palavra/resumo extrativo dos livros + "O que é X?" da Wikipédia em `data/qa_auto/`) e replay de texto puro. Com o índice RAG, ~50% das perguntas que pedem informação ganham "Contexto:" (buscado com `rag.contexts`, igual ao chat). **2 épocas** por padrão. Mostra 8 respostas de teste por época. |
-| `chat.py` | Conversa. `build_prompt(question, tokenizer, block, rag, memory, max_new, history)` (usado também pelo finetune) junta memória + RAG (`rag.contexts`, `rag_chunks(block)` trechos: 1 com 256, 2 com 512, 3 com 768+) e corta o contexto para caber na janela; depois põe antes as trocas do histórico, da mais nova para a mais antiga, enquanto couberem (até `MAX_HISTORY = 5`). A busca do RAG usa `rag_queries()`: em "Faça um texto sobre planárias", procura só "planárias"; senão, a pergunta e, se ela não achar nada com confiança, o nome próprio ("Santos Dumont"). Com `max_new_tokens` > 60, o `<|end|>` é penalizado no começo (`min_answer_tokens`, `end_penalty`), para respostas mais longas. `/limpar` esquece o histórico; `--no-history` desliga. `generate()` com top-k, top-p, penalidade de repetição (só nos tokens gerados). **Sem cache de atenção** (recalcula tudo a cada token). `with_citation()` adiciona ` *Título`. Comandos: `/fontes`, `/rag`, `/memoria`, `sair`. `--base` = completar texto com o pré-treino. |
+| `model.py` | `TinyLLM`: atenção causal (`F.scaled_dot_product_attention`, `is_causal=True`), pré-LayerNorm, GELU, pesos compartilhados entre embedding e saída, **posições aprendidas** (`pos_emb`, tamanho = `block_size`) ou **RoPE** (`rope=True` no config: gira as metades de q e k, tabelas `rope_cos/sin` fora do state_dict, sem `pos_emb`). `forward(idx)` treina; `forward_cached(idx, past)` gera com cache de atenção (mesma saída, conferida). `build_model(config)` cria a partir do dict salvo no checkpoint. |
+| `config.py` | Presets: `tiny` (CPU, ~1,3M), `tiny_rope` (o tiny com RoPE e contexto 256, para testes), `colab` (~7M, o atual), `colab_big` (~14M), `colab_50m` (~52M: 512 dim, 14 camadas, 8 cabeças, contexto 512, vocabulário 16 mil, lote 32 × acumulação 2) e `colab_100m` (~104M: 768 dim, 12 camadas, 12 cabeças, RoPE, contexto 2048, vocabulário 24 mil, dropout 0, lote 16 × 2048 × acumulação 8, lr 5e-4, 8 mil passos, `tokenizer_mb=1500`). Os dois maiores pedem MODO `do_zero` e muitos dados. `accum`, `rope` e `tokenizer_mb` são opcionais no preset. |
+| `train.py` | Pré-treino. Lê `data/books`, `data/wiki`, `data/modern` (esta 3×), `data/carolina` e `data/gigaverbo` (as que existirem). Treina o tokenizer BPE (byte-level) se não for `--resume`; com `tokenizer_mb`/`--tokenizer-mb`, numa amostra dividida igualmente entre as pastas (sem os `<|endoftext|>`). Arquivos grandes são tokenizados em pedaços de ~1 MB, em grupos de ~32 milhões de caracteres (a RAM não estoura com 8 GB de texto); `--tokens-backup` guarda/traz uma cópia dos tokens (célula 3: `Drive/LLM_Laika/tokens`). `--accum`, `--compile` (torch.compile; salva os pesos do modelo original). Validação = últimos 5% de **cada** arquivo. Os tokens vão para `data/tokens/` (uint16, lidos com `np.memmap`, reaproveitados enquanto os textos e o tokenizer não mudam), então a RAM não limita o tamanho dos dados. Acumulação de gradiente (`accum`), bf16 na A100/L4 (fp16 + GradScaler na T4), TF32, early stopping, cosine com warmup. Salva o melhor em `checkpoints/pretrain_best.pt` (`model`, `config`, `step`, `val_loss`) e, a cada validação, `pretrain_last.pt` (pesos, otimizador, scaler, step, geradores aleatórios): `--resume` continua dele do ponto exato (ex.: depois do limite de 6 h do GitHub Actions); se o treino já tinha acabado, parte do melhor com um agendamento novo. O `last` é apagado no fim. |
+| `finetune.py` | Parte do `pretrain_best.pt` e grava `checkpoints/finetuned.pt` (**sobrescreve** a cada melhora, sem backup). Loss só nos tokens da **última** resposta. Guarda o `finetuned.pt` anterior em `checkpoints/backups/` (os 3 últimos; `--no-backup`). bf16 na A100/L4; replay em trechos de até 512 tokens. Taxa de aprendizado automática (`--lr`): 5e-5 até 20M de parâmetros, 1e-4 acima. Memória de IA: as conversas de `data/qa/conversas.jsonl` e ~30% dos outros exemplos (`--history-share`) ganham de 1 a 4 trocas curtas anteriores (só se couber no bloco). Leitura da Wikipédia: `--wiki-leitura 20000` perguntas tiradas dos trechos (`--wiki-mb 40` de artigos; "Onde X nasceu?", "Quando X foi fundada?", "O que X inventou?", "Quantos habitantes tem X?"...) com o trecho como Contexto; 10% com o trecho de outro artigo e resposta "não sei"; com janela ≥ 512, metade ganha um segundo trecho do mesmo artigo. Mistura em cada lote: exemplos escritos (`data/qa/`, pelo menos ~25%; com os 7,6 mil atuais cada um aparece 1× por época, ~37%; identidade com peso extra), sintéticos (`--synthetic 10000`: continue/complete/frase com palavra/resumo extrativo dos livros + "O que é X?" da Wikipédia em `data/qa_auto/`) e replay de texto puro. Com o índice RAG, ~50% das perguntas que pedem informação ganham "Contexto:" (buscado com `rag.contexts`, igual ao chat). **2 épocas** por padrão. Mostra 8 respostas de teste por época. |
+| `chat.py` | Conversa. `build_prompt(question, tokenizer, block, rag, memory, max_new, history)` (usado também pelo finetune) junta memória + RAG (`rag.contexts`, `rag_chunks(block)` trechos: 1 com 256, 2 com 512, 3 com 768+) e corta o contexto para caber na janela; depois põe antes as trocas do histórico, da mais nova para a mais antiga, enquanto couberem (até `MAX_HISTORY = 5`). A busca do RAG usa `rag_queries()`: em "Faça um texto sobre planárias", procura só "planárias"; senão, a pergunta e, se ela não achar nada com confiança, o nome próprio ("Santos Dumont"). Com `max_new_tokens` > 60, o `<|end|>` é penalizado no começo (`min_answer_tokens`, `end_penalty`), para respostas mais longas. O histórico só entra se `follows_up(pergunta)`. `/limpar` esquece o histórico; `--no-history` desliga. `generate()` com top-k, top-p, penalidade de repetição (só nos tokens gerados) e **cache de atenção** (`forward_cached`; passou da janela, recalcula a janela inteira como antes; saída gulosa idêntica à versão sem cache). `with_citation()` adiciona ` *Título`. Comandos: `/fontes`, `/rag`, `/memoria`, `sair`. `--base` = completar texto com o pré-treino. |
 | `rag.py` | `python rag.py build` monta o índice FTS5 (`title, text, kind, pos`; tokenizer `unicode61 remove_diacritics 2`) a partir de wiki/textos/livros, no disco local e depois copia; `RagIndex.best()` só devolve contexto com confiança (nota ≥ 1,8 ou fonte `texto`); `RagIndex.contexts(pergunta, k)` tenta cada consulta de `rag_queries` e devolve até k trechos (os extras do mesmo artigo, ordenados por quantas palavras da pergunta têm). Busca: título contendo todas as palavras + OR de palavras/prefixos; pontuação por cobertura, título igual, penalidade de parênteses/palavras extras/acentos diferentes ("Pele" × "Pelé"), proximidade, primeiro trecho do artigo. `python rag.py search "pergunta"` para testar. No Colab, copia o índice do Drive para o disco local antes de abrir. |
 | `memory.py` | Memória por expressões regulares; salva em `checkpoints/memoria.json`. Responde direto "qual é o meu nome", "o que você lembra de mim", "esqueça tudo" e frases incompletas ("Meu nome é", "Eu moro em", "Lembre que" → pede o resto, sem gravar nada); anotações relacionadas entram no Contexto. Não muda o prompt de perguntas normais. |
-| `data_utils.py` | Tokens especiais, limpeza do Gutenberg, leitura dos arquivos de QA, exemplos sintéticos, resumo extrativo, limpeza da Wikipédia e geração de "O que é X?", as perguntas de leitura da Wikipédia (`reading_examples`), o formato de conversa (`chat_turn`, `split_conversation`, `MAX_HISTORY`) e as funções do RAG: `content_words`, `wants_rag`, `request_topic` (assunto depois de "sobre", "a respeito de", "acerca de"), `question_name` (nome próprio mais longo), `rag_queries`, `rag_chunks`, `rag_question`, `fit_context`, `split_example`. |
-| `prepare_data.py` | Baixa livros pt do catálogo CSV do Gutenberg (`--max-books 500`, grava `data/books/titulos.tsv`) e artigos da Wikipédia via Hugging Face `wikimedia/wikipedia` `20231101.pt` em streaming (`--wiki 100000`; `--wiki 1000000` ou `--wiki -1` = todos, ~1,1 milhão). O download continua de onde parou: cada `wiki_NNN.txt` completo fica registrado num `.pronto` (JSON), e aumentar o número só baixa o que falta. Mostra velocidade e tempo estimado. |
-| `colab.ipynb` | 7 células: (0) ligar o app ao Colab (**só no navegador**, uma vez: login `gcloud` com os escopos do Colab CLI e grava o segredo `COLAB_ADC` no GitHub), (1) preparar/Drive (define `rodar()`, que para a célula se o comando falhar), (2) dados + índice RAG (`ARTIGOS`: 10 mil a 1 milhão ou todos), (3) pré-treino (`MODO = "pular" / "continuar" / "do_zero"`, `PRESET` com `colab_50m`; "continuar" retoma o `pretrain_last.pt`), (4) fine-tuning (`PERGUNTAS_WIKIPEDIA`), (5) conversar (**só no navegador**), (6) exportar para o celular (`laika_pacote.zip`: modelo e, opcionalmente, índice e textos). Os campos são formulários do Colab (`#@param`), que o app preenche. A primeira linha de cada célula é `# N) TÍTULO` (e `[só no navegador]` quando for o caso): o app e o `laika_colab.py` dependem disso. |
+| `data_utils.py` | Tokens especiais, limpeza do Gutenberg, leitura dos arquivos de QA, exemplos sintéticos, resumo extrativo, limpeza da Wikipédia e geração de "O que é X?", as perguntas de leitura da Wikipédia (`reading_examples`), o formato de conversa (`chat_turn`, `split_conversation`, `MAX_HISTORY`, `follows_up`: a mensagem começa com "e/mas/então/também", tem "isso/ele/ela/o mesmo/continue...", uma frase como "explique melhor" ou "não entendi", ou tem até 2 palavras sem assunto e não é cumprimento) e as funções do RAG: `content_words`, `wants_rag`, `request_topic` (assunto depois de "sobre", "a respeito de", "acerca de"), `question_name` (nome próprio mais longo), `rag_queries`, `rag_chunks`, `rag_question`, `fit_context`, `split_example`. |
+| `prepare_data.py` | `--carolina [taxonomias]` (Corpus Carolina v2, XML TEI de `carolina-c4ai/corpus-carolina`; padrão `dat,pub,soc,uni,wik`, sem `jud`/`leg`; pula os `wikis/pt/*`, que são a Wikipédia, e páginas de bastidores; um `carolina_*.txt` por arquivo) e `--gigaverbo N` (N tokens do `Polygl0t/gigaverbo-v2` `edu_high`, toxicidade ≤ 2, lido por grupos de linhas do parquet via HTTP com `fsspec`+`pyarrow`, um grupo de cada um dos 56 arquivos por rodada; `gigaverbo_AA_GG.txt`). Os dois separam documentos com `<|endoftext|>`, continuam de onde pararam (`.pronto`) e não entram no RAG. Baixa livros pt do catálogo CSV do Gutenberg (`--max-books 500`, grava `data/books/titulos.tsv`) e artigos da Wikipédia via Hugging Face `wikimedia/wikipedia` `20231101.pt` em streaming (`--wiki 100000`; `--wiki 1000000` ou `--wiki -1` = todos, ~1,1 milhão). O download continua de onde parou: cada `wiki_NNN.txt` completo fica registrado num `.pronto` (JSON), e aumentar o número só baixa o que falta. Mostra velocidade e tempo estimado. |
+| `colab.ipynb` | 7 células: (0) ligar o app ao Colab (**só no navegador**, uma vez: login `gcloud` com os escopos do Colab CLI e grava o segredo `COLAB_ADC` no GitHub), (1) preparar/Drive (define `rodar()`, que para a célula se o comando falhar; atalhos também para `data/carolina` e `data/gigaverbo`), (2) dados + índice RAG (`ARTIGOS`: 10 mil a 1 milhão ou todos; `CAROLINA`; `GIGAVERBO` de 500 milhões a 2 bilhões de tokens), (3) pré-treino (`MODO = "pular" / "continuar" / "do_zero"`, `PRESET` até `colab_100m`, `COMPILAR`; "continuar" retoma o `pretrain_last.pt`; sempre com `--tokens-backup {DRIVE}/tokens`), (4) fine-tuning (`PERGUNTAS_WIKIPEDIA`), (5) conversar (**só no navegador**), (6) exportar para o celular (`laika_pacote.zip`: modelo e, opcionalmente, índice e textos). Os campos são formulários do Colab (`#@param`), que o app preenche. A primeira linha de cada célula é `# N) TÍTULO` (e `[só no navegador]` quando for o caso): o app e o `laika_colab.py` dependem disso. |
 | `colab/laika_colab.py` | Orquestrador do **Colab CLI** (`google-colab-cli`), rodado pelo GitHub Actions: lê as células do notebook, aplica os parâmetros, liga a máquina (`colab new --gpu`), monta o Drive (repassando ao app o link de autorização, se vier), roda cada célula com `colab exec` (marca de fim + arquivo de estado na máquina, para sobreviver à queda da conexão), baixa o zip da célula 6 e desliga a máquina. Publica o andamento na verificação "Laika no Colab" (check run) que o app lê. Só biblioteca padrão. `python colab/laika_colab.py celulas` mostra as células em JSON. |
 | `colab/teste_laika_colab.py` | Testes do orquestrador com um `colab` falso (kernel Python persistente de verdade, queda de conexão, kernel que reinicia, autorização do Drive, GPU recusada, cancelamento) e uma API do GitHub falsa. `python colab/teste_laika_colab.py`. |
 | `.github/workflows/colab.yml` | Workflow disparado pelo app (`workflow_dispatch`: `celulas`, `gpu`, `parametros` em JSON, `pedido`). Uma execução por vez (`concurrency`), limite de 355 min, guarda o zip como artefato `laika_pacote` (14 dias) e sempre roda `colab stop` no fim. `sinal.yml`: o app avisa "Drive autorizado" disparando-o com `run-name = drive-ok-<id>`. |
 | `SUGESTOES.md` | Ideias de melhoria da LLM que **não** estão no plano da seção 9 (arquitetura, dados, fine-tuning, celular, processo). |
+| `TREINO_100M.md` | Todas as configurações do treino de 100M (dados, células, lote, passos, lr, tempo, unidades, espaço no Drive, ordem). |
 | `tools/gerar_pergeresp.py` | **Gera** `data/qa/pergeresp.txt`, `identidade.txt`, `leitura.txt`, `conversas.jsonl` (`conversas()`: capitais e temas em sequência, "E X?", "Do que estávamos falando?", nome lembrado, "Pode repetir?") e `data/modern/simples_*.txt` a partir das tabelas em `tools/dados_extra*.py`, `tools/leitura.py`, `tools/textos_simples*.py` e `tools/genericas_*.py`. |
+| `tools/longas1..7.py`, `porque1..4.py`, `simnao*.py` | **Respostas longas** (176 textos de 2 parágrafos, ~100–150 palavras, até 252 tokens com o tokenizer de 8 mil: explicações, passo a passo, comparações e histórias; `(assunto ou None, pergunta, texto)`, com 2–3 formas de pedir), **"por quê"** (~250, com outra forma de perguntar cada) e **sim ou não** (~300 à mão + `ANIMAIS`, `PLANETAS` e as tabelas de capitais, estados, línguas e livros, com uma pergunta certa e uma errada; primos, pares, tabuada, contas). `gerar_pergeresp.longas_sections` e `contas_explicadas` (150 contas com o passo a passo). |
 | `tools/genericas_*.py` | Perguntas **genéricas** (3333 exemplos). `genericas_temas1..5`: ~460 assuntos `(assunto com artigo, resposta curta, parágrafo)`, de onde saem "O que é X?", "Faça um texto sobre X." (e outras 11 formas), texto curto, "E X?", "Você sabe algo sobre X?", "Resuma em uma frase: <parágrafo>" e leitura com Contexto. `genericas_perguntas1..3` e `genericas_extra`: por quê, como fazer, o que fazer, diferenças, para que serve, como funciona, verdade ou mito, listas, pessoas, datas, opiniões (neutras em política e religião), conversa livre, curiosidades. `genericas_conversa`: mensagens incompletas, pedidos que dependem da mensagem anterior ("Por quê?", "Continue.": a Laika vê uma mensagem por vez e pergunta o assunto), identidade (vai para `identidade.txt`), limites, apoio (CVV 188, SAMU 192, 180, Disque 100) e escrita (poemas, histórias, mensagens). O gerador pula perguntas que já existem (mesmo texto, sem pontuação) e cria variações ("Me ensine a...", "Verdade ou mito:"...). |
 | `android/` | **App Android** (APK) que roda a Laika no celular, sem PyTorch: o transformer com KV cache, o tokenizer, o RAG e a memória reescritos em Java (`android/core`), conferidos contra o Python por `core/referencias.py` + `gradle :core:test`. Também liga as células do Colab pela tela **Treinar** (`ColabActivity`, seção 6c) e importa o `laika_pacote.zip`. `exportar_modelo.py` converte os checkpoints (pesos em float16) para `app/src/main/assets/` (fora do Git). Ver seção 6b e `android/LEIA-ME.md`. |
 | `windows/` | Scripts do pacote para Windows (`instalar.bat`, `conversar.bat`, `completar_texto.bat`, `instalar_indice.bat`, `rodar.py`, `LEIA-ME.txt`). Ver seção 6. |
@@ -71,6 +77,10 @@ Claude Code tiver PyTorch disponível, vale rodar um teste ponta a ponta com `--
 ## 4. Formatos
 
 - Tokens especiais: `[PAD] [UNK] <|user|> <|assistant|> <|end|> <|endoftext|>`.
+- Pesos do app: `LAIKA001` (posições aprendidas) ou `LAIKA002` (RoPE: sem `pos_emb`, cabeçalho com o theta em float32);
+  o `exportar_modelo.py` e o `ConversorPt` geram os mesmos bytes.
+- `data/carolina/*.txt` e `data/gigaverbo/*.txt`: documentos separados por uma linha `<|endoftext|>` (o tokenizer lê
+  como o token de fim de texto).
 - Exemplo de chat: `<|user|> pergunta <|assistant|> resposta <|end|>`. Nos arquivos `.txt`:
   `<|user|> pergunta` (quebra de linha) `<|assistant|> resposta <|end|>`, linha em branco entre exemplos;
   linhas com `#` antes do `<|user|>` são comentários. A resposta pode ter quebras de linha (poemas, diálogos);
@@ -100,6 +110,10 @@ python chat.py
 
 # Regenerar exemplos escritos
 python tools/gerar_pergeresp.py
+
+# Modelo de 100M (A100): ver TREINO_100M.md
+python prepare_data.py --max-books 500 --wiki -1 --carolina --gigaverbo 1.5e9
+python train.py --preset colab_100m --compile --tokens-backup /content/drive/MyDrive/LLM_Laika/tokens
 
 # Modelo de 50M (Colab): muitos dados e tokenizer novo
 python prepare_data.py --wiki 1000000        # ou --wiki -1 (todos); se cair, rode de novo que continua
@@ -136,6 +150,11 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
 - `app/`: telas de chat, versões e Colab (Views, sem Compose), `Motor` com uma thread de fundo. SQLite próprio
   (`androidx.sqlite:sqlite-bundled`, tem FTS5). O índice pequeno (`laika_rag_mini.db`) vai no APK; o
   `laika_rag.db` completo é importado pelo menu (não cabe no APK). minSdk 26, targetSdk 35.
+- `Modelo` lê `LAIKA001` e `LAIKA002` (RoPE: tabelas cos/sin em float32 como o `rope_tables`); acima de 60M de
+  parâmetros (`LIMITE_COMPACTO`) guarda as matrizes em float16 (`short[]` + tabela de 65536 floats, mesma soma, logits
+  idênticos) e o `Cache` cresce dobrando até o `block` (2048 × 12 camadas reservado de uma vez seriam ~150 MB).
+  `RopeTest` confere com um checkpoint `tiny_rope` (`referencias.py --rope <pt>`). O limite da barrinha de tamanho
+  depende da janela (`Motor.tamanhoMaximo`: 120 / 200 / 400).
 - Conversa no processador (com 7M parâmetros é mais rápido, ~5 ms/token no PC). O de 50M foi conferido no PC
   (logits iguais ao PyTorch, diferença 1,6e-6; ~35–40 ms/token; ~260 MB de memória com pesos em float32). O `Motor`
   mantém um modelo grande por vez (`grande()`: > 20 M de parâmetros nas camadas): ao trocar entre conversar e
@@ -156,6 +175,8 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
   barrinhas de temperatura (0,10–1,50, passo 0,01, com − e +) e tamanho (16–120 tokens), e os itens memória, versões,
   **Treinar** e limpar. Sem leitura em voz alta, sem "Sobre" e sem compartilhar a conversa. O teclado não abre ao
   entrar (`stateHidden`). Pontinhos de "digitando", a tela só acompanha a resposta se estiver no fim (botão ↓).
+  As ações da bolha (tocar ou segurar) são o `AcoesBolha`: barra flutuante com ícones acima da bolha (Copiar; Editar
+  nas do usuário; Trecho lido e Gerar outra nas da Laika), sem compartilhar nem selecionar texto (1.5).
   O `Motor.historicoAte()` monta as trocas (pula avisos, erros, respostas interrompidas e o modo completar, que fica
   marcado na conversa salva como `"x"`); "Gerar outra resposta" usa o histórico de antes da pergunta.
 - **O treino no celular (GPU) foi retirado** na versão 1.2 do app, a pedido do usuário; o treino fica no Colab,
@@ -224,18 +245,30 @@ app (tela Colab) --API do GitHub--> workflow colab.yml (runner Linux) --Colab CL
     trecho (padrões "nasceu em", "fica em", "fundada em", "inventou"...), mais 10% de trechos errados com "não sei".
 16. **Tamanho da resposta**: a barrinha vai até 120 (mais que isso tira espaço do histórico na janela de 256); acima de
     60 tokens o `<|end|>` é penalizado no começo (3,0 decaindo até zero na metade do que passa de 60).
+17. **Memória de IA só em seguimento** (1.5): com o histórico em toda pergunta, o modelo repetia a resposta anterior
+    em perguntas sem relação. `follows_up` decide (Python e Java, `Texto.segueConversa`); o fine-tuning continua
+    misturando históricos sem relação (`--history-share`), o que ensina a ignorá-los.
+18. **100M com RoPE e contexto 2048** (pedido do usuário): posições aprendidas de 2048 seriam 1,6M de parâmetros que
+    aprendem devagar; o RoPE não tem parâmetros. Os presets antigos continuam com `pos_emb` (checkpoints compatíveis).
+19. **GigaVerbo por grupos de linhas, de todos os arquivos**: cada parquet do `edu_high` vem de uma fonte (o primeiro é
+    todo `mc4_pt`), então pegar os 3 primeiros arquivos inteiros daria só 3 fontes. O Carolina vai sem leis e decisões
+    judiciais por padrão (~45% do corpus, estilo muito formal) e sem a Wikipédia que vem dentro dele.
+20. **Respostas longas de até ~150 palavras**: cabem na janela de 256 do 7M (a maior tem 252 tokens), então servem a
+    todos os modelos; com 2048 tokens, a barrinha do app vai até 400.
 
 ## 8. Limitações conhecidas
 
-- **Sem cache de atenção** no `generate()`: aceitável com 7M/256 (alguns segundos por resposta), inviável para modelos maiores.
+- O de 100M nunca foi treinado de verdade (só o `tiny_rope` em CPU); tempo e unidades do `TREINO_100M.md` são estimativas.
+- 100M no celular: ~210 MB de pesos em float16 e bem mais lento (prompt longo com RAG e histórico pode levar dezenas de segundos).
 - O `--resume` continua do `pretrain_last.pt` só se o preset e o tokenizer forem os mesmos; trocar de preset exige `do_zero`.
-- **Posições aprendidas** limitadas a `block_size`: mudar o contexto exige refazer o pré-treino.
-- Sem `torch.compile` (a acumulação de gradiente, o bf16 e o TF32 já existem).
+- **Posições aprendidas** (presets até 50M) limitadas a `block_size`: mudar o contexto exige refazer o pré-treino. O RoPE
+  (100M) também foi treinado só até 2048.
+- GigaVerbo e Carolina têm licenças por fonte (texto da web no GigaVerbo, inclusive notícias): só pré-treino, nunca no RAG.
 - O tokenizer foi treinado com muito português antigo do Gutenberg ("chronica", "portuguez").
 - O resumo sintético é **extrativo** (escolhe a frase mais representativa), não um resumo de verdade.
 - Com 1 milhão de artigos, o índice RAG passa de ~4 GB (o de 100 mil tem 636 MB): o celular importa se houver
   espaço (~1,3× o arquivo), mas demora; para o app, o índice de 100 mil artigos costuma bastar.
-- O `finetuned.pt` é sobrescrito sem backup.
+- O `finetuned.pt` é sobrescrito, mas o anterior vai para `checkpoints/backups/` (os 3 últimos).
 - Memória baseada em expressões regulares (frases fora dos padrões não são guardadas).
 - Memória de IA limitada pela janela: com 256 tokens, uma pergunta com RAG quase não deixa espaço para o histórico.
   Os checkpoints treinados antes da 1.4 nunca viram históricos: é preciso refazer o fine-tuning (célula 4).
@@ -255,25 +288,26 @@ provavelmente, 2 TB no Drive; o Colab CLI permite rodar scripts sem o navegador)
 opcional: ~30M, contexto 1024, ~600M tokens.
 
 ### Fase 0 — Infraestrutura (fazer antes de gastar unidades)
-- [ ] Cache de atenção (KV cache) no modelo e no `generate()`; manter a saída idêntica à versão sem cache.
+- [x] Cache de atenção (KV cache) no modelo e no `generate()`; saída idêntica à versão sem cache (conferido).
 - [x] Retomada completa: `pretrain_last.pt` com otimizador, scaler, step e geradores aleatórios; `--resume` continua de onde parou.
 - [x] Acumulação de gradiente (`accum` no preset).
-- [x] bf16 na A100 (`torch.cuda.is_bf16_supported()`) e TF32. Falta o `torch.compile` opcional.
+- [x] bf16 na A100 (`torch.cuda.is_bf16_supported()`), TF32 e `--compile`.
 - [x] Tokens pré-processados em disco (`uint16` com `np.memmap`, em `data/tokens/`).
-- [ ] Backup automático do `finetuned.pt` com data e hora.
+- [x] Backup automático do `finetuned.pt` com data e hora (`checkpoints/backups/`).
 - [ ] Script de avaliação: perplexidade em um conjunto fixo e um banco de ~50 perguntas com respostas esperadas (identidade, fatos, resumo, leitura, conversa), para comparar versões.
 
 ### Fase 1 — Dados
 - [~] Wikipédia inteira (~1,1 milhão de artigos; ~200–400 M tokens): o `prepare_data.py --wiki -1` já baixa tudo,
   continuando de onde parou (célula 2: `ARTIGOS = "todos"`, sem GPU). Falta medir o tempo e o tamanho reais.
 - [ ] Wikisource em português (dumps) e os livros do Gutenberg (só ~650 em português existem lá).
-- [ ] **GigaVerbo-v2** (`Polygl0t/gigaverbo-v2` no Hugging Face, ~318 bilhões de tokens em português, licença permissiva, com anotações de qualidade educacional e toxicidade): usar só um subconjunto filtrado (~2 bilhões de tokens), em streaming.
-- [ ] Retreinar o tokenizer (~24 mil) com uma amostra equilibrada (português moderno majoritário).
+- [x] **GigaVerbo-v2** (`Polygl0t/gigaverbo-v2`, ~320 bilhões de tokens, sem licença única): `prepare_data.py --gigaverbo`, só `edu_high` e toxicidade ≤ 2.
+- [x] **Corpus Carolina** (`--carolina`, sem leis/judiciário por padrão).
+- [x] Retreinar o tokenizer (~24 mil) com uma amostra equilibrada (`tokenizer_mb`, dividida entre as pastas).
 - [ ] Remover duplicatas e textos curtos demais.
 
 ### Fase 2 — Pré-treino
-- [ ] Preset `colab_100m` (e `colab_30m`), RoPE, contexto 2048. Já existe o `colab_50m` (posições aprendidas,
-  contexto 512), que roda no app sem mudar o `Modelo.java`.
+- [x] Preset `colab_100m`, RoPE, contexto 2048 (Python, exportador, `ConversorPt` e `Modelo.java`). Falta treinar de
+  verdade e, se quiser, um `colab_30m` intermediário.
 - [ ] Estimativa na A100: ~8,5 h para 2 bilhões de tokens com contexto 2048 (~45 a 125 unidades, pois o consumo da A100 varia de 5,4 a 15 unidades por hora conforme a fonte). Com 1024: ~7 h.
 - [ ] Opcional: fase curta de extensão para 8k (~5% dos tokens, ~1 h), só como experimento. 16k/32k não compensam para este tamanho (custo de 4 a 7 vezes e o modelo não aproveita).
 
@@ -289,7 +323,7 @@ opcional: ~30M, contexto 1024, ~600M tokens.
 - [ ] Opcional: busca por embeddings como segunda etapa de ordenação.
 
 ### Fase 5 — Windows
-- [ ] KV cache obrigatório; opcional salvar pesos em fp16 para o arquivo ficar menor.
+- [x] KV cache no `chat.py`. Opcional: salvar pesos em fp16 para o arquivo ficar menor.
 - [ ] Tempo estimado por mensagem no processador (4–8 núcleos), com cache: 100M ~3–6 s numa pergunta com RAG, ~6–12 s com ~2000 tokens de prompt. Sem cache seria de dezenas de segundos a minutos.
 - [ ] Atualizar o pacote e o LEIA-ME.
 

@@ -8,9 +8,9 @@ com busca nos textos (RAG) e memória do usuário.
 ## No celular (Android)
 
 A pasta `android/` tem um app que roda a Laika no celular, sem internet (RAG e memória incluídos).
-Pela tela **Colab** do app dá para ligar as células do treino no Colab sem deixar o Colab aberto
+Pela tela **Treinar** do app dá para ligar as células do treino no Colab sem deixar o Colab aberto
 (GitHub Actions + [Colab CLI](https://github.com/googlecolab/google-colab-cli)) e baixar o modelo novo.
-Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Colab e gerar o APK de novo.
+Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Treinar e gerar o APK de novo.
 
 ## Como rodar (Google Colab)
 
@@ -26,6 +26,7 @@ Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Colab e gerar o
 | Só conversar | 1, 5 |
 | Levar o modelo para o celular | 1, 6 |
 | Modelo maior (~50M; precisa de mais dados) | 1; 2 com `ARTIGOS = "1 milhão"`; 3 com `PRESET = "colab_50m"` e `MODO = "do_zero"`; 4 |
+| **Modelo de 100M** (contexto 2048, A100) | 1; 2 com `ARTIGOS = "todos"`, `CAROLINA` e `GIGAVERBO = 1,5 bilhão`; 3 com `PRESET = "colab_100m"`; 4; 6. Ver **`TREINO_100M.md`** |
 | Ligar as células pelo app, sem deixar o Colab aberto | 0 (uma vez só) |
 
 As células são: (0) ligar o app ao Colab, (1) preparar, (2) dados, (3) pré-treino, (4) fine-tuning,
@@ -43,19 +44,20 @@ parou, ou continua o terminado com os dados atuais) ou `"do_zero"`. A célula 2 
 
 | Arquivo | Para quê |
 |---|---|
-| `prepare_data.py` | Baixa 500 livros do Project Gutenberg (`data/books/`) e artigos da Wikipédia em português (`--wiki 100000`, `1000000` ou `-1` para todos; continua de onde parou) em `data/wiki/`, com perguntas "O que é X?" em `data/qa_auto/` |
+| `prepare_data.py` | Baixa 500 livros do Project Gutenberg (`data/books/`) e artigos da Wikipédia em português (`--wiki 100000`, `1000000` ou `-1` para todos; continua de onde parou) em `data/wiki/`, com perguntas "O que é X?" em `data/qa_auto/`. Para os modelos grandes: Corpus Carolina (`--carolina`, em `data/carolina/`) e GigaVerbo-v2 (`--gigaverbo 1.5e9` tokens, em `data/gigaverbo/`), só para o pré-treino |
 | `rag.py` | Índice de busca (SQLite FTS5) nos artigos, livros e textos modernos: `python rag.py build` |
 | `memory.py` | Memória do usuário (nome, cidade, gostos, "lembre que...") em `checkpoints/memoria.json` |
-| `train.py` | Pré-treino com validação, early stopping, tokens em disco (`data/tokens/`), acumulação de gradiente, bf16 e retomada (`--resume`) |
+| `train.py` | Pré-treino com validação, early stopping, tokens em disco (`data/tokens/`, com cópia opcional no Drive: `--tokens-backup`), tokenizer treinado numa amostra (`--tokenizer-mb`), acumulação de gradiente (`--accum`), bf16, `--compile` e retomada (`--resume`) |
 | `finetune.py` | Fine-tuning pergunta→resposta (loss só na resposta); não sobrescreve o pré-treino |
-| `chat.py` | Conversa com RAG e memória; `--base` completa texto com o modelo só pré-treinado |
-| `model.py` / `config.py` | Arquitetura e presets (`tiny` para CPU; `colab` ~7M, `colab_big` ~14M e `colab_50m` ~52M para GPU) |
+| `chat.py` | Conversa com RAG, memória e cache de atenção; `--base` completa texto com o modelo só pré-treinado |
+| `model.py` / `config.py` | Arquitetura (posições aprendidas ou RoPE) e presets (`tiny` e `tiny_rope` para CPU; `colab` ~7M, `colab_big` ~14M, `colab_50m` ~52M e `colab_100m` ~104M com contexto 2048 para GPU) |
+| `TREINO_100M.md` | Todas as configurações do treino de 100M: dados, células, tempo, unidades e ordem |
 | `windows/` | Scripts do pacote para rodar no Windows (CPU): `instalar.bat`, `conversar.bat`, `rodar.py`... |
 | `CLAUDE.md` | Guia do projeto para o Claude Code: arquitetura, decisões, limitações e plano futuro |
 | `SUGESTOES.md` | Ideias para melhorar a LLM além do plano do `CLAUDE.md` |
 | `colab/laika_colab.py` | Roda células do `colab.ipynb` pelo Colab CLI (usado pelo workflow `.github/workflows/colab.yml`, que o app dispara) |
 | `data/modern/` | 130 textos em português moderno escritos para o projeto: 20 maiores e 110 simples (`simples_*.txt`); entram 3x no pré-treino |
-| `data/qa/pergeresp.txt` | ~7000 perguntas e respostas, ~3000 delas genéricas ("Faça um texto sobre X", "E X?", por quê, como, diferenças, conversa, poemas...) (gerado por `tools/gerar_pergeresp.py`) |
+| `data/qa/pergeresp.txt` | ~9000 perguntas e respostas: ~3000 genéricas ("Faça um texto sobre X", "E X?", por quê, como, diferenças, conversa, poemas...), 627 com respostas longas (2 parágrafos, passo a passo, histórias, contas explicadas), 438 de "por quê" e 975 de sim ou não (gerado por `tools/gerar_pergeresp.py`) |
 | `data/qa/leitura.txt` | ~510 perguntas de interpretação com "Contexto:", o mesmo formato do RAG |
 | `data/qa/identidade.txt` | ~110 perguntas sobre quem é a Laika e a origem do nome (peso extra no fine-tuning) |
 
@@ -106,6 +108,11 @@ Assim a Laika entende "E da Itália?", "Por quê?" ou "Resuma o que você disse"
 isso com `data/qa/conversas.jsonl` (~1.000 conversas escritas pelo gerador) e com ~30% dos exemplos
 ganhando de 1 a 4 trocas anteriores (`--history-share`). No `chat.py`, `/limpar` esquece o histórico e
 `--no-history` desliga. Com a janela de 256 tokens cabem poucas trocas; com 512, umas 5.
+
+O histórico só entra quando a mensagem depende da conversa (`data_utils.follows_up`): começa com "E",
+"Mas" ou "Então", tem palavras como "isso", "ele", "ela", "o mesmo", "continue", ou é bem curta e sem assunto
+próprio ("Por quê?", "Como assim?", "Explique melhor."). Numa pergunta que se basta, como "O que é um
+vulcão?", o histórico fica de fora: com ele, o modelo pequeno às vezes repetia a resposta anterior.
 
 ## O que esperar
 

@@ -442,7 +442,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         }
         LinearLayout atalhos = cartao(caixaCelulas);
         atalhos.addView(texto("Atalhos", 13, R.color.topo_sub, true));
-        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos);
+        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos), a4 = linha(atalhos);
         botao(a1, "Só fine-tuning", false, v -> marcar(4, 6));
         botao(a1, "Tudo do zero", false, v -> {
             valores.put("3.MODO", "do_zero");
@@ -460,6 +460,22 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         botao(a3, "Modelo de 50M", false, v -> {
             valores.put("3.MODO", "do_zero");
             valores.put("3.PRESET", "colab_50m");
+            gpu = "A100";
+            marcar(3, 4, 6);
+        });
+        // 100M (contexto 2048, RoPE): primeiro os dados (Wikipédia inteira, Carolina, GigaVerbo; sem GPU),
+        // depois o treino na A100. Se parar no limite de 6 h, rode "Modelo de 100M" de novo com MODO "continuar".
+        botao(a4, "Dados para 100M", false, v -> {
+            valores.put("2.ARTIGOS", "todos (~1,1 milhão)");
+            valores.put("2.CAROLINA", "true");
+            valores.put("2.GIGAVERBO", "1,5 bilhão de tokens");
+            gpu = "nenhuma";
+            marcar(2);
+        });
+        botao(a4, "Modelo de 100M", false, v -> {
+            valores.put("3.MODO", "do_zero");
+            valores.put("3.PRESET", "colab_100m");
+            valores.put("4.PERGUNTAS_WIKIPEDIA", "40000");
             gpu = "A100";
             marcar(3, 4, 6);
         });

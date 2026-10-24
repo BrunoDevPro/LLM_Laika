@@ -27,11 +27,12 @@ import torch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-MAGIC = b"LAIKA001"
+MAGIC = b"LAIKA001"       # posições aprendidas (pos_emb)
+MAGIC_ROPE = b"LAIKA002"  # RoPE: sem pos_emb; o cabeçalho ganha o theta (float32)
 
 
-def tensor_order(layers):
-    names = ["tok_emb.weight", "pos_emb.weight"]
+def tensor_order(layers, rope=False):
+    names = ["tok_emb.weight"] if rope else ["tok_emb.weight", "pos_emb.weight"]
     for i in range(layers):
         p = f"blocks.{i}."
         names += [p + "ln1.weight", p + "ln1.bias", p + "attn.qkv.weight", p + "attn.proj.weight",
@@ -45,11 +46,14 @@ def export_weights(ckpt_path, out_path):
     cfg, state = ckpt["config"], ckpt["model"]
     if not torch.equal(state["head.weight"], state["tok_emb.weight"]):
         raise SystemExit(f"{ckpt_path}: head.weight diferente de tok_emb.weight (o app espera pesos compartilhados)")
+    rope = bool(cfg.get("rope"))
     with open(out_path, "wb") as f:
-        f.write(MAGIC)
+        f.write(MAGIC_ROPE if rope else MAGIC)
         f.write(struct.pack("<5i", cfg["vocab_size"], cfg["block_size"], cfg["embed_size"],
                             cfg["heads"], cfg["layers"]))
-        for name in tensor_order(cfg["layers"]):
+        if rope:
+            f.write(struct.pack("<f", float(cfg.get("rope_theta", 10000.0))))
+        for name in tensor_order(cfg["layers"], rope):
             f.write(state[name].float().numpy().astype("<f2").tobytes())
         # Rodapé opcional (o app mostra na lista de versões): val loss, step e se é o modelo de chat.
         val = ckpt.get("val_loss")

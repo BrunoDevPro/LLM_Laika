@@ -447,6 +447,47 @@ def question_name(question):
     return name if content_words(name) else None
 
 
+# Palavras que só fazem sentido com a mensagem anterior ("isso", "ele", "o mesmo"...). Ficam de fora
+# "este/esta", que no celular muitas vezes é "está" sem acento.
+_FOLLOW_WORDS = set("""
+isso isto disso disto nisso nisto esse essa esses essas desse dessa desses dessas nesse nessa nesses nessas
+aquilo aquele aquela aqueles aquelas daquilo daquele daquela naquilo naquele naquela
+ele ela eles elas dele dela deles delas nele nela neles nelas
+mesmo mesma anterior disse falou falamos falando mencionou perguntei respondeu
+continue continua continuar prossiga repita repete repetir novamente
+""".split())
+_FOLLOW_STARTS = {"e", "mas", "entao", "tambem"}
+_FOLLOW_PHRASES = ["explique melhor", "explica melhor", "fale mais", "conte mais", "diga mais", "mais detalhes",
+                   "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer"]
+# Mensagens sociais curtas: não precisam do histórico (e com ele o modelo tende a repetir a resposta anterior).
+_SOCIAL = set("""
+oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal
+show otimo sim nao kkk kkkk haha blz
+""".split())
+
+
+def follows_up(question):
+    """A mensagem depende da conversa anterior? ("E da Itália?", "Por quê?", "Quem foi ele?").
+
+    A memória de IA só põe o histórico no prompt nesses casos: numa pergunta que se basta
+    ("O que é um vulcão?"), as trocas anteriores só atrapalhavam o modelo pequeno, que às
+    vezes repetia a resposta de antes.
+    """
+    words = [w.strip(_NAME_STRIP) for w in normalize(question).split()]
+    words = [w for w in words if w]
+    if not words:
+        return False
+    if words[0] in _FOLLOW_STARTS and not (len(words) > 1 and words[1] == "ai"):  # "E aí?" é cumprimento
+        return True
+    if any(w in _FOLLOW_WORDS for w in words):
+        return True
+    junto = " " + " ".join(words) + " "
+    if any(f" {f} " in junto for f in _FOLLOW_PHRASES):
+        return True
+    # Bem curta e sem assunto próprio: "Por quê?", "Como assim?", "Quando?", "Explique melhor."
+    return len(words) <= 2 and not content_words(question) and not all(w in _SOCIAL for w in words)
+
+
 def rag_queries(question):
     """O que procurar no RAG, em ordem: o assunto, nos pedidos "... sobre X"; senão, a pergunta inteira
     e, se ela não achar nada com confiança, só o nome próprio ("O que Santos Dumont inventou?")."""

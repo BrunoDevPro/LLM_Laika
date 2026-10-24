@@ -105,6 +105,8 @@ final class Motor {
     /** Limites das barrinhas do menu: temperatura e tamanho máximo da resposta (tokens; o chat.py usa 80). */
     static final double TEMP_MIN = 0.1, TEMP_MAX = 1.5;
     static final int TAMANHO_MIN = 16, TAMANHO_MAX = 120;
+    /** Janela do modelo de conversa em uso (para o limite da barrinha de tamanho). */
+    volatile int janela = 256;
 
     private final Context ctx;
     private final SharedPreferences prefs;
@@ -154,9 +156,17 @@ final class Motor {
         usarMemoria = prefs.getBoolean("memoria", true);
         usarHistorico = prefs.getBoolean("historico", true);
         temperatura = Math.max(TEMP_MIN, Math.min(TEMP_MAX, prefs.getFloat("temperatura", 0.7f)));
-        tamanhoResposta = Math.max(TAMANHO_MIN, Math.min(TAMANHO_MAX, prefs.getInt("tamanho", 80)));
+        tamanhoResposta = Math.max(TAMANHO_MIN, Math.min(400, prefs.getInt("tamanho", 80)));
         tarefa = "Carregando a Laika…";
         fundo.execute(this::iniciar);
+    }
+
+    /**
+     * Até 120 tokens com janela de 256 (o resto fica para a pergunta, o RAG e o histórico); 200 com 512 e 400 com
+     * 1024 ou mais (o modelo de 100M, com 2048), que têm espaço para respostas longas.
+     */
+    int tamanhoMaximo() {
+        return janela >= 1024 ? 400 : janela >= 512 ? 200 : TAMANHO_MAX;
     }
 
     void salvarOpcoes() {
@@ -371,6 +381,7 @@ final class Motor {
         }
         refChat = arqChat.ref;
         chat = carregar(refChat);
+        janela = chat.modelo.block;
         Armazem.Arquivo b = v.arquivos.get(Armazem.BASE);
         refBase = b == null ? null : b.ref;
         temBase = b != null;
@@ -568,7 +579,7 @@ final class Motor {
         avisarEstado();
         final boolean completar = modoCompletar, fontes = mostrarFontes, comRag = usarRag, comMemoria = usarMemoria;
         final double temp = temperatura;
-        final int tamanho = tamanhoResposta;
+        final int tamanho = Math.min(tamanhoResposta, tamanhoMaximo());
         if (existente != null) existente.completar = completar;
         fundo.execute(() -> {
             Mensagem resp = existente;

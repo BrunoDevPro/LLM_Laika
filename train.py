@@ -1,7 +1,9 @@
-"""Pré-treinamento: aprende português a partir dos textos em data/books, data/wiki e data/modern."""
+"""Pré-treinamento: aprende português a partir dos textos em data/books, data/wiki e data/modern
+(e, para os modelos grandes, data/carolina e data/gigaverbo, baixados pelo prepare_data.py)."""
 
 import argparse
 import hashlib
+import shutil
 import json
 import math
 import os
@@ -20,18 +22,27 @@ from model import build_model
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--preset", default="tiny", choices=PRESETS.keys())
-parser.add_argument("--books", nargs="+", default=["data/books", "data/wiki", "data/modern"],
-                    help="pastas com .txt para o pré-treino")
+parser.add_argument("--books", nargs="+",
+                    default=["data/books", "data/wiki", "data/modern", "data/carolina", "data/gigaverbo"],
+                    help="pastas com .txt para o pré-treino (as que não existirem são ignoradas)")
 parser.add_argument("--modern-repeat", type=int, default=3,
                     help="quantas vezes os textos de data/modern entram no treino (são poucos e modernos)")
 parser.add_argument("--qa", default="data/qa")
 parser.add_argument("--out", default="checkpoints")
 parser.add_argument("--max-steps", type=int, default=None)
 parser.add_argument("--batch-size", type=int, default=None, help="troca o lote do preset (testes rápidos)")
+parser.add_argument("--accum", type=int, default=None,
+                    help="troca a acumulação de gradiente (ex.: faltou memória na GPU: --batch-size 8 --accum 16)")
+parser.add_argument("--tokenizer-mb", type=float, default=None,
+                    help="treina o tokenizer numa amostra de N MB, equilibrada entre as pastas (0 = todos os textos)")
+parser.add_argument("--compile", action="store_true", help="usa torch.compile (GPU; mais rápido depois de compilar)")
 parser.add_argument("--eval-iters", type=int, default=None, help="troca o nº de lotes da validação")
 parser.add_argument("--eval-every", type=int, default=None, help="troca de quantos em quantos passos validar")
 parser.add_argument("--tokens-dir", default="data/tokens",
                     help="onde guardar os textos já tokenizados (uint16 em disco, lidos com memmap)")
+parser.add_argument("--tokens-backup", default=None,
+                    help="pasta (ex.: no Drive) para guardar uma cópia dos tokens: numa máquina nova, copiar de "
+                         "volta é mais rápido do que tokenizar bilhões de tokens de novo")
 parser.add_argument("--resume", action="store_true",
                     help="continua: retoma um treino interrompido (pretrain_last.pt) do ponto em que parou, "
                          "ou parte dos pesos do pretrain_best.pt com um agendamento novo")
@@ -41,10 +52,10 @@ cfg = dict(PRESETS[args.preset])
 cfg.setdefault("accum", 1)
 cfg["preset"] = args.preset
 for chave, valor in [("max_steps", args.max_steps), ("batch_size", args.batch_size), ("eval_iters", args.eval_iters),
-                     ("eval_every", args.eval_every)]:
+                     ("eval_every", args.eval_every), ("accum", args.accum)]:
     if valor:
         cfg[chave] = valor
-ARQUITETURA = ("vocab_size", "block_size", "embed_size", "heads", "layers")
+ARQUITETURA = ("vocab_size", "block_size", "embed_size", "heads", "layers", "rope")
 
 out_dir = Path(args.out)
 out_dir.mkdir(exist_ok=True)
@@ -65,6 +76,8 @@ print("Dispositivo:", device, "(bf16)" if bf16 else "(fp16)" if use_cuda else ""
 book_files = []
 for folder in args.books:
     found = sorted(Path(folder).glob("*.txt"))
+    if not found and folder in ("data/carolina", "data/gigaverbo"):
+        continue  # só existem se o prepare_data.py baixou
     size = sum(f.stat().st_size for f in found) / 1e6
     print(f"{folder}: {len(found)} arquivos ({size:.1f} MB)")
     book_files.extend(found)
@@ -73,6 +86,34 @@ if not book_files:
 
 
 # ---------- Tokenizer ----------
+def amostra_tokenizer(files, mb, pasta):
+    """Uma amostra de ~mb MB para treinar o tokenizer, dividida igualmente entre as pastas (a que tem menos
+    texto entra inteira e o que sobra vai para as outras). Com 8 GB de texto, treinar o BPE em tudo gastaria
+    dezenas de GB de RAM; e assim o português antigo dos livros não domina o vocabulário."""
+    pasta.mkdir(parents=True, exist_ok=True)
+    por_pasta = {}
+    for f in files:
+        por_pasta.setdefault(f.parent, []).append(f)
+    tamanhos = {d: sum(f.stat().st_size for f in fs) for d, fs in por_pasta.items()}
+    restante, faltam, saida = mb * 1e6, len(por_pasta), []
+    for d in sorted(por_pasta, key=tamanhos.get):
+        cota = min(tamanhos[d], restante / faltam)
+        restante -= cota
+        faltam -= 1
+        por_arquivo = cota / len(por_pasta[d])
+        destino = pasta / f"{d.name}.txt"
+        with open(destino, "w", encoding="utf-8") as out:
+            for f in por_pasta[d]:
+                with open(f, encoding="utf-8", errors="ignore") as g:
+                    texto = g.read(int(por_arquivo) + 1)
+                if len(texto) > por_arquivo:
+                    texto = texto[:texto.rfind("\n\n") if "\n\n" in texto else len(texto)]
+                out.write(texto.replace(EOT_TOKEN, "") + "\n\n")
+        saida.append(destino)
+        print(f"  amostra do tokenizer: {d} {cota / 1e6:,.0f} MB")
+    return saida
+
+
 if args.resume and tokenizer_path.exists():
     tokenizer = Tokenizer.from_file(str(tokenizer_path))
     print("Tokenizer carregado de", tokenizer_path)
@@ -86,7 +127,15 @@ else:
         initial_alphabet=pre_tokenizers.ByteLevel.alphabet(),
     )
     qa_files = sorted(Path(args.qa).glob("*.txt")) if Path(args.qa).exists() else []
-    tokenizer.train([str(p) for p in book_files + qa_files], trainer)
+    amostra_mb = args.tokenizer_mb if args.tokenizer_mb is not None else cfg.get("tokenizer_mb", 0)
+    total_mb = sum(f.stat().st_size for f in book_files) / 1e6
+    if amostra_mb and total_mb > amostra_mb:
+        pasta_amostra = out_dir / "_amostra_tokenizer"
+        arquivos = amostra_tokenizer(book_files, amostra_mb, pasta_amostra)
+        tokenizer.train([str(p) for p in arquivos + qa_files], trainer)
+        shutil.rmtree(pasta_amostra, ignore_errors=True)
+    else:
+        tokenizer.train([str(p) for p in book_files + qa_files], trainer)
     tokenizer.save(str(tokenizer_path))
     print("Tokenizer treinado e salvo em", tokenizer_path)
 
@@ -107,10 +156,44 @@ def assinatura(files):
     return h.hexdigest()[:16]
 
 
+def pedacos(texto, tamanho=1 << 20):
+    """Textos grandes em pedaços de ~1 MB, cortados no fim de um parágrafo."""
+    if len(texto) <= 8 << 20:
+        return [texto]
+    partes, ini = [], 0
+    while ini < len(texto):
+        fim = texto.find("\n\n", ini + tamanho)
+        fim = len(texto) if fim < 0 else fim + 2
+        partes.append(texto[ini:fim])
+        ini = fim
+    return partes
+
+
+def grupos_para_tokenizar(files, max_chars=32 << 20, max_arquivos=16):
+    """Junta arquivos em grupos de até 16 arquivos ou ~32 milhões de caracteres: (arquivos, textos, nº de pedaços)."""
+    grupo, textos, partes, chars = [], [], [], 0
+    for path in files:
+        p = pedacos(path.read_text(encoding="utf-8"))
+        grupo.append(path)
+        textos += p
+        partes.append(len(p))
+        chars += sum(len(t) for t in p)
+        if len(grupo) >= max_arquivos or chars >= max_chars:
+            yield grupo, textos, partes
+            grupo, textos, partes, chars = [], [], [], 0
+    if grupo:
+        yield grupo, textos, partes
+
+
 def tokenizar_para_disco(files, pasta):
     pasta.mkdir(parents=True, exist_ok=True)
     sig = assinatura(files)
     meta, treino, val = pasta / f"{sig}.json", pasta / f"{sig}_treino.bin", pasta / f"{sig}_val.bin"
+    copia = Path(args.tokens_backup) if args.tokens_backup else None
+    if not (meta.exists() and treino.exists() and val.exists()) and copia and (copia / meta.name).exists():
+        print(f"Copiando os tokens já calculados de {copia}...", flush=True)
+        for f in (treino, val, meta):  # o .json por último: só vale se os .bin chegaram inteiros
+            shutil.copy(copia / f.name, f)
     if meta.exists() and treino.exists() and val.exists():
         print(f"Tokens já calculados em {pasta} ({sig}).")
     else:
@@ -118,15 +201,18 @@ def tokenizar_para_disco(files, pasta):
             if not antigo.name.startswith(sig):
                 antigo.unlink()
         dtype = np.uint16 if tokenizer.get_vocab_size() <= 65535 else np.uint32
-        n_treino = n_val = 0
-        inicio = time.time()
+        n_treino = n_val = feitos = avisado = 0
+        inicio = ultimo_aviso = time.time()
         with open(treino, "wb") as ft, open(val, "wb") as fv:
-            for i in range(0, len(files), 16):
-                grupo = files[i:i + 16]
-                # encode_batch tokeniza os arquivos em paralelo; cada arquivo dá os mesmos tokens que antes
-                codigos = tokenizer.encode_batch([p.read_text(encoding="utf-8") for p in grupo])
-                for path, enc in zip(grupo, codigos):
-                    ids = np.array(enc.ids + [eot_id], dtype=dtype)
+            for grupo, textos, partes in grupos_para_tokenizar(files):
+                # encode_batch tokeniza em paralelo. Arquivos pequenos vão inteiros (os mesmos tokens de antes);
+                # os grandes (Carolina, GigaVerbo) vão em pedaços de ~1 MB, para não gastar dezenas de GB de RAM.
+                codigos = tokenizer.encode_batch(textos)
+                k = 0
+                for path, n_partes in zip(grupo, partes):
+                    ids = np.concatenate([np.asarray(enc.ids, dtype=dtype) for enc in codigos[k:k + n_partes]]
+                                         + [np.array([eot_id], dtype=dtype)])
+                    k += n_partes
                     cut = int(len(ids) * 0.95)
                     repeat = args.modern_repeat if path.parent.name == "modern" else 1
                     for _ in range(max(1, repeat)):
@@ -134,11 +220,20 @@ def tokenizar_para_disco(files, pasta):
                     fv.write(ids[cut:].tobytes())
                     n_treino += cut * max(1, repeat)
                     n_val += len(ids) - cut
-                feitos = min(i + 16, len(files))
-                if feitos % 160 < 16 or feitos == len(files):
+                feitos += len(grupo)
+                if feitos - avisado >= 160 or feitos == len(files) or time.time() - ultimo_aviso > 60:
+                    avisado, ultimo_aviso = feitos, time.time()
                     print(f"  tokenizados {feitos}/{len(files)} arquivos ({n_treino:,} tokens, "
                           f"{time.time() - inicio:.0f}s)", flush=True)
         meta.write_text(json.dumps({"treino": n_treino, "val": n_val, "dtype": np.dtype(dtype).name}))
+        if copia:
+            copia.mkdir(parents=True, exist_ok=True)
+            for antigo in copia.iterdir():
+                if not antigo.name.startswith(sig):
+                    antigo.unlink()
+            print(f"Guardando uma cópia dos tokens em {copia}...", flush=True)
+            for f in (treino, val, meta):
+                shutil.copy(f, copia / f.name)
     info = json.loads(meta.read_text())
     return (np.memmap(treino, dtype=info["dtype"], mode="r"), np.memmap(val, dtype=info["dtype"], mode="r"))
 
@@ -150,6 +245,8 @@ if len(val_data) < block * 10 or len(train_data) < block * 100:
 
 # Parâmetros vs. tokens: regra prática ~20 tokens de treino por parâmetro.
 model = build_model(cfg).to(device)
+# torch.compile: o modelo compilado só faz as contas; os pesos salvos são os do model (mesmos tensores).
+rodar_modelo = torch.compile(model) if args.compile and use_cuda else model
 n_params = model.num_params()
 tokens_por_passo = cfg["batch_size"] * cfg["accum"] * block
 print(f"Tokens: {len(train_data):,} | Parâmetros: {n_params:,} | "
@@ -159,7 +256,8 @@ print(f"Tokens: {len(train_data):,} | Parâmetros: {n_params:,} | "
 
 
 def mesma_arquitetura(config):
-    return all(config.get(k) == cfg[k] for k in ARQUITETURA)
+    return all(bool(config.get(k)) == bool(cfg.get(k)) if k == "rope" else config.get(k) == cfg.get(k)
+               for k in ARQUITETURA)
 
 
 def descrever(config):
@@ -183,7 +281,7 @@ def evaluate():
     for _ in range(cfg["eval_iters"]):
         x, y = get_batch(val_data)
         with torch.autocast(device_type=device, dtype=amp_dtype, enabled=use_cuda):
-            logits = model(x)
+            logits = rodar_modelo(x)
         losses.append(F.cross_entropy(logits.float().view(-1, logits.size(-1)), y.view(-1)).item())
     model.train()
     return sum(losses) / len(losses)
@@ -278,7 +376,7 @@ for step in range(start_step, cfg["max_steps"] + 1):
     for _ in range(cfg["accum"]):  # acumulação: o lote efetivo é batch_size × accum
         x, y = get_batch(train_data)
         with torch.autocast(device_type=device, dtype=amp_dtype, enabled=use_cuda):
-            logits = model(x)
+            logits = rodar_modelo(x)
         loss = F.cross_entropy(logits.float().view(-1, logits.size(-1)), y.view(-1)) / cfg["accum"]
         scaler.scale(loss).backward()
     scaler.unscale_(optimizer)

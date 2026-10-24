@@ -63,7 +63,8 @@ public final class Laika {
 
     /**
      * Como o build_prompt do chat.py. historico: trocas anteriores {pergunta, resposta}, da mais antiga
-     * para a mais nova ("memória de IA"); entram as mais recentes (até MAX_HISTORY) que couberem.
+     * para a mais nova ("memória de IA"); entram as mais recentes (até MAX_HISTORY) que couberem, e só se a
+     * pergunta depender da conversa (Texto.segueConversa).
      * bloco: a janela do modelo (parâmetro só para os testes compararem janelas diferentes).
      */
     public Prompt montarPrompt(String pergunta, IndiceRag rag, Memoria memoria, int maxNovos,
@@ -100,7 +101,7 @@ public final class Laika {
             }
         }
         List<String> turnos = new ArrayList<>();
-        if (historico != null) {
+        if (historico != null && Texto.segueConversa(pergunta)) {
             int ini = Math.max(0, historico.size() - Texto.MAX_HISTORY);
             for (int i = historico.size() - 1; i >= ini; i--) {
                 List<String> candidato = new ArrayList<>();

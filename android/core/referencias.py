@@ -1,6 +1,7 @@
 """Gera as respostas de referência do Python para os testes do core em Java.
 
     python android/core/referencias.py --checkpoints checkpoints --livro data/books/gutenberg_24455.txt
+    (opcional) --rope pasta/pretrain_best.pt   um checkpoint com RoPE (ex.: train.py --preset tiny_rope)
 
 Usa o código original (model.py, tokenizers, rag.py, memory.py, chat.build_prompt) e grava
 arquivos .jsonl em android/core/build/referencias/. Depois:  cd android && gradle :core:test
@@ -23,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 from tokenizers import Tokenizer  # noqa: E402
 
 from chat import build_prompt, end_penalty, min_answer_tokens  # noqa: E402
-from data_utils import content_words, question_name, rag_queries, wants_rag  # noqa: E402
+from data_utils import content_words, follows_up, question_name, rag_queries, wants_rag  # noqa: E402
 from memory import Memory  # noqa: E402
 from model import build_model  # noqa: E402
 from rag import RagIndex  # noqa: E402
@@ -43,6 +44,9 @@ PERGUNTAS = [
     "O que Santos Dumont inventou?", "Santos Dumont inventou o quê?", "Quando nasceu Machado de Assis?",
     "Onde fica Roma?", "Compare Brasil e Portugal", "Quem foi Dom Pedro II?", "Você conhece o Rio de Janeiro?",
     "Me fale de \"Santos Dumont\".", "Roma", "O vulcão Vesúvio fica em Nápoles?",
+    "E da Itália?", "Por quê?", "Quem foi ele?", "Continue.", "Explique melhor.", "E o Brasil?", "O que ela fez?",
+    "Obrigado!", "E aí, tudo bem?", "Não entendi", "Como esta o tempo?", "Resuma isso.",
+    "O que havia antes do Big Bang?", "O Sol é uma estrela?", "Explique passo a passo: quanto é 23 × 4?",
 ]
 
 # Conversas anteriores para a "memória de IA" (histórico no prompt).
@@ -98,17 +102,47 @@ def modelo_fp16(path):
     return model
 
 
+def referencias_rope(pt, out):
+    """Modelo com RoPE: pesos no formato LAIKA002, o .pt (para o ConversorPt) e logits/geração gulosa."""
+    import shutil
+    sys.path.insert(0, str(ROOT / "android"))
+    from exportar_modelo import export_weights
+    pasta = out / "rope"
+    pasta.mkdir(parents=True, exist_ok=True)
+    export_weights(Path(pt), pasta / "rope.bin")
+    shutil.copy(pt, pasta / "modelo.pt")
+    model = modelo_fp16(pt)
+    block, vocab = model.block_size, model.tok_emb.num_embeddings
+    rng = random.Random(3)
+    casos = []
+    for n in (1, 7, 60, 200, 250):
+        ids = [rng.randrange(6, vocab) for _ in range(n)]
+        with torch.no_grad():
+            logits = model(torch.tensor([ids]))[0, -1].float()
+            seq = list(ids)
+            for _ in range(20):  # gulosa sem cache; com 250 tokens passa da janela de 256
+                seq.append(int(model(torch.tensor([seq[-block:]]))[0, -1].argmax()))
+        casos.append({"ids": ids, "logits": logits.numpy().round(5).tolist(), "guloso": seq[n:]})
+    with open(pasta / "rope.jsonl", "w", encoding="utf-8") as f:
+        for c in casos:
+            f.write(json.dumps(c) + "\n")
+    print(f"rope.jsonl: {len(casos)} casos (bloco {block})")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoints", default="checkpoints")
     parser.add_argument("--livro", default=None, help="um livro .txt para testar o tokenizer")
     parser.add_argument("--rag-db", default=str(ROOT / "android/app/src/main/assets/laika_rag_mini.db"))
     parser.add_argument("--out", default=str(Path(__file__).resolve().parent / "build/referencias"))
+    parser.add_argument("--rope", default=None, help="checkpoint .pt de um modelo com RoPE (preset tiny_rope)")
     args = parser.parse_args()
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     ck = Path(args.checkpoints)
+    if args.rope:
+        referencias_rope(args.rope, out)
     tok = Tokenizer.from_file(str(ck / "tokenizer.json"))
 
     def gravar(nome, linhas):
@@ -154,7 +188,7 @@ def main():
         best = rag.best(p)
         contextos = {str(k): [[h["title"], h["text"]] for h in rag.contexts(p, k)] for k in (1, 2, 3)}
         linhas.append({"pergunta": p, "palavras": content_words(p), "quer_rag": wants_rag(p), "top": top,
-                       "melhor": best["title"] if best else None, "nome": question_name(p),
+                       "melhor": best["title"] if best else None, "nome": question_name(p), "segue": follows_up(p),
                        "consultas": rag_queries(p), "contextos": contextos})
     gravar("rag.jsonl", linhas)
 

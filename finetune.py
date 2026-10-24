@@ -26,6 +26,8 @@ import argparse
 import json
 import math
 import random
+import shutil
+import time
 from pathlib import Path
 
 import numpy as np
@@ -69,6 +71,7 @@ parser.add_argument("--lr", type=float, default=None,
                     help="taxa de aprendizado (o tamanho do passo de cada ajuste dos pesos); "
                          "padrão: 5e-5 até 20M de parâmetros e 1e-4 nos modelos maiores")
 parser.add_argument("--batch-size", type=int, default=16)
+parser.add_argument("--no-backup", action="store_true", help="não guarda o finetuned.pt anterior em checkpoints/backups")
 parser.add_argument("--synthetic", type=int, default=10000,
                     help="nº de exemplos gerados dos livros (era 4000; subiu junto com os ~7,5 mil escritos à mão)")
 parser.add_argument("--qa-share", type=float, default=0.25, help="fração dos exemplos de chat vinda do pergeresp")
@@ -290,11 +293,15 @@ del parts
 n_replay = round(args.batch_size * args.replay / (1 - args.replay)) if args.replay > 0 else 0
 
 
+# Trechos de até 512 tokens: com o contexto de 2048 (100M), trechos da janela inteira só gastariam memória.
+replay_len = min(block, 512)
+
+
 def replay_items(n):
     if n == 0:
         return []
-    starts = torch.randint(0, len(stream) - block - 1, (n,)).tolist()
-    return [(stream[s:s + block].tolist(), stream[s + 1:s + block + 1].tolist()) for s in starts]
+    starts = torch.randint(0, len(stream) - replay_len - 1, (n,)).tolist()
+    return [(stream[s:s + replay_len].tolist(), stream[s + 1:s + replay_len + 1].tolist()) for s in starts]
 
 
 def make_batch(items):
@@ -308,10 +315,15 @@ def make_batch(items):
     return torch.tensor(xs, device=device), torch.tensor(ys, device=device)
 
 
+# bf16 na A100/L4 (metade da memória; o de 100M não caberia em float32 com o lote inteiro). Na T4, float32.
+amp = device == "cuda" and torch.cuda.is_bf16_supported()
+
+
 def batch_loss(items):
     x, y = make_batch(items)
-    logits = model(x)
-    return F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-100)
+    with torch.autocast(device_type=device, dtype=torch.bfloat16, enabled=amp):
+        logits = model(x)
+    return F.cross_entropy(logits.float().view(-1, logits.size(-1)), y.view(-1), ignore_index=-100)
 
 
 @torch.no_grad()
@@ -371,6 +383,15 @@ show_samples()
 
 best_val, bad_epochs, step = float("inf"), 0, 0
 best_path = out_dir / "finetuned.pt"
+# O finetuned.pt é sobrescrito a cada melhora: antes, guarda o anterior em checkpoints/backups/ (os 3 últimos).
+if best_path.exists() and not args.no_backup:
+    backups = out_dir / "backups"
+    backups.mkdir(exist_ok=True)
+    quando = time.strftime("%Y-%m-%d_%H%M", time.localtime(best_path.stat().st_mtime))
+    shutil.copy2(best_path, backups / f"finetuned_{quando}.pt")
+    for velho in sorted(backups.glob("finetuned_*.pt"))[:-3]:
+        velho.unlink()
+    print(f"Backup do finetuned.pt anterior: {backups / f'finetuned_{quando}.pt'}")
 model.train()
 
 for epoch in range(1, args.epochs + 1):

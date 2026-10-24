@@ -117,7 +117,7 @@ public final class Importador {
             }
             String papel = info.finetuned ? Armazem.CHAT : Armazem.BASE;
             colocar(r, papel, armazem.guardar(bin, "bin", nome, info.descricao()), nome);
-        } else if (cab.startsWith("LAIKA001")) {
+        } else if (cab.startsWith("LAIKA001") || cab.startsWith("LAIKA002")) {
             ConversorPt.Info info;
             try (InputStream in = new FileInputStream(e.arquivo)) {
                 info = ConversorPt.lerBin(in);

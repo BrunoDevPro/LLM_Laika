@@ -1,5 +1,7 @@
 """Gera data/qa/pergeresp.txt, identidade.txt, leitura.txt e conversas.jsonl (várias trocas).
 
+As respostas longas, os "por quê" e os sim ou não vêm de tools/longas*.py, porque*.py e simnao*.py.
+
 Rode:  python tools/gerar_pergeresp.py
 ATENÇÃO: sobrescreve esses dois arquivos. Para adicionar perguntas suas sem perder nada,
 crie outro arquivo em data/qa/ (por exemplo data/qa/meus_exemplos.txt).
@@ -32,6 +34,11 @@ import genericas_perguntas2 as GP2  # noqa: E402
 import genericas_perguntas3 as GP3  # noqa: E402
 import genericas_conversa as GC  # noqa: E402
 import genericas_extra as GE  # noqa: E402
+import longas1, longas2, longas3, longas4, longas5, longas6, longas7  # noqa: E402,E401
+import porque1, porque2, porque3, porque4  # noqa: E402,E401
+import simnao as SN  # noqa: E402
+import simnao2 as SN2  # noqa: E402
+import simnao3 as SN3  # noqa: E402
 
 TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
 QA_DIR = ROOT / "data" / "qa"
@@ -1409,6 +1416,186 @@ def conversas():
     return convs
 
 
+# =====================================================================
+# RESPOSTAS LONGAS, "POR QUÊ" E SIM OU NÃO (tools/longas*.py, porque*.py, simnao.py)
+# =====================================================================
+LONGAS = (longas1.LONGAS + longas2.LONGAS + longas3.LONGAS + longas4.LONGAS + longas5.LONGAS + longas6.LONGAS
+          + longas7.LONGAS)
+PORQUES = porque1.PORQUES + porque2.PORQUES + porque3.PORQUES + porque4.PORQUES
+PEDIDOS_LONGO = ["Escreva um texto longo sobre {}.", "Escreva um texto completo sobre {}.", "Fale bastante sobre {}.",
+                 "Me conte tudo o que você sabe sobre {}.", "Faça uma explicação detalhada sobre {}."]
+PEDIDOS_HISTORIA = ["Escreva uma história sobre {}.", "Invente uma história sobre {}.", "Me conte uma história sobre {}."]
+DETALHE = ["{} Explique com detalhes.", "{} Responda com detalhes.", "Explique com detalhes: {}",
+           "{} Quero uma resposta completa."]
+PASSO = ["Me explique o passo a passo: {}", "{} Explique com detalhes.", "Passo a passo, por favor: {}"]
+PORQUE_FORMAS = ["Você sabe {}?", "Explique {}.", "Me diga {}."]
+CONTINENTES = ["na Europa", "na Ásia", "na África", "na América do Sul", "na América do Norte", "na Oceania"]
+ARTIGO_PAIS = {"do": "o ", "da": "a ", "dos": "os ", "de": ""}
+
+
+def longas_sections(rng):
+    """Respostas longas (2 parágrafos), "por quê" e sim ou não."""
+    longas = []
+    for i, (assunto, pergunta, texto) in enumerate(LONGAS):
+        longas.append((pergunta, texto))
+        if assunto is None:
+            for k in range(2):
+                longas.append((PASSO[(i + k) % len(PASSO)].format(pergunta), texto))
+            continue
+        historia = re.match(r"(Conte|Escreva) uma história", pergunta)
+        formas = PEDIDOS_HISTORIA if historia else PEDIDOS_LONGO
+        longas.append((formas[i % len(formas)].format(assunto), texto))
+        if not historia:
+            longas.append((DETALHE[i % len(DETALHE)].format(pergunta), texto))
+
+    porques = []
+    for i, (pergunta, resposta) in enumerate(PORQUES):
+        porques.append((pergunta, resposta))
+        miolo = pergunta[0].lower() + pergunta[1:].rstrip("?")
+        porques.append((PORQUE_FORMAS[i % len(PORQUE_FORMAS)].format(miolo), resposta))
+
+    sim = list(SN.SIMNAO) + list(SN2.SIMNAO) + list(SN3.SIMNAO)
+    # Capitais e continentes: uma pergunta certa e uma errada de cada.
+    caps = CAPITAIS
+    for i, (pais, prep, capital, continente, _) in enumerate(caps):
+        outro = caps[(i * 7 + 3) % len(caps)]
+        if outro[2] == capital:
+            outro = caps[(i + 1) % len(caps)]
+        sim.append((f"A capital {prep} {pais} é {capital}?", f"Sim. A capital {prep} {pais} é {capital}."))
+        sim.append((f"A capital {prep} {pais} é {outro[2]}?",
+                    f"Não. A capital {prep} {pais} é {capital}. {outro[2]} é a capital {outro[1]} {outro[0]}."))
+        art = ARTIGO_PAIS[prep]
+        verbo = "ficam" if prep == "dos" else "fica"
+        nome = (art + pais)[0].upper() + (art + pais)[1:]
+        sim.append((f"{nome} {verbo} {continente}?", f"Sim. {nome} {verbo} {continente}."))
+        outros = [c for c in CONTINENTES if c not in continente]
+        errado = outros[i % len(outros)]
+        sim.append((f"{nome} {verbo} {errado}?", f"Não. {nome} {verbo} {continente}, e não {errado}."))
+    falam = [(c[0], c[1], c[4]) for c in caps if c[4]]
+    for i, (pais, prep, lingua) in enumerate(falam):
+        em = {"do": "No", "da": "Na", "dos": "Nos", "de": "Em"}[prep]
+        outra = next((l for _, _, l in falam[i + 1:] + falam[:i] if l != lingua), None)
+        sim.append((f"{em} {pais} se fala {lingua}?", f"Sim. {em} {pais} a língua oficial é o {lingua}."
+                    if lingua.islower() and " " not in lingua else f"Sim. {em} {pais} se fala {lingua}."))
+        if outra:
+            sim.append((f"{em} {pais} se fala {outra}?", f"Não. {em} {pais} se fala {lingua}."))
+    for i, (estado, prep, capital) in enumerate(ESTADOS):
+        outro = ESTADOS[(i * 5 + 2) % len(ESTADOS)]
+        if outro[2] == capital:
+            outro = ESTADOS[(i + 1) % len(ESTADOS)]
+        sim.append((f"A capital {prep} {estado} é {capital}?", f"Sim. A capital {prep} {estado} é {capital}."))
+        sim.append((f"A capital {prep} {estado} é {outro[2]}?",
+                    f"Não. A capital {prep} {estado} é {capital}. {outro[2]} é a capital {outro[1]} {outro[0]}."))
+    for i, (obra, autor) in enumerate(LIVROS):
+        outro = next(a for _, a in LIVROS[i + 1:] + LIVROS[:i] if a != autor)
+        sim.append((f"{obra} foi escrito por {autor}?", f"Sim. {obra} foi escrito por {autor}."))
+        sim.append((f"{obra} foi escrito por {outro}?", f"Não. {obra} foi escrito por {autor}, e não por {outro}."))
+    # Animais: a classe certa e uma com que costuma ser confundido.
+    for i, (animal, classe, motivo) in enumerate(SN.ANIMAIS):
+        nome = animal[0].upper() + animal[1:]
+        pron = "ela" if animal.startswith("a ") else "ele"
+        art = SN.ARTIGO_CLASSE[classe]
+        sim.append((f"{nome} é {art} {classe}?", f"Sim. {nome} é {art} {classe}: {pron} {motivo}."))
+        confusoes = SN.CONFUSOES[classe]
+        for k in range(min(2, len(confusoes))):  # até duas classes erradas por animal
+            errada = confusoes[(i + k) % len(confusoes)]
+            art2 = SN.ARTIGO_CLASSE[errada]
+            sim.append((f"{nome} é {art2} {errada}?",
+                        f"Não. {nome} é {art} {classe}, e não {art2} {errada}: {pron} {motivo}."))
+    for i, (planeta, pos, tipo, carac) in enumerate(SN.PLANETAS):
+        outro_tipo = "gasoso" if tipo == "rochoso" else "rochoso"
+        sim.append((f"{planeta} {carac}?", f"Sim. {planeta} {carac}."))
+        sim.append((f"{planeta} é um planeta {tipo}?", f"Sim. {planeta} é um planeta {tipo}."))
+        sim.append((f"{planeta} é um planeta {outro_tipo}?", f"Não. {planeta} é um planeta {tipo}, e não {outro_tipo}."))
+        if pos == 1:
+            sim.append((f"{planeta} é o planeta mais próximo do Sol?", f"Sim. {planeta} é o planeta mais próximo do Sol."))
+        else:
+            sim.append((f"{planeta} é o planeta mais próximo do Sol?",
+                        f"Não. O planeta mais próximo do Sol é Mercúrio. {planeta} é o {ORDINAIS[pos - 1]} planeta "
+                        f"a partir do Sol."))
+    # Contas, pares e ímpares, maior e menor.
+    for _ in range(60):
+        a, b = rng.randint(2, 30), rng.randint(2, 20)
+        op, r = rng.choice([("+", a + b), ("-", a - b), ("×", a * b)]) if a > b else ("+", a + b)
+        if op == "×":
+            a, b = rng.randint(2, 10), rng.randint(2, 10)
+            r = a * b
+        certo = rng.random() < 0.5
+        dado = r if certo else r + rng.choice([-3, -2, -1, 1, 2, 3])
+        sim.append((f"{a} {op} {b} é igual a {dado}?",
+                    f"Sim. {a} {op} {b} = {r}." if certo else f"Não. {a} {op} {b} = {r}, e não {dado}."))
+    for _ in range(50):  # tabuada
+        a, b = rng.randint(2, 10), rng.randint(2, 10)
+        dado = a * b if rng.random() < 0.5 else a * b + rng.choice([-2, -1, 1, 2, a, -b])
+        sim.append((f"{a} vezes {b} é {dado}?", f"Sim. {a} vezes {b} é {a * b}." if dado == a * b
+                    else f"Não. {a} vezes {b} é {a * b}, e não {dado}."))
+    for n in range(1, 41):
+        if n % 2 == 0:
+            sim.append((f"{n} é um número par?", f"Sim. {n} é par, porque pode ser dividido por 2 sem sobrar resto."))
+        else:
+            sim.append((f"{n} é um número par?", f"Não. {n} é ímpar: dividido por 2, sobra 1."))
+    for n in range(2, 51):
+        divisor = next((d for d in range(2, n) if n % d == 0), None)
+        if divisor is None:
+            sim.append((f"{n} é um número primo?", f"Sim. {n} é primo: só pode ser dividido por 1 e por ele mesmo."))
+        else:
+            sim.append((f"{n} é um número primo?",
+                        f"Não. {n} não é primo, porque também pode ser dividido por {divisor}: {n} ÷ {divisor} = "
+                        f"{n // divisor}."))
+    for _ in range(30):
+        a, b = rng.sample(range(1, 200), 2)
+        sim.append((f"{a} é maior que {b}?",
+                    f"Sim. {a} é maior que {b}." if a > b else f"Não. {a} é menor que {b}."))
+    return [("Respostas longas", longas + contas_explicadas(rng)), ("Por quê", porques), ("Sim ou não", sim)]
+
+
+def contas_explicadas(rng):
+    """Contas com o passo a passo (respostas mais longas, com o raciocínio)."""
+    pares, vistos = [], set()
+    while len(pares) < 150:
+        tipo = len(pares) % 3
+        if tipo == 0:  # multiplicação de dois algarismos por um
+            a, b = rng.randint(12, 99), rng.randint(2, 9)
+            if (a, b, "x") in vistos or a % 10 == 0:
+                continue
+            vistos.add((a, b, "x"))
+            d, u = a - a % 10, a % 10
+            q = rng.choice(["Explique passo a passo: quanto é {} × {}?", "Como calcular {} × {}? Explique.",
+                            "Me mostre como fazer a conta {} × {}."]).format(a, b)
+            r = (f"Para multiplicar {a} por {b}, dá para separar o {a} em {d} + {u}. Primeiro, {d} × {b} = {d * b}. "
+                 f"Depois, {u} × {b} = {u * b}. Por fim, somamos os dois resultados: {d * b} + {u * b} = {a * b}. "
+                 f"Então, {a} × {b} = {a * b}.")
+        elif tipo == 1:  # soma com "vai um"
+            a, b = rng.randint(15, 89), rng.randint(15, 89)
+            if (a, b, "+") in vistos or (a % 10) + (b % 10) < 10:
+                continue
+            vistos.add((a, b, "+"))
+            su = a % 10 + b % 10
+            q = rng.choice(["Explique passo a passo: quanto é {} + {}?", "Como somar {} + {}? Explique.",
+                            "Me ensine a fazer a conta {} + {}."]).format(a, b)
+            r = (f"Somamos primeiro as unidades: {a % 10} + {b % 10} = {su}. Escrevemos o {su % 10} e passamos 1 "
+                 f"para a casa das dezenas, o famoso vai um. Depois, somamos as dezenas: {a // 10} + {b // 10} + 1 = "
+                 f"{a // 10 + b // 10 + 1}. Juntando, o resultado é {a + b}. Então, {a} + {b} = {a + b}.")
+        else:  # divisão exata
+            b, r_ = rng.randint(2, 9), rng.randint(11, 30)
+            a = b * r_
+            if (a, b, "/") in vistos:
+                continue
+            vistos.add((a, b, "/"))
+            q = rng.choice(["Explique passo a passo: quanto é {} ÷ {}?", "Como dividir {} por {}? Explique.",
+                            "Me mostre como fazer a conta {} ÷ {}."]).format(a, b)
+            d = (a // (b * 10)) * b * 10
+            if d:
+                r = (f"Dividir {a} por {b} é descobrir quantas vezes o {b} cabe no {a}. Dá para separar o {a} em "
+                     f"{d} + {a - d}. {d} ÷ {b} = {d // b}, e {a - d} ÷ {b} = {(a - d) // b}. Somando, "
+                     f"{d // b} + {(a - d) // b} = {r_}. Então, {a} ÷ {b} = {r_}. Para conferir, {r_} × {b} = {a}.")
+            else:
+                r = (f"Dividir {a} por {b} é descobrir quantas vezes o {b} cabe no {a}. Como {r_} × {b} = {a}, o "
+                     f"resultado é {r_}. Então, {a} ÷ {b} = {r_}.")
+        pares.append((q, r))
+    return pares
+
+
 def _chave(question):
     return " ".join(re.sub(r"[^\w\s]", " ", question.lower()).split())
 
@@ -1524,6 +1711,7 @@ def build():
     vistas |= {_chave(q) for q, _ in novas_id}
     vistas |= {_chave(item.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0]) for _, items in sections for item in items}
     genericas, leitura_genericas = generic_sections()
+    genericas += longas_sections(rng)
     repetidas = 0
     for title, pares in genericas:
         novos = []

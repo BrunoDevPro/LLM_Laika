@@ -182,6 +182,39 @@ public final class Texto {
         return palavrasDeConteudo(r).isEmpty() ? null : r;
     }
 
+    private static final Set<String> SEGUE_PALAVRAS = conjunto(
+            "isso isto disso disto nisso nisto esse essa esses essas desse dessa desses dessas nesse nessa nesses nessas "
+            + "aquilo aquele aquela aqueles aquelas daquilo daquele daquela naquilo naquele naquela "
+            + "ele ela eles elas dele dela deles delas nele nela neles nelas "
+            + "mesmo mesma anterior disse falou falamos falando mencionou perguntei respondeu "
+            + "continue continua continuar prossiga repita repete repetir novamente");
+    private static final Set<String> SEGUE_INICIOS = conjunto("e mas entao tambem");
+    private static final String[] SEGUE_FRASES = {"explique melhor", "explica melhor", "fale mais", "conte mais",
+            "diga mais", "mais detalhes", "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer"};
+    private static final Set<String> SOCIAIS = conjunto(
+            "oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal "
+            + "show otimo sim nao kkk kkkk haha blz");
+
+    /**
+     * A mensagem depende da conversa anterior? (follows_up do data_utils.py). A memória de IA só põe o
+     * histórico no prompt nesses casos ("E da Itália?", "Por quê?", "Quem foi ele?").
+     */
+    public static boolean segueConversa(String pergunta) {
+        List<String> ws = new ArrayList<>();
+        for (String w : separar(normalizar(pergunta))) {
+            String limpa = tirarPontas(w, NOME_PONTAS);
+            if (!limpa.isEmpty()) ws.add(limpa);
+        }
+        if (ws.isEmpty()) return false;
+        if (SEGUE_INICIOS.contains(ws.get(0)) && !(ws.size() > 1 && ws.get(1).equals("ai"))) return true;
+        for (String w : ws) if (SEGUE_PALAVRAS.contains(w)) return true;
+        String junto = " " + String.join(" ", ws) + " ";
+        for (String f : SEGUE_FRASES) if (junto.contains(" " + f + " ")) return true;
+        if (ws.size() > 2 || !palavrasDeConteudo(pergunta).isEmpty()) return false;
+        for (String w : ws) if (!SOCIAIS.contains(w)) return true;
+        return false;
+    }
+
     /** O que procurar no RAG, em ordem (rag_queries): o assunto do pedido; senão a pergunta e o nome próprio. */
     public static List<String> consultasRag(String pergunta) {
         List<String> r = new ArrayList<>();

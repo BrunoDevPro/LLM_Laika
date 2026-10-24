@@ -18,13 +18,11 @@ import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -393,61 +391,36 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
 
     private void acoesDaBolha(Motor.Mensagem m, View ancora) {
         if (m.texto == null || m.texto.equals(Motor.DIGITANDO)) return;
-        PopupMenu pm = new PopupMenu(this, ancora);
-        Menu menu = pm.getMenu();
-        menu.add(0, 1, 0, "Copiar");
-        menu.add(0, 2, 0, "Compartilhar");
-        menu.add(0, 3, 0, "Selecionar parte do texto…");
-        if (m.usuario) {
-            menu.add(0, 4, 0, "Editar e enviar de novo");
-        } else {
-            if (m.trecho != null) menu.add(0, 6, 0, "Ver o trecho que a Laika leu");
-            if (!motor.gerando && motor.perguntaDe(m) != null) menu.add(0, 7, 0, "Gerar outra resposta");
-        }
         String completo = m.texto + (m.fonte != null ? " *" + m.fonte : "");
-        pm.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case 1:
-                    getSystemService(ClipboardManager.class).setPrimaryClip(ClipData.newPlainText("Laika", completo));
-                    Toast.makeText(this, "Copiado.", Toast.LENGTH_SHORT).show();
-                    break;
-                case 2:
-                    startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain")
-                            .putExtra(Intent.EXTRA_TEXT, completo), "Compartilhar"));
-                    break;
-                case 3: selecionar(completo); break;
-                case 4:
-                    entrada.setText(m.texto);
-                    entrada.setSelection(entrada.length());
-                    focarCampo();
-                    break;
-                case 6:
-                    new AlertDialog.Builder(this).setTitle(m.fonte != null ? "*" + m.fonte : "Trecho encontrado")
-                            .setMessage(m.trecho + "\n\n(A busca do RAG achou este trecho e ele entrou na pergunta "
-                                    + "como Contexto.)")
-                            .setPositiveButton("OK", null).show();
-                    break;
-                case 7:
-                    if (motor.ocupado() || !motor.pronto) Toast.makeText(this, "Espere a Laika ficar pronta.", Toast.LENGTH_SHORT).show();
-                    else motor.gerarDeNovo(m);
-                    break;
-                default: return false;
-            }
-            return true;
+        AcoesBolha acoes = new AcoesBolha(this).acao(R.drawable.ic_copiar, "Copiar", () -> {
+            getSystemService(ClipboardManager.class).setPrimaryClip(ClipData.newPlainText("Laika", completo));
+            Toast.makeText(this, "Copiado.", Toast.LENGTH_SHORT).show();
         });
-        pm.show();
-    }
-
-    private void selecionar(String texto) {
-        TextView t = new TextView(this);
-        t.setText(texto);
-        t.setTextSize(16);
-        t.setTextIsSelectable(true);
-        t.setTextColor(getColor(R.color.texto_laika));
-        t.setPadding(dp(22), dp(12), dp(22), dp(4));
-        ScrollView s = new ScrollView(this);
-        s.addView(t);
-        new AlertDialog.Builder(this).setView(s).setPositiveButton("OK", null).show();
+        if (m.usuario) {
+            acoes.acao(R.drawable.ic_editar, "Editar", () -> {
+                entrada.setText(m.texto);
+                entrada.setSelection(entrada.length());
+                focarCampo();
+            });
+        } else {
+            if (m.trecho != null) {
+                acoes.acao(R.drawable.ic_trecho, "Trecho lido", () ->
+                        new AlertDialog.Builder(this).setTitle(m.fonte != null ? "*" + m.fonte : "Trecho encontrado")
+                                .setMessage(m.trecho + "\n\n(A busca do RAG achou este trecho e ele entrou na "
+                                        + "pergunta como Contexto.)")
+                                .setPositiveButton("OK", null).show());
+            }
+            if (!motor.gerando && motor.perguntaDe(m) != null) {
+                acoes.acao(R.drawable.ic_gerar, "Gerar outra", () -> {
+                    if (motor.ocupado() || !motor.pronto) {
+                        Toast.makeText(this, "Espere a Laika ficar pronta.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        motor.gerarDeNovo(m);
+                    }
+                });
+            }
+        }
+        acoes.mostrar(ancora, m.usuario);
     }
 
     // ---------- estado ----------

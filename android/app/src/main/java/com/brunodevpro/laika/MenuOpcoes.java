@@ -86,8 +86,9 @@ final class MenuOpcoes {
                 (int) Math.round(motor.temperatura * 100),
                 v -> String.format(Locale.getDefault(), "%.2f", v / 100.0),
                 v -> motor.temperatura = v / 100.0);
-        barra(lista, "Tamanho das respostas", "curtas", "longas", Motor.TAMANHO_MIN, Motor.TAMANHO_MAX,
-                motor.tamanhoResposta, v -> "até " + v + " tokens", v -> motor.tamanhoResposta = v);
+        barra(lista, "Tamanho das respostas", "curtas", "longas", Motor.TAMANHO_MIN, motor.tamanhoMaximo(),
+                Math.min(motor.tamanhoResposta, motor.tamanhoMaximo()), v -> "até " + v + " tokens",
+                v -> motor.tamanhoResposta = v);
         TextView dica = texto("Com mais tokens, a Laika tenta escrever respostas mais longas (e sobra menos "
                 + "espaço para lembrar a conversa).", 11, R.color.aviso, false);
         dica.setPadding(dp(12), 0, dp(12), dp(6));

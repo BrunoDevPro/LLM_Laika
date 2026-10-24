@@ -20,7 +20,7 @@ from pathlib import Path
 import torch
 
 from data_utils import (USER_TOKEN, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, MAX_CONTEXT_WORDS,
-                        MAX_HISTORY, chat_turn, fit_context, rag_chunks, wants_rag)
+                        MAX_HISTORY, chat_turn, fit_context, follows_up, rag_chunks, wants_rag)
 from model import build_model
 
 
@@ -46,7 +46,8 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
     janela do modelo), ou se há anotações da memória ligadas à pergunta, a pergunta ganha um
     "Contexto:", no mesmo formato usado no fine-tuning, cortado para caber na janela.
     history: as trocas anteriores [(pergunta, resposta), ...], da mais antiga para a mais nova
-    ("memória de IA"). Entram as mais recentes (até MAX_HISTORY) que couberem depois da pergunta.
+    ("memória de IA"). Entram as mais recentes (até MAX_HISTORY) que couberem depois da pergunta,
+    e só se a pergunta depender da conversa (follows_up).
     """
     budget = block_size - max_new_tokens
 
@@ -72,7 +73,7 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
             current = f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN}"
 
     turns = []
-    for q, a in reversed(list(history or [])[-MAX_HISTORY:]):
+    for q, a in reversed(list(history or [])[-MAX_HISTORY:] if follows_up(question) else []):
         candidate = [chat_turn(q, a)] + turns
         if count(" ".join(candidate + [current])) > budget:
             break
@@ -107,10 +108,18 @@ def generate(model, tokenizer, prompt, device, max_new_tokens=80, temperature=0.
         banned.append(end_id)
     min_tokens = min_answer_tokens(max_new_tokens) if stop_at_end else 0
 
+    past, cached = None, 0
     for _ in range(max_new_tokens):
-        context = ids[-model.block_size:]
-        x = torch.tensor([context], dtype=torch.long, device=device)
-        logits = model(x)[0, -1].float()
+        # Cache de atenção: só os tokens novos passam pelo modelo. Passou da janela, as posições mudam:
+        # recalcula a janela inteira (o mesmo resultado de antes, sem cache).
+        if len(ids) <= model.block_size:
+            x = torch.tensor([ids[cached:]], dtype=torch.long, device=device)
+            logits, past = model.forward_cached(x, past)
+            cached = len(ids)
+        else:
+            x = torch.tensor([ids[-model.block_size:]], dtype=torch.long, device=device)
+            logits, _ = model.forward_cached(x, None)
+        logits = logits[0].float()
 
         for token_id in banned:
             if token_id is not None:
