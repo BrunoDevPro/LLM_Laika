@@ -21,6 +21,7 @@ import com.brunodevpro.laika.core.Laika;
 import com.brunodevpro.laika.core.Memoria;
 import com.brunodevpro.laika.core.Modelo;
 import com.brunodevpro.laika.core.Pacote;
+import com.brunodevpro.laika.core.Texto;
 import com.brunodevpro.laika.core.Tokenizador;
 import com.brunodevpro.laika.core.colab.GitHub;
 import com.brunodevpro.laika.core.dados.ConstrutorIndice;
@@ -59,6 +60,8 @@ final class Motor {
     /** Uma mensagem da conversa. */
     static final class Mensagem {
         final boolean usuario, aviso;
+        /** Mensagem do modo completar texto (não entra na memória de IA). */
+        boolean completar;
         /** trecho: o texto que o RAG achou e entrou no prompt (para "Ver o trecho usado"). */
         volatile String texto, fonte, detalhe, trecho;
 
@@ -68,6 +71,9 @@ final class Motor {
             this.texto = texto;
         }
     }
+
+    /** Resposta ainda sendo gerada (a tela mostra os pontinhos de "digitando"). */
+    static final String DIGITANDO = "…", SEM_RESPOSTA = "(sem resposta)";
 
     /** Uma tela aberta (todas as chamadas vêm na thread principal). */
     interface Ouvinte {
@@ -96,8 +102,11 @@ final class Motor {
         return instancia;
     }
 
-    /** Tamanhos de resposta do menu (tokens novos; o chat.py usa 80). */
-    static final int[] TAMANHOS = {40, 80, 160};
+    /** Limites das barrinhas do menu: temperatura e tamanho máximo da resposta (tokens; o chat.py usa 80). */
+    static final double TEMP_MIN = 0.1, TEMP_MAX = 1.5;
+    static final int TAMANHO_MIN = 16, TAMANHO_MAX = 120;
+    /** Janela do modelo de conversa em uso (para o limite da barrinha de tamanho). */
+    volatile int janela = 256;
 
     private final Context ctx;
     private final SharedPreferences prefs;
@@ -134,7 +143,8 @@ final class Motor {
     volatile boolean temBase;
 
     // Opções do app (valem para todas as versões)
-    boolean mostrarFontes, usarRag, usarMemoria, modoCompletar, lerEmVozAlta;
+    /** usarHistorico: a "memória de IA" (as últimas trocas da conversa entram no prompt). */
+    boolean mostrarFontes, usarRag, usarMemoria, usarHistorico, modoCompletar;
     double temperatura;
     int tamanhoResposta;
 
@@ -144,16 +154,24 @@ final class Motor {
         mostrarFontes = prefs.getBoolean("fontes", true);
         usarRag = prefs.getBoolean("rag", true);
         usarMemoria = prefs.getBoolean("memoria", true);
-        lerEmVozAlta = prefs.getBoolean("voz", false);
-        temperatura = prefs.getFloat("temperatura", 0.7f);
-        tamanhoResposta = prefs.getInt("tamanho", 80);
+        usarHistorico = prefs.getBoolean("historico", true);
+        temperatura = Math.max(TEMP_MIN, Math.min(TEMP_MAX, prefs.getFloat("temperatura", 0.7f)));
+        tamanhoResposta = Math.max(TAMANHO_MIN, Math.min(400, prefs.getInt("tamanho", 80)));
         tarefa = "Carregando a Laika…";
         fundo.execute(this::iniciar);
     }
 
+    /**
+     * Até 120 tokens com janela de 256 (o resto fica para a pergunta, o RAG e o histórico); 200 com 512 e 400 com
+     * 1024 ou mais (o modelo de 100M, com 2048), que têm espaço para respostas longas.
+     */
+    int tamanhoMaximo() {
+        return janela >= 1024 ? 400 : janela >= 512 ? 200 : TAMANHO_MAX;
+    }
+
     void salvarOpcoes() {
         prefs.edit().putBoolean("fontes", mostrarFontes).putBoolean("rag", usarRag)
-                .putBoolean("memoria", usarMemoria).putBoolean("voz", lerEmVozAlta)
+                .putBoolean("memoria", usarMemoria).putBoolean("historico", usarHistorico)
                 .putFloat("temperatura", (float) temperatura).putInt("tamanho", tamanhoResposta).apply();
         avisarEstado();
     }
@@ -363,6 +381,7 @@ final class Motor {
         }
         refChat = arqChat.ref;
         chat = carregar(refChat);
+        janela = chat.modelo.block;
         Armazem.Arquivo b = v.arquivos.get(Armazem.BASE);
         refBase = b == null ? null : b.ref;
         temBase = b != null;
@@ -440,6 +459,7 @@ final class Motor {
                 msg.fonte = (String) m.get("f");
                 msg.detalhe = (String) m.get("d");
                 msg.trecho = (String) m.get("c");
+                msg.completar = Boolean.TRUE.equals(m.get("x"));
                 r.add(msg);
             }
         } catch (Exception e) {
@@ -459,6 +479,7 @@ final class Motor {
             if (m.fonte != null) o.put("f", m.fonte);
             if (m.detalhe != null) o.put("d", m.detalhe);
             if (m.trecho != null) o.put("c", m.trecho);
+            if (m.completar) o.put("x", true);
             lista.add(o);
         }
         String json = Json.escrever(lista);
@@ -476,18 +497,6 @@ final class Motor {
         conversa.clear();
         for (Ouvinte o : new ArrayList<>(ouvintes)) o.conversaTrocada();
         salvarConversa();
-    }
-
-    /** A conversa como texto, para compartilhar. */
-    String conversaEmTexto() {
-        StringBuilder sb = new StringBuilder();
-        for (Mensagem m : conversa) {
-            if (m.aviso) continue;
-            sb.append(m.usuario ? "Você: " : "Laika: ").append(m.texto);
-            if (m.fonte != null) sb.append(" *").append(m.fonte);
-            sb.append("\n\n");
-        }
-        return sb.toString().trim();
     }
 
     // ---------- conversa ----------
@@ -509,100 +518,140 @@ final class Motor {
 
     void enviar(String texto) {
         Mensagem eu = new Mensagem(true, false, texto);
+        eu.completar = modoCompletar;
         conversa.add(eu);
         for (Ouvinte o : new ArrayList<>(ouvintes)) o.mensagemNova(eu);
-        responder(texto, null);
+        responder(texto, null, historicoAte(conversa.size() - 1));
     }
 
-    /** A pergunta que gerou esta resposta (a mensagem do usuário logo antes), ou null. */
-    String perguntaDe(Mensagem resposta) {
+    /** Índice da pergunta que gerou esta resposta (a mensagem do usuário logo antes), ou -1. */
+    private int indicePergunta(Mensagem resposta) {
         int i = conversa.indexOf(resposta);
         for (int k = i - 1; k >= 0; k--) {
             Mensagem m = conversa.get(k);
             if (m.aviso) continue;
-            return m.usuario ? m.texto : null;
+            return m.usuario ? k : -1;
         }
-        return null;
+        return -1;
     }
 
-    /** Gera outra resposta para a mesma pergunta, no lugar desta. */
+    /** A pergunta que gerou esta resposta, ou null. */
+    String perguntaDe(Mensagem resposta) {
+        int i = indicePergunta(resposta);
+        return i < 0 ? null : conversa.get(i).texto;
+    }
+
+    /** Gera outra resposta para a mesma pergunta, no lugar desta (com o histórico de antes da pergunta). */
     void gerarDeNovo(Mensagem resposta) {
-        String pergunta = perguntaDe(resposta);
-        if (pergunta == null || gerando) return;
-        resposta.texto = "…";
+        int i = indicePergunta(resposta);
+        if (i < 0 || gerando) return;
+        resposta.texto = DIGITANDO;
         resposta.fonte = resposta.detalhe = resposta.trecho = null;
         mudou(resposta);
-        responder(pergunta, resposta);
+        responder(conversa.get(i).texto, resposta, historicoAte(i));
     }
 
-    private void responder(String texto, Mensagem existente) {
+    /**
+     * A memória de IA: as últimas trocas (pergunta, resposta) da conversa antes da posição fim, como o
+     * history do chat.py. Pula avisos, erros, respostas vazias ou interrompidas e o modo completar texto.
+     */
+    private List<String[]> historicoAte(int fim) {
+        List<String[]> r = new ArrayList<>();
+        if (!usarHistorico) return r;
+        for (int i = 0; i < fim; i++) {
+            Mensagem p = conversa.get(i);
+            if (!p.usuario || p.aviso || p.completar) continue;
+            int j = i + 1;
+            while (j < fim && conversa.get(j).aviso) j++;
+            if (j >= fim) break;
+            Mensagem a = conversa.get(j);
+            if (a.usuario || a.completar || a.texto == null || a.texto.equals(DIGITANDO) || a.texto.equals(SEM_RESPOSTA)
+                    || a.texto.startsWith("Erro:")
+                    || (a.detalhe != null && a.detalhe.contains("interrompida"))) continue;
+            r.add(new String[]{p.texto, a.texto});
+        }
+        return r.size() > Texto.MAX_HISTORY ? new ArrayList<>(r.subList(r.size() - Texto.MAX_HISTORY, r.size())) : r;
+    }
+
+    private void responder(String texto, Mensagem existente, List<String[]> historico) {
         gerando = true;
         cancelar.set(false);
         avisarEstado();
         final boolean completar = modoCompletar, fontes = mostrarFontes, comRag = usarRag, comMemoria = usarMemoria;
         final double temp = temperatura;
-        final int tamanho = tamanhoResposta;
+        final int tamanho = Math.min(tamanhoResposta, tamanhoMaximo());
+        if (existente != null) existente.completar = completar;
         fundo.execute(() -> {
-            Mensagem resp = existente != null ? existente : adicionar(new Mensagem(false, false, "…"));
-            long t0 = System.nanoTime();
-            Laika.Opcoes op = new Laika.Opcoes();
-            try {
-                if (!pronto) throw new IllegalStateException(erro != null ? erro : "o modelo ainda está carregando");
-                op.temperatura = temp;
-                if (completar && refBase != null) {
-                    if (base == null) {
-                        if (chat != null && grande(chat)) {  // um modelo grande por vez
-                            chat.modelo.fechar();
-                            chat = null;
-                        }
-                        resp.texto = "Carregando o modelo de completar texto…";
-                        mudou(resp);
-                        base = carregar(refBase);
+            Mensagem resp = existente;
+            if (resp == null) {
+                resp = new Mensagem(false, false, DIGITANDO);
+                resp.completar = completar;
+                adicionar(resp);
+            }
+            responderEm(resp, texto, historico, completar, fontes, comRag, comMemoria, temp, tamanho);
+        });
+    }
+
+    private void responderEm(Mensagem resp, String texto, List<String[]> historico, boolean completar, boolean fontes,
+                             boolean comRag, boolean comMemoria, double temp, int tamanho) {
+        long t0 = System.nanoTime();
+        Laika.Opcoes op = new Laika.Opcoes();
+        try {
+            if (!pronto) throw new IllegalStateException(erro != null ? erro : "o modelo ainda está carregando");
+            op.temperatura = temp;
+            if (completar && refBase != null) {
+                if (base == null) {
+                    if (chat != null && grande(chat)) {  // um modelo grande por vez
+                        chat.modelo.fechar();
+                        chat = null;
                     }
-                    op.maxNovos = tamanho * 2;
-                    String r = base.gerar(texto, op, false, rng, parcial -> {
-                        resp.texto = texto + " " + parcial;
+                    resp.texto = "Carregando o modelo de completar texto…";
+                    mudou(resp);
+                    base = carregar(refBase);
+                }
+                op.maxNovos = tamanho * 2;
+                String r = base.gerar(texto, op, false, rng, parcial -> {
+                    resp.texto = texto + " " + parcial;
+                    mudou(resp);
+                }, cancelar::get);
+                resp.texto = texto + " " + r;
+            } else {
+                String direto = comMemoria ? memoria.tratar(texto) : null;
+                if (direto != null) {
+                    resp.texto = direto;
+                } else {
+                    if (chat == null) {  // foi liberado para o modelo de completar texto (modelo grande)
+                        if (base != null) {
+                            base.modelo.fechar();
+                            base = null;
+                        }
+                        resp.texto = "Carregando o modelo de conversa…";
+                        mudou(resp);
+                        chat = carregar(refChat);
+                    }
+                    op.maxNovos = tamanho;
+                    Laika.Prompt p = chat.montarPrompt(texto, comRag ? rag : null, comMemoria ? memoria : null,
+                            op.maxNovos, historico);
+                    String r = chat.gerar(p.texto, op, true, rng, parcial -> {
+                        resp.texto = parcial.isEmpty() ? DIGITANDO : parcial;
                         mudou(resp);
                     }, cancelar::get);
-                    resp.texto = texto + " " + r;
-                } else {
-                    String direto = comMemoria ? memoria.tratar(texto) : null;
-                    if (direto != null) {
-                        resp.texto = direto;
-                    } else {
-                        if (chat == null) {  // foi liberado para o modelo de completar texto (modelo grande)
-                            if (base != null) {
-                                base.modelo.fechar();
-                                base = null;
-                            }
-                            resp.texto = "Carregando o modelo de conversa…";
-                            mudou(resp);
-                            chat = carregar(refChat);
-                        }
-                        op.maxNovos = tamanho;
-                        Laika.Prompt p = chat.montarPrompt(texto, comRag ? rag : null, comMemoria ? memoria : null,
-                                op.maxNovos);
-                        String r = chat.gerar(p.texto, op, true, rng, parcial -> {
-                            resp.texto = parcial.isEmpty() ? "…" : parcial;
-                            mudou(resp);
-                        }, cancelar::get);
-                        resp.texto = r.isEmpty() ? "…" : r;
-                        if (fontes) resp.fonte = p.fonte;
-                        resp.trecho = p.trecho;
-                    }
+                    resp.texto = r.isEmpty() ? SEM_RESPOSTA : r;
+                    if (fontes) resp.fonte = p.fonte;
+                    resp.trecho = p.trecho;
                 }
-                double seg = (System.nanoTime() - t0) / 1e9;
-                resp.detalhe = String.format(Locale.getDefault(), "%.1f s%s%s", seg,
-                        op.gerados > 0 ? String.format(Locale.getDefault(), " · %d tokens/s", Math.round(op.gerados / seg)) : "",
-                        cancelar.get() ? " · interrompida" : "");
-            } catch (Throwable e) {
-                resp.texto = "Erro: " + e.getMessage();
             }
-            mudou(resp);
-            gerando = false;
-            naTela(this::salvarConversa);
-            avisarEstado();
-        });
+            double seg = (System.nanoTime() - t0) / 1e9;
+            resp.detalhe = String.format(Locale.getDefault(), "%.1f s%s%s", seg,
+                    op.gerados > 0 ? String.format(Locale.getDefault(), " · %d tokens/s", Math.round(op.gerados / seg)) : "",
+                    cancelar.get() ? " · interrompida" : "");
+        } catch (Throwable e) {
+            resp.texto = "Erro: " + e.getMessage();
+        }
+        mudou(resp);
+        gerando = false;
+        naTela(this::salvarConversa);
+        avisarEstado();
     }
 
     // ---------- versões e backups ----------

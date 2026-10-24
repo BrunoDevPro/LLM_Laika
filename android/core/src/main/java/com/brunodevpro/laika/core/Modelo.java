@@ -12,29 +12,71 @@ import java.util.concurrent.Executors;
 /**
  * O TinyLLM do model.py refeito em Java puro, com cache de atenção (KV cache).
  *
- * Mesma conta do PyTorch: embedding de token + posição aprendida, blocos com pré-LayerNorm,
- * atenção causal (8 cabeças), feed-forward com GELU exato, LayerNorm final e saída com os
- * pesos do embedding. Com o cache, cada token novo custa só a parte dele, em vez de
- * recalcular a frase inteira como o chat.py faz.
+ * Mesma conta do PyTorch: embedding de token + posição (aprendida, LAIKA001, ou RoPE, LAIKA002),
+ * blocos com pré-LayerNorm, atenção causal, feed-forward com GELU exato, LayerNorm final e saída
+ * com os pesos do embedding. Com o cache, cada token novo custa só a parte dele.
+ *
+ * Modelos grandes (o de 100M) guardam as matrizes em float16 (metade da memória; a conta continua
+ * em float32, com os mesmos valores), e o cache cresce conforme a conversa em vez de reservar a
+ * janela inteira (2048 posições) de uma vez.
  *
  * As multiplicações de matriz são divididas entre os núcleos do processador.
  */
 public final class Modelo {
     private static final float LN_EPS = 1e-5f;
 
+    /** Acima disto (parâmetros), as matrizes ficam em float16 na memória. */
+    public static final long LIMITE_COMPACTO = 60_000_000L;
+
     public final int vocab, block, dim, heads, layers, headDim;
-    private final float[] tokEmb, posEmb, lnfW, lnfB;
-    private final float[][] ln1W, ln1B, qkvW, projW, ln2W, ln2B, ff1W, ff1B, ff2W, ff2B;
+    /** RoPE (LAIKA002) em vez da tabela de posições aprendidas. */
+    public final boolean rope;
+    /** Matrizes em float16 (short[]) em vez de float32. */
+    public final boolean compacto;
+    private final float[] posEmb, lnfW, lnfB, ropeCos, ropeSin;
+    private final Matriz tokEmb;
+    private final float[][] ln1W, ln1B, ln2W, ln2B, ff1B, ff2B;
+    private final Matriz[] qkvW, projW, ff1W, ff2W;
     private final ExecutorService pool;
     private final int threads;
 
+    /** Uma matriz de pesos: float32 (f) ou float16 (h, convertido na hora pela tabela MEIAS). */
+    private static final class Matriz {
+        final float[] f;
+        final short[] h;
+
+        Matriz(float[] f, short[] h) {
+            this.f = f;
+            this.h = h;
+        }
+    }
+
+    private static float[] meias;
+
+    /** float16 -> float32 para todos os 65536 valores (os mesmos de meiaParaFloat). */
+    private static synchronized float[] tabelaMeias() {
+        if (meias == null) {
+            float[] t = new float[65536];
+            for (int i = 0; i < t.length; i++) t[i] = meiaParaFloat((short) i);
+            meias = t;
+        }
+        return meias;
+    }
+
     /** Lê o laika_*.bin gerado por android/exportar_modelo.py. */
     public Modelo(InputStream in, int threads) throws IOException {
+        this(in, threads, null);
+    }
+
+    /** compacto: null = decide pelo tamanho (LIMITE_COMPACTO); true/false força (testes). */
+    public Modelo(InputStream in, int threads, Boolean compacto) throws IOException {
         DataInputStream d = new DataInputStream(new java.io.BufferedInputStream(in, 1 << 16));
         byte[] magic = new byte[8];
         d.readFully(magic);
-        if (!new String(magic, "US-ASCII").equals("LAIKA001")) throw new IOException("arquivo de pesos inválido");
-        byte[] cab = new byte[20];
+        String m = new String(magic, "US-ASCII");
+        if (!m.equals("LAIKA001") && !m.equals("LAIKA002")) throw new IOException("arquivo de pesos inválido");
+        rope = m.equals("LAIKA002");
+        byte[] cab = new byte[rope ? 24 : 20];
         d.readFully(cab);
         ByteBuffer c = ByteBuffer.wrap(cab).order(ByteOrder.LITTLE_ENDIAN);
         vocab = c.getInt();
@@ -43,26 +85,47 @@ public final class Modelo {
         heads = c.getInt();
         layers = c.getInt();
         headDim = dim / heads;
+        float theta = rope ? c.getFloat() : 0f;
+        long parametros = ConversorPt.parametros(vocab, rope ? 0 : block, dim, layers);
+        this.compacto = compacto != null ? compacto : parametros > LIMITE_COMPACTO;
 
-        tokEmb = ler(d, vocab * dim);
-        posEmb = ler(d, block * dim);
-        ln1W = new float[layers][]; ln1B = new float[layers][]; qkvW = new float[layers][]; projW = new float[layers][];
-        ln2W = new float[layers][]; ln2B = new float[layers][]; ff1W = new float[layers][]; ff1B = new float[layers][];
-        ff2W = new float[layers][]; ff2B = new float[layers][];
+        tokEmb = matriz(d, vocab * dim);
+        posEmb = rope ? null : ler(d, block * dim);
+        ln1W = new float[layers][]; ln1B = new float[layers][]; qkvW = new Matriz[layers]; projW = new Matriz[layers];
+        ln2W = new float[layers][]; ln2B = new float[layers][]; ff1W = new Matriz[layers]; ff1B = new float[layers][];
+        ff2W = new Matriz[layers]; ff2B = new float[layers][];
         for (int l = 0; l < layers; l++) {
             ln1W[l] = ler(d, dim);
             ln1B[l] = ler(d, dim);
-            qkvW[l] = ler(d, 3 * dim * dim);
-            projW[l] = ler(d, dim * dim);
+            qkvW[l] = matriz(d, 3 * dim * dim);
+            projW[l] = matriz(d, dim * dim);
             ln2W[l] = ler(d, dim);
             ln2B[l] = ler(d, dim);
-            ff1W[l] = ler(d, 4 * dim * dim);
+            ff1W[l] = matriz(d, 4 * dim * dim);
             ff1B[l] = ler(d, 4 * dim);
-            ff2W[l] = ler(d, 4 * dim * dim);
+            ff2W[l] = matriz(d, 4 * dim * dim);
             ff2B[l] = ler(d, dim);
         }
         lnfW = ler(d, dim);
         lnfB = ler(d, dim);
+
+        if (rope) {
+            // Igual ao rope_tables do model.py (float32): ângulo = posição × theta^(-2j/headDim).
+            int metade = headDim / 2;
+            float[] inv = new float[metade];
+            for (int j = 0; j < metade; j++) inv[j] = (float) (1.0 / Math.pow(theta, (2.0 * j) / headDim));
+            ropeCos = new float[block * metade];
+            ropeSin = new float[block * metade];
+            for (int pos = 0; pos < block; pos++) {
+                for (int j = 0; j < metade; j++) {
+                    float ang = (float) pos * inv[j];
+                    ropeCos[pos * metade + j] = (float) Math.cos(ang);
+                    ropeSin[pos * metade + j] = (float) Math.sin(ang);
+                }
+            }
+        } else {
+            ropeCos = ropeSin = null;
+        }
 
         this.threads = Math.max(1, threads);
         pool = this.threads > 1 ? Executors.newFixedThreadPool(this.threads - 1, r -> {
@@ -70,6 +133,16 @@ public final class Modelo {
             t.setDaemon(true);
             return t;
         }) : null;
+    }
+
+    private Matriz matriz(DataInputStream d, int n) throws IOException {
+        if (!compacto) return new Matriz(ler(d, n), null);
+        tabelaMeias();
+        byte[] raw = new byte[n * 2];
+        d.readFully(raw);
+        short[] h = new short[n];
+        ByteBuffer.wrap(raw).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(h);
+        return new Matriz(null, h);
     }
 
     /** Pesos em float16 (little-endian) -> float32. */
@@ -100,11 +173,13 @@ public final class Modelo {
         if (pool != null) pool.shutdownNow();
     }
 
-    /** Cache de atenção de uma conversa: chaves e valores das posições já processadas. */
+    /**
+     * Cache de atenção de uma conversa: chaves e valores das posições já processadas. Começa pequeno
+     * e dobra quando precisa (com contexto 2048, reservar tudo de cara gastaria ~150 MB).
+     */
     public final class Cache {
-        final float[][] k = new float[layers][block * dim];
-        final float[][] v = new float[layers][block * dim];
-        int tamanho = 0;
+        float[][] k = new float[layers][], v = new float[layers][];
+        int tamanho = 0, capacidade = 0;
 
         public int tamanho() {
             return tamanho;
@@ -112,6 +187,16 @@ public final class Modelo {
 
         public void limpar() {
             tamanho = 0;
+        }
+
+        void garantir(int posicoes) {
+            if (posicoes <= capacidade) return;
+            int nova = Math.min(block, Math.max(posicoes, Math.max(64, capacidade * 2)));
+            for (int l = 0; l < layers; l++) {
+                k[l] = k[l] == null ? new float[nova * dim] : java.util.Arrays.copyOf(k[l], nova * dim);
+                v[l] = v[l] == null ? new float[nova * dim] : java.util.Arrays.copyOf(v[l], nova * dim);
+            }
+            capacidade = nova;
         }
     }
 
@@ -128,10 +213,16 @@ public final class Modelo {
         if (t <= 0) throw new IllegalArgumentException("nenhum token");
         if (p0 + t > block) throw new IllegalArgumentException("passou do block_size (" + block + ")");
 
+        cache.garantir(p0 + t);
+
         float[] x = new float[t * dim];
+        float[] tabela = compacto ? tabelaMeias() : null;
         for (int i = 0; i < t; i++) {
             int tok = tokens[de + i], pos = p0 + i;
-            for (int j = 0; j < dim; j++) x[i * dim + j] = tokEmb[tok * dim + j] + posEmb[pos * dim + j];
+            for (int j = 0; j < dim; j++) {
+                float e = compacto ? tabela[tokEmb.h[tok * dim + j] & 0xFFFF] : tokEmb.f[tok * dim + j];
+                x[i * dim + j] = rope ? e : e + posEmb[pos * dim + j];
+            }
         }
         float[] h = new float[t * dim];
         float[] qkv = new float[t * 3 * dim];
@@ -142,6 +233,7 @@ public final class Modelo {
         for (int l = 0; l < layers; l++) {
             layerNorm(x, h, t, ln1W[l], ln1B[l]);
             matmul(h, t, dim, qkvW[l], null, 3 * dim, qkv);
+            if (rope) girar(qkv, t, p0);
             float[] kc = cache.k[l], vc = cache.v[l];
             for (int i = 0; i < t; i++) {
                 System.arraycopy(qkv, i * 3 * dim + dim, kc, (p0 + i) * dim, dim);
@@ -164,6 +256,25 @@ public final class Modelo {
         float[] logits = new float[vocab];
         matmul(ultimo, 1, dim, tokEmb, null, vocab, logits);
         return logits;
+    }
+
+    /** RoPE em q e k de cada cabeça (apply_rope do model.py: gira a 1ª metade com a 2ª). */
+    private void girar(float[] qkv, int t, int p0) {
+        int metade = headDim / 2;
+        for (int i = 0; i < t; i++) {
+            int base = (p0 + i) * metade;
+            for (int parte = 0; parte < 2; parte++) {  // 0 = q, 1 = k
+                for (int hd = 0; hd < heads; hd++) {
+                    int o = i * 3 * dim + parte * dim + hd * headDim;
+                    for (int j = 0; j < metade; j++) {
+                        float x1 = qkv[o + j], x2 = qkv[o + metade + j];
+                        float c = ropeCos[base + j], s = ropeSin[base + j];
+                        qkv[o + j] = x1 * c - x2 * s;
+                        qkv[o + metade + j] = x1 * s + x2 * c;
+                    }
+                }
+            }
+        }
     }
 
     private void layerNorm(float[] x, float[] out, int t, float[] w, float[] b) {
@@ -215,14 +326,32 @@ public final class Modelo {
     }
 
     /** out[t][o] = x[t] · W[o] (+ bias[o]); W no formato do PyTorch: [saída][entrada]. */
-    private void matmul(float[] x, int t, int in, float[] w, float[] bias, int outDim, float[] out) {
+    private void matmul(float[] x, int t, int in, Matriz w, float[] bias, int outDim, float[] out) {
+        float[] tabela = w.h != null ? tabelaMeias() : null;
         paralelo(outDim, (long) t * in * outDim >= 65536, (ini, fim) -> {
             for (int o = ini; o < fim; o++) {
                 int wo = o * in;
                 float b = bias == null ? 0f : bias[o];
-                for (int i = 0; i < t; i++) out[i * outDim + o] = dot(x, i * in, w, wo, in) + b;
+                for (int i = 0; i < t; i++) {
+                    float d = w.f != null ? dot(x, i * in, w.f, wo, in) : dotMeia(x, i * in, w.h, wo, in, tabela);
+                    out[i * outDim + o] = d + b;
+                }
             }
         });
+    }
+
+    /** Igual ao dot, com os pesos em float16 (mesma ordem de soma, então o mesmo resultado). */
+    private static float dotMeia(float[] a, int ao, short[] b, int bo, int n, float[] tab) {
+        float s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+        int j = 0;
+        for (; j + 3 < n; j += 4) {
+            s0 += a[ao + j] * tab[b[bo + j] & 0xFFFF];
+            s1 += a[ao + j + 1] * tab[b[bo + j + 1] & 0xFFFF];
+            s2 += a[ao + j + 2] * tab[b[bo + j + 2] & 0xFFFF];
+            s3 += a[ao + j + 3] * tab[b[bo + j + 3] & 0xFFFF];
+        }
+        for (; j < n; j++) s0 += a[ao + j] * tab[b[bo + j] & 0xFFFF];
+        return (s0 + s1) + (s2 + s3);
     }
 
     private static float dot(float[] a, int ao, float[] b, int bo, int n) {

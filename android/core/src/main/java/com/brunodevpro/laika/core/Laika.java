@@ -53,28 +53,78 @@ public final class Laika {
     }
 
     public Prompt montarPrompt(String pergunta, IndiceRag rag, Memoria memoria, int maxNovos) {
+        return montarPrompt(pergunta, rag, memoria, maxNovos, null, modelo.block);
+    }
+
+    public Prompt montarPrompt(String pergunta, IndiceRag rag, Memoria memoria, int maxNovos,
+                               List<String[]> historico) {
+        return montarPrompt(pergunta, rag, memoria, maxNovos, historico, modelo.block);
+    }
+
+    /**
+     * Como o build_prompt do chat.py. historico: trocas anteriores {pergunta, resposta}, da mais antiga
+     * para a mais nova ("memória de IA"); entram as mais recentes (até MAX_HISTORY) que couberem, e só se a
+     * pergunta depender da conversa (Texto.segueConversa).
+     * bloco: a janela do modelo (parâmetro só para os testes compararem janelas diferentes).
+     */
+    public Prompt montarPrompt(String pergunta, IndiceRag rag, Memoria memoria, int maxNovos,
+                               List<String[]> historico, int bloco) {
+        int orcamento = bloco - maxNovos;
         List<String> partes = new ArrayList<>();
         String fonte = null, trecho = null;
         if (memoria != null) {
             String nota = memoria.contextoPara(pergunta);
             if (!nota.isEmpty()) partes.add(nota);
         }
-        if (rag != null && Texto.querRag(pergunta)) {
-            IndiceRag.Trecho hit = rag.melhor(Texto.consultaRag(pergunta));
-            if (hit != null) {
-                partes.add(hit.texto);
-                fonte = hit.titulo;
-                trecho = hit.texto;
+        List<IndiceRag.Trecho> achados = rag != null && Texto.querRag(pergunta)
+                ? rag.contextos(pergunta, Texto.trechosRag(bloco)) : new ArrayList<>();
+        if (!achados.isEmpty()) {
+            List<String> textos = new ArrayList<>();
+            for (IndiceRag.Trecho t : achados) {
+                partes.add(t.texto);
+                textos.add(t.texto);
+            }
+            fonte = achados.get(0).titulo;
+            trecho = String.join("\n\n", textos);
+        }
+        String atual = Texto.USER + " " + pergunta + " " + Texto.ASSISTANT;
+        if (!partes.isEmpty()) {
+            String comContexto = Texto.ajustarContexto(
+                    t -> tok.codificar(Texto.USER + " " + t + " " + Texto.ASSISTANT).length,
+                    pergunta, String.join(" ", partes), orcamento,
+                    Texto.MAX_CONTEXT_WORDS * Math.max(1, achados.size()));
+            if (comContexto == null) {
+                fonte = null;
+                trecho = null;
+            } else {
+                atual = Texto.USER + " " + comContexto + " " + Texto.ASSISTANT;
             }
         }
-        String simples = Texto.USER + " " + pergunta + " " + Texto.ASSISTANT;
-        if (partes.isEmpty()) return new Prompt(simples, null, null);
-        int orcamento = modelo.block - maxNovos;
-        String comContexto = Texto.ajustarContexto(
-                t -> tok.codificar(Texto.USER + " " + t + " " + Texto.ASSISTANT).length,
-                pergunta, String.join(" ", partes), orcamento);
-        if (comContexto == null) return new Prompt(simples, null, null);
-        return new Prompt(Texto.USER + " " + comContexto + " " + Texto.ASSISTANT, fonte, trecho);
+        List<String> turnos = new ArrayList<>();
+        if (historico != null && Texto.segueConversa(pergunta)) {
+            int ini = Math.max(0, historico.size() - Texto.MAX_HISTORY);
+            for (int i = historico.size() - 1; i >= ini; i--) {
+                List<String> candidato = new ArrayList<>();
+                candidato.add(Texto.turno(historico.get(i)[0], historico.get(i)[1]));
+                candidato.addAll(turnos);
+                candidato.add(atual);
+                if (tok.codificar(String.join(" ", candidato)).length > orcamento) break;
+                candidato.remove(candidato.size() - 1);
+                turnos = candidato;
+            }
+        }
+        turnos.add(atual);
+        return new Prompt(String.join(" ", turnos), fonte, trecho);
+    }
+
+    /** Com um tamanho máximo grande, a resposta tende a ser mais longa (min_answer_tokens do chat.py). */
+    public static int minimoResposta(int maxNovos) {
+        return Math.max(0, (maxNovos - 60) / 2);
+    }
+
+    /** Quanto tirar do logit do <|end|> no passo `passo` (end_penalty do chat.py). */
+    public static double penalidadeFim(int passo, int minimo) {
+        return passo >= minimo ? 0.0 : 3.0 * (1 - (double) passo / minimo);
     }
 
     public static String comCitacao(String resposta, String fonte) {
@@ -92,6 +142,7 @@ public final class Laika {
         int n = promptIds.length, promptLen = n;
         Modelo.Cache cache = modelo.novoCache();
         int bloco = modelo.block;
+        int minimo = pararNoFim ? minimoResposta(op.maxNovos) : 0;
 
         for (int passo = 0; passo < op.maxNovos; passo++) {
             if (cancelado != null && cancelado.getAsBoolean()) break;
@@ -107,6 +158,7 @@ public final class Laika {
 
             for (int t : proibidos) if (t >= 0) logits[t] = Float.NEGATIVE_INFINITY;
             if (!pararNoFim && endId >= 0) logits[endId] = Float.NEGATIVE_INFINITY;
+            if (minimo > 0 && endId >= 0) logits[endId] = (float) (logits[endId] - penalidadeFim(n - promptLen, minimo));
 
             // Penaliza só tokens que o próprio modelo já gerou (os últimos 60).
             Set<Integer> gerados = new LinkedHashSet<>();

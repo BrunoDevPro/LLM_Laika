@@ -4,11 +4,13 @@
   python chat.py --base     -> modo "completar texto" com o modelo só pré-treinado
   python chat.py --no-rag   -> sem busca nos textos
   python chat.py --no-memory
+  python chat.py --no-history -> sem as últimas mensagens no prompt
 
 Comandos durante a conversa:
   /fontes   mostra ou esconde o "*Nome do artigo" no fim das respostas que usaram o RAG
   /rag      liga ou desliga a busca nos textos
   /memoria  mostra o que a Laika lembra sobre você
+  /limpar   esquece as mensagens anteriores (a "memória de IA": as últimas trocas entram no prompt)
   sair      encerra
 """
 
@@ -17,8 +19,8 @@ from pathlib import Path
 
 import torch
 
-from data_utils import (USER_TOKEN, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN,
-                        fit_context, rag_query, wants_rag)
+from data_utils import (USER_TOKEN, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, MAX_CONTEXT_WORDS,
+                        MAX_HISTORY, chat_turn, fit_context, follows_up, rag_chunks, wants_rag)
 from model import build_model
 
 
@@ -37,40 +39,62 @@ def load(out_dir, base, device):
     return model, tokenizer
 
 
-def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new_tokens=80):
+def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new_tokens=80, history=None):
     """Monta o prompt do chat. Devolve (prompt, título do artigo usado pelo RAG ou None).
 
-    Se a pergunta pede informação (wants_rag) e o RAG acha um trecho relevante, ou se há
-    anotações da memória ligadas à pergunta, o prompt ganha um "Contexto:", no mesmo
-    formato usado no fine-tuning. O contexto é cortado para caber na janela do modelo.
+    Se a pergunta pede informação (wants_rag) e o RAG acha trechos relevantes (1 a 3, conforme a
+    janela do modelo), ou se há anotações da memória ligadas à pergunta, a pergunta ganha um
+    "Contexto:", no mesmo formato usado no fine-tuning, cortado para caber na janela.
+    history: as trocas anteriores [(pergunta, resposta), ...], da mais antiga para a mais nova
+    ("memória de IA"). Entram as mais recentes (até MAX_HISTORY) que couberem depois da pergunta,
+    e só se a pergunta depender da conversa (follows_up).
     """
+    budget = block_size - max_new_tokens
+
+    def count(text):
+        return len(tokenizer.encode(text).ids)
+
     context_parts, source = [], None
     if memory is not None:
         note = memory.context_for(question)
         if note:
             context_parts.append(note)
-    if rag is not None and wants_rag(question):
-        hit = rag.best(rag_query(question))
-        if hit:
-            context_parts.append(hit["text"])
-            source = hit["title"]
-    plain = f"{USER_TOKEN} {question} {ASSISTANT_TOKEN}"
-    if not context_parts:
-        return plain, None
+    hits = rag.contexts(question, rag_chunks(block_size)) if rag is not None and wants_rag(question) else []
+    if hits:
+        context_parts += [h["text"] for h in hits]
+        source = hits[0]["title"]
+    current = f"{USER_TOKEN} {question} {ASSISTANT_TOKEN}"
+    if context_parts:
+        user_text = fit_context(lambda t: count(f"{USER_TOKEN} {t} {ASSISTANT_TOKEN}"), question,
+                                " ".join(context_parts), budget, max_words=MAX_CONTEXT_WORDS * max(1, len(hits)))
+        if user_text is None:
+            source = None
+        else:
+            current = f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN}"
 
-    def count(user_text):
-        return len(tokenizer.encode(f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN}").ids)
-
-    budget = block_size - max_new_tokens
-    user_text = fit_context(count, question, " ".join(context_parts), budget)
-    if user_text is None:
-        return plain, None
-    return f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN}", source
+    turns = []
+    for q, a in reversed(list(history or [])[-MAX_HISTORY:] if follows_up(question) else []):
+        candidate = [chat_turn(q, a)] + turns
+        if count(" ".join(candidate + [current])) > budget:
+            break
+        turns = candidate
+    return " ".join(turns + [current]), source
 
 
 def with_citation(answer, source):
     """Acrescenta ' *Nome do artigo' no fim da resposta quando o RAG foi usado."""
     return f"{answer} *{source}" if source else answer
+
+
+def min_answer_tokens(max_new_tokens):
+    """Com um tamanho máximo grande, a resposta tende a ser mais longa: até este número de tokens,
+    o <|end|> perde força (sem ser proibido). 80 -> 10, 120 -> 30, 60 ou menos -> 0."""
+    return max(0, (max_new_tokens - 60) // 2)
+
+
+def end_penalty(step, min_tokens):
+    """Quanto tirar do logit do <|end|> no passo `step` (0 = primeiro token da resposta)."""
+    return 0.0 if step >= min_tokens else 3.0 * (1 - step / min_tokens)
 
 
 @torch.no_grad()
@@ -82,15 +106,26 @@ def generate(model, tokenizer, prompt, device, max_new_tokens=80, temperature=0.
     banned = [tokenizer.token_to_id(t) for t in (USER_TOKEN, ASSISTANT_TOKEN, PAD_TOKEN, EOT_TOKEN)]
     if not stop_at_end:
         banned.append(end_id)
+    min_tokens = min_answer_tokens(max_new_tokens) if stop_at_end else 0
 
+    past, cached = None, 0
     for _ in range(max_new_tokens):
-        context = ids[-model.block_size:]
-        x = torch.tensor([context], dtype=torch.long, device=device)
-        logits = model(x)[0, -1].float()
+        # Cache de atenção: só os tokens novos passam pelo modelo. Passou da janela, as posições mudam:
+        # recalcula a janela inteira (o mesmo resultado de antes, sem cache).
+        if len(ids) <= model.block_size:
+            x = torch.tensor([ids[cached:]], dtype=torch.long, device=device)
+            logits, past = model.forward_cached(x, past)
+            cached = len(ids)
+        else:
+            x = torch.tensor([ids[-model.block_size:]], dtype=torch.long, device=device)
+            logits, _ = model.forward_cached(x, None)
+        logits = logits[0].float()
 
         for token_id in banned:
             if token_id is not None:
                 logits[token_id] = -float("inf")
+        if min_tokens and end_id is not None:
+            logits[end_id] -= end_penalty(len(ids) - prompt_len, min_tokens)
 
         # Penaliza só tokens que o próprio modelo já gerou (não a pergunta nem o contexto).
         for token_id in set(ids[prompt_len:][-60:]):
@@ -128,6 +163,8 @@ def main():
     parser.add_argument("--no-rag", action="store_true")
     parser.add_argument("--memory", default="checkpoints/memoria.json")
     parser.add_argument("--no-memory", action="store_true")
+    parser.add_argument("--no-history", action="store_true",
+                        help="não põe as últimas mensagens da conversa no prompt (memória de IA)")
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -151,8 +188,10 @@ def main():
     rag = None if args.no_rag else open_index(args.rag_db)
     memory = None if args.no_memory else Memory(args.memory)
     show_sources = True
-    print(f"RAG: {'ligado' if rag else 'desligado'} | memória: {'ligada' if memory else 'desligada'}")
-    print("Digite 'sair' para encerrar. Comandos: /fontes, /rag, /memoria")
+    history = None if args.no_history else []
+    print(f"RAG: {'ligado' if rag else 'desligado'} | memória: {'ligada' if memory else 'desligada'} | "
+          f"memória de IA: {'ligada' if history is not None else 'desligada'}")
+    print("Digite 'sair' para encerrar. Comandos: /fontes, /rag, /memoria, /limpar")
 
     while True:
         text = input("\nVocê: ").strip()
@@ -171,16 +210,21 @@ def main():
         if text == "/memoria":
             print("LLM:", memory.summary() if memory else "A memória está desligada.")
             continue
+        if text == "/limpar":
+            history = None if history is None else []
+            print("(conversa esquecida: a Laika não vê mais as mensagens anteriores)")
+            continue
 
-        if memory is not None:
-            remembered = memory.handle(text)
-            if remembered:
-                print("LLM:", remembered)
-                continue
-
-        prompt, source = build_prompt(text, tokenizer, model.block_size, rag, memory, args.max_new_tokens)
-        answer = generate(model, tokenizer, prompt, device, args.max_new_tokens, args.temperature)
-        print("LLM:", with_citation(answer, source) if show_sources else answer)
+        answer = memory.handle(text) if memory is not None else None
+        if answer:
+            print("LLM:", answer)
+        else:
+            prompt, source = build_prompt(text, tokenizer, model.block_size, rag, memory, args.max_new_tokens,
+                                          history)
+            answer = generate(model, tokenizer, prompt, device, args.max_new_tokens, args.temperature)
+            print("LLM:", with_citation(answer, source) if show_sources else answer)
+        if history is not None and answer:
+            history = (history + [(text, answer)])[-MAX_HISTORY:]
 
 
 if __name__ == "__main__":

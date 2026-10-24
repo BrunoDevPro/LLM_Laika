@@ -1,5 +1,6 @@
-"""Baixa os dados de treino: livros do Project Gutenberg (data/books/) e artigos da
-Wikipédia em português moderno (data/wiki/ e data/qa_auto/).
+"""Baixa os dados de treino: livros do Project Gutenberg (data/books/), artigos da
+Wikipédia em português moderno (data/wiki/ e data/qa_auto/) e, para os modelos grandes,
+o Corpus Carolina (data/carolina/) e parte do GigaVerbo-v2 (data/gigaverbo/).
 
 Rode no Colab (que tem internet livre). Você também pode simplesmente colocar seus
 próprios .txt em data/books/ e pular este script.
@@ -7,13 +8,18 @@ próprios .txt em data/books/ e pular este script.
 
 import argparse
 import csv
+import gzip
 import io
 import json
+import os
+import re
+import tempfile
 import time
 import urllib.request
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from data_utils import clean_gutenberg, clean_wiki, wiki_definition
+from data_utils import EOT_TOKEN, clean_gutenberg, clean_wiki, wiki_definition
 
 CATALOG = "https://www.gutenberg.org/cache/epub/feeds/pg_catalog.csv"
 MIN_CHARS = 30_000
@@ -197,6 +203,243 @@ def download_wikipedia(wiki_dir, qa_auto_dir, n_articles, per_file=2000):
     print(f"Pronto: {kept} artigos{extra} ({total / 1e6:.1f} MB) e {len(definitions)} perguntas 'O que é X?'")
 
 
+# ---------- Corpus Carolina e GigaVerbo (modelos grandes) ----------
+# Os dois vão só para o pré-treino (não entram no índice do RAG). Cada documento é separado do
+# seguinte por uma linha com <|endoftext|>, que o tokenizer lê como o token de fim de texto.
+SEPARADOR = f"\n\n{EOT_TOKEN}\n\n"
+HF = "https://huggingface.co/datasets/"
+
+
+def _json_url(url):
+    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "LLM-Laika"}), timeout=90) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+def _estado(arquivo):
+    try:
+        return json.loads(arquivo.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def _gravar_estado(arquivo, estado):
+    tmp = arquivo.with_suffix(".tmp")
+    tmp.write_text(json.dumps(estado, ensure_ascii=False))
+    os.replace(tmp, arquivo)
+
+
+def _limpar_doc(texto):
+    linhas = [re.sub(r"[ \t\u00a0]+", " ", l).strip() for l in texto.replace("\r", "").split("\n")]
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(linhas)).strip().replace(EOT_TOKEN, "")
+
+
+# Corpus Carolina (carolina-c4ai/corpus-carolina, versão 2): português brasileiro contemporâneo em XML TEI,
+# com a licença de cada documento no cabeçalho (CC BY, CC BY-SA, domínio público...).
+CAROLINA = HF + "carolina-c4ai/corpus-carolina/resolve/main/corpus/"
+CAROLINA_TAXONOMIAS = {"dat": "datasets_and_other_corpora", "jud": "judicial_branch", "leg": "legislative_branch",
+                       "pub": "public_domain_works", "soc": "social_media", "uni": "university_domains",
+                       "wik": "wikis"}
+# Sem os textos de leis e decisões judiciais por padrão: são ~45% do corpus e têm um estilo muito
+# próprio. Peça com --carolina dat,jud,leg,pub,soc,uni,wik.
+CAROLINA_PADRAO = "dat,pub,soc,uni,wik"
+_TEI = "{http://www.tei-c.org/ns/1.0}"
+# Páginas de bastidores dos wikis (usuários, discussões, predefinições...).
+_WIKI_BASTIDOR = re.compile(r"^(usu[aá]ri[oa]|discuss[aã]o|predefini[cç][aã]o|categoria|wikip[eé]dia|ajuda|portal|"
+                            r"mediawiki|ficheiro|arquivo|imagem|m[oó]dulo|especial|wiki[a-z]*|anexo|livro|"
+                            r"projeto|tópico|t[oó]pico|user|talk|template|file|help|category)\s*:", re.I)
+
+
+def _carolina_docs(caminho):
+    """(texto, título, fonte) de cada documento de um .xml.gz do Carolina, sem carregar o arquivo todo."""
+    with gzip.open(caminho) as g:
+        for _, el in ET.iterparse(g, events=("end",)):
+            if el.tag != _TEI + "TEI":
+                continue
+            corpo = el.find(_TEI + "text")  # os <p> do cabeçalho (licença, descrição) ficam de fora
+            ps = corpo.iter(_TEI + "p") if corpo is not None else []
+            texto = "\n\n".join(p.text.strip() for p in ps if p.text and p.text.strip())
+            nome = el.find(f".//{_TEI}titleStmt/{_TEI}title/{_TEI}name")
+            media = el.find(f".//{_TEI}titleStmt/{_TEI}title/{_TEI}media")
+            yield texto, (nome.text or "") if nome is not None else "", (media.get("source", "") if media is not None else "")
+            el.clear()
+
+
+def download_carolina(pasta, taxonomias, com_wikipedia=False):
+    """Baixa o Corpus Carolina (as taxonomias pedidas), um .xml.gz por vez, e grava o texto em
+    data/carolina/carolina_<arquivo>.txt. Continua de onde parou (data/carolina/.pronto).
+
+    A Wikipédia que vem dentro do Carolina (os arquivos wikis/pt/, ~1 GB) é pulada: o prepare_data já baixa
+    a Wikipédia inteira. Do resto dos wikis, só ficam as páginas de conteúdo (sem usuários e discussões).
+    """
+    pasta.mkdir(parents=True, exist_ok=True)
+    pronto = pasta / ".pronto"
+    estado = _estado(pronto)
+    feitos = set(estado.get("arquivos", []))
+    total_docs = estado.get("docs", 0)
+    inicio = time.time()
+    for cod in taxonomias:
+        tax = CAROLINA_TAXONOMIAS.get(cod)
+        if tax is None:
+            raise SystemExit(f"Taxonomia do Carolina desconhecida: {cod} (use {', '.join(CAROLINA_TAXONOMIAS)})")
+        try:
+            lista = fetch(f"{CAROLINA}{tax}/checksum.sha256").decode("utf-8").split()[1::2]
+        except Exception as error:
+            print(f"Carolina: não consegui listar {tax}: {error}")
+            continue
+        for rel in lista:
+            chave = f"{tax}/{rel}"
+            if chave in feitos:
+                continue
+            if cod == "wik" and rel.startswith("pt/") and not com_wikipedia:
+                continue  # os arquivos pt/WIK* do Carolina são a própria Wikipédia: nem baixa
+            nome = "carolina_" + re.sub(r"[^A-Za-z0-9]+", "_", f"{cod}_{rel}").strip("_").lower() + ".txt"
+            with tempfile.TemporaryDirectory() as tmp:
+                gz = Path(tmp) / "a.xml.gz"
+                try:
+                    gz.write_bytes(fetch(f"{CAROLINA}{tax}/{rel}.gz", timeout=300))
+                except Exception as error:
+                    print(f"  falhou {chave}: {error} (rode de novo para tentar outra vez)")
+                    continue
+                docs, pulados = [], 0
+                for texto, titulo, fonte in _carolina_docs(gz):
+                    if cod == "wik" and ((fonte.startswith("ptwiki") and not com_wikipedia)
+                                         or _WIKI_BASTIDOR.match(titulo)):
+                        pulados += 1
+                        continue
+                    texto = _limpar_doc(texto)
+                    if len(texto.split()) < 50:
+                        pulados += 1
+                        continue
+                    docs.append(texto)
+            if docs:
+                destino = pasta / nome
+                destino.with_suffix(".tmp").write_text(SEPARADOR.join(docs), encoding="utf-8")
+                os.replace(destino.with_suffix(".tmp"), destino)
+            feitos.add(chave)
+            total_docs += len(docs)
+            _gravar_estado(pronto, {"arquivos": sorted(feitos), "docs": total_docs})
+            mb = sum(f.stat().st_size for f in pasta.glob("*.txt")) / 1e6
+            print(f"  Carolina {chave}: {len(docs)} documentos ({pulados} pulados) | total {total_docs:,} "
+                  f"documentos, {mb:,.0f} MB, {time.time() - inicio:.0f}s", flush=True)
+    mb = sum(f.stat().st_size for f in pasta.glob("*.txt")) / 1e6
+    print(f"Carolina pronto: {total_docs:,} documentos ({mb:,.0f} MB) em {pasta}")
+
+
+# GigaVerbo-v2 (Polygl0t/gigaverbo-v2): ~320 bilhões de tokens da web em português, com notas de
+# qualidade educacional e de toxicidade. Usamos só o subconjunto edu_high (nota educacional ≥ 4) e
+# um pedaço de cada um dos 56 arquivos (um "grupo de linhas" do parquet por vez, lido pela internet
+# sem baixar o arquivo inteiro), para misturar as fontes: cada arquivo tem um site/crawl diferente.
+GIGAVERBO = "Polygl0t/gigaverbo-v2"
+
+
+def _ordem_espalhada(n):
+    """0, n/2, n/4, 3n/4...: posições espalhadas pelo arquivo (sequência de van der Corput)."""
+    vistos, ordem, i = set(), [], 1
+    while len(ordem) < n:
+        f, k, b = 0.0, i, 0.5
+        while k:
+            f, k, b = f + b * (k & 1), k >> 1, b / 2
+        pos = int(f * n) if i > 1 else 0
+        i += 1
+        if pos not in vistos:
+            vistos.add(pos)
+            ordem.append(pos)
+        if i > 64 * n:
+            ordem += [p for p in range(n) if p not in vistos]
+    return ordem
+
+
+def download_gigaverbo(pasta, tokens, subconjunto="edu_high", toxico_max=2):
+    """Grava ~`tokens` tokens do GigaVerbo-v2 em data/gigaverbo/gigaverbo_AA_GG.txt (arquivo AA, grupo GG).
+    Continua de onde parou (.pronto); pedir mais tokens depois só baixa o que falta.
+    `token_count` vem no próprio dataset (tokenizer do Tucano, parecido com o nosso)."""
+    try:
+        import fsspec
+        import pyarrow.parquet as pq
+    except ImportError:
+        print("Para baixar o GigaVerbo, instale: pip install pyarrow fsspec aiohttp")
+        return
+    pasta.mkdir(parents=True, exist_ok=True)
+    pronto = pasta / ".pronto"
+    estado = _estado(pronto)
+    feitos = dict(estado.get("grupos", {}))
+    total = sum(feitos.values())
+    if total >= tokens:
+        print(f"GigaVerbo já baixado: {total / 1e9:.2f} bilhão de tokens em {pasta}")
+        return
+    try:
+        arvore = _json_url(f"https://huggingface.co/api/datasets/{GIGAVERBO}/tree/main/{subconjunto}")
+    except Exception as error:
+        print("GigaVerbo: não consegui listar os arquivos:", error)
+        return
+    arquivos = sorted(f["path"] for f in arvore if f["path"].endswith(".parquet"))
+    print(f"GigaVerbo ({subconjunto}): {len(arquivos)} arquivos; já tem {total / 1e9:.2f} bilhão de tokens, "
+          f"meta {tokens / 1e9:.2f} bilhão", flush=True)
+    fs = fsspec.filesystem("https")
+    abertos, grupos = {}, {}
+
+    def abrir(i):
+        if i not in abertos:
+            arq = fs.open(f"{HF}{GIGAVERBO}/resolve/main/{arquivos[i]}", "rb", block_size=8 << 20)
+            abertos[i] = (arq, pq.ParquetFile(arq))
+            grupos[i] = _ordem_espalhada(abertos[i][1].metadata.num_row_groups)
+        return abertos[i][1]
+
+    inicio, novos, rodada = time.time(), 0, 0
+    try:
+        while total < tokens:
+            algum = False
+            for i in range(len(arquivos)):  # uma rodada = um grupo de cada arquivo
+                if total >= tokens:
+                    break
+                try:
+                    pf = abrir(i)
+                except Exception as error:
+                    print(f"  arquivo {arquivos[i]} não abriu: {error}")
+                    continue
+                if rodada >= len(grupos[i]):
+                    continue
+                algum = True
+                g = grupos[i][rodada]
+                chave = f"{i:02d}_{g:02d}"
+                if chave in feitos:
+                    continue
+                try:
+                    t = pf.read_row_group(g, columns=["text", "token_count", "toxic_int_score"])
+                except Exception as error:
+                    print(f"  grupo {chave} falhou: {error} (rode de novo para tentar outra vez)")
+                    continue
+                docs, n_tok = [], 0
+                for texto, n, tox in zip(t.column("text").to_pylist(), t.column("token_count").to_pylist(),
+                                         t.column("toxic_int_score").to_pylist()):
+                    if tox is not None and tox > toxico_max:
+                        continue
+                    texto = _limpar_doc(texto or "")
+                    if len(texto) < 300:
+                        continue
+                    docs.append(texto)
+                    n_tok += n or 0
+                destino = pasta / f"gigaverbo_{chave}.txt"
+                destino.with_suffix(".tmp").write_text(SEPARADOR.join(docs), encoding="utf-8")
+                os.replace(destino.with_suffix(".tmp"), destino)
+                feitos[chave] = n_tok
+                total += n_tok
+                novos += n_tok
+                _gravar_estado(pronto, {"grupos": feitos, "subconjunto": subconjunto})
+                vel = novos / max(1.0, time.time() - inicio)
+                print(f"  GigaVerbo {chave}: {len(docs):,} documentos | {total / 1e9:.2f}/{tokens / 1e9:.2f} bilhão "
+                      f"de tokens ({vel / 1e6:.1f} M/s; faltam ~{max(0, tokens - total) / max(vel, 1) / 60:.0f} min)",
+                      flush=True)
+            if not algum:
+                break
+            rodada += 1
+    finally:
+        for arq, _ in abertos.values():
+            arq.close()
+    mb = sum(f.stat().st_size for f in pasta.glob("*.txt")) / 1e6
+    print(f"GigaVerbo pronto: {total / 1e9:.2f} bilhão de tokens ({mb:,.0f} MB) em {pasta}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="data/books")
@@ -205,12 +448,25 @@ def main():
                         help="nº de artigos da Wikipédia (0 = não baixar; -1 = todos, ~1,1 milhão)")
     parser.add_argument("--wiki-dir", default="data/wiki")
     parser.add_argument("--qa-auto-dir", default="data/qa_auto")
+    parser.add_argument("--carolina", nargs="?", const=CAROLINA_PADRAO, default=None,
+                        help=f"baixa o Corpus Carolina (taxonomias separadas por vírgula; sem valor: {CAROLINA_PADRAO})")
+    parser.add_argument("--carolina-dir", default="data/carolina")
+    parser.add_argument("--gigaverbo", type=float, default=0,
+                        help="tokens do GigaVerbo-v2 a baixar (ex.: 1.5e9 = 1,5 bilhão; 0 = não baixar)")
+    parser.add_argument("--gigaverbo-dir", default="data/gigaverbo")
+    parser.add_argument("--gigaverbo-toxico-max", type=int, default=2,
+                        help="nota de toxicidade máxima aceita (1 a 5; o edu_high já vem com no máximo 3)")
     args = parser.parse_args()
 
-    download_gutenberg(Path(args.out), args.max_books)
+    if args.max_books > 0:
+        download_gutenberg(Path(args.out), args.max_books)
     if args.wiki != 0:
         n = args.wiki if args.wiki > 0 else 10 ** 9
         download_wikipedia(Path(args.wiki_dir), Path(args.qa_auto_dir), n)
+    if args.carolina:
+        download_carolina(Path(args.carolina_dir), [c.strip() for c in args.carolina.split(",") if c.strip()])
+    if args.gigaverbo > 0:
+        download_gigaverbo(Path(args.gigaverbo_dir), int(args.gigaverbo), toxico_max=args.gigaverbo_toxico_max)
 
 
 if __name__ == "__main__":

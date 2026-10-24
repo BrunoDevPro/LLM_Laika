@@ -210,10 +210,53 @@ public final class IndiceRag implements AutoCloseable {
 
     /** O trecho mais relevante, ou null se a busca não tiver confiança (igual ao RagIndex.best). */
     public Trecho melhor(String pergunta) {
-        List<Trecho> r = buscar(pergunta);
+        return confiavel(buscar(pergunta));
+    }
+
+    /** O primeiro resultado, se a busca tiver confiança (_confident do rag.py); senão null. */
+    static Trecho confiavel(List<Trecho> r) {
+        return confiavel(r, true);
+    }
+
+    /** qualquerTexto=false: os textos de data/modern também precisam da nota mínima (busca só pelo nome). */
+    static Trecho confiavel(List<Trecho> r, boolean qualquerTexto) {
         if (r.isEmpty() || r.get(0).cobertura < 0.6) return null;
         Trecho top = r.get(0);
-        return top.nota >= 1.8 || "texto".equals(top.tipo) ? top : null;
+        return top.nota >= 1.8 || (qualquerTexto && "texto".equals(top.tipo)) ? top : null;
+    }
+
+    /**
+     * Até k trechos confiáveis para a pergunta (RagIndex.contexts): tenta cada consulta de
+     * Texto.consultasRag; os extras são do mesmo artigo, na ordem de quantas palavras da pergunta têm.
+     */
+    public List<Trecho> contextos(String pergunta, int k) {
+        List<String> consultas = Texto.consultasRag(pergunta);
+        for (int c = 0; c < consultas.size(); c++) {
+            List<Trecho> r = buscar(consultas.get(c));
+            Trecho top = confiavel(r, c == 0);
+            if (top == null) continue;
+            List<Trecho> achados = new ArrayList<>();
+            achados.add(top);
+            if (k > 1) {
+                Set<String> queridas = radicais(Texto.palavrasDeConteudo(pergunta));
+                List<Trecho> mesmos = new ArrayList<>();
+                List<Integer> pontos = new ArrayList<>();
+                for (Trecho t : r) {
+                    if (!t.titulo.equals(top.titulo) || t.texto.equals(top.texto)) continue;
+                    Set<String> tem = radicais(Texto.palavras(t.texto));
+                    tem.retainAll(queridas);
+                    mesmos.add(t);
+                    pontos.add(tem.size());
+                }
+                // Ordenação estável pelo número de palavras (empate: ordem da busca), como o sort do Python.
+                List<Integer> ordem = new ArrayList<>();
+                for (int i = 0; i < mesmos.size(); i++) ordem.add(i);
+                Collections.sort(ordem, (a, b) -> Integer.compare(pontos.get(b), pontos.get(a)));
+                for (int i = 0; i < Math.min(k - 1, ordem.size()); i++) achados.add(mesmos.get(ordem.get(i)));
+            }
+            return achados;
+        }
+        return new ArrayList<>();
     }
 
     @Override

@@ -5,21 +5,29 @@ Para o modelo não decorar o pergeresp (e responder tudo com ele), cada lote mis
      ~7,5 mil exemplos, cada um aparece uma vez por época, ~37%); o identidade.txt (nome da
      Laika) tem peso extra;
   2) exemplos sintéticos: "continue o texto", "frase com a palavra X", "complete a frase"
-     (de todos os textos) e "resuma o texto" (trechos dos livros do Gutenberg), mais as
-     perguntas "O que é X?" tiradas da Wikipédia (data/qa_auto/);
+     (de todos os textos) e "resuma o texto" (trechos dos livros do Gutenberg), as perguntas
+     "O que é X?" tiradas da Wikipédia (data/qa_auto/) e ~20 mil perguntas com Contexto tiradas
+     dos trechos da Wikipédia ("Onde X nasceu?", "O que X inventou?"; 10% com o trecho errado e a
+     resposta "não sei");
   3) trechos de texto puros (replay), para não esquecer o português do pré-treino.
 
 Com o índice do RAG pronto (python rag.py build), parte das perguntas ganha um
 "Contexto:" achado nos textos, igual ao que o chat faz. Assim o modelo aprende a usar
 o contexto quando ele ajuda e a ignorá-lo quando não ajuda.
 
+Memória de IA: as conversas de data/qa/conversas.jsonl e ~30% dos outros exemplos vêm com
+trocas anteriores no prompt, como o chat manda; a loss fica só na última resposta.
+
 Parte de checkpoints/pretrain_best.pt e grava em checkpoints/finetuned.pt, então o
 pré-treino nunca é sobrescrito: dá para repetir só este script à vontade.
 """
 
 import argparse
+import json
 import math
 import random
+import shutil
+import time
 from pathlib import Path
 
 import numpy as np
@@ -28,10 +36,11 @@ import torch.nn.functional as F
 from tokenizers import Tokenizer
 
 from chat import build_prompt, generate, with_citation
-from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit_context, split_example,
-                        rag_query, wants_rag, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
+from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit_context, split_conversation,
+                        reading_examples, chat_turn, rag_chunks, wants_rag, MAX_CONTEXT_WORDS,
+                        ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
-from rag import open_index
+from rag import open_index, wiki_passages
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--books", nargs="+", default=["data/books", "data/wiki", "data/modern"])
@@ -40,6 +49,12 @@ parser.add_argument("--summary-books", default="data/books",
 parser.add_argument("--qa", default="data/qa")
 parser.add_argument("--qa-auto", default="data/qa_auto", help="perguntas geradas da Wikipédia")
 parser.add_argument("--wiki-qa", type=int, default=3000, help="máximo de perguntas da Wikipédia usadas")
+parser.add_argument("--wiki-dir", default="data/wiki")
+parser.add_argument("--wiki-leitura", type=int, default=20000,
+                    help="perguntas com Contexto tiradas dos trechos da Wikipédia (\"Onde X nasceu?\"...)")
+parser.add_argument("--wiki-mb", type=float, default=40, help="MB de artigos lidos para essas perguntas")
+parser.add_argument("--history-share", type=float, default=0.3,
+                    help="fração dos exemplos que ganham 1 a 4 trocas anteriores (memória de IA)")
 parser.add_argument("--identity-boost", type=int, default=2,
                     help="peso extra do identidade.txt (quem é a Laika)")
 parser.add_argument("--out", default="checkpoints")
@@ -52,8 +67,11 @@ parser.add_argument("--rag-db", default="data/rag/laika_rag.db")
 parser.add_argument("--rag-share", type=float, default=0.5,
                     help="fração das perguntas (que pedem informação) que ganham Contexto do RAG")
 parser.add_argument("--no-rag", action="store_true")
-parser.add_argument("--lr", type=float, default=5e-5)
+parser.add_argument("--lr", type=float, default=None,
+                    help="taxa de aprendizado (o tamanho do passo de cada ajuste dos pesos); "
+                         "padrão: 5e-5 até 20M de parâmetros e 1e-4 nos modelos maiores")
 parser.add_argument("--batch-size", type=int, default=16)
+parser.add_argument("--no-backup", action="store_true", help="não guarda o finetuned.pt anterior em checkpoints/backups")
 parser.add_argument("--synthetic", type=int, default=10000,
                     help="nº de exemplos gerados dos livros (era 4000; subiu junto com os ~7,5 mil escritos à mão)")
 parser.add_argument("--qa-share", type=float, default=0.25, help="fração dos exemplos de chat vinda do pergeresp")
@@ -76,7 +94,11 @@ block = cfg["block_size"]
 
 model = build_model(cfg, dropout=args.dropout).to(device)
 model.load_state_dict(ckpt["model"])
-print(f"Pré-treino carregado (val loss {ckpt['val_loss']:.4f}, step {ckpt['step']})")
+n_params = sum(p.numel() for p in model.parameters())
+# Modelos maiores com a taxa do de 7M quase não aprendiam os exemplos escritos (nem o próprio nome).
+lr = args.lr if args.lr is not None else (1e-4 if n_params > 20e6 else 5e-5)
+print(f"Pré-treino carregado (val loss {ckpt['val_loss']:.4f}, step {ckpt['step']}, "
+      f"{n_params / 1e6:.1f}M parâmetros, taxa de aprendizado {lr:g})")
 
 assistant_id = tokenizer.token_to_id(ASSISTANT_TOKEN)
 end_id = tokenizer.token_to_id(END_TOKEN)
@@ -112,6 +134,13 @@ print(f"Textos usados: {len(book_texts)} de {len(book_files)} arquivos "
 
 print("Lendo perguntas/respostas:")
 qa_texts = load_qa_examples(args.qa)
+# Conversas de várias trocas (gerar_pergeresp.py): "Qual é a capital da França?" ... "E da Itália?".
+conversas_path = Path(args.qa) / "conversas.jsonl"
+if conversas_path.exists():
+    conversas = [" ".join(chat_turn(q, a) for q, a in json.loads(line))
+                 for line in conversas_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    print(f"  conversas.jsonl: {len(conversas)} conversas")
+    qa_texts += conversas
 identity_texts = set(parse_qa_text((Path(args.qa) / "identidade.txt").read_text(encoding="utf-8"))) \
     if (Path(args.qa) / "identidade.txt").exists() else set()
 
@@ -125,28 +154,66 @@ if Path(args.qa_auto).exists():
     random.shuffle(auto)
     syn_texts += auto[:args.wiki_qa]
 
+# Perguntas com Contexto tiradas dos trechos da Wikipédia (os mesmos trechos que o RAG usa).
+wiki_files = sorted(Path(args.wiki_dir).glob("*.txt"))
+random.shuffle(wiki_files)
+passages, size = [], 0
+for f in wiki_files:
+    if size >= args.wiki_mb * 1e6:
+        break
+    passages += list(wiki_passages(f.read_text(encoding="utf-8")))
+    size += f.stat().st_size
+reading = reading_examples(passages, args.wiki_leitura, chunks=rag_chunks(block), seed=args.seed)
+print(f"Leitura da Wikipédia: {len(reading)} perguntas com Contexto (de {len(passages)} trechos)")
+syn_texts += reading
+
 # ---------- Contexto do RAG em parte das perguntas ----------
 rag = None if args.no_rag else open_index(args.rag_db)
 
 
 def add_context(examples, share):
+    """Põe o Contexto do RAG na última pergunta, como o chat faz (1 a 3 trechos, conforme a janela)."""
     if rag is None or share <= 0:
         return examples, 0
     out, n = [], 0
+    k = rag_chunks(block)
     for example in examples:
-        question, answer = split_example(example)
+        history, question, answer = split_conversation(example)
         if random.random() < share and wants_rag(question):
-            hit = rag.best(rag_query(question))
-            if hit:
+            hits = rag.contexts(question, k)
+            if hits:
+                prefix = history + " " if history else ""
+
                 def count(user_text):
-                    return len(tokenizer.encode(
-                        f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN} {answer} {END_TOKEN}").ids)
-                user_text = fit_context(count, question, hit["text"], block)
+                    return len(tokenizer.encode(prefix + chat_turn(user_text, answer)).ids)
+                user_text = fit_context(count, question, " ".join(h["text"] for h in hits), block,
+                                        max_words=MAX_CONTEXT_WORDS * len(hits))
                 if user_text:
-                    out.append(f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN} {answer} {END_TOKEN}")
+                    out.append(prefix + chat_turn(user_text, answer))
                     n += 1
                     continue
         out.append(example)
+    return out, n
+
+
+def add_history(examples, pool, share, skip=frozenset()):
+    """Põe 1 a 4 trocas anteriores (sem relação) em parte dos exemplos: o modelo se acostuma a ver o
+    histórico no prompt (memória de IA) e a usá-lo só quando ele importa, como nas conversas."""
+    if not pool or share <= 0:
+        return examples, 0
+    out, n = [], 0
+    for example in examples:
+        if example not in skip and random.random() < share:
+            for k in range(random.randint(1, 4), 0, -1):
+                joined = " ".join(chat_turn(q, a) for q, a in random.sample(pool, k)) + " " + example
+                if len(tokenizer.encode(joined).ids) <= block:
+                    out.append(joined)
+                    n += 1
+                    break
+            else:
+                out.append(example)
+        else:
+            out.append(example)
     return out, n
 
 
@@ -156,7 +223,14 @@ if rag is not None:
     print(f"RAG: {n_qa_ctx} perguntas escritas à mão e {n_syn_ctx} automáticas ganharam Contexto")
 else:
     print("RAG desligado: o fine-tuning segue sem exemplos com Contexto do RAG "
-          "(os de data/qa/leitura.txt continuam).")
+          "(os de data/qa/leitura.txt e da Wikipédia continuam).")
+
+# Trocas curtas, sem contexto, para servir de histórico.
+pool = [split_conversation(e)[1:] for e in qa_texts if e.count(USER_TOKEN) == 1 and "Contexto:" not in e]
+pool = [(q, a) for q, a in pool if len(q.split()) <= 15 and len(a.split()) <= 25]
+qa_texts, n_qa_hist = add_history(qa_texts, pool, args.history_share, skip=identity_texts)
+syn_texts, n_syn_hist = add_history(syn_texts, pool, args.history_share)
+print(f"Memória de IA: {n_qa_hist + n_syn_hist} exemplos ganharam mensagens anteriores")
 
 for sample in random.sample(syn_texts, min(4, len(syn_texts))):
     print("   ", sample[:160].replace("\n", " "))
@@ -173,7 +247,8 @@ def encode_chat(texts, identity=frozenset()):
             continue
         if assistant_id not in ids or end_id not in ids:
             continue
-        answer_start = ids.index(assistant_id) + 1
+        # Numa conversa, só a ÚLTIMA resposta é treinada (as anteriores são o histórico).
+        answer_start = len(ids) - ids[::-1].index(assistant_id)
         inputs = ids[:-1]
         # Loss só na RESPOSTA (e no <|end|>); a pergunta vira -100.
         labels = [tok if pos + 1 >= answer_start else -100 for pos, tok in enumerate(ids[1:])]
@@ -218,11 +293,15 @@ del parts
 n_replay = round(args.batch_size * args.replay / (1 - args.replay)) if args.replay > 0 else 0
 
 
+# Trechos de até 512 tokens: com o contexto de 2048 (100M), trechos da janela inteira só gastariam memória.
+replay_len = min(block, 512)
+
+
 def replay_items(n):
     if n == 0:
         return []
-    starts = torch.randint(0, len(stream) - block - 1, (n,)).tolist()
-    return [(stream[s:s + block].tolist(), stream[s + 1:s + block + 1].tolist()) for s in starts]
+    starts = torch.randint(0, len(stream) - replay_len - 1, (n,)).tolist()
+    return [(stream[s:s + replay_len].tolist(), stream[s + 1:s + replay_len + 1].tolist()) for s in starts]
 
 
 def make_batch(items):
@@ -236,10 +315,15 @@ def make_batch(items):
     return torch.tensor(xs, device=device), torch.tensor(ys, device=device)
 
 
+# bf16 na A100/L4 (metade da memória; o de 100M não caberia em float32 com o lote inteiro). Na T4, float32.
+amp = device == "cuda" and torch.cuda.is_bf16_supported()
+
+
 def batch_loss(items):
     x, y = make_batch(items)
-    logits = model(x)
-    return F.cross_entropy(logits.view(-1, logits.size(-1)), y.view(-1), ignore_index=-100)
+    with torch.autocast(device_type=device, dtype=torch.bfloat16, enabled=amp):
+        logits = model(x)
+    return F.cross_entropy(logits.float().view(-1, logits.size(-1)), y.view(-1), ignore_index=-100)
 
 
 @torch.no_grad()
@@ -253,6 +337,7 @@ def validate(items):
     return sum(losses) / len(losses)
 
 
+SAMPLE_HISTORY = [("Qual é a capital da França?", "A capital da França é Paris.")]
 SAMPLE_PROMPTS = [
     "Qual é o seu nome?", "Oi", "O que é um vulcão?", "Quem foi Santos Dumont?", "Qual é a capital da França?",
     "Complete a frase: Quem espera", "Escreva uma frase com a palavra noite.",
@@ -269,11 +354,15 @@ def show_samples():
         prompt, source = build_prompt(question, tokenizer, block, rag, None, max_new_tokens=60)
         answer = generate(model, tokenizer, prompt, device, max_new_tokens=60)
         print(f"   Você: {question}\n   LLM:  {with_citation(answer, source)}")
+    # Memória de IA: a pergunta só faz sentido com a anterior.
+    prompt, source = build_prompt("E da Itália?", tokenizer, block, rag, None, 60, SAMPLE_HISTORY)
+    answer = generate(model, tokenizer, prompt, device, max_new_tokens=60)
+    print(f"   (depois de \"{SAMPLE_HISTORY[0][0]}\") Você: E da Itália?\n   LLM:  {with_citation(answer, source)}")
     model.train()
 
 
 # ---------- Treino ----------
-optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
+optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
 items_per_epoch = len(syn_train) + len(qa_train) * qa_repeat + len(id_train) * id_repeat
 steps_per_epoch = math.ceil(items_per_epoch / args.batch_size)
 total_steps = steps_per_epoch * args.epochs
@@ -284,9 +373,9 @@ print(f"{steps_per_epoch} steps por época, até {total_steps} no total "
 
 def lr_at(step):
     if step < warmup:
-        return args.lr * (step + 1) / warmup
+        return lr * (step + 1) / warmup
     progress = (step - warmup) / max(1, total_steps - warmup)
-    return args.lr * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * min(progress, 1.0))))
+    return lr * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * min(progress, 1.0))))
 
 
 print("\nAntes do fine-tuning:")
@@ -294,6 +383,15 @@ show_samples()
 
 best_val, bad_epochs, step = float("inf"), 0, 0
 best_path = out_dir / "finetuned.pt"
+# O finetuned.pt é sobrescrito a cada melhora: antes, guarda o anterior em checkpoints/backups/ (os 3 últimos).
+if best_path.exists() and not args.no_backup:
+    backups = out_dir / "backups"
+    backups.mkdir(exist_ok=True)
+    quando = time.strftime("%Y-%m-%d_%H%M", time.localtime(best_path.stat().st_mtime))
+    shutil.copy2(best_path, backups / f"finetuned_{quando}.pt")
+    for velho in sorted(backups.glob("finetuned_*.pt"))[:-3]:
+        velho.unlink()
+    print(f"Backup do finetuned.pt anterior: {backups / f'finetuned_{quando}.pt'}")
 model.train()
 
 for epoch in range(1, args.epochs + 1):
@@ -330,5 +428,5 @@ for epoch in range(1, args.epochs + 1):
 
 print("=" * 40)
 print(f"Fine-tuning concluído. Melhor val: {best_val:.4f} -> {best_path}")
-print("Se ainda repetir o pergeresp: rode de novo com --qa-share 0.12 ou --lr 3e-5.")
+print("Se ainda repetir o pergeresp: rode de novo com mais sintéticos (--synthetic 20000) ou --lr menor.")
 print("Converse com: python chat.py")

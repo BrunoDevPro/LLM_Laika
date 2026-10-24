@@ -237,17 +237,13 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         secao("ATUALIZAR");
         LinearLayout u = cartao(false);
         u.addView(texto("Usar um modelo novo", 16, R.color.topo_texto, true));
-        TextView ajuda = texto("O jeito mais fácil: a tela Colab roda o treino na nuvem e baixa o resultado.\n\n"
-                + "Ou escolha um arquivo baixado do Google Drive: o laika_pacote.zip (célula 6 do Colab: modelo, "
-                + "tokenizer e, se marcado, o índice ou os textos para o celular montar o índice) ou, de uma vez, "
-                + "finetuned.pt, pretrain_best.pt e tokenizer.json (e, se quiser, laika_rag.db e memoria.json). "
-                + "Também aceita um backup .zip exportado pelo app.\n\n"
-                + "Antes de trocar, a versão em uso é guardada como backup.", 13, R.color.texto_laika, false);
+        TextView ajuda = texto("laika_pacote.zip do Colab, os .pt e o tokenizer.json, ou um backup .zip do app. "
+                + "A versão em uso vai para os backups antes da troca.", 13, R.color.texto_laika, false);
         ajuda.setPadding(0, dp(4), 0, 0);
         u.addView(ajuda);
         LinearLayout lu = linhaDeBotoes(u);
         botao(lu, "Escolher arquivos", true, v -> escolherArquivos.launch(new String[]{"*/*"}));
-        botao(lu, "Colab", false, v -> startActivity(new android.content.Intent(this, ColabActivity.class)));
+        botao(lu, "Treinar", false, v -> startActivity(new android.content.Intent(this, ColabActivity.class)));
 
         // Backups
         secao("BACKUPS (" + backups.size() + ")");
@@ -320,20 +316,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
     }
 
     private void usar(Armazem.Versao b, boolean atualJaSalva) {
-        if (atualJaSalva) {
-            new AlertDialog.Builder(this).setTitle("Usar \"" + b.nome + "\"?")
-                    .setMessage("A conversa, a memória e o modelo passam a ser os deste backup.")
-                    .setPositiveButton("Usar", (d, w) -> motor.usarBackup(b.id, null))
-                    .setNegativeButton("Cancelar", null).show();
-            return;
-        }
-        new AlertDialog.Builder(this).setTitle("Usar \"" + b.nome + "\"?")
-                .setMessage("A versão em uso (\"" + motor.nomeVersao + "\") tem mudanças que não estão em nenhum "
-                        + "backup (conversa, memória ou arquivos). Guardar antes de trocar?")
-                .setPositiveButton("Guardar e usar", (d, w) ->
-                        motor.usarBackup(b.id, motor.nomeVersao + " (" + data(System.currentTimeMillis()) + ")"))
-                .setNeutralButton("Usar sem guardar", (d, w) -> motor.usarBackup(b.id, null))
-                .setNegativeButton("Cancelar", null).show();
+        SeletorModelos.confirmarUso(this, motor, b, atualJaSalva);
     }
 
     private void apagar(Armazem.Versao b) {

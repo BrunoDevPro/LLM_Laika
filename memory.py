@@ -1,9 +1,8 @@
 """Memória do chatbot: guarda o que o usuário conta sobre si e lembra depois.
 
-Por que não "memória de conversa" dentro do modelo? A janela do modelo tem só 256
-tokens e ele foi treinado com uma pergunta por vez. Colocar as falas anteriores no
-prompt ocuparia o espaço do contexto do RAG e confundiria o modelo. Por isso a
-memória fica FORA do modelo:
+As últimas trocas da conversa entram no prompt (a "memória de IA", em chat.build_prompt),
+mas só enquanto couberem na janela e só durante a conversa. O que vale entre conversas
+fica FORA do modelo, aqui:
 
 - frases como "meu nome é Ana", "eu moro em Recife", "eu gosto de futebol",
   "minha cor favorita é azul" e "lembre que amanhã tenho prova" são guardadas

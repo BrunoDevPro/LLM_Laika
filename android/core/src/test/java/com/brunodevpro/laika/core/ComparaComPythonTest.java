@@ -122,6 +122,21 @@ class ComparaComPythonTest {
     }
 
     @Test
+    void modoCompactoDaOMesmoResultado() throws IOException {
+        // Pesos em float16 na memória (modelos grandes): os mesmos logits, bit a bit.
+        Modelo compacto = new Modelo(new FileInputStream(new File(assets, "laika_chat.bin")), 4, true);
+        assertTrue(compacto.compacto && !chat.compacto);
+        for (Map<String, Object> c : ler("modelo.jsonl")) {
+            if (!"finetuned".equals(c.get("modelo"))) continue;
+            int[] ids = ints(c.get("ids"));
+            float[] a = chat.avancar(chat.novoCache(), ids, 0, ids.length);
+            float[] b = compacto.avancar(compacto.novoCache(), ids, 0, ids.length);
+            assertTrue(java.util.Arrays.equals(a, b), "compacto diferente");
+        }
+        compacto.fechar();
+    }
+
+    @Test
     void ragEPalavras() throws IOException {
         for (Map<String, Object> c : ler("rag.jsonl")) {
             String p = (String) c.get("pergunta");
@@ -137,6 +152,15 @@ class ComparaComPythonTest {
             }
             IndiceRag.Trecho m = rag.melhor(p);
             assertEquals(c.get("melhor"), m == null ? null : m.titulo, "melhor: " + p);
+            assertEquals(c.get("nome"), Texto.nomeDaPergunta(p), "nome: " + p);
+            assertEquals(c.get("segue"), Texto.segueConversa(p), "segueConversa: " + p);
+            assertEquals(c.get("consultas"), Texto.consultasRag(p), "consultas: " + p);
+            Map<?, ?> contextos = (Map<?, ?>) c.get("contextos");
+            for (int k = 1; k <= 3; k++) {
+                List<List<String>> obtido = new ArrayList<>();
+                for (IndiceRag.Trecho t : rag.contextos(p, k)) obtido.add(java.util.Arrays.asList(t.titulo, t.texto));
+                assertEquals(contextos.get(String.valueOf(k)), obtido, "contextos k=" + k + ": " + p);
+            }
         }
     }
 
@@ -165,13 +189,41 @@ class ComparaComPythonTest {
         Memoria mem = new Memoria(f);
         mem.tratar("lembre que o vulcão da feira de ciências é de argila");
         Laika laika = new Laika(chat, tok);
+        int comHistorico = 0;
         for (Map<String, Object> c : ler("prompt.jsonl")) {
             String p = (String) c.get("pergunta");
-            Laika.Prompt pr = laika.montarPrompt(p, rag, Boolean.TRUE.equals(c.get("memoria")) ? mem : null, 80);
-            assertEquals(c.get("prompt"), pr.texto, "prompt: " + p);
-            assertEquals(c.get("fonte"), pr.fonte, "fonte: " + p);
+            int bloco = c.containsKey("bloco") ? ((Double) c.get("bloco")).intValue() : 256;
+            int maxNovos = c.containsKey("max_novos") ? ((Double) c.get("max_novos")).intValue() : 80;
+            List<String[]> hist = new ArrayList<>();
+            if (c.containsKey("historico")) {
+                for (Object t : (List<?>) c.get("historico")) {
+                    List<?> par = (List<?>) t;
+                    hist.add(new String[]{(String) par.get(0), (String) par.get(1)});
+                }
+            }
+            Laika.Prompt pr = laika.montarPrompt(p, rag, Boolean.TRUE.equals(c.get("memoria")) ? mem : null,
+                    maxNovos, hist, bloco);
+            String caso = p + " (bloco " + bloco + ", " + maxNovos + " tokens, " + hist.size() + " trocas)";
+            assertEquals(c.get("prompt"), pr.texto, "prompt: " + caso);
+            assertEquals(c.get("fonte"), pr.fonte, "fonte: " + caso);
+            if (pr.texto.indexOf(Texto.END) > 0) comHistorico++;
         }
+        System.out.println("prompt: " + comHistorico + " prompts com histórico iguais ao Python");
+        assertTrue(comHistorico > 0, "nenhum prompt com histórico");
         f.delete();
+    }
+
+    @Test
+    void penalidadeDoFim() throws IOException {
+        for (Map<String, Object> c : ler("penalidade.jsonl")) {
+            int maxNovos = ((Double) c.get("max_novos")).intValue();
+            int minimo = Laika.minimoResposta(maxNovos);
+            assertEquals(((Double) c.get("minimo")).intValue(), minimo, "mínimo: " + maxNovos);
+            List<?> valores = (List<?>) c.get("valores");
+            for (int k = 0; k < valores.size(); k++) {
+                assertEquals((Double) valores.get(k), Laika.penalidadeFim(k, minimo), 1e-12, "passo " + k);
+            }
+        }
     }
 
     @Test

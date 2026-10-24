@@ -28,6 +28,9 @@ public final class ConversorPt {
     /** O que se sabe do checkpoint (vai para a descrição da versão). */
     public static final class Info {
         public int vocab, block, dim, heads, layers;
+        /** RoPE (formato LAIKA002, o preset de 100M) e o theta dele. */
+        public boolean rope;
+        public float theta = 10000f;
         public long parametros;
         public boolean finetuned;
         public Double valLoss;
@@ -39,16 +42,17 @@ public final class ConversorPt {
             StringBuilder sb = new StringBuilder();
             sb.append(String.format("%.1f M parâmetros · %d dim · %d camadas · contexto %d",
                     parametros / 1e6, dim, layers, block));
+            if (rope) sb.append(" · RoPE");
             if (valLoss != null) sb.append(String.format(" · val loss %.3f", valLoss));
             if (step != null) sb.append(" · step ").append(step);
             return sb.toString();
         }
     }
 
-    private static List<String> ordem(int layers) {
+    private static List<String> ordem(int layers, boolean rope) {
         List<String> n = new ArrayList<>();
         n.add("tok_emb.weight");
-        n.add("pos_emb.weight");
+        if (!rope) n.add("pos_emb.weight");
         for (int i = 0; i < layers; i++) {
             String p = "blocks." + i + ".";
             for (String s : new String[]{"ln1.weight", "ln1.bias", "attn.qkv.weight", "attn.proj.weight", "ln2.weight",
@@ -80,7 +84,8 @@ public final class ConversorPt {
         java.io.DataInputStream d = new java.io.DataInputStream(new java.io.BufferedInputStream(in, 1 << 16));
         byte[] cab = new byte[28];
         d.readFully(cab);
-        if (!new String(cab, 0, 8, "US-ASCII").equals("LAIKA001")) throw new IOException("não é um arquivo de pesos da Laika");
+        String magic = new String(cab, 0, 8, "US-ASCII");
+        if (!magic.equals("LAIKA001") && !magic.equals("LAIKA002")) throw new IOException("não é um arquivo de pesos da Laika");
         ByteBuffer c = ByteBuffer.wrap(cab, 8, 20).order(ByteOrder.LITTLE_ENDIAN);
         Info i = new Info();
         i.temRodape = false;
@@ -89,7 +94,13 @@ public final class ConversorPt {
         i.dim = c.getInt();
         i.heads = c.getInt();
         i.layers = c.getInt();
-        i.parametros = parametros(i.vocab, i.block, i.dim, i.layers);
+        i.rope = magic.equals("LAIKA002");
+        if (i.rope) {
+            byte[] th = new byte[4];
+            d.readFully(th);
+            i.theta = ByteBuffer.wrap(th).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+        }
+        i.parametros = parametros(i.vocab, i.rope ? 0 : i.block, i.dim, i.layers);
         long pular = i.parametros * 2;
         while (pular > 0) {
             long p = d.skip(pular);
@@ -115,7 +126,7 @@ public final class ConversorPt {
         return i;
     }
 
-    /** Número de parâmetros do TinyLLM (sem contar a saída, que é o embedding). */
+    /** Número de parâmetros do TinyLLM (sem contar a saída, que é o embedding). Com RoPE, block = 0. */
     public static long parametros(int vocab, int block, int dim, int layers) {
         long d = dim, porCamada = 2 * d + 3 * d * d + d * d + 2 * d + 4 * d * d + 4 * d + 4 * d * d + d;
         return (long) vocab * d + (long) block * d + layers * porCamada + 2 * d;
@@ -128,7 +139,7 @@ public final class ConversorPt {
         }
     }
 
-    /** Converte e grava os pesos em `saida` (formato LAIKA001, float16). */
+    /** Converte e grava os pesos em `saida` (formato LAIKA001, ou LAIKA002 com RoPE; float16). */
     @SuppressWarnings("unchecked")
     public static Info converter(File pt, OutputStream saida) throws IOException {
         try (ZipFile zip = new ZipFile(pt)) {
@@ -137,14 +148,14 @@ public final class ConversorPt {
             Info info = info(ckpt);
             Map<Object, Object> estado = (Map<Object, Object>) ckpt.get("model");
 
-            List<String> nomes = ordem(info.layers);
+            List<String> nomes = ordem(info.layers, info.rope);
             Set<String> sobra = new LinkedHashSet<>();
             for (Object k : estado.keySet()) sobra.add(String.valueOf(k));
             sobra.removeAll(nomes);
             sobra.remove("head.weight");
             if (!sobra.isEmpty()) {
                 throw new IOException("o modelo tem partes que este app não conhece (" + String.join(", ", sobra)
-                        + "). Ele foi feito para o model.py atual (posições aprendidas, sem RoPE).");
+                        + "). Ele foi feito para o model.py atual.");
             }
             Pickle.Tensor emb = (Pickle.Tensor) estado.get("tok_emb.weight");
             Pickle.Tensor head = (Pickle.Tensor) estado.get("head.weight");
@@ -153,9 +164,10 @@ public final class ConversorPt {
                 throw new IOException("head.weight diferente de tok_emb.weight (o app espera pesos compartilhados)");
             }
 
-            ByteBuffer cab = ByteBuffer.allocate(28).order(ByteOrder.LITTLE_ENDIAN);
-            cab.put("LAIKA001".getBytes("US-ASCII"));
+            ByteBuffer cab = ByteBuffer.allocate(info.rope ? 32 : 28).order(ByteOrder.LITTLE_ENDIAN);
+            cab.put((info.rope ? "LAIKA002" : "LAIKA001").getBytes("US-ASCII"));
             cab.putInt(info.vocab).putInt(info.block).putInt(info.dim).putInt(info.heads).putInt(info.layers);
+            if (info.rope) cab.putFloat(info.theta);
             saida.write(cab.array());
 
             long params = 0;
@@ -211,6 +223,8 @@ public final class ConversorPt {
             i.dim = ((Number) cfg.get("embed_size")).intValue();
             i.heads = ((Number) cfg.get("heads")).intValue();
             i.layers = ((Number) cfg.get("layers")).intValue();
+            i.rope = Boolean.TRUE.equals(cfg.get("rope"));
+            if (cfg.get("rope_theta") instanceof Number) i.theta = ((Number) cfg.get("rope_theta")).floatValue();
         } catch (RuntimeException e) {
             throw new IOException("config do checkpoint incompleta");
         }

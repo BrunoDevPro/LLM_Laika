@@ -53,19 +53,19 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Botão de acesso rápido às versões e backups -->
+        <!-- Seletor de modelos: abre um painel flutuante com todos os modelos do celular -->
         <LinearLayout
             android:id="@+id/versao"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:background="@drawable/chip"
             android:clickable="true"
-            android:contentDescription="@string/versoes"
+            android:contentDescription="@string/modelos"
             android:focusable="false"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="10dp"
-            android:paddingEnd="12dp">
+            android:paddingEnd="6dp">
 
             <ImageView
                 android:layout_width="18dp"
@@ -85,6 +85,13 @@
                 android:textColor="@color/chip_texto"
                 android:textSize="13sp"
                 android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginStart="2dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_seta_baixo" />
         </LinearLayout>
 
         <ImageButton
@@ -226,6 +233,20 @@
                     android:orientation="vertical" />
             </LinearLayout>
         </ScrollView>
+
+        <!-- Aparece quando o usuário rola para cima: volta para a última mensagem -->
+        <ImageButton
+            android:id="@+id/descer"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="14dp"
+            android:background="@drawable/botao_redondo"
+            android:contentDescription="@string/descer"
+            android:elevation="4dp"
+            android:focusable="false"
+            android:src="@drawable/ic_descer"
+            android:visibility="gone" />
     </FrameLayout>
 
     <!-- Campo de texto (sempre ativo) e botão enviar/parar -->

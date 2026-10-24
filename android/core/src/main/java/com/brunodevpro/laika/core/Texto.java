@@ -23,6 +23,8 @@ public final class Texto {
     public static final String EOT = "<|endoftext|>";
     public static final String PAD = "[PAD]";
     public static final int MAX_CONTEXT_WORDS = 80;
+    /** Trocas anteriores que podem entrar no prompt ("memória de IA"), como o MAX_HISTORY do Python. */
+    public static final int MAX_HISTORY = 5;
 
     private static Set<String> conjunto(String palavras) {
         return new HashSet<>(Arrays.asList(palavras.trim().split("\\s+")));
@@ -135,10 +137,106 @@ public final class Texto {
         return palavrasDeConteudo(assunto).isEmpty() ? null : assunto;
     }
 
-    /** O que procurar no RAG: o assunto, nos pedidos "... sobre X"; senão, a pergunta (rag_query). */
-    public static String consultaRag(String pergunta) {
+    private static final String NOME_PONTAS = ".,;:!?¿¡\"'()[]«»“”‘’";
+    private static final Set<String> LIGACOES_NOME = conjunto("de da do dos das e");
+
+    /**
+     * O nome próprio mais longo da pergunta ("Santos Dumont" em "O que Santos Dumont inventou?"), ou null
+     * (question_name). A primeira palavra só conta se a seguinte também for nome.
+     */
+    public static String nomeDaPergunta(String pergunta) {
+        String[] brutas = separar(pergunta);
+        boolean[] nome = new boolean[brutas.length];
+        for (int i = 0; i < brutas.length; i++) {
+            String w = tirarPontas(brutas[i], NOME_PONTAS);
+            nome[i] = !w.isEmpty() && Character.isUpperCase(w.charAt(0)) && !STOPWORDS.contains(normalizar(w));
+        }
+        if (brutas.length == 1 || (brutas.length > 1 && !nome[1])) nome[0] = false;
+        List<List<String>> trechos = new ArrayList<>();
+        List<String> atual = new ArrayList<>(), ligacoes = new ArrayList<>();
+        for (int i = 0; i < brutas.length; i++) {
+            String bruta = brutas[i], w = tirarPontas(bruta, NOME_PONTAS);
+            if (nome[i]) {
+                atual.addAll(ligacoes);
+                atual.add(w);
+                ligacoes.clear();
+            } else if (!atual.isEmpty() && LIGACOES_NOME.contains(w)) {
+                ligacoes.add(w);
+            } else {
+                if (!atual.isEmpty()) trechos.add(atual);
+                atual = new ArrayList<>();
+                ligacoes.clear();
+            }
+            // Pontuação depois da palavra fecha o nome.
+            if (!atual.isEmpty() && NOME_PONTAS.indexOf(bruta.charAt(bruta.length() - 1)) >= 0) {
+                trechos.add(atual);
+                atual = new ArrayList<>();
+                ligacoes.clear();
+            }
+        }
+        if (!atual.isEmpty()) trechos.add(atual);
+        List<String> maior = null;
+        for (List<String> t : trechos) if (maior == null || t.size() > maior.size()) maior = t;
+        if (maior == null) return null;
+        String r = String.join(" ", maior);
+        return palavrasDeConteudo(r).isEmpty() ? null : r;
+    }
+
+    private static final Set<String> SEGUE_PALAVRAS = conjunto(
+            "isso isto disso disto nisso nisto esse essa esses essas desse dessa desses dessas nesse nessa nesses nessas "
+            + "aquilo aquele aquela aqueles aquelas daquilo daquele daquela naquilo naquele naquela "
+            + "ele ela eles elas dele dela deles delas nele nela neles nelas "
+            + "mesmo mesma anterior disse falou falamos falando mencionou perguntei respondeu "
+            + "continue continua continuar prossiga repita repete repetir novamente");
+    private static final Set<String> SEGUE_INICIOS = conjunto("e mas entao tambem");
+    private static final String[] SEGUE_FRASES = {"explique melhor", "explica melhor", "fale mais", "conte mais",
+            "diga mais", "mais detalhes", "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer"};
+    private static final Set<String> SOCIAIS = conjunto(
+            "oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal "
+            + "show otimo sim nao kkk kkkk haha blz");
+
+    /**
+     * A mensagem depende da conversa anterior? (follows_up do data_utils.py). A memória de IA só põe o
+     * histórico no prompt nesses casos ("E da Itália?", "Por quê?", "Quem foi ele?").
+     */
+    public static boolean segueConversa(String pergunta) {
+        List<String> ws = new ArrayList<>();
+        for (String w : separar(normalizar(pergunta))) {
+            String limpa = tirarPontas(w, NOME_PONTAS);
+            if (!limpa.isEmpty()) ws.add(limpa);
+        }
+        if (ws.isEmpty()) return false;
+        if (SEGUE_INICIOS.contains(ws.get(0)) && !(ws.size() > 1 && ws.get(1).equals("ai"))) return true;
+        for (String w : ws) if (SEGUE_PALAVRAS.contains(w)) return true;
+        String junto = " " + String.join(" ", ws) + " ";
+        for (String f : SEGUE_FRASES) if (junto.contains(" " + f + " ")) return true;
+        if (ws.size() > 2 || !palavrasDeConteudo(pergunta).isEmpty()) return false;
+        for (String w : ws) if (!SOCIAIS.contains(w)) return true;
+        return false;
+    }
+
+    /** O que procurar no RAG, em ordem (rag_queries): o assunto do pedido; senão a pergunta e o nome próprio. */
+    public static List<String> consultasRag(String pergunta) {
+        List<String> r = new ArrayList<>();
         String assunto = assuntoDoPedido(pergunta);
-        return assunto != null ? assunto : pergunta;
+        if (assunto != null) {
+            r.add(assunto);
+            return r;
+        }
+        r.add(pergunta);
+        String nome = nomeDaPergunta(pergunta);
+        if (nome != null && !palavrasDeConteudo(nome).equals(palavrasDeConteudo(pergunta))) r.add(nome);
+        return r;
+    }
+
+    /** Quantos trechos do RAG cabem no prompt (rag_chunks): 1 com janela de 256, 2 com 512, 3 com 768+. */
+    public static int trechosRag(int bloco) {
+        return Math.min(3, Math.max(1, bloco / 256));
+    }
+
+    /** Uma troca no formato do chat (chat_turn). */
+    public static String turno(String pergunta, String resposta) {
+        return USER + " " + pergunta + " " + ASSISTANT + " " + resposta + " " + END;
     }
 
     /** Decide se vale procurar contexto nos textos (mesma regra do wants_rag). */
@@ -172,8 +270,14 @@ public final class Texto {
      */
     public static String ajustarContexto(ToIntFunction<String> contarTokens, String pergunta, String contexto,
                                          int orcamento) {
+        return ajustarContexto(contarTokens, pergunta, contexto, orcamento, MAX_CONTEXT_WORDS);
+    }
+
+    /** Igual, com outro limite de palavras (MAX_CONTEXT_WORDS por trecho, quando há vários). */
+    public static String ajustarContexto(ToIntFunction<String> contarTokens, String pergunta, String contexto,
+                                         int orcamento, int maxPalavras) {
         String[] palavras = separar(contexto);
-        int n = Math.min(palavras.length, MAX_CONTEXT_WORDS);
+        int n = Math.min(palavras.length, maxPalavras);
         while (n >= 12) {
             String trecho = String.join(" ", Arrays.asList(palavras).subList(0, n)) + (n < palavras.length ? "..." : "");
             String texto = perguntaComContexto(pergunta, trecho);
