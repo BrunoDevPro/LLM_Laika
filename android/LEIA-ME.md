@@ -86,7 +86,9 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   **Copiar**, **Trecho lido** (o contexto do RAG) e **Gerar outra**. Nas suas mensagens: **Copiar** e
   **Editar** (para enviar de novo).
 - RAG igual ao `chat.py`: mesmas regras (`wants_rag`, limite de confiança, busca pelo nome próprio, até
-  3 trechos conforme a janela) e a fonte no fim (`*Título`).
+  6 trechos conforme a janela) e a fonte no fim (`*Título`). Na 1.7, a busca foi corrigida: perguntas sobre
+  a cadela Laika voltaram a usar o RAG, "Você sabe..." não conta mais como pergunta pessoal, o radical das
+  palavras não junta mais "capital" com "capítulo" e os textos próprios precisam da nota mínima.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o
@@ -136,7 +138,8 @@ Colab (tela Treinar).
 `core/referencias.py` gera as respostas do código original e `gradle :core:test` compara:
 666 textos tokenizados iguais, logits com diferença máxima de ~1e-5 para o PyTorch,
 geração gulosa idêntica (com cache e passando da janela de 256), busca do RAG (nome próprio e vários
-trechos, quando usar o histórico), memória, prompt (com histórico, janelas de 256 e 512) e a penalidade do
+trechos, quando usar o histórico; também com um índice de artigos reais, `LAIKA_RAG_DB=<índice>` com o mesmo
+índice no `referencias.py --rag-db`), memória, prompt (com histórico, janelas de 256 e 512) e a penalidade do
 fim iguais. O modelo com RoPE (`RopeTest`, um checkpoint `tiny_rope`) dá os mesmos logits do PyTorch
 (diferença ~7e-6), também com os pesos em float16, e o `.bin` convertido no celular é igual ao do exportador.
 Também: o índice montado no celular igual ao do `rag.py build`, o zip do Colab virando uma versão nova,

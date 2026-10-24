@@ -39,7 +39,10 @@ class ComparaComPythonTest {
         tok = new Tokenizador(new FileInputStream(new File(assets, "tokenizer.txt")));
         chat = new Modelo(new FileInputStream(new File(assets, "laika_chat.bin")), 4);
         base = new Modelo(new FileInputStream(new File(assets, "laika_base.bin")), 4);
-        rag = new IndiceRag(new BundledSQLiteDriver().open(new File(assets, "laika_rag_mini.db").getPath()));
+        // LAIKA_RAG_DB: outro índice (o mesmo passado ao referencias.py --rag-db), ex.: um com artigos reais.
+        String outroDb = System.getProperty("laika.ragdb");
+        File db = outroDb != null && !outroDb.isEmpty() ? new File(outroDb) : new File(assets, "laika_rag_mini.db");
+        rag = new IndiceRag(new BundledSQLiteDriver().open(db.getPath()));
     }
 
     @AfterAll
@@ -141,6 +144,9 @@ class ComparaComPythonTest {
         for (Map<String, Object> c : ler("rag.jsonl")) {
             String p = (String) c.get("pergunta");
             assertEquals(c.get("palavras"), Texto.palavrasDeConteudo(p), "palavras: " + p);
+            List<String> radicais = new ArrayList<>();
+            for (String w : Texto.palavrasDeConteudo(p)) radicais.add(IndiceRag.radical(w));
+            assertEquals(c.get("radicais"), radicais, "radicais: " + p);
             assertEquals(c.get("quer_rag"), Texto.querRag(p), "querRag: " + p);
             List<?> top = (List<?>) c.get("top");
             List<IndiceRag.Trecho> r = rag.buscar(p);
@@ -158,7 +164,7 @@ class ComparaComPythonTest {
             assertEquals(c.get("longa"), Texto.querLonga(p), "querLonga: " + p);
             assertEquals(c.get("consultas"), Texto.consultasRag(p), "consultas: " + p);
             Map<?, ?> contextos = (Map<?, ?>) c.get("contextos");
-            for (int k = 1; k <= 3; k++) {
+            for (int k : new int[]{1, 2, 3, 6}) {
                 List<List<String>> obtido = new ArrayList<>();
                 for (IndiceRag.Trecho t : rag.contextos(p, k)) obtido.add(java.util.Arrays.asList(t.titulo, t.texto));
                 assertEquals(contextos.get(String.valueOf(k)), obtido, "contextos k=" + k + ": " + p);

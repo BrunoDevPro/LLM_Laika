@@ -1,0 +1,91 @@
+{"categoria": "identidade", "pergunta": "Qual é o seu nome?", "esperado": [["laika"]]}
+{"categoria": "identidade", "pergunta": "Quem é você?", "esperado": [["laika"], ["modelo de linguagem", "programa"]]}
+{"categoria": "identidade", "pergunta": "Você é humana?", "esperado": [["nao"]]}
+{"categoria": "identidade", "pergunta": "Quem te criou?", "esperado": [["desenvolvedor", "criada", "criou"]]}
+{"categoria": "identidade", "pergunta": "O que você sabe fazer?", "esperado": [["responder", "perguntas", "resumir", "completar"]]}
+{"categoria": "identidade", "pergunta": "Por que você se chama Laika?", "esperado": [["cadela", "cachorra"]]}
+{"categoria": "identidade", "pergunta": "Você fala português?", "esperado": [["sim", "portugues"]]}
+{"categoria": "conversa", "pergunta": "Oi", "esperado": [["ola", "oi"]]}
+{"categoria": "conversa", "pergunta": "Obrigado!", "esperado": [["de nada", "disponha", "por nada"]]}
+{"categoria": "conversa", "pergunta": "Bom dia!", "esperado": [["bom dia"]]}
+{"categoria": "conversa", "pergunta": "Tchau!", "esperado": [["tchau", "ate logo", "ate mais"]]}
+{"categoria": "fatos sem RAG", "pergunta": "Qual é a capital da França?", "esperado": [["paris"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Qual é a capital do Japão?", "esperado": [["toquio"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Qual é a capital da Bahia?", "esperado": [["salvador"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quem escreveu Dom Casmurro?", "esperado": [["machado"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Em que ano foi a Independência do Brasil?", "esperado": [["1822"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quem foi Santos Dumont?", "esperado": [["aviacao", "aviao", "inventor", "14 bis"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quem foi Tiradentes?", "esperado": [["inconfidencia"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quantas patas tem um inseto?", "esperado": [["seis", "6"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Qual é o maior planeta do Sistema Solar?", "esperado": [["jupiter"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "De que é feita a água?", "esperado": [["hidrogenio"], ["oxigenio"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "O que é fotossíntese?", "esperado": [["luz", "sol"], ["planta", "plantas"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quem pintou a Mona Lisa?", "esperado": [["leonardo", "vinci"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quem foi Albert Einstein?", "esperado": [["fisico", "relatividade"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quando foi a Lei Áurea?", "esperado": [["1888"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "O que Alexander Fleming descobriu?", "esperado": [["penicilina"]], "rag": false}
+{"categoria": "fatos sem RAG", "pergunta": "Quem foi o primeiro homem a pisar na Lua?", "esperado": [["armstrong"]], "rag": false}
+{"categoria": "fatos com RAG", "pergunta": "Quem foi a cadela Laika?", "esperado": [["cadela", "cao", "animal"]]}
+{"categoria": "fatos com RAG", "pergunta": "Pesquise sobre a cadela Laika.", "esperado": [["espaco", "sputnik", "orbita"]]}
+{"categoria": "fatos com RAG", "pergunta": "Quem foi Machado de Assis?", "esperado": [["escritor"]]}
+{"categoria": "fatos com RAG", "pergunta": "Onde fica Lisboa?", "esperado": [["portugal"]]}
+{"categoria": "fatos com RAG", "pergunta": "O que é a água?", "esperado": [["hidrogenio", "oxigenio", "substancia", "liquido"]]}
+{"categoria": "fatos com RAG", "pergunta": "O que é rocha?", "esperado": [["minerais", "mineral"]]}
+{"categoria": "fatos com RAG", "pergunta": "Quem foi Getúlio Vargas?", "esperado": [["presidente", "politico"]]}
+{"categoria": "fatos com RAG", "pergunta": "O que é o Pantanal?", "esperado": [["planicie", "alagad", "bioma", "area"]]}
+{"categoria": "fatos com RAG", "pergunta": "O que é a Via Láctea?", "esperado": [["galaxia"]]}
+{"categoria": "fatos com RAG", "pergunta": "Quem foi Marie Curie?", "esperado": [["radioatividade", "cientista", "fisica", "quimica"]]}
+{"categoria": "fatos com RAG", "pergunta": "Quem foi Ayrton Senna?", "esperado": [["piloto", "formula"]]}
+{"categoria": "fatos com RAG", "pergunta": "O que é o Titanic?", "esperado": [["navio"]]}
+{"categoria": "leitura", "pergunta": "Qual é o maior roedor do mundo?", "esperado": [["capivara"]], "contexto": "A capivara é o maior roedor do mundo. Ela vive perto de rios e lagos da América do Sul e se alimenta de capim e plantas aquáticas."}
+{"categoria": "leitura", "pergunta": "Do que a capivara se alimenta?", "esperado": [["capim", "plantas"]], "contexto": "A capivara é o maior roedor do mundo. Ela vive perto de rios e lagos da América do Sul e se alimenta de capim e plantas aquáticas."}
+{"categoria": "leitura", "pergunta": "Onde Joana nasceu?", "esperado": [["belem"]], "contexto": "Joana nasceu em Belém, no Pará, em 1990. Aos vinte anos, mudou-se para Curitiba, onde estudou engenharia."}
+{"categoria": "leitura", "pergunta": "O que Joana estudou?", "esperado": [["engenharia"]], "contexto": "Joana nasceu em Belém, no Pará, em 1990. Aos vinte anos, mudou-se para Curitiba, onde estudou engenharia."}
+{"categoria": "leitura", "pergunta": "Quantos habitantes tem Vila Nova?", "esperado": [["30 mil", "30.000", "trinta mil"]], "contexto": "A cidade de Vila Nova foi fundada em 1845 por imigrantes alemães. Hoje tem cerca de 30 mil habitantes e é conhecida pela festa da uva."}
+{"categoria": "leitura", "pergunta": "Quando Vila Nova foi fundada?", "esperado": [["1845"]], "contexto": "A cidade de Vila Nova foi fundada em 1845 por imigrantes alemães. Hoje tem cerca de 30 mil habitantes e é conhecida pela festa da uva."}
+{"categoria": "leitura", "pergunta": "O que Paulo Rocha inventou?", "esperado": [["maquina de costura"]], "contexto": "O inventor Paulo Rocha criou, em 1932, uma máquina de costura movida a pedal que podia ser usada sem eletricidade."}
+{"categoria": "leitura", "pergunta": "Qual é o comprimento do rio Verde?", "esperado": [["320"]], "contexto": "O rio Verde nasce na serra do Mar e deságua no oceano Atlântico depois de percorrer 320 quilômetros."}
+{"categoria": "nao sei", "pergunta": "Qual é a capital da Austrália?", "esperado": [["nao sei", "nao fala", "nao encontrei", "nao tenho", "nao ha"]], "contexto": "A capivara é o maior roedor do mundo. Ela vive perto de rios e lagos da América do Sul."}
+{"categoria": "nao sei", "pergunta": "Quem inventou o telefone?", "esperado": [["nao sei", "nao fala", "nao encontrei", "nao tenho", "nao ha"]], "contexto": "O rio Verde nasce na serra do Mar e deságua no oceano Atlântico."}
+{"categoria": "nao sei", "pergunta": "Qual é a cor do céu em Marte?", "esperado": [["nao sei", "nao fala", "nao encontrei", "nao tenho", "nao ha"]], "contexto": "Joana nasceu em Belém, no Pará, em 1990."}
+{"categoria": "seguimento", "pergunta": "E da Itália?", "esperado": [["roma"]], "historico": [["Qual é a capital da França?", "A capital da França é Paris."]], "rag": false}
+{"categoria": "seguimento", "pergunta": "E da Argentina?", "esperado": [["buenos aires"]], "historico": [["Qual é a capital do Brasil?", "A capital do Brasil é Brasília."]], "rag": false}
+{"categoria": "seguimento", "pergunta": "E o que ele fez?", "esperado": [["dom casmurro", "escreveu", "romances", "academia"]], "historico": [["Quem foi Machado de Assis?", "Machado de Assis foi um escritor brasileiro, considerado por muitos o maior nome da literatura do país."]], "rag": false}
+{"categoria": "seguimento", "pergunta": "E o que ele fez?", "esperado": [["14 bis", "aviao", "voou", "dirigive"]], "historico": [["Quem foi Santos Dumont?", "Alberto Santos Dumont foi um inventor brasileiro, pioneiro da aviação."]], "rag": false}
+{"categoria": "seguimento", "pergunta": "Explique melhor.", "esperado": [["magma", "lava"]], "historico": [["O que é um vulcão?", "Vulcão é uma abertura na crosta da Terra por onde sai magma, que vira lava."]], "rag": false}
+{"categoria": "seguimento", "pergunta": "E em que século?", "esperado": [["xix", "dezenove"]], "historico": [["Quando foi a Independência do Brasil?", "Foi em 7 de setembro de 1822."]], "rag": false}
+{"categoria": "resposta longa", "pergunta": "O que é rocha? Resposta longa.", "esperado": [["minerais", "mineral"]], "min_palavras": 60, "rag": false}
+{"categoria": "resposta longa", "pergunta": "O que é um vulcão? Explique melhor.", "esperado": [["magma", "lava"]], "min_palavras": 60, "rag": false}
+{"categoria": "resposta longa", "pergunta": "Quem foi Santos Dumont? Resposta longa.", "esperado": [["aviacao", "aviao", "14 bis"]], "min_palavras": 60, "rag": false}
+{"categoria": "resposta longa", "pergunta": "O que é a água? Resposta longa.", "esperado": [["hidrogenio", "oxigenio"]], "min_palavras": 60, "rag": false}
+{"categoria": "resposta longa", "pergunta": "Fale sobre o Sol. Resposta longa.", "esperado": [["estrela"]], "min_palavras": 60, "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 7 + 5?", "esperado": [["12"]], "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 9 + 8?", "esperado": [["17"]], "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 15 - 6?", "esperado": [["9"]], "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 6 × 7?", "esperado": [["42"]], "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 8 × 3?", "esperado": [["24"]], "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 20 ÷ 4?", "esperado": [["5"]], "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 100 - 1?", "esperado": [["99"]], "rag": false}
+{"categoria": "contas", "pergunta": "Quanto é 12 + 30?", "esperado": [["42"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "O Sol é uma estrela?", "esperado": [["sim"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "A Lua é maior que a Terra?", "esperado": [["nao"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "A baleia é um mamífero?", "esperado": [["sim"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "O Brasil fica na Europa?", "esperado": [["nao"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "A água ferve a 100 graus ao nível do mar?", "esperado": [["sim"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "O morcego é uma ave?", "esperado": [["nao"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "Paris é a capital da França?", "esperado": [["sim"]], "rag": false}
+{"categoria": "sim ou nao", "pergunta": "7 é um número par?", "esperado": [["nao"]], "rag": false}
+{"categoria": "datas e seculos", "pergunta": "Em que século fica o ano 1500?", "esperado": [["xv", "quinze"]], "rag": false}
+{"categoria": "datas e seculos", "pergunta": "Em que século fica o ano 1822?", "esperado": [["xix", "dezenove"]], "rag": false}
+{"categoria": "datas e seculos", "pergunta": "Como se escreve século dezenove em algarismos romanos?", "esperado": [["xix"]], "rag": false}
+{"categoria": "datas e seculos", "pergunta": "Quanto vale XIV em algarismos romanos?", "esperado": [["14"]], "rag": false}
+{"categoria": "datas e seculos", "pergunta": "O que aconteceu em sete de setembro de mil oitocentos e vinte e dois?", "esperado": [["independencia"]], "rag": false}
+{"categoria": "datas e seculos", "pergunta": "Como se escreve o ano 1988 por extenso?", "esperado": [["mil novecentos e oitenta e oito"]], "rag": false}
+{"categoria": "generalizacao", "pergunta": "O que é madeira?", "esperado": [["arvore", "arvores", "tronco", "plantas", "planta"]], "rag": false}
+{"categoria": "generalizacao", "pergunta": "O que é areia?", "esperado": [["grao", "graos", "rocha", "rochas", "praia", "mineral"]], "rag": false}
+{"categoria": "generalizacao", "pergunta": "Para que serve a madeira?", "esperado": [["moveis", "casa", "construcao", "construir", "papel", "lenha"]], "rag": false}
+{"categoria": "generalizacao", "pergunta": "Onde encontramos areia?", "esperado": [["praia", "deserto", "rio"]], "rag": false}
+{"categoria": "pedidos", "pergunta": "Faça um texto sobre o mar.", "esperado": [["agua"]], "rag": false}
+{"categoria": "pedidos", "pergunta": "Escreva uma frase com a palavra noite.", "esperado": [["noite"]], "rag": false}
+{"categoria": "pedidos", "pergunta": "Complete a frase: Quem espera", "esperado": [["sempre alcanca", "alcanca"]], "rag": false}
+{"categoria": "pedidos", "pergunta": "Resuma em uma frase: O menino acordou cedo, tomou café e foi para a escola de bicicleta. No caminho, viu um cachorro perdido e parou para ajudar.", "esperado": [["menino"], ["cachorro"]], "rag": false}

@@ -48,7 +48,7 @@ class ColabTest {
     @Test
     void celulasDoNotebook() throws IOException {
         List<Caderno.Celula> cs = Caderno.ler(caderno());
-        assertEquals(7, cs.size());
+        assertEquals(8, cs.size());
         Caderno.Celula c3 = cs.get(3);
         assertEquals(3, c3.numero);
         assertEquals("PRÉ-TREINO", c3.nome);
@@ -103,7 +103,10 @@ class ColabTest {
                 assertEquals(pp.get("nome"), jp.nome);
                 assertEquals(pp.get("tipo"), jp.tipo);
                 Object padrao = pp.get("padrao");
-                assertEquals(padrao instanceof Number ? (Object) ((Number) padrao).longValue() : padrao, jp.padrao);
+                // Números com vírgula (RAG_FRACAO = 0.7) ficam Double; os inteiros, Long.
+                Object esperado = !(padrao instanceof Number) ? padrao : jp.padrao instanceof Double
+                        ? (Object) ((Number) padrao).doubleValue() : (Object) ((Number) padrao).longValue();
+                assertEquals(esperado, jp.padrao);
                 if (pp.containsKey("opcoes")) assertEquals(pp.get("opcoes"), jp.opcoes);
             }
         }
@@ -209,7 +212,7 @@ class ColabTest {
         GitHub g = new GitHub(base, "dono/repo", "tok");
         assertEquals("main", g.ramoPrincipal());
         assertTrue(g.temWorkflow());
-        assertEquals(7, Caderno.ler(g.caderno("meu-ramo")).size());
+        assertEquals(8, Caderno.ler(g.caderno("meu-ramo")).size());
 
         long id = g.disparar("main", "4,6", "T4", "{\"4\": {\"EPOCAS\": 3}}", "#ab12cd");
         assertEquals(12345678901L, id);
