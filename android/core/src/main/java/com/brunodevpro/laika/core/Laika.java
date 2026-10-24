@@ -25,8 +25,8 @@ public final class Laika {
         public double topP = 0.9;
         public double penalidade = 1.15;
         public int maxNovos = 80;
-        /** Saída: quantos tokens a última chamada de gerar() produziu. */
-        public int gerados;
+        /** Saída: quantos tokens a última chamada de gerar() produziu e quantos tinha o prompt. */
+        public int gerados, tokensPrompt;
     }
 
     /** Prompt pronto, o título do artigo usado pelo RAG e o trecho encontrado (ou null). */
@@ -70,14 +70,15 @@ public final class Laika {
     public Prompt montarPrompt(String pergunta, IndiceRag rag, Memoria memoria, int maxNovos,
                                List<String[]> historico, int bloco) {
         int orcamento = bloco - maxNovos;
+        String busca = Texto.semGatilho(pergunta);  // o gatilho de resposta longa não entra na busca nem na memória
         List<String> partes = new ArrayList<>();
         String fonte = null, trecho = null;
         if (memoria != null) {
-            String nota = memoria.contextoPara(pergunta);
+            String nota = memoria.contextoPara(busca);
             if (!nota.isEmpty()) partes.add(nota);
         }
-        List<IndiceRag.Trecho> achados = rag != null && Texto.querRag(pergunta)
-                ? rag.contextos(pergunta, Texto.trechosRag(bloco)) : new ArrayList<>();
+        List<IndiceRag.Trecho> achados = rag != null && Texto.querRag(busca)
+                ? rag.contextos(busca, Texto.trechosRag(bloco)) : new ArrayList<>();
         if (!achados.isEmpty()) {
             List<String> textos = new ArrayList<>();
             for (IndiceRag.Trecho t : achados) {
@@ -101,7 +102,7 @@ public final class Laika {
             }
         }
         List<String> turnos = new ArrayList<>();
-        if (historico != null && Texto.segueConversa(pergunta)) {
+        if (historico != null && Texto.segueConversa(busca)) {
             int ini = Math.max(0, historico.size() - Texto.MAX_HISTORY);
             for (int i = historico.size() - 1; i >= ini; i--) {
                 List<String> candidato = new ArrayList<>();
@@ -174,6 +175,7 @@ public final class Laika {
             if (aoGerar != null) aoGerar.parcial(semPedacoIncompleto(tok.decodificar(ids, promptLen, n)));
         }
         op.gerados = n - promptLen;
+        op.tokensPrompt = promptLen;
         return Texto.aparar(tok.decodificar(ids, promptLen, n));
     }
 

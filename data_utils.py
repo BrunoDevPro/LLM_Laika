@@ -447,6 +447,23 @@ def question_name(question):
     return name if content_words(name) else None
 
 
+# Gatilho de resposta longa: "O que é a pedra? Explique melhor." / "Resposta longa: o que é a rocha?".
+# O fine-tuning ensina uma resposta bem mais detalhada; a busca do RAG e a memória ignoram o gatilho.
+LONG_TRIGGER = "Resposta longa."
+_LONG_TRIGGERS = re.compile(r"\b(?:explique melhor|explica melhor|resposta longa|responda com detalhes)\b[.:!,]?",
+                            re.IGNORECASE)
+
+
+def without_trigger(question):
+    """A pergunta sem o gatilho de resposta longa (se sobrar nada, como em "Explique melhor.", fica igual)."""
+    rest = re.sub(r"\s+", " ", _LONG_TRIGGERS.sub(" ", question)).strip(" ,")
+    return rest if content_words(rest) or len(rest) > 3 else question
+
+
+def wants_long(question):
+    return bool(_LONG_TRIGGERS.search(question))
+
+
 # Palavras que só fazem sentido com a mensagem anterior ("isso", "ele", "o mesmo"...). Ficam de fora
 # "este/esta", que no celular muitas vezes é "está" sem acento.
 _FOLLOW_WORDS = set("""
@@ -458,7 +475,8 @@ continue continua continuar prossiga repita repete repetir novamente
 """.split())
 _FOLLOW_STARTS = {"e", "mas", "entao", "tambem"}
 _FOLLOW_PHRASES = ["explique melhor", "explica melhor", "fale mais", "conte mais", "diga mais", "mais detalhes",
-                   "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer"]
+                   "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer",
+                   "resposta longa", "responda com detalhes"]  # o gatilho sozinho ("Resposta longa.") pede mais da anterior
 # Mensagens sociais curtas: não precisam do histórico (e com ele o modelo tende a repetir a resposta anterior).
 _SOCIAL = set("""
 oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal

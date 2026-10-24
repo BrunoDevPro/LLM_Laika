@@ -144,7 +144,8 @@ final class Motor {
 
     // Opções do app (valem para todas as versões)
     /** usarHistorico: a "memória de IA" (as últimas trocas da conversa entram no prompt). */
-    boolean mostrarFontes, usarRag, usarMemoria, usarHistorico, modoCompletar;
+    /** respostasLongas: acrescenta o gatilho "Resposta longa." à pergunta e usa o tamanho máximo. */
+    boolean mostrarFontes, usarRag, usarMemoria, usarHistorico, modoCompletar, respostasLongas;
     double temperatura;
     int tamanhoResposta;
 
@@ -155,6 +156,7 @@ final class Motor {
         usarRag = prefs.getBoolean("rag", true);
         usarMemoria = prefs.getBoolean("memoria", true);
         usarHistorico = prefs.getBoolean("historico", true);
+        respostasLongas = prefs.getBoolean("longas", false);
         temperatura = Math.max(TEMP_MIN, Math.min(TEMP_MAX, prefs.getFloat("temperatura", 0.7f)));
         tamanhoResposta = Math.max(TAMANHO_MIN, Math.min(400, prefs.getInt("tamanho", 80)));
         tarefa = "Carregando a Laika…";
@@ -172,6 +174,7 @@ final class Motor {
     void salvarOpcoes() {
         prefs.edit().putBoolean("fontes", mostrarFontes).putBoolean("rag", usarRag)
                 .putBoolean("memoria", usarMemoria).putBoolean("historico", usarHistorico)
+                .putBoolean("longas", respostasLongas)
                 .putFloat("temperatura", (float) temperatura).putInt("tamanho", tamanhoResposta).apply();
         avisarEstado();
     }
@@ -521,7 +524,7 @@ final class Motor {
         eu.completar = modoCompletar;
         conversa.add(eu);
         for (Ouvinte o : new ArrayList<>(ouvintes)) o.mensagemNova(eu);
-        responder(texto, null, historicoAte(conversa.size() - 1));
+        responder(eu, null, historicoAte(conversa.size() - 1));
     }
 
     /** Índice da pergunta que gerou esta resposta (a mensagem do usuário logo antes), ou -1. */
@@ -548,7 +551,7 @@ final class Motor {
         resposta.texto = DIGITANDO;
         resposta.fonte = resposta.detalhe = resposta.trecho = null;
         mudou(resposta);
-        responder(conversa.get(i).texto, resposta, historicoAte(i));
+        responder(conversa.get(i), resposta, historicoAte(i));
     }
 
     /**
@@ -573,13 +576,15 @@ final class Motor {
         return r.size() > Texto.MAX_HISTORY ? new ArrayList<>(r.subList(r.size() - Texto.MAX_HISTORY, r.size())) : r;
     }
 
-    private void responder(String texto, Mensagem existente, List<String[]> historico) {
+    private void responder(Mensagem pergunta, Mensagem existente, List<String[]> historico) {
+        final String texto = pergunta.texto;
         gerando = true;
         cancelar.set(false);
         avisarEstado();
         final boolean completar = modoCompletar, fontes = mostrarFontes, comRag = usarRag, comMemoria = usarMemoria;
         final double temp = temperatura;
         final int tamanho = Math.min(tamanhoResposta, tamanhoMaximo());
+        final boolean longas = respostasLongas;
         if (existente != null) existente.completar = completar;
         fundo.execute(() -> {
             Mensagem resp = existente;
@@ -588,12 +593,13 @@ final class Motor {
                 resp.completar = completar;
                 adicionar(resp);
             }
-            responderEm(resp, texto, historico, completar, fontes, comRag, comMemoria, temp, tamanho);
+            responderEm(pergunta, resp, texto, historico, completar, fontes, comRag, comMemoria, temp, tamanho, longas);
         });
     }
 
-    private void responderEm(Mensagem resp, String texto, List<String[]> historico, boolean completar, boolean fontes,
-                             boolean comRag, boolean comMemoria, double temp, int tamanho) {
+    private void responderEm(Mensagem pergunta, Mensagem resp, String texto, List<String[]> historico, boolean completar,
+                             boolean fontes, boolean comRag, boolean comMemoria, double temp, int tamanho,
+                             boolean longas) {
         long t0 = System.nanoTime();
         Laika.Opcoes op = new Laika.Opcoes();
         try {
@@ -629,8 +635,10 @@ final class Motor {
                         mudou(resp);
                         chat = carregar(refChat);
                     }
-                    op.maxNovos = tamanho;
-                    Laika.Prompt p = chat.montarPrompt(texto, comRag ? rag : null, comMemoria ? memoria : null,
+                    // Respostas longas: o gatilho do fine-tuning ("Resposta longa.") e o tamanho máximo.
+                    String paraModelo = longas && !Texto.querLonga(texto) ? texto + " " + Texto.GATILHO_LONGO : texto;
+                    op.maxNovos = Texto.querLonga(paraModelo) ? tamanhoMaximo() : tamanho;
+                    Laika.Prompt p = chat.montarPrompt(paraModelo, comRag ? rag : null, comMemoria ? memoria : null,
                             op.maxNovos, historico);
                     String r = chat.gerar(p.texto, op, true, rng, parcial -> {
                         resp.texto = parcial.isEmpty() ? DIGITANDO : parcial;
@@ -642,8 +650,16 @@ final class Motor {
                 }
             }
             double seg = (System.nanoTime() - t0) / 1e9;
-            resp.detalhe = String.format(Locale.getDefault(), "%.1f s%s%s", seg,
+            // Tokens: os da pergunta, os da resposta e o total que passou pelo modelo (prompt com contexto,
+            // histórico e gatilho + resposta).
+            int naPergunta = tok.codificar(texto).length;
+            int naResposta = op.gerados > 0 ? op.gerados : tok.codificar(resp.texto).length;
+            pergunta.detalhe = naPergunta + (naPergunta == 1 ? " token" : " tokens");
+            mudou(pergunta);
+            resp.detalhe = String.format(Locale.getDefault(), "%.1f s%s · %d tokens%s%s", seg,
                     op.gerados > 0 ? String.format(Locale.getDefault(), " · %d tokens/s", Math.round(op.gerados / seg)) : "",
+                    naResposta,
+                    op.tokensPrompt > 0 ? String.format(Locale.getDefault(), " · %d no total", op.tokensPrompt + op.gerados) : "",
                     cancelar.get() ? " · interrompida" : "");
         } catch (Throwable e) {
             resp.texto = "Erro: " + e.getMessage();

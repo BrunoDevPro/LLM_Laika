@@ -81,7 +81,7 @@ Referência de `val loss` (vocabulário de 24 mil): abaixo de ~3,0 as frases já
 | `PERGUNTAS_WIKIPEDIA` | **40000** (o atalho do app já põe; o padrão é 20000) |
 | Taxa de aprendizado | automática: **1e-4** (acima de 20M de parâmetros) |
 | Precisão | bf16 na A100 |
-| Dados | ~9,7 mil exemplos escritos (inclui as 627 respostas longas, 438 "por quê" e 975 de sim ou não) + 1.061 conversas + 10 mil sintéticos + 40 mil perguntas de leitura da Wikipédia; ~30% com mensagens anteriores (memória de IA); até 3 trechos do RAG por pergunta |
+| Dados | ~15 mil exemplos escritos (inclui as 627 respostas longas, 438 "por quê", 975 de sim ou não e 5.313 de pessoas, datas, séculos, conceitos e gatilho de resposta longa) + 1.435 conversas + 10 mil sintéticos + 40 mil perguntas de leitura da Wikipédia; ~30% com mensagens anteriores (memória de IA); até 3 trechos do RAG por pergunta |
 
 Leva ~30–60 min. O `finetuned.pt` anterior vai para `checkpoints/backups/` antes de ser sobrescrito
 (ficam os 3 últimos).
@@ -92,7 +92,7 @@ Leva ~30–60 min. O `finetuned.pt` anterior vai para `checkpoints/backups/` ant
 de 100 mil artigos costuma bastar). O zip tem ~420 MB só com os dois modelos (float16). No app:
 **Treinar → Modelos prontos → Baixar e usar**.
 
-No celular, o app 1.5 já entende o modelo com RoPE: ele guarda as matrizes em float16 (~210 MB de memória)
+No celular, o app 1.5 (ou mais novo) já entende o modelo com RoPE: ele guarda as matrizes em float16 (~210 MB de memória)
 e o cache de atenção cresce conforme a conversa. Ainda assim, é um modelo grande para celular: espere
 respostas bem mais lentas que as do de 7M. No Windows/PC, o `chat.py` agora usa cache de atenção.
 

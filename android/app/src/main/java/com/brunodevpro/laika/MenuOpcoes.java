@@ -170,6 +170,8 @@ final class MenuOpcoes {
                 v -> motor.usarMemoria = v);
         caixa(grupo, "Memória de IA", "Lembra das últimas 5 mensagens da conversa", motor.usarHistorico,
                 v -> motor.usarHistorico = v);
+        caixa(grupo, "Respostas longas", "Respostas bem mais detalhadas (o mesmo que pedir \"resposta longa\")",
+                motor.respostasLongas, v -> motor.respostasLongas = v);
         if (motor.temBase) {
             caixa(grupo, "Modo completar texto", "Escreva um começo e a Laika continua", motor.modoCompletar, v -> {
                 motor.modoCompletar = v;
@@ -183,7 +185,7 @@ final class MenuOpcoes {
             grupo.setVisibility(aberto ? View.VISIBLE : View.GONE);
             seta.setRotation(aberto ? 180 : 0);
             int ligadas = (motor.mostrarFontes ? 1 : 0) + (motor.usarRag ? 1 : 0) + (motor.usarMemoria ? 1 : 0)
-                    + (motor.usarHistorico ? 1 : 0) + (motor.modoCompletar ? 1 : 0);
+                    + (motor.usarHistorico ? 1 : 0) + (motor.modoCompletar ? 1 : 0) + (motor.respostasLongas ? 1 : 0);
             resumo.setText(aberto ? "" : ligadas + " ligada" + (ligadas == 1 ? "" : "s"));
         };
         atualizar.run();

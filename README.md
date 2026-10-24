@@ -57,7 +57,7 @@ parou, ou continua o terminado com os dados atuais) ou `"do_zero"`. A célula 2 
 | `SUGESTOES.md` | Ideias para melhorar a LLM além do plano do `CLAUDE.md` |
 | `colab/laika_colab.py` | Roda células do `colab.ipynb` pelo Colab CLI (usado pelo workflow `.github/workflows/colab.yml`, que o app dispara) |
 | `data/modern/` | 130 textos em português moderno escritos para o projeto: 20 maiores e 110 simples (`simples_*.txt`); entram 3x no pré-treino |
-| `data/qa/pergeresp.txt` | ~9000 perguntas e respostas: ~3000 genéricas ("Faça um texto sobre X", "E X?", por quê, como, diferenças, conversa, poemas...), 627 com respostas longas (2 parágrafos, passo a passo, histórias, contas explicadas), 438 de "por quê" e 975 de sim ou não (gerado por `tools/gerar_pergeresp.py`) |
+| `data/qa/pergeresp.txt` | ~14 mil perguntas e respostas: ~3000 genéricas ("Faça um texto sobre X", "E X?", por quê, como, diferenças, conversa, poemas...), 627 com respostas longas (2 parágrafos, passo a passo, histórias, contas explicadas), 438 de "por quê", 975 de sim ou não e 5313 de pessoas ("Quem foi X?", "O que X fez?"), datas por extenso, séculos em algarismos romanos, conceitos (pedra, rocha, água...) e o gatilho de resposta longa (gerado por `tools/gerar_pergeresp.py`) |
 | `data/qa/leitura.txt` | ~510 perguntas de interpretação com "Contexto:", o mesmo formato do RAG |
 | `data/qa/identidade.txt` | ~110 perguntas sobre quem é a Laika e a origem do nome (peso extra no fine-tuning) |
 
@@ -96,6 +96,10 @@ A Laika guarda o que você conta: "meu nome é Ana", "eu moro em Recife", "eu go
 "o que você lembra de mim?" e usa as anotações como contexto. "Esqueça tudo" apaga a memória.
 
 Essa memória fica **fora do modelo**, num arquivo no Drive, e vale entre conversas.
+
+**Resposta longa:** termine a pergunta com "Explique melhor." ou "Resposta longa." (ou ligue a opção
+**Respostas longas** no app, ou `/longa` no `chat.py`) para uma resposta mais longa e detalhada. Depois de
+cada mensagem, o app e o `chat.py` mostram quantos tokens ela teve e o total com o prompt.
 
 **Memória de IA (histórico da conversa):** as últimas trocas da conversa (até 5) entram no prompt antes
 da pergunta, quantas couberem na janela depois do contexto do RAG e do espaço da resposta:

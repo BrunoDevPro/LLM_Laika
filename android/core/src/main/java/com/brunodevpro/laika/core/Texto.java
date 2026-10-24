@@ -182,6 +182,23 @@ public final class Texto {
         return palavrasDeConteudo(r).isEmpty() ? null : r;
     }
 
+    /** Gatilho de resposta longa (LONG_TRIGGER do data_utils.py), que a opção "Respostas longas" do app acrescenta. */
+    public static final String GATILHO_LONGO = "Resposta longa.";
+    private static final Pattern GATILHOS = Pattern.compile(
+            "\\b(?:explique melhor|explica melhor|resposta longa|responda com detalhes)\\b[.:!,]?",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | UNICODE);
+
+    /** A pergunta sem o gatilho de resposta longa, para a busca e a memória (without_trigger). */
+    public static String semGatilho(String pergunta) {
+        String resto = tirarPontas(aparar(ESPACOS.matcher(GATILHOS.matcher(pergunta).replaceAll(" ")).replaceAll(" ")), " ,");
+        return !palavrasDeConteudo(resto).isEmpty() || resto.length() > 3 ? resto : pergunta;
+    }
+
+    /** A mensagem pede uma resposta longa? (wants_long) */
+    public static boolean querLonga(String pergunta) {
+        return GATILHOS.matcher(pergunta).find();
+    }
+
     private static final Set<String> SEGUE_PALAVRAS = conjunto(
             "isso isto disso disto nisso nisto esse essa esses essas desse dessa desses dessas nesse nessa nesses nessas "
             + "aquilo aquele aquela aqueles aquelas daquilo daquele daquela naquilo naquele naquela "
@@ -190,7 +207,8 @@ public final class Texto {
             + "continue continua continuar prossiga repita repete repetir novamente");
     private static final Set<String> SEGUE_INICIOS = conjunto("e mas entao tambem");
     private static final String[] SEGUE_FRASES = {"explique melhor", "explica melhor", "fale mais", "conte mais",
-            "diga mais", "mais detalhes", "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer"};
+            "diga mais", "mais detalhes", "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer",
+            "resposta longa", "responda com detalhes"}; // o gatilho sozinho ("Resposta longa.") pede mais da anterior
     private static final Set<String> SOCIAIS = conjunto(
             "oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal "
             + "show otimo sim nao kkk kkkk haha blz");

@@ -154,6 +154,8 @@ class ComparaComPythonTest {
             assertEquals(c.get("melhor"), m == null ? null : m.titulo, "melhor: " + p);
             assertEquals(c.get("nome"), Texto.nomeDaPergunta(p), "nome: " + p);
             assertEquals(c.get("segue"), Texto.segueConversa(p), "segueConversa: " + p);
+            assertEquals(c.get("sem_gatilho"), Texto.semGatilho(p), "semGatilho: " + p);
+            assertEquals(c.get("longa"), Texto.querLonga(p), "querLonga: " + p);
             assertEquals(c.get("consultas"), Texto.consultasRag(p), "consultas: " + p);
             Map<?, ?> contextos = (Map<?, ?>) c.get("contextos");
             for (int k = 1; k <= 3; k++) {

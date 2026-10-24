@@ -293,10 +293,12 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
             sb.setSpan(new ForegroundColorSpan(getColor(R.color.fonte)), ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.setSpan(new RelativeSizeSpan(0.85f), ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        if (m.detalhe != null && !m.usuario) {
+        if (m.detalhe != null) {
             int ini = sb.length();
             sb.append("\n").append(m.detalhe);
-            sb.setSpan(new ForegroundColorSpan(getColor(R.color.detalhe)), ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            // Na bolha do usuário (azul), o detalhe vai em branco translúcido.
+            int cor = m.usuario ? (getColor(R.color.texto_usuario) & 0x00FFFFFF) | 0xB0000000 : getColor(R.color.detalhe);
+            sb.setSpan(new ForegroundColorSpan(cor), ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.setSpan(new RelativeSizeSpan(0.72f), ini, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         return sb;
@@ -439,6 +441,7 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         }
         if (motor.usarMemoria) ligado.add("memória");
         if (motor.usarHistorico) ligado.add("memória de IA");
+        if (motor.respostasLongas) ligado.add("respostas longas");
         return ligado.isEmpty() ? "sem busca e sem memória" : String.join(" · ", ligado);
     }
 

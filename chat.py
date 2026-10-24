@@ -20,7 +20,8 @@ from pathlib import Path
 import torch
 
 from data_utils import (USER_TOKEN, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, MAX_CONTEXT_WORDS,
-                        MAX_HISTORY, chat_turn, fit_context, follows_up, rag_chunks, wants_rag)
+                        LONG_TRIGGER, MAX_HISTORY, chat_turn, fit_context, follows_up, rag_chunks, wants_rag,
+                        wants_long, without_trigger)
 from model import build_model
 
 
@@ -48,7 +49,10 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
     history: as trocas anteriores [(pergunta, resposta), ...], da mais antiga para a mais nova
     ("memória de IA"). Entram as mais recentes (até MAX_HISTORY) que couberem depois da pergunta,
     e só se a pergunta depender da conversa (follows_up).
+    O gatilho de resposta longa ("Explique melhor.", "Resposta longa.") fica na pergunta, mas não entra na
+    busca do RAG nem na memória.
     """
+    busca = without_trigger(question)
     budget = block_size - max_new_tokens
 
     def count(text):
@@ -56,10 +60,10 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
 
     context_parts, source = [], None
     if memory is not None:
-        note = memory.context_for(question)
+        note = memory.context_for(busca)
         if note:
             context_parts.append(note)
-    hits = rag.contexts(question, rag_chunks(block_size)) if rag is not None and wants_rag(question) else []
+    hits = rag.contexts(busca, rag_chunks(block_size)) if rag is not None and wants_rag(busca) else []
     if hits:
         context_parts += [h["text"] for h in hits]
         source = hits[0]["title"]
@@ -73,7 +77,7 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
             current = f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN}"
 
     turns = []
-    for q, a in reversed(list(history or [])[-MAX_HISTORY:] if follows_up(question) else []):
+    for q, a in reversed(list(history or [])[-MAX_HISTORY:] if follows_up(busca) else []):
         candidate = [chat_turn(q, a)] + turns
         if count(" ".join(candidate + [current])) > budget:
             break
@@ -191,7 +195,8 @@ def main():
     history = None if args.no_history else []
     print(f"RAG: {'ligado' if rag else 'desligado'} | memória: {'ligada' if memory else 'desligada'} | "
           f"memória de IA: {'ligada' if history is not None else 'desligada'}")
-    print("Digite 'sair' para encerrar. Comandos: /fontes, /rag, /memoria, /limpar")
+    print("Digite 'sair' para encerrar. Comandos: /fontes, /rag, /memoria, /limpar, /longa")
+    longa = False
 
     while True:
         text = input("\nVocê: ").strip()
@@ -210,6 +215,10 @@ def main():
         if text == "/memoria":
             print("LLM:", memory.summary() if memory else "A memória está desligada.")
             continue
+        if text == "/longa":
+            longa = not longa
+            print(f"(respostas longas {'ligadas' if longa else 'desligadas'}: a pergunta ganha \"{LONG_TRIGGER}\")")
+            continue
         if text == "/limpar":
             history = None if history is None else []
             print("(conversa esquecida: a Laika não vê mais as mensagens anteriores)")
@@ -219,10 +228,13 @@ def main():
         if answer:
             print("LLM:", answer)
         else:
-            prompt, source = build_prompt(text, tokenizer, model.block_size, rag, memory, args.max_new_tokens,
-                                          history)
-            answer = generate(model, tokenizer, prompt, device, args.max_new_tokens, args.temperature)
+            pergunta = f"{text} {LONG_TRIGGER}" if longa and not wants_long(text) else text
+            max_new = max(args.max_new_tokens, model.block_size // 4) if wants_long(pergunta) else args.max_new_tokens
+            prompt, source = build_prompt(pergunta, tokenizer, model.block_size, rag, memory, max_new, history)
+            answer = generate(model, tokenizer, prompt, device, max_new, args.temperature)
+            n_prompt, n_resp = len(tokenizer.encode(prompt).ids), len(tokenizer.encode(answer).ids)
             print("LLM:", with_citation(answer, source) if show_sources else answer)
+            print(f"     ({n_resp} tokens na resposta, {n_prompt + n_resp} no total)")
         if history is not None and answer:
             history = (history + [(text, answer)])[-MAX_HISTORY:]
 
