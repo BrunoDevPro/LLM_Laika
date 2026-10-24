@@ -11,6 +11,8 @@ import csv
 import gzip
 import io
 import json
+import random
+import math
 import os
 import re
 import tempfile
@@ -19,7 +21,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from data_utils import EOT_TOKEN, clean_gutenberg, clean_wiki, wiki_definition
+from data_utils import EOT_TOKEN, clean_gutenberg, clean_wiki, rag_question, wiki_definition
 
 CATALOG = "https://www.gutenberg.org/cache/epub/feeds/pg_catalog.csv"
 MIN_CHARS = 30_000
@@ -440,6 +442,143 @@ def download_gigaverbo(pasta, tokens, subconjunto="edu_high", toxico_max=2):
     print(f"GigaVerbo pronto: {total / 1e9:.2f} bilhão de tokens ({mb:,.0f} MB) em {pasta}")
 
 
+# ---------- GigaVerbo-v2-SFT (instruções para o fine-tuning) ----------
+# Licença Apache 2.0. É gerado por outra IA (Qwen2.5) e filtrado por nota de qualidade; os pesos da Laika
+# continuam treinados do zero, isto só entra como exemplo de pergunta e resposta no fine-tuning.
+SFT = "Polygl0t/gigaverbo-v2-sft"
+SFT_PADRAO = "general:0.7,retrieval:0.3"
+# Exemplos que falam de outra IA ("sou o Qwen, da Alibaba") estragariam a identidade da Laika.
+_SFT_OUTRA_IA = re.compile(r"\b(?:qwen|alibaba|openai|chatgpt|gpt-?[345]|anthropic|claude|gemini|llama|deepseek|"
+                           r"mistral|tucano|copilot)\b", re.IGNORECASE)
+_SFT_FORA = ("```", "<think>", "</think>", "\\[", "$$", "|---", "<tool", "<function")
+_CONTEXTO_SFT = re.compile(r"<context>(.*?)</context>", re.DOTALL)
+
+
+def _limpar_sft(texto):
+    """Tira a marcação de Markdown que o app não mostra (negrito, títulos) e espaços sobrando."""
+    texto = texto.replace("**", "").replace("__", "")
+    texto = re.sub(r"(?m)^#{1,6}\s*", "", texto)
+    return _limpar_doc(texto)
+
+
+def converter_sft(mensagens, max_trocas=5):
+    """[{role, content}] -> [[pergunta, resposta], ...] no formato da Laika, ou None se não servir.
+
+    Sem mensagem de sistema; o <context> do subconjunto retrieval vira "Contexto: ... Pergunta: ...",
+    o mesmo formato do RAG."""
+    msgs = [m for m in mensagens if m.get("role") != "system"]
+    if not msgs or len(msgs) % 2 or len(msgs) > 2 * max_trocas:
+        return None
+    pares = []
+    for u, a in zip(msgs[::2], msgs[1::2]):
+        if u.get("role") != "user" or a.get("role") != "assistant":
+            return None
+        q, r = (u.get("content") or "").strip(), (a.get("content") or "").strip()
+        if not q or not r or len(q) > 8000 or len(r) > 6000:
+            return None
+        if any(x in q or x in r for x in _SFT_FORA) or _SFT_OUTRA_IA.search(r):
+            return None
+        m = _CONTEXTO_SFT.search(q)
+        if m:
+            contexto = re.sub(r"\s+", " ", m.group(1)).strip()
+            pergunta = re.sub(r"\s+", " ", _CONTEXTO_SFT.sub(" ", q)).strip()
+            if not contexto or not pergunta:
+                return None
+            q = rag_question(pergunta, contexto)
+        else:
+            q = _limpar_sft(q)
+        pares.append([q, _limpar_sft(r)])
+    return pares
+
+
+def download_sft(pasta, total, subconjuntos=SFT_PADRAO, nota_min=4.0, tokens_max=1500):
+    """Grava ~`total` conversas do GigaVerbo-v2-SFT em data/sft/sft_SUB_AA_GG.jsonl (uma conversa por linha,
+    lista de [pergunta, resposta], como o data/qa/conversas.jsonl). Pega um grupo de linhas de cada arquivo por
+    rodada (espalhado) e continua de onde parou (.pronto).
+
+    subconjuntos: "general:0.7,retrieval:0.3" (nome:fração). nota_min: instruct_score mínimo (1 a 5).
+    tokens_max: tamanho máximo do exemplo (token_count do dataset); o finetune ainda tira o que não couber."""
+    try:
+        import fsspec
+        import pyarrow.parquet as pq
+    except ImportError:
+        print("Para baixar o GigaVerbo-SFT, instale: pip install pyarrow fsspec aiohttp")
+        return
+    pasta.mkdir(parents=True, exist_ok=True)
+    pronto = pasta / ".pronto"
+    feitos = dict(_estado(pronto).get("grupos", {}))
+    partes = []
+    for item in subconjuntos.split(","):
+        nome, _, frac = item.strip().partition(":")
+        if nome:
+            partes.append((nome, float(frac or 1)))
+    soma = sum(f for _, f in partes) or 1
+    fs = fsspec.filesystem("https")
+    for nome, frac in partes:
+        meta = int(total * frac / soma)
+        tem = sum(n for k, n in feitos.items() if k.startswith(nome + "_"))
+        if tem >= meta:
+            print(f"GigaVerbo-SFT {nome}: já tem {tem:,} de {meta:,}")
+            continue
+        try:
+            arvore = _json_url(f"https://huggingface.co/api/datasets/{SFT}/tree/main/{nome}")
+        except Exception as error:
+            print(f"GigaVerbo-SFT {nome}: não consegui listar os arquivos:", error)
+            continue
+        arquivos = sorted(f["path"] for f in arvore if f["path"].endswith(".parquet"))
+        print(f"GigaVerbo-SFT {nome}: {len(arquivos)} arquivos; tem {tem:,}, meta {meta:,}", flush=True)
+        abertos, grupos, rodada = {}, {}, 0
+        try:
+            for i, caminho in enumerate(arquivos):
+                arq = fs.open(f"{HF}{SFT}/resolve/main/{caminho}", "rb", block_size=8 << 20)
+                abertos[i] = (arq, pq.ParquetFile(arq))
+                grupos[i] = _ordem_espalhada(abertos[i][1].metadata.num_row_groups)
+            # Cada grupo de ~1000 linhas contribui com um pedaço, para a amostra cobrir o subconjunto inteiro.
+            por_grupo = max(20, math.ceil(1.2 * meta / max(1, sum(map(len, grupos.values())))))
+            while tem < meta:
+                algum = False
+                for i in range(len(arquivos)):
+                    if tem >= meta:
+                        break
+                    if rodada >= len(grupos[i]):
+                        continue
+                    algum = True
+                    g = grupos[i][rodada]
+                    chave = f"{nome}_{i:02d}_{g:03d}"
+                    if chave in feitos:
+                        continue
+                    try:
+                        t = abertos[i][1].read_row_group(g, columns=["messages", "token_count", "instruct_score"])
+                    except Exception as error:
+                        print(f"  grupo {chave} falhou: {error} (rode de novo para tentar outra vez)")
+                        continue
+                    linhas = []
+                    for msgs, n, nota in zip(t.column("messages").to_pylist(), t.column("token_count").to_pylist(),
+                                             t.column("instruct_score").to_pylist()):
+                        if (nota or 0) < nota_min or (n or 0) > tokens_max:
+                            continue
+                        pares = converter_sft(msgs or [])
+                        if pares:
+                            linhas.append(json.dumps(pares, ensure_ascii=False))
+                    random.Random(chave).shuffle(linhas)
+                    linhas = linhas[:min(por_grupo, meta - tem)]
+                    destino = pasta / f"sft_{chave}.jsonl"
+                    destino.with_suffix(".tmp").write_text("\n".join(linhas) + "\n", encoding="utf-8")
+                    os.replace(destino.with_suffix(".tmp"), destino)
+                    feitos[chave] = len(linhas)
+                    tem += len(linhas)
+                    _gravar_estado(pronto, {"grupos": feitos})
+                    print(f"  GigaVerbo-SFT {chave}: {len(linhas):,} conversas | {tem:,}/{meta:,}", flush=True)
+                if not algum:
+                    break
+                rodada += 1
+        finally:
+            for arq, _ in abertos.values():
+                arq.close()
+    n = sum(feitos.values())
+    print(f"GigaVerbo-SFT pronto: {n:,} conversas em {pasta}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="data/books")
@@ -456,6 +595,14 @@ def main():
     parser.add_argument("--gigaverbo-dir", default="data/gigaverbo")
     parser.add_argument("--gigaverbo-toxico-max", type=int, default=2,
                         help="nota de toxicidade máxima aceita (1 a 5; o edu_high já vem com no máximo 3)")
+    parser.add_argument("--sft", type=int, default=0,
+                        help="conversas do GigaVerbo-v2-SFT para o fine-tuning (ex.: 300000; 0 = não baixar)")
+    parser.add_argument("--sft-dir", default="data/sft")
+    parser.add_argument("--sft-subconjuntos", default=SFT_PADRAO,
+                        help=f"subconjuntos e frações (padrão {SFT_PADRAO}; há também summarization, rewriting...)")
+    parser.add_argument("--sft-nota-min", type=float, default=4.0, help="nota de qualidade mínima (1 a 5)")
+    parser.add_argument("--sft-tokens-max", type=int, default=1500,
+                        help="tamanho máximo de cada exemplo (o de 100M tem janela de 2048)")
     args = parser.parse_args()
 
     if args.max_books > 0:
@@ -467,6 +614,8 @@ def main():
         download_carolina(Path(args.carolina_dir), [c.strip() for c in args.carolina.split(",") if c.strip()])
     if args.gigaverbo > 0:
         download_gigaverbo(Path(args.gigaverbo_dir), int(args.gigaverbo), toxico_max=args.gigaverbo_toxico_max)
+    if args.sft > 0:
+        download_sft(Path(args.sft_dir), args.sft, args.sft_subconjuntos, args.sft_nota_min, args.sft_tokens_max)
 
 
 if __name__ == "__main__":

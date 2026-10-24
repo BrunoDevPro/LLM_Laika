@@ -24,10 +24,11 @@ sys.path.insert(0, str(ROOT))
 from tokenizers import Tokenizer  # noqa: E402
 
 from chat import build_prompt, end_penalty, min_answer_tokens  # noqa: E402
-from data_utils import content_words, follows_up, question_name, rag_queries, wants_rag  # noqa: E402
+from data_utils import (content_words, follows_up, question_name, rag_queries, wants_long, wants_rag,  # noqa: E402
+                        without_trigger)
 from memory import Memory  # noqa: E402
 from model import build_model  # noqa: E402
-from rag import RagIndex  # noqa: E402
+from rag import RagIndex, _stem  # noqa: E402
 
 PERGUNTAS = [
     "Qual é o seu nome?", "Oi", "O que é um vulcão?", "Quem foi Santos Dumont?", "Qual é a capital da França?",
@@ -47,6 +48,16 @@ PERGUNTAS = [
     "E da Itália?", "Por quê?", "Quem foi ele?", "Continue.", "Explique melhor.", "E o Brasil?", "O que ela fez?",
     "Obrigado!", "E aí, tudo bem?", "Não entendi", "Como esta o tempo?", "Resuma isso.",
     "O que havia antes do Big Bang?", "O Sol é uma estrela?", "Explique passo a passo: quanto é 23 × 4?",
+    "O que é a pedra? Explique melhor.", "Resposta longa: o que é a rocha?", "O que é um vulcão? Resposta longa.",
+    "Resposta longa.", "Responda com detalhes.", "E o que ele fez?", "Quem foi Machado de Assis? Resposta longa.",
+    "Quem foi Santos Dumont? Explica melhor, por favor.", "Fale sobre Roma. Responda com detalhes.",
+    "Pesquise sobre a cadela Laika.", "Quem foi a cadela Laika?", "Você sabe quem foi a cadela Laika?",
+    "Quem é você, Laika?", "Você conhece a Laika?", "Você sabe o que é um vulcão?", "Você pode me dizer o que é o Sol?",
+    "O que é pedra?", "O que é madeira?", "O que é areia?", "Qual é a capital de Portugal?", "Os vulcões entram em erupção?",
+    "O que os planetas têm?", "Quais animais vivem nos rios?", "O que é o ciclo da água?",
+    "O planeta Marte tem água?", "Qual é o tamanho do rio Amazonas?", "O que foi o Sputnik 2?",
+    "Quem foi Pedro II do Brasil?", "Para que serve o petróleo?", "Fale sobre o escritor Machado de Assis.",
+    "Qual é a língua da França?", "Saturno tem anéis?", "Qual é a população do Brasil?",
 ]
 
 # Conversas anteriores para a "memória de IA" (histórico no prompt).
@@ -186,9 +197,10 @@ def main():
     for p in PERGUNTAS:
         top = [[r["title"], round(r["score"], 6), r["coverage"]] for r in rag.search(p)[:8]]
         best = rag.best(p)
-        contextos = {str(k): [[h["title"], h["text"]] for h in rag.contexts(p, k)] for k in (1, 2, 3)}
-        linhas.append({"pergunta": p, "palavras": content_words(p), "quer_rag": wants_rag(p), "top": top,
+        contextos = {str(k): [[h["title"], h["text"]] for h in rag.contexts(p, k)] for k in (1, 2, 3, 6)}
+        linhas.append({"pergunta": p, "palavras": content_words(p), "radicais": [_stem(w) for w in content_words(p)], "quer_rag": wants_rag(p), "top": top,
                        "melhor": best["title"] if best else None, "nome": question_name(p), "segue": follows_up(p),
+                       "sem_gatilho": without_trigger(p), "longa": wants_long(p),
                        "consultas": rag_queries(p), "contextos": contextos})
     gravar("rag.jsonl", linhas)
 

@@ -9,7 +9,12 @@ Para o modelo não decorar o pergeresp (e responder tudo com ele), cada lote mis
      "O que é X?" tiradas da Wikipédia (data/qa_auto/) e ~20 mil perguntas com Contexto tiradas
      dos trechos da Wikipédia ("Onde X nasceu?", "O que X inventou?"; 10% com o trecho errado e a
      resposta "não sei");
-  3) trechos de texto puros (replay), para não esquecer o português do pré-treino.
+  3) trechos de texto puros (replay), para não esquecer o português do pré-treino;
+  4) CONHECIMENTO (--conhecimento): os artigos mais importantes da Wikipédia viram perguntas SEM
+     Contexto, cada fato em várias formas ("Onde X nasceu?", "Você sabe onde X nasceu?", "Fale
+     sobre X."), repetidas a cada época: o modelo pequeno só guarda um fato vendo-o muitas vezes;
+  5) instruções do GigaVerbo-v2-SFT (data/sft/, de prepare_data.py --sft): pedidos variados de
+     verdade e perguntas com contexto, em vez de só moldes escritos à mão.
 
 Com o índice do RAG pronto (python rag.py build), parte das perguntas ganha um
 "Contexto:" achado nos textos, igual ao que o chat faz. Assim o modelo aprende a usar
@@ -37,7 +42,8 @@ from tokenizers import Tokenizer
 
 from chat import build_prompt, generate, with_citation
 from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit_context, split_conversation,
-                        reading_examples, chat_turn, rag_chunks, wants_rag, MAX_CONTEXT_WORDS,
+                        reading_examples, chat_turn, rag_chunks, wants_rag, knowledge_examples, normalize,
+                        MAX_CONTEXT_WORDS,
                         ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
 from rag import open_index, wiki_passages
@@ -64,9 +70,18 @@ parser.add_argument("--max-text-mb", type=float, default=40,
                     help="MB de texto (amostrados) usados para exemplos sintéticos e replay")
 parser.add_argument("--max-summary-books", type=int, default=80)
 parser.add_argument("--rag-db", default="data/rag/laika_rag.db")
-parser.add_argument("--rag-share", type=float, default=0.5,
+parser.add_argument("--rag-share", type=float, default=0.7,
                     help="fração das perguntas (que pedem informação) que ganham Contexto do RAG")
 parser.add_argument("--no-rag", action="store_true")
+parser.add_argument("--conhecimento", type=int, default=-1,
+                    help="artigos da Wikipédia que viram perguntas sem Contexto (-1 = automático: 5 mil até "
+                         "20M de parâmetros, 20 mil acima; 0 = desliga)")
+parser.add_argument("--conhecimento-formas", type=int, default=4, help="formas de perguntar cada fato")
+parser.add_argument("--conhecimento-repetir", type=int, default=2, help="vezes que cada uma aparece por época")
+parser.add_argument("--conhecimento-excluir", default="Madeira,Areia",
+                    help="títulos que ficam de fora (para testar se a Laika responde sozinha)")
+parser.add_argument("--sft-dir", default="data/sft", help="instruções do GigaVerbo-v2-SFT (prepare_data.py --sft)")
+parser.add_argument("--sft-max", type=int, default=300000, help="máximo de exemplos do SFT usados")
 parser.add_argument("--lr", type=float, default=None,
                     help="taxa de aprendizado (o tamanho do passo de cada ajuste dos pesos); "
                          "padrão: 5e-5 até 20M de parâmetros e 1e-4 nos modelos maiores")
@@ -167,6 +182,63 @@ reading = reading_examples(passages, args.wiki_leitura, chunks=rag_chunks(block)
 print(f"Leitura da Wikipédia: {len(reading)} perguntas com Contexto (de {len(passages)} trechos)")
 syn_texts += reading
 
+
+def select_articles(files, n, exclude):
+    """Os n artigos "mais importantes": os mais longos, com um peso a mais para os primeiros arquivos
+    (a Wikipédia vem em ordem de criação, e os artigos antigos costumam ser os assuntos centrais)."""
+    import heapq
+    files = sorted(files)
+    heap = []
+    for i, f in enumerate(files):
+        peso = 1.5 - 0.5 * i / max(1, len(files) - 1)
+        title, words = None, 0
+        for block in f.read_text(encoding="utf-8").split("\n\n") + ["."]:
+            block = block.strip()
+            if block and block[-1] not in ".!?…" and len(block) < 120:
+                if title and normalize(title) not in exclude:
+                    item = (words * peso, title, i)
+                    (heapq.heappush if len(heap) < n else heapq.heappushpop)(heap, item)
+                title, words = block, 0
+            else:
+                words += len(block.split())
+        if title and normalize(title) not in exclude:
+            item = (words * peso, title, i)
+            (heapq.heappush if len(heap) < n else heapq.heappushpop)(heap, item)
+        if (i + 1) % 100 == 0:
+            print(f"  conhecimento: {i + 1}/{len(files)} arquivos lidos", flush=True)
+    wanted = {}
+    for _, title, i in heap:
+        wanted.setdefault(i, set()).add(title)
+    articles = {}
+    for i, titles in wanted.items():
+        for title, text, _ in wiki_passages(files[i].read_text(encoding="utf-8")):
+            if title in titles:
+                articles.setdefault(title, []).append(text)
+    return list(articles.items())
+
+
+n_know = args.conhecimento if args.conhecimento >= 0 else (5000 if n_params <= 20e6 else 20000)
+know_texts = []
+if n_know and wiki_files:
+    excluir = {normalize(t.strip()) for t in args.conhecimento_excluir.split(",") if t.strip()}
+    articles = select_articles(wiki_files, n_know, excluir)
+    know_texts = knowledge_examples(articles, forms=args.conhecimento_formas)
+    random.shuffle(know_texts)
+    print(f"Conhecimento: {len(know_texts)} perguntas sem Contexto de {len(articles)} artigos "
+          f"({args.conhecimento_formas} formas por fato, {args.conhecimento_repetir}x por época; "
+          f"fora: {args.conhecimento_excluir or 'nenhum'})")
+
+# Instruções do GigaVerbo-v2-SFT: conversas já prontas (com ou sem Contexto); ficam fora do RAG e do histórico.
+sft_texts = []
+for f in sorted(Path(args.sft_dir).glob("*.jsonl")):
+    for line in f.read_text(encoding="utf-8").splitlines():
+        if line.strip():
+            sft_texts.append(" ".join(chat_turn(q, a) for q, a in json.loads(line)))
+random.shuffle(sft_texts)
+sft_texts = sft_texts[:args.sft_max]
+if sft_texts:
+    print(f"GigaVerbo-v2-SFT: {len(sft_texts)} exemplos de {args.sft_dir}")
+
 # ---------- Contexto do RAG em parte das perguntas ----------
 rag = None if args.no_rag else open_index(args.rag_db)
 
@@ -259,6 +331,10 @@ def encode_chat(texts, identity=frozenset()):
 qa_data, qa_long = encode_chat(qa_texts, identity_texts)
 id_data, _ = encode_chat(list(identity_texts))
 syn_data, _ = encode_chat(syn_texts)
+know_data, _ = encode_chat(know_texts)
+sft_data, sft_long = encode_chat(sft_texts)
+if sft_long:
+    print(f"GigaVerbo-v2-SFT: {sft_long} exemplos passam de {block} tokens e ficaram de fora.")
 if qa_long:
     print(f"ATENÇÃO: {qa_long} exemplos do pergeresp passam de {block} tokens e foram descartados.")
 if not syn_data:
@@ -275,6 +351,8 @@ qa_train, qa_val = split(qa_data)
 id_train, id_val = split(id_data)
 qa_val += id_val
 syn_train, syn_val = split(syn_data)
+know_train, know_val = split(know_data)
+sft_train, sft_val = split(sft_data)
 
 # Repete o pergeresp só o suficiente para ele ser ~qa_share dos exemplos de chat.
 qa_repeat = 0
@@ -282,9 +360,11 @@ if qa_train:
     wanted = args.qa_share / (1 - args.qa_share) * len(syn_train)
     qa_repeat = min(args.max_qa_repeat, max(1, round(wanted / len(qa_train))))
 id_repeat = qa_repeat * args.identity_boost if id_train else 0
+know_repeat = args.conhecimento_repetir if know_train else 0
 print(f"Treino: {len(syn_train)} sintéticos + {len(qa_train)} do pergeresp (x{qa_repeat}) + "
-      f"{len(id_train)} de identidade (x{id_repeat}) | "
-      f"validação: {len(syn_val)} sintéticos + {len(qa_val)} escritos à mão")
+      f"{len(id_train)} de identidade (x{id_repeat}) + {len(know_train)} de conhecimento (x{know_repeat}) + "
+      f"{len(sft_train)} do SFT | validação: {len(syn_val)} sintéticos + {len(qa_val)} escritos à mão + "
+      f"{len(know_val)} de conhecimento + {len(sft_val)} do SFT")
 
 # Texto contínuo dos livros para o replay (numpy para economizar memória).
 parts = [np.array(enc.ids + [eot_id], dtype=np.int32) for enc in tokenizer.encode_batch(book_texts)]
@@ -363,7 +443,8 @@ def show_samples():
 
 # ---------- Treino ----------
 optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
-items_per_epoch = len(syn_train) + len(qa_train) * qa_repeat + len(id_train) * id_repeat
+items_per_epoch = (len(syn_train) + len(qa_train) * qa_repeat + len(id_train) * id_repeat
+                   + len(know_train) * know_repeat + len(sft_train))
 steps_per_epoch = math.ceil(items_per_epoch / args.batch_size)
 total_steps = steps_per_epoch * args.epochs
 warmup = min(100, total_steps // 10)
@@ -395,7 +476,8 @@ if best_path.exists() and not args.no_backup:
 model.train()
 
 for epoch in range(1, args.epochs + 1):
-    train_items = syn_train + qa_train * qa_repeat + id_train * id_repeat
+    train_items = (syn_train + qa_train * qa_repeat + id_train * id_repeat + know_train * know_repeat
+                   + sft_train)
     random.shuffle(train_items)
     running = 0.0
     for i in range(0, len(train_items), args.batch_size):
@@ -410,6 +492,7 @@ for epoch in range(1, args.epochs + 1):
         step += 1
 
     syn_v, qa_v = validate(syn_val), validate(qa_val)
+    know_v, sft_v = validate(know_val), validate(sft_val)
     # Critério de parada: os dois tipos de pergunta contam igual.
     combined = syn_v if math.isnan(qa_v) else 0.5 * (syn_v + qa_v)
     note = ""
@@ -420,7 +503,8 @@ for epoch in range(1, args.epochs + 1):
     else:
         bad_epochs += 1
     print(f"\népoca {epoch} | treino {running / steps_per_epoch:.4f} | val livros {syn_v:.4f} | "
-          f"val pergeresp {qa_v:.4f}{note}", flush=True)
+          f"val pergeresp {qa_v:.4f}" + (f" | val conhecimento {know_v:.4f}" if know_val else "")
+          + (f" | val SFT {sft_v:.4f}" if sft_val else "") + note, flush=True)
     show_samples()
     if bad_epochs >= args.patience:
         print("Early stopping.")

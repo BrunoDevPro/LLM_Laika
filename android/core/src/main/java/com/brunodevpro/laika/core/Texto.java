@@ -39,9 +39,17 @@ public final class Texto {
             + "toda todos todas outro outra cada seja sejam pode podem posso sabe saber diga fale explique defina significa "
             + "significado conte fala diz dizer existe existem coisa coisas entao assim aqui ali favor obrigado obrigada ola oi "
             + "tipo vez vezes ano anos dia dias hoje ontem amanha agora sempre nunca qualquer cujo cuja onde "
-            + "fica ficam ficou funciona funcionam acontece aconteceu chama chamado chamada");
+            + "fica ficam ficou funciona funcionam acontece aconteceu chama chamado chamada serve servem");
     static final Set<String> PERSONAL = conjunto(
             "voce voces seu sua seus suas teu tua te laika eu meu minha meus minhas mim comigo contigo");
+    /** Com estas palavras, "Laika" é a cadela do Sputnik 2, e não a IA (_LAIKA_CADELA do data_utils.py). */
+    static final Set<String> LAIKA_CADELA = conjunto(
+            "cadela cadelinha cachorra cachorrinha cao sputnik espaco espacial sovietica sovietico sovieticos uniao 1957 "
+            + "orbita foguete nave cosmonauta astronauta animal russa russia moscou");
+    /** "Você sabe o que é um vulcão?": o começo educado não torna a pergunta pessoal (_POLITE). */
+    private static final Pattern EDUCADO = Pattern.compile(
+            "^\\s*(?:(?:voce|vc|tu)\\s+(?:sabe|sabes|conhece|conheces|lembra)(?:\\s+(?:me\\s+)?(?:dizer|explicar|falar))?"
+            + "|(?:(?:voce|vc)\\s+)?(?:pode|poderia|consegue)\\s+(?:me\\s+)?(?:dizer|explicar|falar|contar))\\b");
     static final Set<String> INSTRUCTIONS = conjunto(
             "corrija complete termine resuma continue escreva crie use cite conjugue passe transforme separe traduza "
             + "classifique calcule conte faca leia vamos apresente");
@@ -182,6 +190,23 @@ public final class Texto {
         return palavrasDeConteudo(r).isEmpty() ? null : r;
     }
 
+    /** Gatilho de resposta longa (LONG_TRIGGER do data_utils.py), que a opção "Respostas longas" do app acrescenta. */
+    public static final String GATILHO_LONGO = "Resposta longa.";
+    private static final Pattern GATILHOS = Pattern.compile(
+            "\\b(?:explique melhor|explica melhor|resposta longa|responda com detalhes)\\b[.:!,]?",
+            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | UNICODE);
+
+    /** A pergunta sem o gatilho de resposta longa, para a busca e a memória (without_trigger). */
+    public static String semGatilho(String pergunta) {
+        String resto = tirarPontas(aparar(ESPACOS.matcher(GATILHOS.matcher(pergunta).replaceAll(" ")).replaceAll(" ")), " ,");
+        return !palavrasDeConteudo(resto).isEmpty() || resto.length() > 3 ? resto : pergunta;
+    }
+
+    /** A mensagem pede uma resposta longa? (wants_long) */
+    public static boolean querLonga(String pergunta) {
+        return GATILHOS.matcher(pergunta).find();
+    }
+
     private static final Set<String> SEGUE_PALAVRAS = conjunto(
             "isso isto disso disto nisso nisto esse essa esses essas desse dessa desses dessas nesse nessa nesses nessas "
             + "aquilo aquele aquela aqueles aquelas daquilo daquele daquela naquilo naquele naquela "
@@ -190,7 +215,8 @@ public final class Texto {
             + "continue continua continuar prossiga repita repete repetir novamente");
     private static final Set<String> SEGUE_INICIOS = conjunto("e mas entao tambem");
     private static final String[] SEGUE_FRASES = {"explique melhor", "explica melhor", "fale mais", "conte mais",
-            "diga mais", "mais detalhes", "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer"};
+            "diga mais", "mais detalhes", "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer",
+            "resposta longa", "responda com detalhes"}; // o gatilho sozinho ("Resposta longa.") pede mais da anterior
     private static final Set<String> SOCIAIS = conjunto(
             "oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal "
             + "show otimo sim nao kkk kkkk haha blz");
@@ -215,23 +241,23 @@ public final class Texto {
         return false;
     }
 
-    /** O que procurar no RAG, em ordem (rag_queries): o assunto do pedido; senão a pergunta e o nome próprio. */
+    /**
+     * O que procurar no RAG, em ordem (rag_queries): o assunto do pedido ou a pergunta; depois, só o nome
+     * próprio ("O que Santos Dumont inventou?", "sobre a cadela Laika").
+     */
     public static List<String> consultasRag(String pergunta) {
         List<String> r = new ArrayList<>();
         String assunto = assuntoDoPedido(pergunta);
-        if (assunto != null) {
-            r.add(assunto);
-            return r;
-        }
-        r.add(pergunta);
-        String nome = nomeDaPergunta(pergunta);
-        if (nome != null && !palavrasDeConteudo(nome).equals(palavrasDeConteudo(pergunta))) r.add(nome);
+        String primeira = assunto != null ? assunto : pergunta;
+        r.add(primeira);
+        String nome = nomeDaPergunta(primeira);
+        if (nome != null && !palavrasDeConteudo(nome).equals(palavrasDeConteudo(primeira))) r.add(nome);
         return r;
     }
 
-    /** Quantos trechos do RAG cabem no prompt (rag_chunks): 1 com janela de 256, 2 com 512, 3 com 768+. */
+    /** Quantos trechos do RAG cabem no prompt (rag_chunks): 1 com janela de 256, 2 com 512, 4 com 1024, 6 com 2048. */
     public static int trechosRag(int bloco) {
-        return Math.min(3, Math.max(1, bloco / 256));
+        return Math.min(6, Math.max(1, bloco / 256));
     }
 
     /** Uma troca no formato do chat (chat_turn). */
@@ -239,15 +265,31 @@ public final class Texto {
         return USER + " " + pergunta + " " + ASSISTANT + " " + resposta + " " + END;
     }
 
+    /**
+     * As palavras pessoais do texto (personal_words): sem o começo educado ("Você sabe...") e sem "laika"
+     * quando o assunto é a cadela ("Quem foi a cadela Laika?").
+     */
+    public static Set<String> palavrasPessoais(String texto) {
+        List<String> ws = palavras(EDUCADO.matcher(normalizar(texto)).replaceFirst(" "));
+        Set<String> achadas = new LinkedHashSet<>();
+        for (String w : ws) if (PERSONAL.contains(w)) achadas.add(w);
+        if (achadas.contains("laika")) {
+            for (String w : ws) {
+                if (LAIKA_CADELA.contains(w)) {
+                    achadas.remove("laika");
+                    break;
+                }
+            }
+        }
+        return achadas;
+    }
+
     /** Decide se vale procurar contexto nos textos (mesma regra do wants_rag). */
     public static boolean querRag(String pergunta) {
         String[] todas = separar(pergunta);
         if (pergunta.contains("Contexto:") || todas.length > 40) return false;
         String assunto = assuntoDoPedido(pergunta);
-        if (assunto != null) {
-            for (String w : palavras(assunto)) if (PERSONAL.contains(w)) return false;
-            return true;
-        }
+        if (assunto != null) return palavrasPessoais(assunto).isEmpty();
         List<String> primeiras = new ArrayList<>();
         for (int i = 0; i < Math.min(2, todas.length); i++) {
             primeiras.add(tirarPontas(todas[i].toLowerCase(Locale.ROOT), ",.!?:;"));
@@ -256,7 +298,7 @@ public final class Texto {
         if (!primeiras.isEmpty() && (primeiras.get(0).equals("dê") || INSTRUCTIONS.contains(normalizar(primeiras.get(0))))) {
             return false;
         }
-        for (String w : palavras(pergunta)) if (PERSONAL.contains(w)) return false;
+        if (!palavrasPessoais(pergunta).isEmpty()) return false;
         return !palavrasDeConteudo(pergunta).isEmpty();
     }
 

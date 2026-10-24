@@ -464,11 +464,13 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             marcar(3, 4, 6);
         });
         // 100M (contexto 2048, RoPE): primeiro os dados (Wikipédia inteira, Carolina, GigaVerbo; sem GPU),
-        // depois o treino na A100. Se parar no limite de 6 h, rode "Modelo de 100M" de novo com MODO "continuar".
+        // depois o treino na A100 e a avaliação (célula 7). Se parar no limite de 6 h, rode "Modelo de 100M" de novo
+        // com MODO "continuar". Os dados incluem 300 mil conversas do GigaVerbo-v2-SFT para o fine-tuning.
         botao(a4, "Dados para 100M", false, v -> {
             valores.put("2.ARTIGOS", "todos (~1,1 milhão)");
             valores.put("2.CAROLINA", "true");
             valores.put("2.GIGAVERBO", "1,5 bilhão de tokens");
+            valores.put("2.SFT", "300 mil conversas");
             gpu = "nenhuma";
             marcar(2);
         });
@@ -477,7 +479,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             valores.put("3.PRESET", "colab_100m");
             valores.put("4.PERGUNTAS_WIKIPEDIA", "40000");
             gpu = "A100";
-            marcar(3, 4, 6);
+            marcar(3, 4, 6, 7);
         });
         TextView g = texto("GPU: " + nomeGpu(gpu) + "  ▾", 15, R.color.topo_texto, true);
         g.setPadding(0, dp(12), 0, dp(4));

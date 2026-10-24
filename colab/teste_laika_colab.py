@@ -323,18 +323,19 @@ def dados_da_verificacao(check):
 class TesteCaderno(unittest.TestCase):
     def test_notebook_de_verdade(self):
         cel = {c.numero: c for c in lc.ler_caderno(os.path.join(lc.RAIZ, "colab.ipynb"))}
-        self.assertEqual(sorted(cel), [0, 1, 2, 3, 4, 5, 6])
+        self.assertEqual(sorted(cel), [0, 1, 2, 3, 4, 5, 6, 7])
         self.assertTrue(cel[0].so_navegador and cel[5].so_navegador)
-        self.assertFalse(any(cel[n].so_navegador for n in (1, 2, 3, 4, 6)))
+        self.assertFalse(any(cel[n].so_navegador for n in (1, 2, 3, 4, 6, 7)))
         self.assertEqual([c.nome for c in cel.values()][1:5], ["PREPARAR", "DADOS", "PRÉ-TREINO", "FINE-TUNING"])
         modo = next(p for p in cel[3].parametros if p.nome == "MODO")
         self.assertEqual((modo.tipo, modo.padrao, modo.opcoes), ("opcoes", "pular", ["pular", "continuar", "do_zero"]))
         codigo = lc.aplicar_parametros(cel[3], {"MODO": "continuar", "PASSOS": "500"})
         self.assertIn("MODO = 'continuar'  #@param [\"pular\", \"continuar\", \"do_zero\"]", codigo)
         self.assertIn("PASSOS = 500  #@param", codigo)
-        codigo = lc.aplicar_parametros(cel[4], {"EPOCAS": 3, "USAR_RAG": False})
+        codigo = lc.aplicar_parametros(cel[4], {"EPOCAS": 3, "USAR_RAG": False, "RAG_FRACAO": "0.5"})
         self.assertIn("EPOCAS = 3  #@param", codigo)
         self.assertIn("USAR_RAG = False  #@param", codigo)
+        self.assertIn("RAG_FRACAO = 0.5  #@param", codigo)
         for errado in [{"MODO": "xyz"}, {"PASSOS": "dois"}, {"NAO_EXISTE": 1}, {"PASSOS": True}]:
             with self.assertRaises(lc.Falha):
                 lc.aplicar_parametros(cel[3], errado)

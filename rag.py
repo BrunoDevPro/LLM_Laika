@@ -24,7 +24,7 @@ import sqlite3
 import tempfile
 from pathlib import Path
 
-from data_utils import _SENTENCE_SPLIT, content_words, normalize, rag_queries, word_tokens
+from data_utils import _SENTENCE_SPLIT, content_words, normalize, question_name, rag_queries, word_tokens
 
 DEFAULT_DB = "data/rag/laika_rag.db"
 SOURCES = [("data/wiki", "wiki"), ("data/modern", "texto"), ("data/books", "livro")]
@@ -167,8 +167,32 @@ def build(db_path=DEFAULT_DB, force=False):
 
 # ---------- Busca ----------
 
+# Plural -> singular (já sem acentos): "vulcoes" -> "vulcao", "capitais" -> "capital", "flores" -> "flor".
+_PLURAIS = (("oes", "ao"), ("aes", "ao"), ("ais", "al"), ("eis", "el"), ("ns", "m"), ("res", "r"), ("zes", "z"),
+            ("ses", "s"), ("s", ""))
+_VERBOS = ("ando", "endo", "indo", "aram", "eram", "iram", "ava", "ou", "ar", "er", "ir", "or")
+
+
 def _stem(word):
-    return word[:5] if len(word) >= 6 and word.isalpha() else word
+    """Radical leve: tira o plural e algumas terminações de verbo (palavras com 7+ letras).
+
+    "cadelas" = "cadela", "inventou" = "inventor" = "invent". Antes eram as 5 primeiras letras, o que
+    juntava "capital" com "capítulo", "Portugal" com "português" e "planeta" com "planejamento". A vogal
+    final fica ("pedra" não é "Pedro").
+    """
+    if not word.isalpha() or len(word) < 4:
+        return word
+    w = word
+    for fim, troca in _PLURAIS:
+        if w.endswith(fim) and len(w) - len(fim) + len(troca) >= 3 and (fim != "eis" or len(w) >= 6):
+            w = w[:-len(fim)] + troca
+            break
+    if len(w) >= 7:
+        for fim in _VERBOS:
+            if w.endswith(fim):
+                w = w[:-len(fim)]
+                break
+    return w
 
 
 def _with_stems(words):
@@ -209,26 +233,33 @@ class RagIndex:
         except sqlite3.OperationalError:
             return []
 
-    def search(self, question, k=40):
+    def search(self, question, k=200):
         words = content_words(question)[:12]
         if not words:
             return []
         # 1) Artigos cujo TÍTULO tem todas as palavras da pergunta ("Vulcão", "Machado de Assis").
         title_rows = self._query(" AND ".join(f'title:"{w}"' for w in words), 15)
-        # 2) Qualquer trecho com as palavras: exata OU mesmo começo ("pisou" acha "pisar").
+        # 1b) ... ou todas as palavras do nome próprio ("Laika" em "a cadela Laika").
+        name_words = content_words(question_name(question) or "")
+        if name_words and name_words != words:
+            title_rows += self._query(" AND ".join(f'title:"{w}"' for w in name_words), 15)
+        # 2) Qualquer trecho com as palavras: exata OU com o mesmo radical ("cadelas" acha "cadela").
         terms = []
         for w in words:
             terms.append(f'"{w}"')
-            if len(w) >= 6 and w.isalpha():
-                terms.append(f'"{w[:5]}"*')
+            if len(_stem(w)) >= 4 and _stem(w) != w:
+                terms.append(f'"{_stem(w)}"*')
         rows = title_rows + self._query(" OR ".join(terms), k)
 
         query_stems = {_stem(w) for w in words}
         raw_question = set(re.findall(r"[^\W\d_]+", question.lower()))
+        # Números curtos e algarismos romanos não são palavras de busca, mas desempatam títulos:
+        # "Sputnik 2" x "Sputnik-1", "Pedro II" x "Pedro I".
+        short_numbers = set(re.findall(r"(?<![\d.,])\d{1,2}(?![\d.,])|\b[IVXLC]{1,5}\b", question))
         results, seen = [], set()
         for rank, (title, text, kind, pos) in enumerate(rows):
-            if (title, text) in seen:
-                continue
+            if (title, text) in seen or (kind == "texto" and normalize(title) == "laika"):
+                continue  # o texto em que a IA se apresenta só confundiria as perguntas sobre a cadela
             seen.add((title, text))
             main_title = re.sub(r"\s*\(.*?\)", "", title)
             title_words = _with_stems(word_tokens(title))
@@ -242,21 +273,33 @@ class RagIndex:
             # Mesmas letras mas acentos diferentes ("Pele" x "Pelé") não contam como título igual.
             raw_title = set(re.findall(r"[^\W\d_]+", main_title.lower()))
             accent_clash = any(normalize(a) == normalize(b) and a != b for a in raw_title for b in raw_question)
+            desamb = _with_stems(word_tokens(title)) - _with_stems(word_tokens(main_title))
             if accent_clash:
                 score -= 0.5
             elif main_words and main_words == query_stems:
                 score += 0.6                      # título exatamente igual ao assunto
+            elif main_words and main_words < query_stems:
+                # Título contido na pergunta: "Laika" em "a cadela Laika", "Rio Amazonas" em "o tamanho do rio
+                # Amazonas" (quanto mais da pergunta o título cobre, mais vale), e mais se o resto está no trecho.
+                score += 0.5 * len(main_words) / len(query_stems)
+                if query_stems - main_words - desamb <= _with_stems(text_tokens):
+                    score += 0.15
             elif in_title > 0 and main_words:
                 extra = len(main_words - query_stems) / len(main_words)
                 score -= 0.3 * extra              # "Prêmio Machado de Assis" < "Machado de Assis"
-            if "(" in title and not (_with_stems(word_tokens(title)) - _with_stems(word_tokens(main_title))) <= query_stems:
-                score -= 0.2                      # desambiguação: "Cristo Redentor (Porto Alegre)"
+            if "(" in title:
+                if desamb and desamb <= query_stems:
+                    score += 0.3                  # "Marte (planeta)" em "o planeta Marte tem água?"
+                elif not desamb <= query_stems:
+                    score -= 0.2                  # desambiguação: "Cristo Redentor (Porto Alegre)"
             if pos == 0 and in_title > 0:
                 score += 0.1                      # 1º trecho do artigo costuma ter a definição
+            if short_numbers & set(re.findall(r"\d+|\b[IVXLC]{1,5}\b", title)):
+                score += 0.1                      # "Sputnik 2", "Pedro II do Brasil"
             score += 0.2 * _proximity(text_tokens, words)
             score -= 0.002 * rank
             results.append({"title": title, "text": text, "kind": kind,
-                            "coverage": coverage, "score": score})
+                            "coverage": coverage, "in_title": in_title, "score": score})
         results.sort(key=lambda r: r["score"], reverse=True)
         return results
 
@@ -271,11 +314,20 @@ class RagIndex:
         confiança, só o nome próprio). Os trechos extras são do mesmo artigo do primeiro, na
         ordem de quantas palavras da pergunta eles têm (empate: a nota da busca).
         Na busca só pelo nome, os textos de data/modern também precisam da nota mínima: qualquer
-        texto que cite "França" cobre 100% da consulta "França".
+        texto que cite "França" cobre 100% da consulta "França"; e, se o 1º resultado da pergunta inteira
+        é um artigo cujo título tem o nome, ele é o escolhido.
         """
+        first = []
         for i, query in enumerate(rag_queries(question)):
             results = self.search(query)
             top = _confident(results, any_text=i == 0)
+            if i == 0:
+                first = results
+            elif first and first[0]["coverage"] >= 0.6 and first[0]["kind"] == "wiki" \
+                    and {_stem(w) for w in content_words(query)} <= _with_stems(word_tokens(first[0]["title"])):
+                # Na busca só pelo nome, o 1º resultado da pergunta inteira ganha se o título dele tem o nome:
+                # "o tamanho do rio Amazonas" fica com "Rio Amazonas", e não com o estado "Amazonas".
+                top, results = first[0], first
             if top is None:
                 continue
             hits = [top]
@@ -292,13 +344,14 @@ def _confident(results, min_coverage=0.6, min_score=1.8, any_text=True):
     """O primeiro resultado, se a busca tiver confiança; senão None.
 
     Contexto errado atrapalha mais do que nenhum contexto, então só aceita resultados
-    com nota alta (em geral, quando o assunto da pergunta é o título do artigo) ou que
-    venham dos textos de data/modern (any_text).
+    com nota alta (em geral, quando o assunto da pergunta é o título do artigo) ou, na
+    primeira busca (any_text), textos de data/modern com alguma palavra da pergunta no título.
+    Antes qualquer texto de data/modern passava: "O que é pedra?" usava "As pirâmides do Egito".
     """
     if not results or results[0]["coverage"] < min_coverage:
         return None
     top = results[0]
-    if top["score"] >= min_score or (any_text and top["kind"] == "texto"):
+    if top["score"] >= min_score or (any_text and top["kind"] == "texto" and top.get("in_title", 0) > 0):
         return top
     return None
 

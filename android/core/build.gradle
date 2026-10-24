@@ -29,6 +29,7 @@ test {
     systemProperty "laika.referencias", file("build/referencias").absolutePath
     // Pasta com finetuned.pt, pretrain_best.pt e tokenizer.json (testes da importação no app).
     systemProperty "laika.livros", System.getenv("LAIKA_LIVROS") ?: "none"
+    systemProperty "laika.ragdb", System.getenv("LAIKA_RAG_DB") ?: ""
     systemProperty "laika.repo", file("../..").absolutePath
     systemProperty "laika.checkpoints", System.getenv("LAIKA_CHECKPOINTS") ?: file("../../checkpoints").absolutePath
     testLogging {

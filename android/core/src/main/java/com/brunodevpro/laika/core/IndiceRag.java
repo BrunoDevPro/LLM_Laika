@@ -29,6 +29,10 @@ public final class IndiceRag implements AutoCloseable {
     }
     private static final Pattern PARENTESES = Pattern.compile("\\s*\\(.*?\\)");
     private static final Pattern LETRAS = Pattern.compile("[\\p{L}]+");
+    /** Números curtos e algarismos romanos da pergunta, que desempatam títulos ("Sputnik 2", "Pedro II"). */
+    private static final Pattern NUMEROS_CURTOS = Pattern.compile(
+            "(?<![\\d.,])\\d{1,2}(?![\\d.,])|\\b[IVXLC]{1,5}\\b", Texto.UNICODE);
+    private static final Pattern NUMEROS_TITULO = Pattern.compile("\\d+|\\b[IVXLC]{1,5}\\b", Texto.UNICODE);
 
     private final SQLiteConnection con;
 
@@ -39,13 +43,14 @@ public final class IndiceRag implements AutoCloseable {
     /** Um trecho achado na busca. */
     public static final class Trecho {
         public final String titulo, texto, tipo;
-        public final double cobertura, nota;
+        public final double cobertura, emTitulo, nota;
 
-        Trecho(String titulo, String texto, String tipo, double cobertura, double nota) {
+        Trecho(String titulo, String texto, String tipo, double cobertura, double emTitulo, double nota) {
             this.titulo = titulo;
             this.texto = texto;
             this.tipo = tipo;
             this.cobertura = cobertura;
+            this.emTitulo = emTitulo;
             this.nota = nota;
         }
     }
@@ -84,8 +89,33 @@ public final class IndiceRag implements AutoCloseable {
         return r;
     }
 
-    static String radical(String w) {
-        return w.length() >= 6 && soLetras(w) ? w.substring(0, 5) : w;
+    private static final String[][] PLURAIS = {{"oes", "ao"}, {"aes", "ao"}, {"ais", "al"}, {"eis", "el"}, {"ns", "m"},
+            {"res", "r"}, {"zes", "z"}, {"ses", "s"}, {"s", ""}};
+    private static final String[] VERBOS = {"ando", "endo", "indo", "aram", "eram", "iram", "ava", "ou", "ar", "er", "ir", "or"};
+
+    /**
+     * Radical leve (_stem do rag.py): tira o plural e algumas terminações de verbo (palavras com 7+ letras).
+     * "cadelas" = "cadela", "inventou" = "inventor"; "capital" não é mais "capítulo".
+     */
+    static String radical(String palavra) {
+        if (!soLetras(palavra) || palavra.length() < 4) return palavra;
+        String w = palavra;
+        for (String[] p : PLURAIS) {
+            if (w.endsWith(p[0]) && w.length() - p[0].length() + p[1].length() >= 3
+                    && (!p[0].equals("eis") || w.length() >= 6)) {
+                w = w.substring(0, w.length() - p[0].length()) + p[1];
+                break;
+            }
+        }
+        if (w.length() >= 7) {
+            for (String fim : VERBOS) {
+                if (w.endsWith(fim)) {
+                    w = w.substring(0, w.length() - fim.length());
+                    break;
+                }
+            }
+        }
+        return w;
     }
 
     private static boolean soLetras(String w) {
@@ -132,7 +162,7 @@ public final class IndiceRag implements AutoCloseable {
     }
 
     public List<Trecho> buscar(String pergunta) {
-        return buscar(pergunta, 40);
+        return buscar(pergunta, 200);
     }
 
     public List<Trecho> buscar(String pergunta, int k) {
@@ -145,20 +175,32 @@ public final class IndiceRag implements AutoCloseable {
         List<String> partes = new ArrayList<>();
         for (String w : palavras) partes.add("title:\"" + w + "\"");
         List<Linha> linhas = new ArrayList<>(consulta(String.join(" AND ", partes), 15));
-        // 2) Qualquer trecho com as palavras: exata OU mesmo começo.
+        // 1b) ... ou todas as palavras do nome próprio ("Laika" em "a cadela Laika").
+        String nome = Texto.nomeDaPergunta(pergunta);
+        List<String> doNome = Texto.palavrasDeConteudo(nome == null ? "" : nome);
+        if (!doNome.isEmpty() && !doNome.equals(palavras)) {
+            List<String> p2 = new ArrayList<>();
+            for (String w : doNome) p2.add("title:\"" + w + "\"");
+            linhas.addAll(consulta(String.join(" AND ", p2), 15));
+        }
+        // 2) Qualquer trecho com as palavras: exata OU com o mesmo radical.
         List<String> termos = new ArrayList<>();
         for (String w : palavras) {
             termos.add("\"" + w + "\"");
-            if (w.length() >= 6 && soLetras(w)) termos.add("\"" + w.substring(0, 5) + "\"*");
+            String r = radical(w);
+            if (r.length() >= 4 && !r.equals(w)) termos.add("\"" + r + "\"*");
         }
         linhas.addAll(consulta(String.join(" OR ", termos), k));
 
         Set<String> radicaisPergunta = radicais(palavras);
         Set<String> letrasPergunta = letras(pergunta);
+        Set<String> numerosPergunta = achados(NUMEROS_CURTOS, pergunta);
         Set<String> vistos = new HashSet<>();
         for (int rank = 0; rank < linhas.size(); rank++) {
             Linha l = linhas.get(rank);
             if (!vistos.add(l.titulo + "\u0000" + l.texto)) continue;
+            // O texto em que a IA se apresenta só confundiria as perguntas sobre a cadela.
+            if ("texto".equals(l.tipo) && Texto.normalizar(l.titulo).equals("laika")) continue;
             String tituloPrincipal = PARENTESES.matcher(l.titulo).replaceAll("");
             Set<String> palavrasTitulo = radicais(Texto.palavras(l.titulo));
             List<String> conteudoPrincipal = Texto.palavrasDeConteudo(tituloPrincipal);
@@ -177,6 +219,8 @@ public final class IndiceRag implements AutoCloseable {
             double emTitulo = (double) noTitulo / palavras.size();
 
             double nota = cobertura + 0.3 * emTitulo + KIND_BONUS.getOrDefault(l.tipo, 0.0);
+            Set<String> desamb = radicais(Texto.palavras(l.titulo));
+            desamb.removeAll(radicais(Texto.palavras(tituloPrincipal)));
             // Mesmas letras mas acentos diferentes ("Pele" x "Pelé") não contam como título igual.
             boolean choqueAcento = false;
             for (String a : letras(tituloPrincipal)) {
@@ -188,24 +232,45 @@ public final class IndiceRag implements AutoCloseable {
                 nota -= 0.5;
             } else if (!palavrasPrincipais.isEmpty() && palavrasPrincipais.equals(radicaisPergunta)) {
                 nota += 0.6;  // título exatamente igual ao assunto
+            } else if (!palavrasPrincipais.isEmpty() && radicaisPergunta.containsAll(palavrasPrincipais)
+                    && radicaisPergunta.size() > palavrasPrincipais.size()) {
+                // Título contido na pergunta ("Laika" em "a cadela Laika"): vale mais quanto mais da pergunta
+                // ele cobre, e mais ainda se o resto está no trecho.
+                nota += 0.5 * palavrasPrincipais.size() / radicaisPergunta.size();
+                Set<String> resto = new HashSet<>(radicaisPergunta);
+                resto.removeAll(palavrasPrincipais);
+                resto.removeAll(desamb);
+                if (radicais(tokensTexto).containsAll(resto)) nota += 0.15;
             } else if (emTitulo > 0 && !palavrasPrincipais.isEmpty()) {
                 Set<String> extra = new HashSet<>(palavrasPrincipais);
                 extra.removeAll(radicaisPergunta);
                 nota -= 0.3 * extra.size() / palavrasPrincipais.size();
             }
             if (l.titulo.contains("(")) {
-                Set<String> desamb = radicais(Texto.palavras(l.titulo));
-                desamb.removeAll(radicais(Texto.palavras(tituloPrincipal)));
-                if (!radicaisPergunta.containsAll(desamb)) nota -= 0.2;  // "Cristo Redentor (Porto Alegre)"
+                if (!desamb.isEmpty() && radicaisPergunta.containsAll(desamb)) {
+                    nota += 0.3;  // "Marte (planeta)" em "o planeta Marte tem água?"
+                } else if (!radicaisPergunta.containsAll(desamb)) {
+                    nota -= 0.2;  // "Cristo Redentor (Porto Alegre)"
+                }
             }
             if (l.pos == 0 && emTitulo > 0) nota += 0.1;  // 1º trecho do artigo costuma ter a definição
+            Set<String> numerosTitulo = achados(NUMEROS_TITULO, l.titulo);
+            numerosTitulo.retainAll(numerosPergunta);
+            if (!numerosTitulo.isEmpty()) nota += 0.1;
             nota += 0.2 * proximidade(tokensTexto, palavras);
             nota -= 0.002 * rank;
-            resultados.add(new Trecho(l.titulo, l.texto, l.tipo, cobertura, nota));
+            resultados.add(new Trecho(l.titulo, l.texto, l.tipo, cobertura, emTitulo, nota));
         }
         // Ordenação estável, como o sort do Python.
         Collections.sort(resultados, (a, b) -> Double.compare(b.nota, a.nota));
         return resultados;
+    }
+
+    private static Set<String> achados(Pattern p, String s) {
+        Set<String> r = new HashSet<>();
+        Matcher m = p.matcher(s);
+        while (m.find()) r.add(m.group());
+        return r;
     }
 
     /** O trecho mais relevante, ou null se a busca não tiver confiança (igual ao RagIndex.best). */
@@ -218,11 +283,14 @@ public final class IndiceRag implements AutoCloseable {
         return confiavel(r, true);
     }
 
-    /** qualquerTexto=false: os textos de data/modern também precisam da nota mínima (busca só pelo nome). */
+    /**
+     * qualquerTexto=true (primeira busca): textos de data/modern com alguma palavra da pergunta no título passam
+     * sem a nota mínima; false (busca só pelo nome): também precisam dela.
+     */
     static Trecho confiavel(List<Trecho> r, boolean qualquerTexto) {
         if (r.isEmpty() || r.get(0).cobertura < 0.6) return null;
         Trecho top = r.get(0);
-        return top.nota >= 1.8 || (qualquerTexto && "texto".equals(top.tipo)) ? top : null;
+        return top.nota >= 1.8 || (qualquerTexto && "texto".equals(top.tipo) && top.emTitulo > 0) ? top : null;
     }
 
     /**
@@ -231,9 +299,20 @@ public final class IndiceRag implements AutoCloseable {
      */
     public List<Trecho> contextos(String pergunta, int k) {
         List<String> consultas = Texto.consultasRag(pergunta);
+        List<Trecho> primeira = new ArrayList<>();
         for (int c = 0; c < consultas.size(); c++) {
             List<Trecho> r = buscar(consultas.get(c));
             Trecho top = confiavel(r, c == 0);
+            if (c == 0) {
+                primeira = r;
+            } else if (!primeira.isEmpty() && primeira.get(0).cobertura >= 0.6 && "wiki".equals(primeira.get(0).tipo)
+                    && radicais(Texto.palavras(primeira.get(0).titulo)).containsAll(
+                            radicais(Texto.palavrasDeConteudo(consultas.get(c))))) {
+                // Na busca só pelo nome, o 1º resultado da pergunta inteira ganha se o título dele tem o nome
+                // ("o tamanho do rio Amazonas" fica com "Rio Amazonas", e não com o estado "Amazonas").
+                top = primeira.get(0);
+                r = primeira;
+            }
             if (top == null) continue;
             List<Trecho> achados = new ArrayList<>();
             achados.add(top);

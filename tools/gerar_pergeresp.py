@@ -39,6 +39,8 @@ import porque1, porque2, porque3, porque4  # noqa: E402,E401
 import simnao as SN  # noqa: E402
 import simnao2 as SN2  # noqa: E402
 import simnao3 as SN3  # noqa: E402
+import pessoas1, pessoas2, pessoas3, conceitos1, conceitos2  # noqa: E402,E401
+import eventos as EV  # noqa: E402
 
 TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
 QA_DIR = ROOT / "data" / "qa"
@@ -1596,6 +1598,259 @@ def contas_explicadas(rng):
     return pares
 
 
+# =====================================================================
+# PESSOAS, DATAS, SÉCULOS, CONCEITOS E O GATILHO DE RESPOSTA LONGA
+# (tools/pessoas*.py, eventos.py, conceitos*.py)
+# =====================================================================
+PESSOAS_V = pessoas1.PESSOAS + pessoas2.PESSOAS + pessoas3.PESSOAS
+CONCEITOS = conceitos1.CONCEITOS + conceitos2.CONCEITOS
+# Formas do gatilho (data_utils.LONG_TRIGGER e _LONG_TRIGGERS). A primeira é a que o app e o chat.py acrescentam.
+GATILHOS = ["{} Resposta longa.", "{} Explique melhor.", "Resposta longa: {}", "{} Responda com detalhes.",
+            "Explique melhor: {}", "{} Resposta longa, por favor."]
+
+
+def ano_extenso(n):
+    """1822 -> "mil oitocentos e vinte e dois", 1500 -> "mil e quinhentos", 2002 -> "dois mil e dois"."""
+    if n < 1000:
+        return por_extenso(n)
+    m, r = divmod(n, 1000)
+    mil = "mil" if m == 1 else por_extenso(m) + " mil"
+    if r == 0:
+        return mil
+    return f"{mil}{' e ' if r < 100 or r % 100 == 0 else ' '}{por_extenso(r)}"
+
+
+def seculo(ano):
+    return (ano - 1) // 100 + 1
+
+
+def nome_seculo(s, extenso=True):
+    return f"século {romano(s)} ({por_extenso(s)})" if extenso else f"século {romano(s)}"
+
+
+def data_curta(d, m, a):
+    return f"{'1º' if d == 1 else d} de {MESES[m - 1][0]} de {a}"
+
+
+def data_extenso(d, m, a):
+    return f"{'primeiro' if d == 1 else por_extenso(d)} de {MESES[m - 1][0]} de {ano_extenso(a)}"
+
+
+def minuscula(texto):
+    """Primeira letra minúscula, a não ser que a palavra pareça nome próprio (ex.: "A princesa" -> "a princesa")."""
+    primeira = texto.split(" ", 1)[0]
+    return texto[0].lower() + texto[1:] if primeira in ("O", "A", "Os", "As") else texto
+
+
+def com_gatilho(i, pergunta):
+    forma = GATILHOS[i % len(GATILHOS)]
+    if forma.startswith(("Resposta longa:", "Explique melhor:")):
+        pergunta = minuscula(pergunta)
+    return forma.format(pergunta)
+
+
+def pergunta_conceito(assunto):
+    """"a pedra" -> "O que é pedra?" (como o usuário pergunta); nomes próprios ficam com o artigo ("O que é o Sol?")."""
+    art, _, resto = assunto.partition(" ")
+    return f"O que é {resto}?" if art in ("o", "a") and resto[:1].islower() else pergunta_curta(assunto)
+
+
+def pessoas_sections():
+    """"Quem foi X?", "O que X fez?", século, nascimento com o ano por extenso, sim ou não e o gatilho."""
+    quem, fez, datas, sim = [], [], [], []
+    for i, (nome, g, nasc, morte, q_foi, o_que) in enumerate(PESSOAS_V):
+        plural = g == "p"
+        Nome = cap(nome)
+        foi, fizeram = ("foram", "fizeram") if plural else ("foi", "fez")
+        fim = {"m": "o", "f": "a", "p": "os"}[g]
+        quem.append((f"Quem {foi} {nome}?", q_foi))
+        fez.append((f"O que {nome} {fizeram}?", o_que))
+        fez.append(([f"Por que {nome} {'são' if plural else 'é'} famos{fim}?",
+                     f"Pelo que {nome} {'ficaram' if plural else 'ficou'} conhecid{fim}?",
+                     f"Qual é a importância {de_artigo(nome)}?"][i % 3], o_que))
+        pron = {"m": "ele", "f": "ela", "p": "eles"}[g]
+        quem.append(([f"Quem {foi} {nome} e o que {pron} {fizeram}?", f"Me fale sobre {nome}.",
+                      f"O que você sabe sobre {nome}?"][i % 3], f"{q_foi} {o_que}"))
+        vida = ""
+        if nasc and morte:
+            s1, s2 = seculo(nasc), seculo(morte)
+            vida = (f"{Nome} viveu no {nome_seculo(s1)}: nasceu em {nasc} e morreu em {morte}." if s1 == s2 else
+                    f"{Nome} viveu entre os séculos {romano(s1)} e {romano(s2)}: nasceu em {nasc} e morreu em {morte}.")
+            datas.append(([f"Em que século viveu {nome}?", f"{Nome} viveu em que século?",
+                           f"Em que época viveu {nome}?"][i % 3], vida))
+            datas.append((f"Quando {nome} nasceu?",
+                          f"{Nome} nasceu em {nasc} ({ano_extenso(nasc)}), no {nome_seculo(s1)}."))
+            datas.append((f"Quando {nome} morreu?", f"{Nome} morreu em {morte}, no {nome_seculo(s2)}."))
+            datas.append((f"Quantos anos {nome} viveu?",
+                          f"{Nome} viveu cerca de {morte - nasc} anos: nasceu em {nasc} e morreu em {morte}."))
+            errado = nasc + [12, -9, 23, -17, 31][i % 5]
+            if i % 2 == 0:
+                sim.append((f"{Nome} nasceu em {ano_extenso(nasc)}?",
+                            f"Sim. {Nome} nasceu em {nasc} ({ano_extenso(nasc)})."))
+            else:
+                sim.append((f"{Nome} nasceu em {ano_extenso(errado)}?",
+                            f"Não. {Nome} nasceu em {nasc} ({ano_extenso(nasc)}), e não em {errado}."))
+            outro = s1 + (1 if i % 4 < 2 else -1)
+            if i % 2 == 1 or outro in (s1, s2):
+                sim.append((f"{Nome} viveu no século {romano(s1)}?", f"Sim. {vida}"))
+            else:
+                sim.append((f"{Nome} viveu no século {romano(outro)}?", f"Não. {vida}"))
+            if i % 2 == 1:
+                sim.append((f"{Nome} morreu em {ano_extenso(morte)}?", f"Sim. {Nome} morreu em {morte} ({ano_extenso(morte)})."))
+            else:
+                sim.append((f"{Nome} morreu em {ano_extenso(morte + 14)}?",
+                            f"Não. {Nome} morreu em {morte} ({ano_extenso(morte)}), e não em {morte + 14}."))
+        longa = f"{q_foi} {o_que}" + (f" {vida}" if vida else "")
+        quem.append((com_gatilho(i, f"Quem {foi} {nome}?"), longa))
+        fez.append((com_gatilho(i + 3, f"O que {nome} {fizeram}?"), longa))
+    return [("Pessoas: quem foi", quem), ("Pessoas: o que fez", fez), ("Pessoas: datas e séculos", datas),
+            ("Pessoas: sim ou não", sim)]
+
+
+def datas_sections(rng):
+    """Acontecimentos com a data em algarismos e por extenso, séculos em algarismos romanos e anos por extenso."""
+    quando, aconteceu, sim = [], [], []
+    por_ano = {}
+    for i, (nome, d, m, a, fato, mais) in enumerate(EV.EVENTOS):
+        Nome, s = cap(nome), seculo(a)
+        por_ano.setdefault(a, []).append(fato)
+        quando_foi = f"Foi em {data_curta(d, m, a)}." if d else f"Foi em {a}, no {nome_seculo(s)}."
+        quando.append((f"Quando foi {nome}?", f"{quando_foi} {'Nesse dia' if d else 'Nesse ano'}, {fato}."))
+        quando.append((f"Em que ano foi {nome}?", f"{Nome} foi em {a} ({ano_extenso(a)}), no {nome_seculo(s)}."))
+        quando.append(([f"Em que século foi {nome}?", f"{Nome} aconteceu em que século?"][i % 2],
+                        f"{Nome} foi no {nome_seculo(s)}, em {a}."))
+        texto = f"{Nome} foi em {data_curta(d, m, a) if d else a}. {cap(fato)}. {mais}"
+        aconteceu.append(([f"Me fale sobre {nome}.", f"O que foi {nome}?", f"Explique o que foi {nome}."][i % 3], texto))
+        aconteceu.append((com_gatilho(i, f"Quando foi {nome}?"), f"{texto} Isso foi no {nome_seculo(s)}."))
+        if d:
+            quando.append(([f"Em que dia foi {nome}?", f"Qual foi a data {de_artigo(nome)}?"][i % 2],
+                           f"{Nome} foi no dia {data_curta(d, m, a)}."))
+            resposta = f"Em {data_curta(d, m, a)}, {fato}. {mais}"
+            aconteceu.append((f"O que aconteceu em {data_extenso(d, m, a)}?", resposta))
+            aconteceu.append(([f"O que aconteceu no dia {d:02d}/{m:02d}/{a}?", f"O que aconteceu em {d}/{m}/{a}?"][i % 2],
+                              resposta))
+            aconteceu.append((f"O que aconteceu em {data_curta(d, m, a)}?", resposta))
+        outro = s + (1 if i % 3 else -1)
+        if i % 2 == 0:
+            sim.append((f"{Nome} foi no século {romano(s)}?", f"Sim. {Nome} foi em {a}, no {nome_seculo(s)}."))
+        else:
+            sim.append((f"{Nome} foi no século {romano(outro)}?",
+                        f"Não. {Nome} foi em {a}, no {nome_seculo(s)}, e não no século {romano(outro)}."))
+        if d and i % 2 == 1:
+            sim.append((f"{Nome} foi em {ano_extenso(a)}?", f"Sim. {quando_foi}"))
+    for a, fatos in por_ano.items():
+        if len(fatos) == 1:
+            resposta = f"Em {a}, {fatos[0]}."
+        else:
+            resposta = f"Em {a}, aconteceram várias coisas: " + "; ".join(fatos[:-1]) + f"; e {fatos[-1]}."
+        aconteceu.append(([f"O que aconteceu em {ano_extenso(a)}?", f"O que aconteceu no ano de {ano_extenso(a)}?"]
+                          [a % 2], resposta))
+        aconteceu.append((f"O que aconteceu em {a}?", resposta))
+
+    secs = []
+    for s in range(1, 22):
+        ini, fim = 100 * (s - 1) + 1, 100 * s
+        R, ext = romano(s), por_extenso(s)
+        secs.append((f"Quais anos fazem parte do século {R}?", f"O século {R} ({ext}) vai do ano {ini} ao ano {fim}."))
+        secs.append((f"O que quer dizer século {R}?",
+                     f"Século {R} quer dizer século {ext}: o período de cem anos que vai de {ini} a {fim}."))
+        secs.append((f"Como se lê século {R}?", f"Século {R} se lê século {ext}."))
+        secs.append((f"Como se escreve século {ext} em algarismos romanos?", f"Século {ext} se escreve século {R}."))
+        secs.append((f"Quando começou o século {R}?", f"O século {R} começou no ano {ini} e terminou no ano {fim}."
+                     if s < 21 else f"O século XXI começou em 1º de janeiro de 2001 e vai até o fim de 2100."))
+    anos = sorted(rng.sample(range(1000, 2026), 230) + rng.sample(range(101, 1000), 50)
+                  + [1500, 1600, 1700, 1800, 1900, 2000, 1501, 1801, 1901, 2001])
+    for i, a in enumerate(dict.fromkeys(anos)):
+        s = seculo(a)
+        resposta = (f"O ano {a} fica no {nome_seculo(s)}, que vai de {100 * (s - 1) + 1} a {100 * s}."
+                    + (f" Como {a} termina em 00, ele é o último ano desse século." if a % 100 == 0 else ""))
+        secs.append(([f"Em que século fica o ano {a}?", f"O ano {a} é de que século?", f"{a} é de que século?"][i % 3],
+                      resposta))
+        secs.append(([f"O ano de {ano_extenso(a)} fica em que século?", f"Em que século fica o ano {ano_extenso(a)}?"][i % 2],
+                     resposta.replace(f"O ano {a} ", f"O ano de {ano_extenso(a)}, ou {a}, ", 1)))
+        if i % 3 == 0:
+            secs.append((f"Como se escreve o ano {a} por extenso?", f"O ano {a} por extenso é {ano_extenso(a)}."))
+        elif i % 3 == 1:
+            secs.append((f"Como se escreve {ano_extenso(a)} com algarismos?", f"{cap(ano_extenso(a))} se escreve {a}."))
+    for n in list(range(1, 51)) + [60, 70, 80, 90, 99, 100, 200, 400, 500, 900, 1000, 1500, 1822, 1888, 1889, 1922, 2000, 2024]:
+        R = romano(n)
+        secs.append(([f"Quanto vale {R} em algarismos romanos?", f"Que número é {R} em algarismos romanos?",
+                      f"Quanto é {R} em números?"][n % 3], f"{R} vale {n} ({ano_extenso(n)})."))
+    return [("Datas: quando foi", quando), ("Datas: o que aconteceu", aconteceu), ("Datas: sim ou não", sim),
+            ("Séculos, anos por extenso e algarismos romanos", secs)]
+
+
+def conceitos_sections():
+    """"O que é pedra/rocha/água...?" com resposta curta, e a resposta longa com o gatilho."""
+    curtas, longas = [], []
+    for i, (assunto, curta, longa) in enumerate(CONCEITOS):
+        q = pergunta_conceito(assunto)
+        curtas.append((q, curta))
+        if q != pergunta_curta(assunto):
+            curtas.append((pergunta_curta(assunto), curta))
+        curtas.append(([f"Me explique o que é {assunto}.", f"Você sabe o que é {assunto}?", f"Defina {assunto}."][i % 3],
+                       curta))
+        longas.append((com_gatilho(0, q), longa))
+        longas.append((com_gatilho(1 + i % (len(GATILHOS) - 1), q), longa))
+        longas.append((PEDIDOS_TEXTO[i % len(PEDIDOS_TEXTO)].format(assunto), longa.split("\n\n")[0]))
+        longas.append((com_gatilho(0, PEDIDOS_TEXTO[(i + 3) % len(PEDIDOS_TEXTO)].format(assunto)), longa))
+        if i % 2 == 0:
+            longas.append((PEDIDOS_LONGO[i % len(PEDIDOS_LONGO)].format(assunto), longa))
+    return [("Conceitos: o que é", curtas), ("Conceitos: resposta longa", longas)]
+
+
+def gatilho_sections():
+    """O gatilho nos temas genéricos (resposta curta -> parágrafo) e nas respostas longas já escritas."""
+    temas, longas = [], []
+    for i, ((assunto, curta, texto), passado) in enumerate([(t, False) for t in TEMAS] + [(t, True) for t in TEMAS_PASSADO]):
+        q = pergunta_curta(assunto, passado)
+        temas.append((com_gatilho(i, q), texto))
+        if i % 2 == 0:
+            temas.append((com_gatilho(0, PEDIDOS_TEXTO[i % len(PEDIDOS_TEXTO)].format(sem_artigo(assunto, i))), texto))
+    for i, (assunto, pergunta, texto) in enumerate(LONGAS):
+        longas.append((com_gatilho(0, pergunta), texto))
+        if i % 2 == 1:
+            longas.append((com_gatilho(i, pergunta), texto))
+    return [("Gatilho de resposta longa: temas", temas), ("Gatilho de resposta longa: textos longos", longas)]
+
+
+def novas_conversas():
+    """"Quem foi X?" -> "E o que ele fez?", "O que é X?" -> "Explique melhor." e datas em sequência."""
+    convs = []
+    for i, (nome, g, nasc, morte, q_foi, o_que) in enumerate(PESSOAS_V):
+        plural = g == "p"
+        foi = "foram" if plural else "foi"
+        pron = {"m": "ele", "f": "ela", "p": "eles"}[g]
+        fez = "fizeram" if plural else "fez"
+        seguinte = [f"E o que {pron} {fez}?", f"O que {pron} {fez}?", f"E o que {pron} {fez} de importante?",
+                    f"Por que {pron} {'são' if plural else 'é'} {'famosos' if plural else 'famosa' if g == 'f' else 'famoso'}?"][i % 4]
+        conv = [(f"Quem {foi} {nome}?", q_foi), (seguinte, o_que)]
+        if nasc and morte and i % 3 == 0:
+            Nome = cap(nome)
+            conv.append(([f"Em que século {pron} viveu?", f"E quando {pron} nasceu?"][i % 2],
+                         f"{Nome} viveu entre {nasc} e {morte}, no {nome_seculo(seculo(nasc))}." if i % 2 == 0
+                         else f"{cap(pron)} nasceu em {nasc} ({ano_extenso(nasc)})."))
+        convs.append(conv)
+        if i % 4 == 1:
+            convs.append([(f"Quem {foi} {nome}?", q_foi), ("Explique melhor.", f"{q_foi} {o_que}")])
+    for i, (assunto, curta, longa) in enumerate(CONCEITOS):
+        q = pergunta_conceito(assunto)
+        convs.append([(q, curta), (["Explique melhor.", "Resposta longa.", "Explique melhor, por favor.",
+                                    "Pode dar uma resposta longa?"][i % 4], longa)])
+        if i % 5 == 2:
+            j = (i * 7 + 3) % len(CONCEITOS)
+            convs.append([(q, curta), (f"E {CONCEITOS[j][0]}?", CONCEITOS[j][1])])
+    for i, (nome, d, m, a, fato, mais) in enumerate(EV.EVENTOS):
+        if d and i % 2 == 0:
+            convs.append([(f"Quando foi {nome}?", f"Foi em {data_curta(d, m, a)}."),
+                          (["E em que século?", "E em que século foi isso?"][i % 4 // 2],
+                           f"No {nome_seculo(seculo(a))}: {a} fica entre {100 * (seculo(a) - 1) + 1} e {100 * seculo(a)}.")])
+        elif d:
+            convs.append([(f"O que aconteceu em {data_extenso(d, m, a)}?", f"Em {data_curta(d, m, a)}, {fato}."),
+                          ("Explique melhor.", f"Em {data_curta(d, m, a)}, {fato}. {mais}")])
+    return convs
+
+
 def _chave(question):
     return " ".join(re.sub(r"[^\w\s]", " ", question.lower()).split())
 
@@ -1712,6 +1967,8 @@ def build():
     vistas |= {_chave(item.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0]) for _, items in sections for item in items}
     genericas, leitura_genericas = generic_sections()
     genericas += longas_sections(rng)
+    novas_secoes = pessoas_sections() + datas_sections(rng) + conceitos_sections() + gatilho_sections()
+    genericas += novas_secoes
     repetidas = 0
     for title, pares in genericas:
         novos = []
@@ -1723,6 +1980,8 @@ def build():
             novos.append(ex(q, a))
         sections.append((title, novos))
     novas = sum(len(items) for title, items in sections if title.startswith("Genéricas"))
+    titulos = {title for title, _ in novas_secoes}
+    print(f"Pessoas, datas, conceitos e gatilho: {sum(len(i) for t, i in sections if t in titulos)} novas no pergeresp")
     print(f"Perguntas genéricas: {novas} novas no pergeresp + {len(novas_id)} de identidade + "
           f"{len(leitura_genericas)} com Contexto ({repetidas} repetidas foram puladas)")
 
@@ -1739,7 +1998,7 @@ def build():
     with open(QA_DIR / "identidade.txt", "w", encoding="utf-8") as f:
         f.write("# Quem é a Laika. Este arquivo tem peso maior no fine-tuning.\n\n")
         f.write("\n".join(ex(q, a) for q, a in identidade) + "\n")
-    convs = conversas()
+    convs = conversas() + novas_conversas()
     with open(QA_DIR / "conversas.jsonl", "w", encoding="utf-8") as f:
         for c in convs:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")

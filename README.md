@@ -25,12 +25,13 @@ Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Treinar e gerar
 | Atualizar livros/artigos e o índice de busca | 1, 2 |
 | Só conversar | 1, 5 |
 | Levar o modelo para o celular | 1, 6 |
+| Medir o modelo e comparar com o anterior (`avaliar.py`) | 1, 7 |
 | Modelo maior (~50M; precisa de mais dados) | 1; 2 com `ARTIGOS = "1 milhão"`; 3 com `PRESET = "colab_50m"` e `MODO = "do_zero"`; 4 |
-| **Modelo de 100M** (contexto 2048, A100) | 1; 2 com `ARTIGOS = "todos"`, `CAROLINA` e `GIGAVERBO = 1,5 bilhão`; 3 com `PRESET = "colab_100m"`; 4; 6. Ver **`TREINO_100M.md`** |
+| **Modelo de 100M** (contexto 2048, A100) | 1; 2 com `ARTIGOS = "todos"`, `CAROLINA`, `GIGAVERBO = 1,5 bilhão` e `SFT = 300 mil`; 3 com `PRESET = "colab_100m"`; 4; 6; 7. Ver **`TREINO_100M.md`** |
 | Ligar as células pelo app, sem deixar o Colab aberto | 0 (uma vez só) |
 
 As células são: (0) ligar o app ao Colab, (1) preparar, (2) dados, (3) pré-treino, (4) fine-tuning,
-(5) conversa e (6) exportar para o celular (`laika_pacote.zip`).
+(5) conversa, (6) exportar para o celular (`laika_pacote.zip`) e (7) avaliar.
 
 > O repositório precisa ser **público** para o Colab conseguir clonar sem token.
 
@@ -44,11 +45,12 @@ parou, ou continua o terminado com os dados atuais) ou `"do_zero"`. A célula 2 
 
 | Arquivo | Para quê |
 |---|---|
-| `prepare_data.py` | Baixa 500 livros do Project Gutenberg (`data/books/`) e artigos da Wikipédia em português (`--wiki 100000`, `1000000` ou `-1` para todos; continua de onde parou) em `data/wiki/`, com perguntas "O que é X?" em `data/qa_auto/`. Para os modelos grandes: Corpus Carolina (`--carolina`, em `data/carolina/`) e GigaVerbo-v2 (`--gigaverbo 1.5e9` tokens, em `data/gigaverbo/`), só para o pré-treino |
+| `prepare_data.py` | Baixa 500 livros do Project Gutenberg (`data/books/`) e artigos da Wikipédia em português (`--wiki 100000`, `1000000` ou `-1` para todos; continua de onde parou) em `data/wiki/`, com perguntas "O que é X?" em `data/qa_auto/`. Para os modelos grandes: Corpus Carolina (`--carolina`, em `data/carolina/`) e GigaVerbo-v2 (`--gigaverbo 1.5e9` tokens, em `data/gigaverbo/`), só para o pré-treino; e conversas do GigaVerbo-v2-SFT para o fine-tuning (`--sft 300000`, em `data/sft/`) |
 | `rag.py` | Índice de busca (SQLite FTS5) nos artigos, livros e textos modernos: `python rag.py build` |
 | `memory.py` | Memória do usuário (nome, cidade, gostos, "lembre que...") em `checkpoints/memoria.json` |
 | `train.py` | Pré-treino com validação, early stopping, tokens em disco (`data/tokens/`, com cópia opcional no Drive: `--tokens-backup`), tokenizer treinado numa amostra (`--tokenizer-mb`), acumulação de gradiente (`--accum`), bf16, `--compile` e retomada (`--resume`) |
-| `finetune.py` | Fine-tuning pergunta→resposta (loss só na resposta); não sobrescreve o pré-treino |
+| `finetune.py` | Fine-tuning pergunta→resposta (loss só na resposta); não sobrescreve o pré-treino. Também é **fonte de conhecimento**: os artigos mais importantes da Wikipédia viram perguntas sem contexto, cada fato de 4 jeitos (`--conhecimento`) |
+| `avaliar.py` | Avaliação fixa: perplexidade, 91 perguntas por categoria e a busca do RAG (`data/avaliacao/`); `--comparar backup` compara com o fine-tuning anterior |
 | `chat.py` | Conversa com RAG, memória e cache de atenção; `--base` completa texto com o modelo só pré-treinado |
 | `model.py` / `config.py` | Arquitetura (posições aprendidas ou RoPE) e presets (`tiny` e `tiny_rope` para CPU; `colab` ~7M, `colab_big` ~14M, `colab_50m` ~52M e `colab_100m` ~104M com contexto 2048 para GPU) |
 | `TREINO_100M.md` | Todas as configurações do treino de 100M: dados, células, tempo, unidades e ordem |
@@ -57,7 +59,7 @@ parou, ou continua o terminado com os dados atuais) ou `"do_zero"`. A célula 2 
 | `SUGESTOES.md` | Ideias para melhorar a LLM além do plano do `CLAUDE.md` |
 | `colab/laika_colab.py` | Roda células do `colab.ipynb` pelo Colab CLI (usado pelo workflow `.github/workflows/colab.yml`, que o app dispara) |
 | `data/modern/` | 130 textos em português moderno escritos para o projeto: 20 maiores e 110 simples (`simples_*.txt`); entram 3x no pré-treino |
-| `data/qa/pergeresp.txt` | ~9000 perguntas e respostas: ~3000 genéricas ("Faça um texto sobre X", "E X?", por quê, como, diferenças, conversa, poemas...), 627 com respostas longas (2 parágrafos, passo a passo, histórias, contas explicadas), 438 de "por quê" e 975 de sim ou não (gerado por `tools/gerar_pergeresp.py`) |
+| `data/qa/pergeresp.txt` | ~14 mil perguntas e respostas: ~3000 genéricas ("Faça um texto sobre X", "E X?", por quê, como, diferenças, conversa, poemas...), 627 com respostas longas (2 parágrafos, passo a passo, histórias, contas explicadas), 438 de "por quê", 975 de sim ou não e 5313 de pessoas ("Quem foi X?", "O que X fez?"), datas por extenso, séculos em algarismos romanos, conceitos (pedra, rocha, água...) e o gatilho de resposta longa (gerado por `tools/gerar_pergeresp.py`) |
 | `data/qa/leitura.txt` | ~510 perguntas de interpretação com "Contexto:", o mesmo formato do RAG |
 | `data/qa/identidade.txt` | ~110 perguntas sobre quem é a Laika e a origem do nome (peso extra no fine-tuning) |
 
@@ -76,11 +78,13 @@ Pergunta: O que é um vulcão? <|assistant|>
 
 - O RAG só entra em perguntas que pedem informação. Conversa, perguntas sobre a Laika ou sobre você,
   contas e pedidos como "Corrija...", "Resuma..." vão sem contexto.
-- Com janela de 256 tokens entra 1 trecho; com 512 (preset `colab_50m`), até 2; com 768 ou mais, até 3.
+- Com janela de 256 tokens entra 1 trecho; com 512 (preset `colab_50m`), até 2; com 1024, até 4; com 2048
+  (preset `colab_100m`), até 6.
   Os trechos extras são do mesmo artigo, os que têm mais palavras da pergunta.
 - Se a pergunta inteira não acha nada com confiança, a busca tenta só o **nome próprio** dela
-  ("O que Santos Dumont inventou?" → "Santos Dumont").
-- O fine-tuning ensina o modelo a usar esse formato: `leitura.txt`, ~50% das perguntas que pedem
+  ("O que Santos Dumont inventou?" → "Santos Dumont"; "Pesquise sobre a cadela Laika" → "Laika").
+- "Laika" sozinha é a IA (sem busca); com cadela, Sputnik, espaço, soviética..., é a cadela e a busca vale.
+- O fine-tuning ensina o modelo a usar esse formato: `leitura.txt`, ~70% das perguntas que pedem
   informação, treinadas com os trechos achados pela busca (`--rag-share`), e ~20 mil perguntas tiradas
   dos próprios artigos da Wikipédia ("Onde X nasceu?", "Quando X foi fundada?", "O que X inventou?",
   "Quantos habitantes tem X?"), com o trecho como Contexto (`--wiki-leitura`). Em 10% delas o trecho é
@@ -96,6 +100,10 @@ A Laika guarda o que você conta: "meu nome é Ana", "eu moro em Recife", "eu go
 "o que você lembra de mim?" e usa as anotações como contexto. "Esqueça tudo" apaga a memória.
 
 Essa memória fica **fora do modelo**, num arquivo no Drive, e vale entre conversas.
+
+**Resposta longa:** termine a pergunta com "Explique melhor." ou "Resposta longa." (ou ligue a opção
+**Respostas longas** no app, ou `/longa` no `chat.py`) para uma resposta mais longa e detalhada. Depois de
+cada mensagem, o app e o `chat.py` mostram quantos tokens ela teve e o total com o prompt.
 
 **Memória de IA (histórico da conversa):** as últimas trocas da conversa (até 5) entram no prompt antes
 da pergunta, quantas couberem na janela depois do contexto do RAG e do espaço da resposta:

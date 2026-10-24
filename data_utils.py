@@ -281,6 +281,55 @@ def reading_examples(passages, n, chunks=1, seed=0, negative_share=0.1):
     return examples
 
 
+# ---------- Conhecimento sem contexto (o fine-tuning como fonte de fatos) ----------
+# O modelo pequeno só guarda um fato se o vê muitas vezes, de jeitos diferentes. Para os artigos mais
+# importantes da Wikipédia (que o modelo já leu no pré-treino), cada fato vira várias perguntas SEM o
+# Contexto, com a frase do artigo como resposta; e "Fale sobre X." responde com o começo do artigo.
+
+KNOWLEDGE_WRAPS = ["{q}", "Você sabe {ql}", "Me diga: {ql}", "Responda: {q}", "Pergunta rápida: {ql}",
+                   "Uma dúvida: {ql}"]
+KNOWLEDGE_ABOUT = ["Fale sobre {x}.", "Me fale sobre {x}.", "O que você sabe sobre {x}?", "Me conte sobre {x}.",
+                   "Fale um pouco sobre {x}.", "Quero saber sobre {x}."]
+
+
+def _lead(text, max_words=80):
+    """O começo do texto, em frases inteiras, até ~max_words palavras (sem parênteses)."""
+    out, n = [], 0
+    for sentence in _SENTENCE_SPLIT.split(re.sub(r"\s+", " ", _PAREN.sub("", text)).replace(" ,", ",")):
+        words = len(sentence.split())
+        if out and n + words > max_words:
+            break
+        out.append(sentence.strip())
+        n += words
+    return " ".join(out).strip()
+
+
+def knowledge_examples(articles, forms=4):
+    """Exemplos sem Contexto para [(título, [trechos do artigo])]: cada fato em `forms` perguntas diferentes.
+
+    Os fatos são os mesmos das perguntas de leitura (_reading_pairs: definição, onde nasceu, quando foi
+    fundada, o que inventou...), mais "Fale sobre X." com o começo do artigo.
+    """
+    examples = []
+    for title, texts in articles:
+        x = _PAREN.sub("", title).strip()
+        if not texts or not x or len(x) > 50 or x.startswith("Lista"):
+            continue
+        facts, seen = [], set()
+        for pos, text in enumerate(texts):
+            for q, a in _reading_pairs(title, text, pos):
+                if a not in seen:
+                    seen.add(a)
+                    facts.append((q, a))
+        for q, a in facts:
+            variants = list(dict.fromkeys(w.format(q=q, ql=q[0].lower() + q[1:]) for w in KNOWLEDGE_WRAPS))
+            examples += [chat_turn(v, a) for v in variants[:forms]]
+        lead = _lead(texts[0])
+        if len(lead.split()) >= 12 and lead.endswith("."):
+            examples += [chat_turn(f.format(x=x), lead) for f in KNOWLEDGE_ABOUT[:forms]]
+    return examples
+
+
 def synthetic_examples(book_texts, n, seed=0, summary_texts=None, summary_share=0.2):
     """Cria pares pergunta/resposta cujas respostas saem dos próprios livros.
 
@@ -360,7 +409,7 @@ me te lhe meu minha meus minhas seu sua seus suas teu tua nosso nossa dele dela 
 toda todos todas outro outra cada seja sejam pode podem posso sabe saber diga fale explique defina significa
 significado conte fala diz dizer existe existem coisa coisas entao assim aqui ali favor obrigado obrigada ola oi
 tipo vez vezes ano anos dia dias hoje ontem amanha agora sempre nunca qualquer cujo cuja onde
-fica ficam ficou funciona funcionam acontece aconteceu chama chamado chamada
+fica ficam ficou funciona funcionam acontece aconteceu chama chamado chamada serve servem
 """.split())
 _PERSONAL = {"voce", "voces", "seu", "sua", "seus", "suas", "teu", "tua", "te", "laika", "eu", "meu", "minha",
              "meus", "minhas", "mim", "comigo", "contigo"}
@@ -368,6 +417,13 @@ _INSTRUCTIONS = {"corrija", "complete", "termine", "resuma", "continue", "escrev
                  "conjugue", "passe", "transforme", "separe", "traduza", "classifique", "calcule", "conte",
                  "faca", "leia", "vamos", "apresente"}
 MAX_CONTEXT_WORDS = 80
+# "Laika" é o nome da IA (pessoal), mas também da cadela do Sputnik 2: com estas palavras, é a cadela.
+_LAIKA_CADELA = {"cadela", "cadelinha", "cachorra", "cachorrinha", "cao", "sputnik", "espaco", "espacial",
+                 "sovietica", "sovietico", "sovieticos", "uniao", "1957", "orbita", "foguete", "nave",
+                 "cosmonauta", "astronauta", "animal", "russa", "russia", "moscou"}
+# "Você sabe o que é um vulcão?": o começo educado não torna a pergunta pessoal.
+_POLITE = re.compile(r"^\s*(?:(?:voce|vc|tu)\s+(?:sabe|sabes|conhece|conheces|lembra)(?:\s+(?:me\s+)?(?:dizer|explicar|falar))?"
+                     r"|(?:(?:voce|vc)\s+)?(?:pode|poderia|consegue)\s+(?:me\s+)?(?:dizer|explicar|falar|contar))\b")
 
 
 def normalize(text):
@@ -447,6 +503,23 @@ def question_name(question):
     return name if content_words(name) else None
 
 
+# Gatilho de resposta longa: "O que é a pedra? Explique melhor." / "Resposta longa: o que é a rocha?".
+# O fine-tuning ensina uma resposta bem mais detalhada; a busca do RAG e a memória ignoram o gatilho.
+LONG_TRIGGER = "Resposta longa."
+_LONG_TRIGGERS = re.compile(r"\b(?:explique melhor|explica melhor|resposta longa|responda com detalhes)\b[.:!,]?",
+                            re.IGNORECASE)
+
+
+def without_trigger(question):
+    """A pergunta sem o gatilho de resposta longa (se sobrar nada, como em "Explique melhor.", fica igual)."""
+    rest = re.sub(r"\s+", " ", _LONG_TRIGGERS.sub(" ", question)).strip(" ,")
+    return rest if content_words(rest) or len(rest) > 3 else question
+
+
+def wants_long(question):
+    return bool(_LONG_TRIGGERS.search(question))
+
+
 # Palavras que só fazem sentido com a mensagem anterior ("isso", "ele", "o mesmo"...). Ficam de fora
 # "este/esta", que no celular muitas vezes é "está" sem acento.
 _FOLLOW_WORDS = set("""
@@ -458,7 +531,8 @@ continue continua continuar prossiga repita repete repetir novamente
 """.split())
 _FOLLOW_STARTS = {"e", "mas", "entao", "tambem"}
 _FOLLOW_PHRASES = ["explique melhor", "explica melhor", "fale mais", "conte mais", "diga mais", "mais detalhes",
-                   "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer"]
+                   "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer",
+                   "resposta longa", "responda com detalhes"]  # o gatilho sozinho ("Resposta longa.") pede mais da anterior
 # Mensagens sociais curtas: não precisam do histórico (e com ele o modelo tende a repetir a resposta anterior).
 _SOCIAL = set("""
 oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal
@@ -489,21 +563,29 @@ def follows_up(question):
 
 
 def rag_queries(question):
-    """O que procurar no RAG, em ordem: o assunto, nos pedidos "... sobre X"; senão, a pergunta inteira
-    e, se ela não achar nada com confiança, só o nome próprio ("O que Santos Dumont inventou?")."""
+    """O que procurar no RAG, em ordem: o assunto, nos pedidos "... sobre X", ou a pergunta inteira; e, se
+    não achar nada com confiança, só o nome próprio ("O que Santos Dumont inventou?", "sobre a cadela Laika")."""
     topic = request_topic(question)
-    if topic:
-        return [topic]
-    queries = [question]
-    name = question_name(question)
-    if name and content_words(name) != content_words(question):
+    queries = [topic] if topic else [question]
+    name = question_name(topic or question)
+    if name and content_words(name) != content_words(queries[0]):
         queries.append(name)
     return queries
 
 
 def rag_chunks(block_size):
-    """Quantos trechos do RAG cabem no prompt: 1 com janela de 256, 2 com 512, 3 com 768 ou mais."""
-    return min(3, max(1, block_size // 256))
+    """Quantos trechos do RAG cabem no prompt: 1 com janela de 256, 2 com 512, 4 com 1024, 6 com 2048."""
+    return min(6, max(1, block_size // 256))
+
+
+def personal_words(text):
+    """As palavras pessoais do texto (você, meu, Laika...), sem o começo educado ("Você sabe...") e sem
+    "laika" quando o assunto é a cadela ("Quem foi a cadela Laika?")."""
+    words = word_tokens(_POLITE.sub(" ", normalize(text)))
+    found = _PERSONAL & set(words)
+    if "laika" in found and _LAIKA_CADELA & set(words):
+        found.discard("laika")
+    return found
 
 
 def wants_rag(question):
@@ -519,13 +601,13 @@ def wants_rag(question):
         return False
     topic = request_topic(question)
     if topic is not None:
-        return not (_PERSONAL & set(word_tokens(topic)))
+        return not personal_words(topic)
     first_words = [w.lower().strip(",.!?:;") for w in question.strip().split()[:2]]
     if first_words and first_words[0] == "me":  # "Me conte...", "Me dê..."
         first_words = first_words[1:]
     if first_words and (first_words[0] == "dê" or normalize(first_words[0]) in _INSTRUCTIONS):
         return False
-    if _PERSONAL & set(word_tokens(question)):
+    if personal_words(question):
         return False
     return bool(content_words(question))
 
