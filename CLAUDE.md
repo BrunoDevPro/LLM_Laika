@@ -345,6 +345,10 @@ opcional: ~30M, contexto 1024, ~600M tokens.
 - [x] Preset `colab_100m`, RoPE, contexto 2048 (Python, exportador, `ConversorPt` e `Modelo.java`). Falta treinar de
   verdade e, se quiser, um `colab_30m` intermediário.
 - [ ] Estimativa na A100: ~8,5 h para 2 bilhões de tokens com contexto 2048 (~45 a 125 unidades, pois o consumo da A100 varia de 5,4 a 15 unidades por hora conforme a fonte). Com 1024: ~7 h.
+- [ ] Otimizações para um próximo pré-treino (analisadas, deixadas para depois; no Colab só há uma GPU, então não há
+  ganho com várias GPUs, e a parte do processador já é paralela/sobreposta): AdamW `fused=True` (~5%); calcular a perda
+  sem converter os logits inteiros para float32 (16 × 2048 × 24 mil ≈ 3 GB por micro-lote), em pedaços, o que libera
+  memória para lotes de 32 com metade da acumulação (~10–20%); junto com o `--compile`, ~15–30% a menos de tempo.
 - [ ] Opcional: fase curta de extensão para 8k (~5% dos tokens, ~1 h), só como experimento. 16k/32k não compensam para este tamanho (custo de 4 a 7 vezes e o modelo não aproveita).
 
 ### Fase 3 — Fine-tuning
