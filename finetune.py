@@ -88,7 +88,11 @@ parser.add_argument("--sft-max", type=int, default=300000, help="máximo de exem
 parser.add_argument("--lr", type=float, default=None,
                     help="taxa de aprendizado (o tamanho do passo de cada ajuste dos pesos); "
                          "padrão: 5e-5 até 20M de parâmetros e 1e-4 nos modelos maiores")
-parser.add_argument("--batch-size", type=int, default=16)
+parser.add_argument("--batch-size", type=int, default=16,
+                    help="exemplos por lote (no máximo; lotes de conversas longas têm menos, ver --tokens-por-lote)")
+parser.add_argument("--tokens-por-lote", type=int, default=0,
+                    help="tokens de chat por lote, contando o enchimento (0 = batch-size × min(janela, 512))")
+parser.add_argument("--val-max", type=int, default=2000, help="exemplos de cada tipo usados na validação")
 parser.add_argument("--no-backup", action="store_true", help="não guarda o finetuned.pt anterior em checkpoints/backups")
 parser.add_argument("--synthetic", type=int, default=10000,
                     help="nº de exemplos gerados dos livros (era 4000; subiu junto com os ~7,5 mil escritos à mão)")
@@ -462,6 +466,38 @@ def replay_items(n):
     return [(stream[s:s + replay_len].tolist(), stream[s + 1:s + replay_len + 1].tolist()) for s in starts]
 
 
+# Lotes por número de tokens, com exemplos de tamanho parecido juntos. Antes eram 16 exemplos sorteados: quase
+# todo lote tinha uma conversa longa do SFT, e os curtos eram completados com enchimento até ela (a GPU fazia
+# contas à toa e cada época do 100M levava horas).
+# Até batch-size exemplos por lote, como antes (o mesmo número de atualizações por época), mas agrupados por tamanho
+# e com no máximo batch-size × min(janela, 512) tokens: os lotes de conversas longas ficam com menos exemplos.
+tokens_lote = args.tokens_por_lote or args.batch_size * min(block, 512)
+max_por_lote = args.batch_size
+
+
+def make_batches(items, shuffle=True):
+    """Divide os exemplos em lotes de até tokens_lote tokens (com o enchimento) e até max_por_lote exemplos.
+    Ordena por tamanho dentro de blocos de 8192 exemplos sorteados e depois embaralha a ordem dos lotes."""
+    ordem = list(range(len(items)))
+    if shuffle:
+        random.shuffle(ordem)
+    lotes = []
+    for c in range(0, len(ordem), 8192):
+        lote, maior = [], 0
+        for i in sorted(ordem[c:c + 8192], key=lambda i: len(items[i][0])):
+            n = len(items[i][0])
+            if lote and (max(maior, n) * (len(lote) + 1) > tokens_lote or len(lote) >= max_por_lote):
+                lotes.append(lote)
+                lote, maior = [], 0
+            lote.append(i)
+            maior = max(maior, n)
+        if lote:
+            lotes.append(lote)
+    if shuffle:
+        random.shuffle(lotes)
+    return [[items[i] for i in lote] for lote in lotes]
+
+
 def make_batch(items):
     longest = max(len(inp) for inp, _ in items)
     xs, ys = [], []
@@ -489,10 +525,11 @@ def validate(items):
     if not items:
         return float("nan")
     model.eval()
-    losses = [batch_loss(items[i:i + args.batch_size]).item()
-              for i in range(0, len(items), args.batch_size)]
+    lotes = make_batches(items, shuffle=False)
+    # Média por exemplo (cada lote pesa pelo número de exemplos, como antes com lotes do mesmo tamanho).
+    total = sum(batch_loss(lote).item() * len(lote) for lote in lotes)
     model.train()
-    return sum(losses) / len(losses)
+    return total / len(items)
 
 
 SAMPLE_HISTORY = [("Qual é a capital da França?", "A capital da França é Paris.")]
@@ -521,13 +558,25 @@ def show_samples():
 
 # ---------- Treino ----------
 optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
-items_per_epoch = (len(syn_train) + len(qa_train) * qa_repeat + len(id_train) * id_repeat
-                   + len(know_train) * know_repeat + len(sft_train))
-steps_per_epoch = math.ceil(items_per_epoch / args.batch_size)
+
+
+def epoch_batches():
+    return make_batches(syn_train + qa_train * qa_repeat + id_train * id_repeat + know_train * know_repeat
+                        + sft_train)
+
+
+# Validação com uma amostra fixa de cada tipo (com o SFT e o conhecimento seriam dezenas de milhares por época).
+for nome in ("syn_val", "qa_val", "know_val", "sft_val"):
+    if len(globals()[nome]) > args.val_max:
+        globals()[nome] = random.sample(globals()[nome], args.val_max)
+
+primeiros_lotes = epoch_batches()
+steps_per_epoch = len(primeiros_lotes)
 total_steps = steps_per_epoch * args.epochs
 warmup = min(100, total_steps // 10)
-print(f"{steps_per_epoch} steps por época, até {total_steps} no total "
-      f"(lote = {args.batch_size} de chat + {n_replay} de livro)")
+tokens_epoca = sum(len(inp) for lote in primeiros_lotes for inp, _ in lote)
+print(f"{steps_per_epoch} lotes por época ({tokens_epoca / 1e6:.0f} milhões de tokens de chat), até {total_steps} "
+      f"no total (cada lote: até {tokens_lote} tokens / {max_por_lote} exemplos de chat + {n_replay} trechos de livro)")
 
 
 def lr_at(step):
@@ -554,20 +603,30 @@ if best_path.exists() and not args.no_backup:
 model.train()
 
 for epoch in range(1, args.epochs + 1):
-    train_items = (syn_train + qa_train * qa_repeat + id_train * id_repeat + know_train * know_repeat
-                   + sft_train)
-    random.shuffle(train_items)
-    running = 0.0
-    for i in range(0, len(train_items), args.batch_size):
+    lotes = primeiros_lotes if epoch == 1 else epoch_batches()
+    running, recente, n_recente, feitos_tokens = 0.0, 0.0, 0, 0
+    inicio = ultimo_aviso = time.time()
+    for k, lote in enumerate(lotes, 1):
         for group in optimizer.param_groups:
             group["lr"] = lr_at(step)
-        loss = batch_loss(train_items[i:i + args.batch_size] + replay_items(n_replay))
+        loss = batch_loss(lote + replay_items(n_replay))
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
-        running += loss.item()
+        valor = loss.item()
+        running += valor
+        recente += valor
+        n_recente += 1
+        feitos_tokens += sum(len(inp) for inp, _ in lote)
         step += 1
+        agora = time.time()
+        if agora - ultimo_aviso >= 120 or k == len(lotes):
+            vel = feitos_tokens / max(1e-6, agora - inicio)
+            falta = (len(lotes) - k) * (agora - inicio) / k
+            print(f"  época {epoch}: {k}/{len(lotes)} lotes | loss {recente / n_recente:.4f} | "
+                  f"{vel / 1000:.0f} mil tokens/s | faltam ~{falta / 60:.0f} min", flush=True)
+            ultimo_aviso, recente, n_recente = agora, 0.0, 0
 
     syn_v, qa_v = validate(syn_val), validate(qa_val)
     know_v, sft_v = validate(know_val), validate(sft_val)
@@ -580,7 +639,7 @@ for epoch in range(1, args.epochs + 1):
                     "finetuned": True}, best_path)
     else:
         bad_epochs += 1
-    print(f"\népoca {epoch} | treino {running / steps_per_epoch:.4f} | val livros {syn_v:.4f} | "
+    print(f"\népoca {epoch} | treino {running / len(lotes):.4f} | val livros {syn_v:.4f} | "
           f"val pergeresp {qa_v:.4f}" + (f" | val conhecimento {know_v:.4f}" if know_val else "")
           + (f" | val SFT {sft_v:.4f}" if sft_val else "") + note, flush=True)
     show_samples()
