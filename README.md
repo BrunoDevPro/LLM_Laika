@@ -28,7 +28,8 @@ Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Treinar e gerar
 | Medir o modelo e comparar com o anterior (`avaliar.py`) | 1, 7 |
 | Modelo maior (~50M; precisa de mais dados) | 1; 2 com `ARTIGOS = "1 milhão"`; 3 com `PRESET = "colab_50m"` e `MODO = "do_zero"`; 4 |
 | **Modelo de 100M** (contexto 2048, A100) | 1; 2 com `ARTIGOS = "todos"`, `CAROLINA`, `GIGAVERBO = 1,5 bilhão` e `SFT = 300 mil`; 3 com `PRESET = "colab_100m"`; 4; 6; 7. Ver **`TREINO_100M.md`** |
-| **Outro modelo sem apagar o atual** (ex.: um pequeno) | 1 com um `PROJETO` (o nome do modelo); 3 com `MODO = "do_zero"`; 4; 6. Cada projeto tem as suas pastas `checkpoints_<nome>` e `tokens_<nome>` no Drive, e o app guarda o zip direto nos backups com esse nome |
+| Dar um nome ao modelo no app (vai direto para os backups) | 1 com um `NOME`; depois as células de sempre (ex.: 4 e 6) |
+| **Outro modelo sem apagar o atual** (ex.: um pequeno) | 1 com um `PROJETO`; 3 com `MODO = "do_zero"`; 4; 6. Cada projeto tem as suas pastas `checkpoints_<nome>` e `tokens_<nome>` no Drive, e o app guarda o zip direto nos backups com esse nome |
 | Ligar as células pelo app, sem deixar o Colab aberto | 0 (uma vez só) |
 
 As células são: (0) ligar o app ao Colab, (1) preparar, (2) dados, (3) pré-treino, (4) fine-tuning,

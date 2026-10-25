@@ -112,6 +112,10 @@ torch.manual_seed(args.seed)
 out_dir = Path(args.out)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
+for falta in ("tokenizer.json", "pretrain_best.pt"):
+    if not (out_dir / falta).exists():
+        raise SystemExit(f"Falta {out_dir / falta}: rode o pré-treino (célula 3) antes. No Colab, um PROJETO novo "
+                         "começa com a pasta vazia; para só dar um nome ao modelo, deixe PROJETO vazio e use NOME.")
 tokenizer = Tokenizer.from_file(str(out_dir / "tokenizer.json"))
 ckpt = torch.load(out_dir / "pretrain_best.pt", map_location=device)
 cfg = ckpt["config"]
