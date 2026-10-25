@@ -133,6 +133,11 @@ elif cmd == "reiniciar-kernel":  # só do teste: o kernel morre e o Colab sobe o
 elif cmd == "drivemount":
     registrar("drivemount")
     print(f"[colab] Mounting Google Drive to '/content/drive' on {sessao}...", flush=True)
+    queda = os.path.join(ESTADO, "drive_caiu")
+    if os.environ.get("FAKE_DRIVE_CAI") and not os.path.exists(queda):  # 1ª vez: o CLI perde a conexão
+        open(queda, "w").close()
+        print("Traceback (most recent call last):\nRuntimeError: Connection was lost.", file=sys.stderr, flush=True)
+        sys.exit(1)
     if os.environ.get("FAKE_DRIVE_AUTH"):
         print("\n[colab] Intercepted Drive Auth Request. Connecting to https://colab.research.google.com...")
         print("\n[colab] REQUIRED: Google Drive Authorization needed.\nPlease visit:\n\n"
@@ -499,6 +504,13 @@ class TesteDePontaAPonta(unittest.TestCase):
         self.assertTrue(url.startswith("https://accounts.google.com/") and "state=xyz" in url)
         self.assertNotIn("login_hint", url)
         self.assertNotIn("gmail", json.dumps(self.check()))
+
+    def test_drive_perde_a_conexao_e_tenta_de_novo(self):
+        codigo, saida = self.rodar("2", FAKE_DRIVE_CAI="1")
+        self.assertEqual(codigo, 0, saida)
+        self.assertEqual(self.eventos().count("drivemount"), 2)
+        self.assertIn("tentando de novo (2/3)", saida)
+        self.assertEqual(self.check()["conclusion"], "success")
 
     def test_gpu_recusada(self):
         codigo, saida = self.rodar("2", gpu="A100", FAKE_SEM_GPU="1")
