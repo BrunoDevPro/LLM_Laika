@@ -42,6 +42,7 @@ import simnao3 as SN3  # noqa: E402
 import pessoas1, pessoas2, pessoas3, conceitos1, conceitos2  # noqa: E402,E401
 import eventos as EV  # noqa: E402
 import eventos2 as EV2  # noqa: E402
+import identidade4 as ID4  # noqa: E402
 
 TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
 QA_DIR = ROOT / "data" / "qa"
@@ -2018,6 +2019,20 @@ def nomes_conversas():
     return convs
 
 
+def identidade_conversas():
+    """Perguntas sobre ela depois de perguntas sobre reis e pessoas: o assunto anterior não muda quem ela é."""
+    convs, k = [], 0
+    for nome, (q, pq, lq, la) in EV2.DETALHES.items():
+        if lq:
+            convs.append([(lq, la), ID4.DEPOIS_DO_ASSUNTO[k % len(ID4.DEPOIS_DO_ASSUNTO)]])
+            k += 1
+    for i, (nome, g, nasc, morte, q_foi, o_que) in enumerate(PESSOAS_V):
+        if i % 3 == 0:
+            convs.append([(f"Quem foi {nome}?", q_foi), ID4.DEPOIS_DO_ASSUNTO[k % len(ID4.DEPOIS_DO_ASSUNTO)]])
+            k += 1
+    return convs
+
+
 def _chave(question):
     return " ".join(re.sub(r"[^\w\s]", " ", question.lower()).split())
 
@@ -2131,6 +2146,14 @@ def build():
     novas_id = [(q, a) for q, a in GC.IDENTIDADE_3 if _chave(q) not in vistas]
     identidade = identidade + novas_id
     vistas |= {_chave(q) for q, _ in novas_id}
+    # 1.9: mais formas de perguntar quem ela é e negações de personagem ("Você é o rei do Reino Unido?").
+    novas_id = [(q, a) for q, a in ID4.pares() if _chave(q) not in vistas]
+    # As mesmas perguntas com o Contexto da memória também respondem "Laika" (o app antigo ainda o põe).
+    novas_id += [(rag_question(q, "O nome da assistente é Laika."), a) for q, a in
+                 [("Qual é o seu nome?", "Meu nome é Laika."), ("Como você se chama?", "Eu me chamo Laika."),
+                  ("Quem é você?", ID4.QUEM[0]), ("Seu nome?", "Meu nome é Laika.")]]
+    identidade = identidade + novas_id
+    vistas |= {_chave(q) for q, _ in novas_id}
     vistas |= {_chave(item.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0]) for _, items in sections for item in items}
     genericas, leitura_genericas = generic_sections()
     genericas += longas_sections(rng)
@@ -2165,7 +2188,7 @@ def build():
     with open(QA_DIR / "identidade.txt", "w", encoding="utf-8") as f:
         f.write("# Quem é a Laika. Este arquivo tem peso maior no fine-tuning.\n\n")
         f.write("\n".join(ex(q, a) for q, a in identidade) + "\n")
-    convs = conversas() + novas_conversas() + detalhes_conversas() + nomes_conversas()
+    convs = conversas() + novas_conversas() + detalhes_conversas() + nomes_conversas() + identidade_conversas()
     with open(QA_DIR / "conversas.jsonl", "w", encoding="utf-8") as f:
         for c in convs:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")

@@ -28,6 +28,7 @@ Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Treinar e gerar
 | Medir o modelo e comparar com o anterior (`avaliar.py`) | 1, 7 |
 | Modelo maior (~50M; precisa de mais dados) | 1; 2 com `ARTIGOS = "1 milhão"`; 3 com `PRESET = "colab_50m"` e `MODO = "do_zero"`; 4 |
 | **Modelo de 100M** (contexto 2048, A100) | 1; 2 com `ARTIGOS = "todos"`, `CAROLINA`, `GIGAVERBO = 1,5 bilhão` e `SFT = 300 mil`; 3 com `PRESET = "colab_100m"`; 4; 6; 7. Ver **`TREINO_100M.md`** |
+| **Outro modelo sem apagar o atual** (ex.: um pequeno) | 1 com um `PROJETO` (o nome do modelo); 3 com `MODO = "do_zero"`; 4; 6. Cada projeto tem as suas pastas `checkpoints_<nome>` e `tokens_<nome>` no Drive, e o app guarda o zip direto nos backups com esse nome |
 | Ligar as células pelo app, sem deixar o Colab aberto | 0 (uma vez só) |
 
 As células são: (0) ligar o app ao Colab, (1) preparar, (2) dados, (3) pré-treino, (4) fine-tuning,
@@ -50,7 +51,7 @@ parou, ou continua o terminado com os dados atuais) ou `"do_zero"`. A célula 2 
 | `memory.py` | Memória do usuário (nome, cidade, gostos, "lembre que...") em `checkpoints/memoria.json` |
 | `train.py` | Pré-treino com validação, early stopping, tokens em disco (`data/tokens/`, com cópia opcional no Drive: `--tokens-backup`), tokenizer treinado numa amostra (`--tokenizer-mb`), acumulação de gradiente (`--accum`), bf16, `--compile` e retomada (`--resume`) |
 | `finetune.py` | Fine-tuning pergunta→resposta (loss só na resposta); não sobrescreve o pré-treino. Também é **fonte de conhecimento**: os artigos mais importantes da Wikipédia viram perguntas sem contexto, cada fato de 4 jeitos (`--conhecimento`) |
-| `avaliar.py` | Avaliação fixa: perplexidade, 108 perguntas por categoria e a busca do RAG (`data/avaliacao/`); `--comparar backup` compara com o fine-tuning anterior |
+| `avaliar.py` | Avaliação fixa: perplexidade, 112 perguntas por categoria e a busca do RAG (`data/avaliacao/`); `--comparar backup` compara com o fine-tuning anterior |
 | `chat.py` | Conversa com RAG, memória e cache de atenção; `--base` completa texto com o modelo só pré-treinado |
 | `model.py` / `config.py` | Arquitetura (posições aprendidas ou RoPE) e presets (`tiny` e `tiny_rope` para CPU; `colab` ~7M, `colab_big` ~14M, `colab_50m` ~52M e `colab_100m` ~104M com contexto 2048 para GPU) |
 | `TREINO_100M.md` | Todas as configurações do treino de 100M: dados, células, tempo, unidades e ordem |

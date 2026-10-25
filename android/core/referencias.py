@@ -87,6 +87,7 @@ MEMORIA = [
     "Meu nome é", "Eu moro em", "Lembre que", "eu não gosto de", "Eu tenho", "Lembre-se:", "Meu nome é Bia.",
     "Escreva um poema usando o meu nome.", "Faça uma frase com o seu nome.", "Quantas letras tem o meu nome?",
     "Meu nome é bonito?", "Use o teu nome numa frase.", "Qual é o seu nome?",
+    "Como é o seu nome?", "De onde vem o seu nome?", "Escreva o seu nome ao contrário.",
 ]
 
 

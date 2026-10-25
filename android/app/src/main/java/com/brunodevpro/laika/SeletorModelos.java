@@ -21,6 +21,7 @@ import com.brunodevpro.laika.core.Armazem;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -188,7 +189,11 @@ final class SeletorModelos {
         linha.addView(b, lp);
     }
 
-    /** Troca para um backup, oferecendo guardar a versão em uso se ela tiver mudanças fora dos backups. */
+    /**
+     * Troca para um backup. Se a versão em uso tiver mudanças fora dos backups (conversa, memória ou arquivos),
+     * pergunta o que fazer: salvar por cima do backup de onde ela veio (sem criar outro), guardar como backup
+     * novo ou trocar sem guardar.
+     */
     static void confirmarUso(Activity tela, Motor motor, Armazem.Versao b, boolean atualJaSalva) {
         if (motor.ocupado()) {
             new AlertDialog.Builder(tela).setMessage("Espere terminar: " + motor.tarefa).setPositiveButton("OK", null).show();
@@ -201,12 +206,47 @@ final class SeletorModelos {
                     .setNegativeButton("Cancelar", null).show();
             return;
         }
-        new AlertDialog.Builder(tela).setTitle("Usar \"" + b.nome + "\"?")
-                .setMessage("A versão em uso (\"" + motor.nomeVersao + "\") tem mudanças que não estão em nenhum "
-                        + "backup (conversa, memória ou arquivos). Guardar antes de trocar?")
-                .setPositiveButton("Guardar e usar", (d, w) ->
-                        motor.usarBackup(b.id, motor.nomeVersao + " (" + data(System.currentTimeMillis()) + ")"))
-                .setNeutralButton("Usar sem guardar", (d, w) -> motor.usarBackup(b.id, null))
+        Armazem.Versao origem = null;
+        try {
+            origem = motor.armazem.origemDoAtual();
+        } catch (IOException ignorado) {
+            // sem a origem, só as outras opções
+        }
+        List<String> opcoes = new ArrayList<>();
+        List<Runnable> acoes = new ArrayList<>();
+        if (origem != null) {
+            String id = origem.id;
+            opcoes.add("Salvar por cima de \"" + origem.nome + "\" e trocar");
+            acoes.add(() -> motor.usarBackupSalvandoPorCima(b.id, id));
+        }
+        opcoes.add("Guardar como backup novo e trocar");
+        acoes.add(() -> motor.usarBackup(b.id, motor.nomeVersao + " (" + data(System.currentTimeMillis()) + ")"));
+        opcoes.add("Trocar sem guardar (a conversa e a memória novas se perdem)");
+        acoes.add(() -> motor.usarBackup(b.id, null));
+        TextView titulo = new TextView(tela);
+        titulo.setText("Usar \"" + b.nome + "\"?\n\nA versão em uso (\"" + motor.nomeVersao + "\") tem mudanças que não "
+                + "estão em nenhum backup (conversa, memória ou arquivos). O que fazer com elas?");
+        titulo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        titulo.setTextColor(tela.getColor(R.color.topo_texto));
+        int pad = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, tela.getResources().getDisplayMetrics());
+        titulo.setPadding(pad, pad, pad, pad / 2);
+        new AlertDialog.Builder(tela).setCustomTitle(titulo)
+                .setItems(opcoes.toArray(new String[0]), (d, i) -> acoes.get(i).run())
                 .setNegativeButton("Cancelar", null).show();
+    }
+
+    /** Um modelo novo chegou aos backups (PROJETO do Colab): oferece usar agora. */
+    static void mostrarBackupNovo(Activity tela, Motor motor, String titulo, String texto, String id) {
+        new AlertDialog.Builder(tela).setTitle(titulo).setMessage(texto)
+                .setPositiveButton("Usar agora", (d, w) -> {
+                    try {
+                        Armazem.Versao b = motor.armazem.backup(id);
+                        confirmarUso(tela, motor, b, motor.armazem.backupIgualAoAtual() != null);
+                    } catch (IOException e) {
+                        new AlertDialog.Builder(tela).setMessage("Erro ao abrir o backup: " + e.getMessage())
+                                .setPositiveButton("OK", null).show();
+                    }
+                })
+                .setNegativeButton("Depois", null).show();
     }
 }

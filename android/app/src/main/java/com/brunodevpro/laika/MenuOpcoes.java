@@ -25,7 +25,7 @@ import java.util.function.IntFunction;
 
 /**
  * O menu da tela de conversa: as opções de marcar (num grupo que abre e fecha), as barrinhas de
- * criatividade e de tamanho das respostas, e os atalhos (memória, versões, treinar, limpar).
+ * temperatura e de tamanho das respostas, e os atalhos (memória, versões, treinar, limpar).
  */
 final class MenuOpcoes {
     interface Acoes {
@@ -81,7 +81,7 @@ final class MenuOpcoes {
 
         montarOpcoes(lista);
         divisoria(lista);
-        barra(lista, "Criatividade", "mais previsível", "mais criativa",
+        barra(lista, "Temperatura", "mais previsível", "mais criativa",
                 (int) Math.round(Motor.TEMP_MIN * 100), (int) Math.round(Motor.TEMP_MAX * 100),
                 (int) Math.round(motor.temperatura * 100),
                 v -> String.format(Locale.getDefault(), "%.2f", v / 100.0),

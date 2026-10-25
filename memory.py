@@ -41,6 +41,12 @@ ASK_FAV = re.compile(r"\bqual (?:é |e )?(?:a |o )?(?:minha|meu) ([a-zà-ÿ]+(?:
 # "Faça uma frase com o meu nome", "Escreva um poema usando o seu nome": o nome vai no Contexto.
 NAME_REF_USER = re.compile(r"\b(?:o\s+)?meu\s+(?:pr[oó]prio\s+)?nome\b(?!\s+(?:é|e)\b)", re.I)
 NAME_REF_LAIKA = re.compile(r"\b(?:o\s+)?(?:seu|teu)\s+(?:pr[oó]prio\s+)?nome\b(?!\s+(?:é|e)\b)", re.I)
+# O nome da Laika só vai para o Contexto quando o pedido usa o nome (frase, poema, letras...). Em "Qual é o
+# seu nome?" ou "Como é o seu nome?", não: o modelo aprendeu essas perguntas sem Contexto (identidade.txt), e o
+# Contexto no prompt o levava para outras respostas.
+NAME_USE = re.compile(r"\b(?:frases?|poemas?|poesia|versos?|rimas?|acr[oó]stico|letras?|soletr\w*|contr[aá]rio|"
+                      r"mensagem|hist[oó]ria|texto|escrev\w*|fa[cç]a|use|usando|usar|crie|invente|forme|anagrama)\b",
+                      re.I)
 
 
 def _fav_phrase(key, info):
@@ -201,7 +207,7 @@ class Memory:
         parts = []
         if NAME_REF_USER.search(question) and self.data["nome"]:
             parts.append(f"O nome do usuário é {self.data['nome']}.")
-        if NAME_REF_LAIKA.search(question):
+        if NAME_REF_LAIKA.search(question) and NAME_USE.search(question):
             parts.append("O nome da assistente é Laika.")
         words = set(content_words(question))
         if words:

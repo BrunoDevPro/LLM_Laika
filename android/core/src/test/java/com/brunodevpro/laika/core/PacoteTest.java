@@ -176,6 +176,65 @@ class PacoteTest {
         assertFalse(corpus.raiz.exists());
     }
 
+    /** Um pacote com laika_nome.txt (PROJETO do Colab) vira um backup com esse nome; a versão em uso não muda. */
+    @Test
+    void pacoteComNomeVaiParaOsBackups() throws Exception {
+        Files.writeString(armazem.memoriaAtual().toPath(), "{\"nome\": \"Bruno\", \"notas\": []}");
+        Files.writeString(armazem.conversaAtual().toPath(), "[{\"u\": true, \"t\": \"oi\"}]");
+        byte[] z = zip(
+                "finetuned.pt", ler(new File(ck, "finetuned.pt")),
+                "tokenizer.json", ler(new File(ck, "tokenizer.json")),
+                "laika_nome.txt", "  Laika pequena\n7M ");
+        Pacote p = Pacote.extrair(fluxo(z), z.length, armazem, null, null);
+        assertEquals("Laika pequena 7M", p.nome);
+        assertEquals(2, p.entradas.size());
+        assertTrue(p.ignorados.isEmpty(), p.ignorados.toString());
+        Importador.Resultado r = new Importador(armazem, PacoteTest::trechos).importar(p.entradas);
+        String antes = armazem.atual().nome;
+        Armazem.Versao b = armazem.backupComTrocas(p.nome, r.trocas, r.memoria);
+        assertEquals(antes, armazem.atual().nome);
+        assertEquals("Laika pequena 7M", b.nome);
+        assertEquals(0, b.mensagens());
+        assertTrue(b.resumoMemoria().contains("Bruno"), b.resumoMemoria());
+        assertEquals(armazem.atual().arquivos.get(Armazem.INDICE).ref, b.arquivos.get(Armazem.INDICE).ref);
+        // O mesmo nome de novo: ganha a data, não substitui o anterior.
+        Armazem.Versao b2 = armazem.backupComTrocas(p.nome, r.trocas, null);
+        assertTrue(b2.nome.startsWith("Laika pequena 7M ("), b2.nome);
+        assertEquals(2, armazem.backups().size());
+    }
+
+    /** Salvar por cima do backup de origem e limpar a conversa/memória de um backup, sem criar outro. */
+    @Test
+    void salvarPorCimaELimpar() throws Exception {
+        Armazem.Versao b = armazem.fazerBackup("Meu modelo");
+        assertEquals(b.id, armazem.atual().origem);
+        assertNotNull(armazem.origemDoAtual());
+        Files.writeString(armazem.conversaAtual().toPath(), "[{\"u\": true, \"t\": \"oi\"}]");
+        Files.writeString(armazem.memoriaAtual().toPath(), "{\"nome\": \"Ana\", \"notas\": []}");
+        assertNull(armazem.backupIgualAoAtual());
+        assertEquals(b.id, armazem.origemDoAtual().id);
+        armazem.salvarPorCima(b.id);
+        assertEquals(1, armazem.backups().size());
+        assertNotNull(armazem.backupIgualAoAtual());
+        assertEquals(1, armazem.backup(b.id).mensagens());
+        armazem.limpar(b.id, true, false);
+        assertEquals(0, armazem.backup(b.id).mensagens());
+        assertTrue(armazem.backup(b.id).resumoMemoria().contains("Ana"));
+        assertEquals(1, armazem.atual().mensagens());  // a versão em uso não muda
+        armazem.limpar(b.id, false, true);
+        assertFalse(armazem.backup(b.id).resumoMemoria().contains("Ana"));
+        // Outro modelo na versão em uso: o backup de origem já não serve para "salvar por cima".
+        File tok = armazem.temporario("txt");
+        Files.copy(new File(assets, "tokenizer.txt").toPath(), tok.toPath());
+        java.util.Map<String, Armazem.Arquivo> trocas = new java.util.LinkedHashMap<>();
+        trocas.put(Armazem.TOKENIZER, armazem.guardar(tok, "txt", "tokenizer.txt", "outro"));
+        armazem.aplicar(trocas, null, null);
+        assertNull(armazem.atual().origem);
+        assertNull(armazem.origemDoAtual());
+        armazem.usarBackup(b.id);
+        assertEquals(b.id, armazem.atual().origem);
+    }
+
     /** O resultado do treino no celular do app 1.1 vira um backup, sem trocar a versão em uso. */
     @Test
     void backupDeArquivosNaoTrocaAVersao() throws IOException {

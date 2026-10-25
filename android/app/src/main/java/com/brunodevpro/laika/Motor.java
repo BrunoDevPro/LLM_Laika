@@ -93,6 +93,11 @@ final class Motor {
         /** Resultado de uma operação (importar, backup...), para mostrar ao usuário. */
         default void aviso(String titulo, String texto) {
         }
+
+        /** Um modelo novo foi guardado nos backups (a tela pode oferecer "Usar agora"). */
+        default void backupNovo(String titulo, String texto, String id) {
+            aviso(titulo, texto);
+        }
     }
 
     private static Motor instancia;
@@ -214,6 +219,12 @@ final class Motor {
         tarefa = t;
         progresso = pct;
         avisarEstado();
+    }
+
+    private void avisarBackupNovo(String titulo, String texto, String id) {
+        naTela(() -> {
+            for (Ouvinte o : new ArrayList<>(ouvintes)) o.backupNovo(titulo, texto, id);
+        });
     }
 
     private void avisarUsuario(String titulo, String texto) {
@@ -745,6 +756,26 @@ final class Motor {
         });
     }
 
+    /** Grava a conversa e a memória da versão em uso por cima do backup `origem` e passa a usar `id`. */
+    void usarBackupSalvandoPorCima(String id, String origem) {
+        emFundo("Trocando de versão…", false, () -> {
+            armazem.salvarPorCima(origem);
+            armazem.usarBackup(id);
+            carregarVersao();
+            aviso("Usando a versão \"" + nomeVersao + "\".");
+            avisarUsuario(null, "Agora usando \"" + nomeVersao + "\".");
+        });
+    }
+
+    /** Apaga a conversa e/ou a memória guardadas num backup, sem criar outro. */
+    void limparBackup(String id, boolean conversa, boolean memoria) {
+        emFundo("Limpando o backup…", false, () -> {
+            armazem.limpar(id, conversa, memoria);
+            avisarUsuario(null, (conversa && memoria ? "Conversa e memória apagadas" : conversa ? "Conversa apagada"
+                    : "Memória apagada") + " do backup.");
+        });
+    }
+
     void renomear(String id, String nome) {
         emFundo("Renomeando…", false, () -> {
             armazem.renomear(id, nome);
@@ -872,6 +903,7 @@ final class Motor {
         Corpus corpus = new Corpus(pastaCorpus);
         int textos = 0;
         boolean temIndice = false;
+        String nomePacote = null;
         try {
             int i = 0;
             for (Fonte f : fontes) {
@@ -892,6 +924,7 @@ final class Motor {
                         entradas.addAll(p.entradas);
                         textos += p.textos;
                         temIndice |= p.temIndice();
+                        if (p.nome != null) nomePacote = p.nome;
                         if (!p.ignorados.isEmpty()) {
                             avisos.add(String.format(Locale.getDefault(), "%d arquivo(s) do zip não servem para o app e "
                                     + "foram ignorados (ex.: %s)", p.ignorados.size(), p.ignorados.get(0)));
@@ -914,7 +947,12 @@ final class Motor {
             entradas.clear();
             for (Armazem.Versao b : r.backupsImportados) feitos.add("backup \"" + b.nome + "\"");
             String nomeVersaoNova = null;
-            if (r.mudaVersao()) {
+            Armazem.Versao backupNovo = null;
+            if (r.mudaVersao() && nomePacote != null) {
+                // Modelo de um PROJETO do Colab: vai direto para os backups com o nome dele.
+                tarefa("Guardando nos backups…", -1);
+                backupNovo = armazem.backupComTrocas(nomePacote, r.trocas, r.memoria);
+            } else if (r.mudaVersao()) {
                 tarefa("Aplicando a atualização…", -1);
                 String quando = agora();
                 if (armazem.backupIgualAoAtual() == null) {
@@ -926,6 +964,12 @@ final class Motor {
                 aviso("Atualização aplicada: " + String.join(", ", r.feitos) + ".");
             }
             StringBuilder msg = new StringBuilder();
+            if (backupNovo != null) {
+                msg.append("O modelo \"").append(backupNovo.nome).append("\" foi guardado nos backups com: ")
+                        .append(String.join(", ", r.feitos)).append(".\n\nA versão em uso continua a mesma. Para usar o novo, ")
+                        .append("toque no nome da versão no topo da conversa e escolha \"").append(backupNovo.nome)
+                        .append("\".");
+            }
             if (nomeVersaoNova != null) {
                 msg.append("Agora usando \"").append(nomeVersaoNova).append("\" com: ")
                         .append(String.join(", ", r.feitos)).append(".\n\nA versão anterior foi guardada nos backups.");
@@ -936,7 +980,9 @@ final class Motor {
             }
             avisos.addAll(r.avisos);
             if (!avisos.isEmpty()) msg.append("\n\nAtenção: ").append(String.join("; ", avisos)).append('.');
-            avisarUsuario("Importação concluída", msg.length() == 0 ? "Nada para importar." : msg.toString());
+            String texto = msg.length() == 0 ? "Nada para importar." : msg.toString();
+            if (backupNovo != null) avisarBackupNovo("Importação concluída", texto, backupNovo.id);
+            else avisarUsuario("Importação concluída", texto);
         } finally {
             for (Importador.Entrada e : entradas) e.arquivo.delete();
             corpus.apagar();

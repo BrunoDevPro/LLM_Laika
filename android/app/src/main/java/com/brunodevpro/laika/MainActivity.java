@@ -472,6 +472,11 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
     }
 
     @Override
+    public void backupNovo(String titulo, String texto, String id) {
+        SeletorModelos.mostrarBackupNovo(this, motor, titulo, texto, id);
+    }
+
+    @Override
     public void aviso(String titulo, String texto) {
         if (titulo == null) {
             Toast.makeText(this, texto, Toast.LENGTH_LONG).show();

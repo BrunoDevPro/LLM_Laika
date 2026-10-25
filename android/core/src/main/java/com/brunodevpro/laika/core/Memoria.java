@@ -43,6 +43,10 @@ public final class Memoria {
             "\\b(?:o\\s+)?meu\\s+(?:pr[oó]prio\\s+)?nome\\b(?!\\s+(?:é|e)\\b)", F);
     private static final Pattern NOME_DA_LAIKA = Pattern.compile(
             "\\b(?:o\\s+)?(?:seu|teu)\\s+(?:pr[oó]prio\\s+)?nome\\b(?!\\s+(?:é|e)\\b)", F);
+    /** Pedido que usa o nome ("frase", "poema", "letras"...): só aí o nome da Laika entra no Contexto (NAME_USE). */
+    private static final Pattern USA_O_NOME = Pattern.compile("\\b(?:frases?|poemas?|poesia|versos?|rimas?|acr[oó]stico|"
+            + "letras?|soletr\\w*|contr[aá]rio|mensagem|hist[oó]ria|texto|escrev\\w*|fa[cç]a|use|usando|usar|crie|invente|"
+            + "forme|anagrama)\\b", F);
     private static final Pattern ASK_CITY = Pattern.compile("\\bonde (?:é que )?eu moro\\b", F);
     private static final Pattern ASK_AGE = Pattern.compile("\\b(quantos anos eu tenho|qual (?:é )?a minha idade)\\b", F);
     private static final Pattern ASK_LIKES = Pattern.compile("\\b(?:do que|o que) eu (?:n[ãa]o )?gosto\\b", F);
@@ -308,7 +312,7 @@ public final class Memoria {
         List<String> partes = new ArrayList<>();
         // O nome do usuário ou o da Laika, quando a mensagem fala em "meu nome" ou "seu nome".
         if (nome != null && NOME_DO_USUARIO.matcher(pergunta).find()) partes.add("O nome do usuário é " + nome + ".");
-        if (NOME_DA_LAIKA.matcher(pergunta).find()) partes.add("O nome da assistente é Laika.");
+        if (NOME_DA_LAIKA.matcher(pergunta).find() && USA_O_NOME.matcher(pergunta).find()) partes.add("O nome da assistente é Laika.");
         int antes = partes.size();
         Set<String> palavras = new HashSet<>(Texto.palavrasDeConteudo(pergunta));
         for (String n : notas) {

@@ -66,6 +66,9 @@ parser.add_argument("--history-share", type=float, default=0.3,
                     help="fração dos exemplos que ganham 1 a 4 trocas anteriores (memória de IA)")
 parser.add_argument("--identity-boost", type=int, default=2,
                     help="peso extra do identidade.txt (quem é a Laika)")
+parser.add_argument("--identity-share", type=float, default=0.005,
+                    help="fração mínima de exemplos de identidade por época (com o SFT e o conhecimento, o peso extra "
+                         "sozinho deixava a identidade em ~0,1%%, e o modelo respondia como os personagens do SFT)")
 parser.add_argument("--out", default="checkpoints")
 parser.add_argument("--epochs", type=int, default=2, help="era 4; com muito mais exemplos, 2 bastam")
 parser.add_argument("--max-qa-repeat", type=int, default=2, help="máximo de vezes que cada exemplo escrito à mão aparece por época")
@@ -441,8 +444,11 @@ qa_repeat = 0
 if qa_train:
     wanted = args.qa_share / (1 - args.qa_share) * len(syn_train)
     qa_repeat = min(args.max_qa_repeat, max(1, round(wanted / len(qa_train))))
-id_repeat = qa_repeat * args.identity_boost if id_train else 0
 know_repeat = args.conhecimento_repetir if know_train else 0
+id_repeat = 0
+if id_train:
+    outros = len(syn_train) + len(qa_train) * qa_repeat + len(know_train) * know_repeat + len(sft_train)
+    id_repeat = max(qa_repeat * args.identity_boost, min(16, math.ceil(args.identity_share * outros / len(id_train))))
 print(f"Treino: {len(syn_train)} sintéticos + {len(qa_train)} do pergeresp (x{qa_repeat}) + "
       f"{len(id_train)} de identidade (x{id_repeat}) + {len(know_train)} de conhecimento (x{know_repeat}) + "
       f"{len(sft_train)} do SFT | validação: {len(syn_val)} sintéticos + {len(qa_val)} escritos à mão + "
