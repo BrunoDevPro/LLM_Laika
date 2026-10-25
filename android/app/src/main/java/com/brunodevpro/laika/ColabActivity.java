@@ -535,7 +535,8 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         k.addView(cb);
         String desc = c.soNavegador ? "Só no navegador (" + (c.numero == 0 ? "rode uma vez para ligar o app ao Colab" : "conversa interativa")
                 + ")." : sempre ? "Sempre roda antes das outras (monta o Drive, baixa o código). NOME: o nome do modelo no app (vai "
-                + "direto para os backups). PROJETO: só para um modelo novo, do zero, em pastas só dele (comece pela célula 3)." : resumo(c);
+                + "direto para os backups). PROJETO: um modelo em pastas só dele; PARTIR_DE = \"padrão\" copia para ele o pré-treino de sempre, "
+                + "senão comece pela célula 3." : resumo(c);
         TextView d = texto(desc, 12, R.color.aviso, false);
         d.setPadding(dp(32), 0, 0, dp(2));
         k.addView(d);
