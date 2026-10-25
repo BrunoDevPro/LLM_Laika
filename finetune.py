@@ -30,6 +30,8 @@ pré-treino nunca é sobrescrito: dá para repetir só este script à vontade.
 import argparse
 import json
 import math
+import multiprocessing
+import os
 import random
 import shutil
 import time
@@ -46,7 +48,8 @@ from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit
                         MAX_CONTEXT_WORDS,
                         ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
-from rag import open_index, wiki_passages
+from prepare_data import ler_sft
+from rag import RAG_VERSAO, RagIndex, open_index, wiki_passages
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--books", nargs="+", default=["data/books", "data/wiki", "data/modern"])
@@ -229,11 +232,8 @@ if n_know and wiki_files:
           f"fora: {args.conhecimento_excluir or 'nenhum'})")
 
 # Instruções do GigaVerbo-v2-SFT: conversas já prontas (com ou sem Contexto); ficam fora do RAG e do histórico.
-sft_texts = []
-for f in sorted(Path(args.sft_dir).glob("*.jsonl")):
-    for line in f.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            sft_texts.append(" ".join(chat_turn(q, a) for q, a in json.loads(line)))
+sft_texts = [" ".join(chat_turn(q, a) for q, a in conversa) for conversa in ler_sft(args.sft_dir)] \
+    if args.sft_max > 0 else []
 random.shuffle(sft_texts)
 sft_texts = sft_texts[:args.sft_max]
 if sft_texts:
@@ -243,29 +243,107 @@ if sft_texts:
 rag = None if args.no_rag else open_index(args.rag_db)
 
 
-def add_context(examples, share):
-    """Põe o Contexto do RAG na última pergunta, como o chat faz (1 a 3 trechos, conforme a janela)."""
+_rag_do_processo = None
+
+
+def _abrir_no_processo(arquivo):
+    global _rag_do_processo
+    _rag_do_processo = RagIndex(arquivo)
+
+
+def _buscar_no_processo(item):
+    question, k = item
+    return [[h["title"], h["text"]] for h in _rag_do_processo.contexts(question, k)]
+
+
+def find_contexts(questions, k):
+    """{pergunta: [[título, trecho], ...]} para as perguntas: buscas em paralelo (uma por núcleo do processador)
+    e cache em data/rag/contextos_cache.json, que vale enquanto o índice e a busca (RAG_VERSAO) não mudarem.
+
+    Com a Wikipédia inteira, cada busca leva ~0,3–0,5 s; em sequência, ~13 mil buscas levavam mais de 1 h."""
+    cache_path = Path(args.rag_db).with_name("contextos_cache.json")
+    chave = f"{rag.assinatura}|{RAG_VERSAO}|{k}"
+    cache = {}
+    try:
+        salvo = json.loads(cache_path.read_text(encoding="utf-8"))
+        if salvo.get("chave") == chave:
+            cache = salvo["contextos"]
+    except (OSError, ValueError, KeyError):
+        pass
+    faltam = [q for q in dict.fromkeys(questions) if q not in cache]
+    print(f"RAG: {len(set(questions)) - len(faltam)} perguntas já estavam no cache, {len(faltam)} para buscar",
+          flush=True)
+
+    def gravar():
+        try:
+            parcial = cache_path.with_suffix(".parcial")
+            parcial.write_text(json.dumps({"chave": chave, "contextos": cache}, ensure_ascii=False), encoding="utf-8")
+            os.replace(parcial, cache_path)
+        except OSError as error:
+            print("  não consegui gravar o cache de contextos:", error)
+
+    if faltam:
+        nucleos = min(os.cpu_count() or 1, 16)
+        inicio = time.time()
+        if nucleos > 1 and len(faltam) >= 200:
+            pool = multiprocessing.get_context("fork").Pool(nucleos, _abrir_no_processo, (rag.arquivo,))
+            resultados = pool.imap(_buscar_no_processo, [(q, k) for q in faltam], chunksize=8)
+        else:
+            pool = None
+            resultados = ([[h["title"], h["text"]] for h in rag.contexts(q, k)] for q in faltam)
+        try:
+            for i, (question, hits) in enumerate(zip(faltam, resultados), 1):
+                cache[question] = hits
+                if i % 1000 == 0 or i == len(faltam):
+                    vel = i / max(1e-6, time.time() - inicio)
+                    print(f"  RAG: {i}/{len(faltam)} buscas ({vel:.1f}/s com {nucleos if pool else 1} núcleo(s); "
+                          f"faltam ~{(len(faltam) - i) / vel / 60:.0f} min)", flush=True)
+                if i % 5000 == 0:
+                    gravar()  # se cair, a próxima vez continua daqui
+        finally:
+            if pool is not None:
+                pool.terminate()
+        gravar()
+    return cache
+
+
+def add_context(lists, share):
+    """Põe o Contexto do RAG na última pergunta de parte dos exemplos, como o chat faz (1 a 6 trechos,
+    conforme a janela). Recebe várias listas e busca tudo de uma vez (em paralelo, com cache)."""
     if rag is None or share <= 0:
-        return examples, 0
-    out, n = [], 0
+        return lists, [0] * len(lists)
     k = rag_chunks(block)
-    for example in examples:
-        history, question, answer = split_conversation(example)
-        if random.random() < share and wants_rag(question):
-            hits = rag.contexts(question, k)
+    escolhidos = []
+    for examples in lists:
+        marcados = []
+        for example in examples:
+            _, question, _ = split_conversation(example)
+            marcados.append(random.random() < share and wants_rag(question))
+        escolhidos.append(marcados)
+    perguntas = [split_conversation(e)[1] for examples, marcados in zip(lists, escolhidos)
+                 for e, m in zip(examples, marcados) if m]
+    contextos = find_contexts(perguntas, k)
+    saida, contagem = [], []
+    for examples, marcados in zip(lists, escolhidos):
+        out, n = [], 0
+        for example, marcado in zip(examples, marcados):
+            hits = contextos.get(split_conversation(example)[1]) if marcado else None
             if hits:
+                history, question, answer = split_conversation(example)
                 prefix = history + " " if history else ""
 
                 def count(user_text):
                     return len(tokenizer.encode(prefix + chat_turn(user_text, answer)).ids)
-                user_text = fit_context(count, question, " ".join(h["text"] for h in hits), block,
+                user_text = fit_context(count, question, " ".join(t for _, t in hits), block,
                                         max_words=MAX_CONTEXT_WORDS * len(hits))
                 if user_text:
                     out.append(prefix + chat_turn(user_text, answer))
                     n += 1
                     continue
-        out.append(example)
-    return out, n
+            out.append(example)
+        saida.append(out)
+        contagem.append(n)
+    return saida, contagem
 
 
 def add_history(examples, pool, share, skip=frozenset()):
@@ -290,8 +368,7 @@ def add_history(examples, pool, share, skip=frozenset()):
 
 
 if rag is not None:
-    qa_texts, n_qa_ctx = add_context(qa_texts, args.rag_share)
-    syn_texts, n_syn_ctx = add_context(syn_texts, args.rag_share)
+    (qa_texts, syn_texts), (n_qa_ctx, n_syn_ctx) = add_context([qa_texts, syn_texts], args.rag_share)
     print(f"RAG: {n_qa_ctx} perguntas escritas à mão e {n_syn_ctx} automáticas ganharam Contexto")
 else:
     print("RAG desligado: o fine-tuning segue sem exemplos com Contexto do RAG "
@@ -310,10 +387,11 @@ for sample in random.sample(syn_texts, min(4, len(syn_texts))):
 
 def encode_chat(texts, identity=frozenset()):
     items, too_long = [], 0
-    for text in texts:
-        if text in identity:
-            continue  # tratado à parte
-        ids = tokenizer.encode(text).ids
+    texts = [t for t in texts if t not in identity]  # a identidade é tratada à parte
+    # Em lotes: o tokenizer usa todos os núcleos (com centenas de milhares de exemplos, um por um demorava).
+    lotes = (tokenizer.encode_batch(texts[i:i + 20000]) for i in range(0, len(texts), 20000))
+    for enc in (e for lote in lotes for e in lote):
+        ids = enc.ids
         if len(ids) > block:
             too_long += 1
             continue

@@ -22,11 +22,14 @@ import re
 import shutil
 import sqlite3
 import tempfile
+import time
 from pathlib import Path
 
 from data_utils import _SENTENCE_SPLIT, content_words, normalize, question_name, rag_queries, word_tokens
 
 DEFAULT_DB = "data/rag/laika_rag.db"
+# Mude quando a busca mudar: o cache de contextos do finetune.py (contextos_cache.json) é refeito.
+RAG_VERSAO = "1.7"
 SOURCES = [("data/wiki", "wiki"), ("data/modern", "texto"), ("data/books", "livro")]
 PASSAGE_WORDS = 80
 KIND_BONUS = {"texto": 0.2, "wiki": 0.15, "livro": 0.0}
@@ -216,13 +219,22 @@ class RagIndex:
         if not path.exists():
             raise FileNotFoundError(f"{path} não existe. Rode: python rag.py build")
         real = os.path.realpath(path)
+        info = path.stat()
+        # Identifica esta versão do índice (o cache de contextos do finetune.py depende dela).
+        self.assinatura = f"{info.st_size}-{int(info.st_mtime)}"
         if real.startswith("/content/drive"):
             # Leitura aleatória no Drive é muito lenta: usa uma cópia local.
-            local = Path(tempfile.gettempdir()) / f"laika_rag_{path.stat().st_size}.db"
+            local = Path(tempfile.gettempdir()) / f"laika_rag_{info.st_size}.db"
             if not local.exists():
-                print("Copiando o índice RAG do Drive para o disco local (só na primeira vez)...")
-                shutil.copy(real, local)
+                print(f"Copiando o índice RAG do Drive para o disco local ({info.st_size / 1e9:.1f} GB, só na "
+                      "primeira vez)...", flush=True)
+                inicio = time.time()
+                parcial = local.with_suffix(".parcial")  # se cair no meio, não fica uma cópia pela metade
+                shutil.copy(real, parcial)
+                os.replace(parcial, local)
+                print(f"  índice copiado em {time.time() - inicio:.0f} s", flush=True)
             real = str(local)
+        self.arquivo = real
         self.con = sqlite3.connect(f"file:{real}?mode=ro", uri=True, check_same_thread=False)
 
     def _query(self, match, k):
