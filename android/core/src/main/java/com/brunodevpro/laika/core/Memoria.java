@@ -38,6 +38,11 @@ public final class Memoria {
 
     private static final Pattern ASK_NAME = Pattern.compile("\\b(qual (?:é |e )?(?:o )?meu nome|como (?:é que )?eu me chamo|"
             + "voc[eê] sabe (?:qual (?:é )?)?(?:o )?meu nome|quem sou eu|sabe quem eu sou)", F);
+    /** "Faça uma frase com o meu nome", "Escreva um poema usando o seu nome": o nome vai no Contexto (NAME_REF_*). */
+    private static final Pattern NOME_DO_USUARIO = Pattern.compile(
+            "\\b(?:o\\s+)?meu\\s+(?:pr[oó]prio\\s+)?nome\\b(?!\\s+(?:é|e)\\b)", F);
+    private static final Pattern NOME_DA_LAIKA = Pattern.compile(
+            "\\b(?:o\\s+)?(?:seu|teu)\\s+(?:pr[oó]prio\\s+)?nome\\b(?!\\s+(?:é|e)\\b)", F);
     private static final Pattern ASK_CITY = Pattern.compile("\\bonde (?:é que )?eu moro\\b", F);
     private static final Pattern ASK_AGE = Pattern.compile("\\b(quantos anos eu tenho|qual (?:é )?a minha idade)\\b", F);
     private static final Pattern ASK_LIKES = Pattern.compile("\\b(?:do que|o que) eu (?:n[ãa]o )?gosto\\b", F);
@@ -288,16 +293,26 @@ public final class Memoria {
         for (int i = 0; i < INCOMPLETA.length; i++) {
             if (INCOMPLETA[i].matcher(aparado).matches()) return RESPOSTA_INCOMPLETA[i];
         }
+        // "Faça uma frase com o meu nome" sem saber o nome: pergunta, em vez de o modelo inventar um.
+        if (nome == null && NOME_DO_USUARIO.matcher(msg).find()) {
+            return "Você ainda não me disse o seu nome. Como você se chama?";
+        }
         return null;
     }
 
-    /** Anotações relacionadas à pergunta, para entrar no Contexto do modelo. */
+    /**
+     * Anotações relacionadas à pergunta, para entrar no Contexto do modelo; e o nome do usuário ou o da Laika
+     * quando a mensagem fala em "meu nome" ou "seu nome" (context_for do memory.py).
+     */
     public String contextoPara(String pergunta) {
-        Set<String> palavras = new HashSet<>(Texto.palavrasDeConteudo(pergunta));
-        if (palavras.isEmpty()) return "";
         List<String> partes = new ArrayList<>();
+        // O nome do usuário ou o da Laika, quando a mensagem fala em "meu nome" ou "seu nome".
+        if (nome != null && NOME_DO_USUARIO.matcher(pergunta).find()) partes.add("O nome do usuário é " + nome + ".");
+        if (NOME_DA_LAIKA.matcher(pergunta).find()) partes.add("O nome da assistente é Laika.");
+        int antes = partes.size();
+        Set<String> palavras = new HashSet<>(Texto.palavrasDeConteudo(pergunta));
         for (String n : notas) {
-            if (partes.size() >= 2) break;
+            if (palavras.isEmpty() || partes.size() - antes >= 2) break;
             for (String w : Texto.palavrasDeConteudo(n)) {
                 if (palavras.contains(w)) {
                     partes.add("O usuário pediu para lembrar: " + n + ".");

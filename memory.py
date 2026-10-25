@@ -38,6 +38,11 @@ ASK_LIKES = re.compile(r"\b(?:do que|o que) eu (?:n[ãa]o )?gosto\b", re.I)
 ASK_FAV = re.compile(r"\bqual (?:é |e )?(?:a |o )?(?:minha|meu) ([a-zà-ÿ]+(?: [a-zà-ÿ]+)?) favorit[oa]", re.I)
 
 
+# "Faça uma frase com o meu nome", "Escreva um poema usando o seu nome": o nome vai no Contexto.
+NAME_REF_USER = re.compile(r"\b(?:o\s+)?meu\s+(?:pr[oó]prio\s+)?nome\b(?!\s+(?:é|e)\b)", re.I)
+NAME_REF_LAIKA = re.compile(r"\b(?:o\s+)?(?:seu|teu)\s+(?:pr[oó]prio\s+)?nome\b(?!\s+(?:é|e)\b)", re.I)
+
+
 def _fav_phrase(key, info):
     """'sua cor favorita é azul' / 'seu animal favorito é o gato'."""
     if info.get("fem"):
@@ -185,12 +190,21 @@ class Memory:
         for pattern, reply in INCOMPLETE:
             if pattern.match(msg.strip()):
                 return reply
+        if NAME_REF_USER.search(msg) and not self.data["nome"]:
+            # "Faça uma frase com o meu nome" sem saber o nome: pergunta, em vez de o modelo inventar um.
+            return "Você ainda não me disse o seu nome. Como você se chama?"
         return None
 
     def context_for(self, question):
-        """Anotações relacionadas à pergunta, para entrar no Contexto do modelo."""
+        """Anotações relacionadas à pergunta, para entrar no Contexto do modelo; e o nome do usuário ou o da Laika
+        quando a mensagem fala em "meu nome" ou "seu nome" ("Faça uma frase com o meu nome.")."""
+        parts = []
+        if NAME_REF_USER.search(question) and self.data["nome"]:
+            parts.append(f"O nome do usuário é {self.data['nome']}.")
+        if NAME_REF_LAIKA.search(question):
+            parts.append("O nome da assistente é Laika.")
         words = set(content_words(question))
-        if not words:
-            return ""
-        related = [n for n in self.data["notas"] if words & set(content_words(n))]
-        return " ".join(f"O usuário pediu para lembrar: {n}." for n in related[:2])
+        if words:
+            related = [n for n in self.data["notas"] if words & set(content_words(n))]
+            parts += [f"O usuário pediu para lembrar: {n}." for n in related[:2]]
+        return " ".join(parts)

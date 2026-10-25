@@ -89,6 +89,8 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   6 trechos conforme a janela) e a fonte no fim (`*Título`). Na 1.7, a busca foi corrigida: perguntas sobre
   a cadela Laika voltaram a usar o RAG, "Você sabe..." não conta mais como pergunta pessoal, o radical das
   palavras não junta mais "capital" com "capítulo" e os textos próprios precisam da nota mínima.
+- Na 1.8, "Faça uma frase com o meu nome" põe o nome guardado no Contexto (e "o seu nome", o da Laika), e
+  perguntas curtas como "Mas em que mês foi?" ou "Quem era o líder?" usam a conversa anterior, sem buscar no RAG.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o

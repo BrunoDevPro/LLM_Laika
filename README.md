@@ -50,7 +50,7 @@ parou, ou continua o terminado com os dados atuais) ou `"do_zero"`. A célula 2 
 | `memory.py` | Memória do usuário (nome, cidade, gostos, "lembre que...") em `checkpoints/memoria.json` |
 | `train.py` | Pré-treino com validação, early stopping, tokens em disco (`data/tokens/`, com cópia opcional no Drive: `--tokens-backup`), tokenizer treinado numa amostra (`--tokenizer-mb`), acumulação de gradiente (`--accum`), bf16, `--compile` e retomada (`--resume`) |
 | `finetune.py` | Fine-tuning pergunta→resposta (loss só na resposta); não sobrescreve o pré-treino. Também é **fonte de conhecimento**: os artigos mais importantes da Wikipédia viram perguntas sem contexto, cada fato de 4 jeitos (`--conhecimento`) |
-| `avaliar.py` | Avaliação fixa: perplexidade, 91 perguntas por categoria e a busca do RAG (`data/avaliacao/`); `--comparar backup` compara com o fine-tuning anterior |
+| `avaliar.py` | Avaliação fixa: perplexidade, 108 perguntas por categoria e a busca do RAG (`data/avaliacao/`); `--comparar backup` compara com o fine-tuning anterior |
 | `chat.py` | Conversa com RAG, memória e cache de atenção; `--base` completa texto com o modelo só pré-treinado |
 | `model.py` / `config.py` | Arquitetura (posições aprendidas ou RoPE) e presets (`tiny` e `tiny_rope` para CPU; `colab` ~7M, `colab_big` ~14M, `colab_50m` ~52M e `colab_100m` ~104M com contexto 2048 para GPU) |
 | `TREINO_100M.md` | Todas as configurações do treino de 100M: dados, células, tempo, unidades e ordem |

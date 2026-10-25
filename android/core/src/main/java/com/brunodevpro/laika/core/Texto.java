@@ -217,6 +217,11 @@ public final class Texto {
     private static final String[] SEGUE_FRASES = {"explique melhor", "explica melhor", "fale mais", "conte mais",
             "diga mais", "mais detalhes", "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer",
             "resposta longa", "responda com detalhes"}; // o gatilho sozinho ("Resposta longa.") pede mais da anterior
+    /** Palavras "genéricas" (_FOLLOW_GENERIC): "Foi em que mês?", "Quem era o líder?" dependem da anterior. */
+    private static final Set<String> SEGUE_GENERICAS = conjunto(
+            "mes meses dia dias ano anos data datas seculo seculos hora horas epoca periodo exatamente lider lideres chefe "
+            + "responsavel responsaveis motivo motivos causa causas razao culpa culpado autor autores rei rainha presidente "
+            + "imperador governante comandante resultado consequencia consequencias certeza exato direito governava governavam reinava comandava mandava liderou");
     private static final Set<String> SOCIAIS = conjunto(
             "oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal "
             + "show otimo sim nao kkk kkkk haha blz");
@@ -225,6 +230,23 @@ public final class Texto {
      * A mensagem depende da conversa anterior? (follows_up do data_utils.py). A memória de IA só põe o
      * histórico no prompt nesses casos ("E da Itália?", "Por quê?", "Quem foi ele?").
      */
+    /**
+     * Curta e só com palavras genéricas: "Foi em que mês?", "Quem era o líder?" (generic_follow_up do
+     * data_utils.py). Depende da conversa anterior e não vai para o RAG; definições ("O que é um século?") não contam.
+     */
+    public static boolean seguimentoGenerico(String pergunta) {
+        List<String> ws = new ArrayList<>();
+        for (String w : separar(normalizar(pergunta))) {
+            String limpa = tirarPontas(w, NOME_PONTAS);
+            if (!limpa.isEmpty()) ws.add(limpa);
+        }
+        if (ws.isEmpty() || ws.size() > 6) return false;
+        String inicio = String.join(" ", ws.subList(0, Math.min(3, ws.size())));
+        if (inicio.equals("o que e") || inicio.equals("o que sao") || inicio.equals("o que significa")) return false;
+        List<String> conteudo = palavrasDeConteudo(pergunta);
+        return !conteudo.isEmpty() && SEGUE_GENERICAS.containsAll(conteudo);
+    }
+
     public static boolean segueConversa(String pergunta) {
         List<String> ws = new ArrayList<>();
         for (String w : separar(normalizar(pergunta))) {
@@ -236,7 +258,9 @@ public final class Texto {
         for (String w : ws) if (SEGUE_PALAVRAS.contains(w)) return true;
         String junto = " " + String.join(" ", ws) + " ";
         for (String f : SEGUE_FRASES) if (junto.contains(" " + f + " ")) return true;
-        if (ws.size() > 2 || !palavrasDeConteudo(pergunta).isEmpty()) return false;
+        if (seguimentoGenerico(pergunta)) return true;
+        List<String> conteudo = palavrasDeConteudo(pergunta);
+        if (ws.size() > 2 || !conteudo.isEmpty()) return false;
         for (String w : ws) if (!SOCIAIS.contains(w)) return true;
         return false;
     }
@@ -298,7 +322,7 @@ public final class Texto {
         if (!primeiras.isEmpty() && (primeiras.get(0).equals("dê") || INSTRUCTIONS.contains(normalizar(primeiras.get(0))))) {
             return false;
         }
-        if (!palavrasPessoais(pergunta).isEmpty()) return false;
+        if (!palavrasPessoais(pergunta).isEmpty() || seguimentoGenerico(pergunta)) return false;
         return !palavrasDeConteudo(pergunta).isEmpty();
     }
 
