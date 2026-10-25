@@ -91,6 +91,10 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   palavras não junta mais "capital" com "capítulo" e os textos próprios precisam da nota mínima.
 - Na 1.8, "Faça uma frase com o meu nome" põe o nome guardado no Contexto (e "o seu nome", o da Laika), e
   perguntas curtas como "Mas em que mês foi?" ou "Quem era o líder?" usam a conversa anterior, sem buscar no RAG.
+- Na 1.9: ao trocar de modelo com conversa ou memória novas, dá para **salvar por cima** do backup de onde a
+  versão veio (sem criar outro); na tela de versões, **Limpar** apaga a conversa e/ou a memória de um backup. Um zip
+  do Colab feito com um **PROJETO** (célula 1) entra direto nos backups com o nome do projeto, sem trocar o modelo
+  em uso. A barrinha "Criatividade" agora se chama **Temperatura**.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o
@@ -100,7 +104,7 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
 - Menu ⋮: **Opções** (um grupo que abre e fecha com as caixinhas: mostrar fontes, buscar nos textos,
   memória do usuário, memória de IA, **respostas longas** e **modo completar texto**, o `--base` com o
   `pretrain_best.pt`),
-  barrinhas de **criatividade** (temperatura de 0,10 a 1,50, de 0,01 em 0,01) e de **tamanho das
+  barrinhas de **temperatura** (de 0,10 a 1,50, de 0,01 em 0,01) e de **tamanho das
   respostas** (16 a 120 tokens com os modelos de janela 256; 200 com 512; 400 com o de 100M, que tem 2048;
   quanto maior, mais a Laika tenta escrever), o que a Laika lembra de você, versões e backups, **Treinar** e
   limpar a conversa.

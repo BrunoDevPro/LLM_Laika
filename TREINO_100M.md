@@ -88,7 +88,7 @@ Referência de `val loss` (vocabulário de 24 mil): abaixo de ~3,0 as frases já
 | `USAR_SFT` | ligado (as conversas do GigaVerbo-v2-SFT da célula 2) |
 | Taxa de aprendizado | automática: **1e-4** (acima de 20M de parâmetros) |
 | Precisão | bf16 na A100 |
-| Dados | ~16 mil exemplos escritos (inclui as 627 respostas longas, 438 "por quê", 975 de sim ou não, 5.313 de pessoas, datas, séculos, conceitos e gatilho de resposta longa e 1.048 de acontecimentos e nomes) + 2.188 conversas + 10 mil sintéticos + 40 mil perguntas de leitura da Wikipédia + ~300 mil perguntas de conhecimento (sem contexto) + até 300 mil conversas do SFT; ~30% com mensagens anteriores (memória de IA); até 6 trechos do RAG por pergunta |
+| Dados | ~16 mil exemplos escritos (inclui as 627 respostas longas, 438 "por quê", 975 de sim ou não, 5.313 de pessoas, datas, séculos, conceitos e gatilho de resposta longa e 1.048 de acontecimentos e nomes; identidade com 274) + 2.299 conversas + 10 mil sintéticos + 40 mil perguntas de leitura da Wikipédia + ~300 mil perguntas de conhecimento (sem contexto) + até 300 mil conversas do SFT; ~30% com mensagens anteriores (memória de IA); até 6 trechos do RAG por pergunta |
 
 Com o conhecimento e o SFT, leva ~1–2 h (antes, ~30–60 min); a escolha dos artigos lê a Wikipédia inteira uma vez
 (alguns minutos, sem GPU). O `finetuned.pt` anterior vai para `checkpoints/backups/` antes de ser sobrescrito

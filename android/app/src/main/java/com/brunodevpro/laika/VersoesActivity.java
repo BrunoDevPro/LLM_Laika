@@ -112,6 +112,12 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
     }
 
     @Override
+    public void backupNovo(String titulo, String texto, String id) {
+        SeletorModelos.mostrarBackupNovo(this, motor, titulo, texto, id);
+        montar();
+    }
+
+    @Override
     public void aviso(String titulo, String texto) {
         if (titulo == null) {
             Toast.makeText(this, texto, Toast.LENGTH_LONG).show();
@@ -266,6 +272,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
             botao(lb, "Renomear", false, v -> renomear(b.id, b.nome));
             LinearLayout lb2 = linhaDeBotoes(cb);
             botao(lb2, "Exportar", false, v -> exportar(b));
+            botao(lb2, "Limpar", false, v -> limpar(b));
             TextView apagar = botao(lb2, "Apagar", false, v -> apagar(b));
             apagar.setTextColor(getColor(R.color.perigo));
         }
@@ -317,6 +324,20 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
 
     private void usar(Armazem.Versao b, boolean atualJaSalva) {
         SeletorModelos.confirmarUso(this, motor, b, atualJaSalva);
+    }
+
+    /** Apaga a conversa e/ou a memória guardadas no backup, sem criar outro. */
+    private void limpar(Armazem.Versao b) {
+        int msgs = b.mensagens();
+        boolean[] marcados = {msgs > 0, false};
+        String[] itens = {"Conversa (" + plural(msgs, "mensagem", "mensagens") + ")",
+                "Memória (" + b.resumoMemoria() + ")"};
+        new AlertDialog.Builder(this).setTitle("Limpar \"" + b.nome + "\"")
+                .setMultiChoiceItems(itens, marcados, (d, i, sim) -> marcados[i] = sim)
+                .setPositiveButton("Limpar", (d, w) -> {
+                    if (marcados[0] || marcados[1]) motor.limparBackup(b.id, marcados[0], marcados[1]);
+                })
+                .setNegativeButton("Cancelar", null).show();
     }
 
     private void apagar(Armazem.Versao b) {

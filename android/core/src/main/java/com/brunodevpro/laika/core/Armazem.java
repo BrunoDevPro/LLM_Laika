@@ -91,6 +91,8 @@ public final class Armazem {
         public final String id;
         public String nome;
         public long criado, alterado;
+        /** Na versão em uso: o backup de onde ela veio (com os mesmos arquivos), ou null. */
+        public String origem;
         public final Map<String, Arquivo> arquivos = new LinkedHashMap<>();
         final File pasta;
 
@@ -215,6 +217,7 @@ public final class Armazem {
         v.nome = (String) m.get("nome");
         v.criado = ((Number) m.get("criado")).longValue();
         v.alterado = m.get("alterado") instanceof Number ? ((Number) m.get("alterado")).longValue() : v.criado;
+        v.origem = m.get("origem") instanceof String ? (String) m.get("origem") : null;
         Map<String, Object> arqs = (Map<String, Object>) m.get("arquivos");
         for (String papel : PAPEIS) if (arqs.get(papel) != null) v.arquivos.put(papel, Arquivo.de(arqs.get(papel)));
         return v;
@@ -226,6 +229,7 @@ public final class Armazem {
         m.put("nome", v.nome);
         m.put("criado", v.criado);
         m.put("alterado", v.alterado);
+        if (v.origem != null) m.put("origem", v.origem);
         Map<String, Object> arqs = new LinkedHashMap<>();
         for (Map.Entry<String, Arquivo> e : v.arquivos.entrySet()) arqs.put(e.getKey(), e.getValue().json());
         m.put("arquivos", arqs);
@@ -352,7 +356,45 @@ public final class Armazem {
         b.criado = b.alterado = System.currentTimeMillis();
         b.arquivos.putAll(a.arquivos);
         gravar(b);
+        a.origem = id;  // a versão em uso agora é igual a este backup
+        gravar(a);
         return b;
+    }
+
+    /**
+     * O backup de onde a versão em uso veio, se ele ainda existe e tem os mesmos arquivos (modelo, tokenizer
+     * e índice): só a conversa e a memória podem ter mudado. Senão, null.
+     */
+    public Versao origemDoAtual() throws IOException {
+        Versao a = atual();
+        if (a.origem == null || !new File(backupsDir, a.origem).isDirectory()) return null;
+        try {
+            Versao b = backup(a.origem);
+            return refs(b).equals(refs(a)) ? b : null;
+        } catch (IOException | RuntimeException e) {
+            return null;
+        }
+    }
+
+    /** Grava a conversa e a memória da versão em uso por cima do backup id (sem criar outro). */
+    public void salvarPorCima(String id) throws IOException {
+        Versao a = atual(), b = backup(id);
+        copiarPasta(a, b.pasta);
+        b.arquivos.clear();
+        b.arquivos.putAll(a.arquivos);
+        b.alterado = System.currentTimeMillis();
+        gravar(b);
+        a.origem = id;
+        gravar(a);
+    }
+
+    /** Apaga a conversa e/ou a memória de um backup (id) ou da versão em uso (id null). */
+    public void limpar(String id, boolean conversa, boolean memoria) throws IOException {
+        Versao v = id == null ? atual() : backup(id);
+        if (conversa && v.conversa().exists() && !v.conversa().delete()) throw new IOException("não consegui apagar a conversa");
+        if (memoria && v.memoria().exists() && !v.memoria().delete()) throw new IOException("não consegui apagar a memória");
+        v.alterado = System.currentTimeMillis();
+        gravar(v);
     }
 
     /** Passa a usar o backup (a versão em uso vira uma cópia dele; o backup não muda). */
@@ -364,6 +406,7 @@ public final class Armazem {
         a.criado = b.criado;
         a.alterado = System.currentTimeMillis();
         a.arquivos.putAll(b.arquivos);
+        a.origem = id;
         gravar(a);
         limparBlobs();
     }
@@ -394,6 +437,7 @@ public final class Armazem {
             else a.arquivos.put(e.getKey(), e.getValue());
         }
         if (nome != null) a.nome = nome;
+        if (!trocas.isEmpty()) a.origem = null;  // outros arquivos: já não é igual ao backup de onde veio
         a.alterado = System.currentTimeMillis();
         if (memoria != null) escreverAtomico(a.memoria(), memoria);
         gravar(a);
@@ -511,6 +555,30 @@ public final class Armazem {
         b.arquivos.putAll(arquivos);
         if (!b.arquivos.containsKey(INDICE)) b.arquivos.put(INDICE, arquivosDeFabrica().get(INDICE));
         gravar(b);
+        return b;
+    }
+
+    /**
+     * Um backup novo com os arquivos da versão em uso trocados por `trocas` (um modelo que chegou com nome, de
+     * outro PROJETO do Colab), sem mexer na versão em uso. Leva a memória do usuário (ou `memoria`, se veio
+     * uma), sem a conversa. Se já houver um backup com o mesmo nome, acrescenta a data.
+     */
+    public Versao backupComTrocas(String nome, Map<String, Arquivo> trocas, byte[] memoria) throws IOException {
+        Versao a = atual();
+        Map<String, Arquivo> arqs = new LinkedHashMap<>(a.arquivos);
+        for (Map.Entry<String, Arquivo> e : trocas.entrySet()) {
+            if (e.getValue() == null) arqs.remove(e.getKey());
+            else arqs.put(e.getKey(), e.getValue());
+        }
+        for (Versao b : backups()) {
+            if (nome.equals(b.nome)) {
+                nome += " (" + new java.text.SimpleDateFormat("dd/MM HH:mm", java.util.Locale.ROOT).format(new java.util.Date()) + ")";
+                break;
+            }
+        }
+        Versao b = backupDeArquivos(nome, arqs);
+        byte[] mem = memoria != null ? memoria : lerOuVazio(a.memoria());
+        if (mem.length > 0) escreverAtomico(b.memoria(), mem);
         return b;
     }
 

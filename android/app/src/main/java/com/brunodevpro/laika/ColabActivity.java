@@ -190,6 +190,11 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
     }
 
     @Override
+    public void backupNovo(String titulo, String texto, String id) {
+        SeletorModelos.mostrarBackupNovo(this, motor, titulo, texto, id);
+    }
+
+    @Override
     public void aviso(String titulo, String texto) {
         if (titulo == null) Toast.makeText(this, texto, Toast.LENGTH_LONG).show();
         else new AlertDialog.Builder(this).setTitle(titulo).setMessage(texto).setPositiveButton("OK", null).show();
@@ -529,16 +534,19 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         ligado(cb, !sempre && !c.soNavegador);
         k.addView(cb);
         String desc = c.soNavegador ? "Só no navegador (" + (c.numero == 0 ? "rode uma vez para ligar o app ao Colab" : "conversa interativa")
-                + ")." : sempre ? "Sempre roda antes das outras (monta o Drive, baixa o código)." : resumo(c);
+                + ")." : sempre ? "Sempre roda antes das outras (monta o Drive, baixa o código). PROJETO: o nome de um modelo novo, "
+                + "em pastas só dele no Drive; vazio = o modelo de sempre." : resumo(c);
         TextView d = texto(desc, 12, R.color.aviso, false);
         d.setPadding(dp(32), 0, 0, dp(2));
         k.addView(d);
-        if (c.soNavegador || sempre) return;
+        if (c.soNavegador) return;
         LinearLayout params = new LinearLayout(this);
         params.setOrientation(LinearLayout.VERTICAL);
         params.setPadding(dp(32), 0, 0, 0);
         k.addView(params);
-        for (Caderno.Parametro p : c.parametros) montarParametro(params, c, p);
+        // Da célula 1 só aparece o PROJETO: o RAMO vem do GitHub (o laika_colab.py usa o ramo do workflow).
+        for (Caderno.Parametro p : c.parametros) if (!(sempre && p.nome.equals("RAMO"))) montarParametro(params, c, p);
+        if (sempre) return;
         params.setVisibility(cb.isChecked() ? View.VISIBLE : View.GONE);
         cb.setOnCheckedChangeListener((v, marcada) -> {
             if (marcada) marcadas.add(c.numero);
@@ -636,9 +644,9 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             if (c.soNavegador || (c.numero != 1 && !marcadas.contains(c.numero))) continue;
             nomes.add(c.numero + ") " + c.nome);
             if (c.numero != 1) lista.append(lista.length() > 0 ? "," : "").append(c.numero);
-            if (c.numero == 1) continue;  // RAMO: o laika_colab.py usa o ramo do GitHub
             Map<String, Object> daCelula = new LinkedHashMap<>();
             for (Caderno.Parametro p : c.parametros) {
+                if (c.numero == 1 && p.nome.equals("RAMO")) continue;  // o laika_colab.py usa o ramo do GitHub
                 String v = valor(c, p);
                 if (v.equals(Caderno.textoDoPadrao(p))) continue;  // só o que mudou
                 try {

@@ -17,7 +17,8 @@ import java.util.zip.ZipInputStream;
  * Um zip com tudo de um modelo diferente: o laika_pacote.zip da célula 6 do Colab (também o que a
  * tela Colab baixa), o laika_dados.zip antigo ou um zip montado à mão. Pode ter:
  *   finetuned.pt, pretrain_best.pt (ou laika_*.bin), tokenizer.json (ou .txt), laika_rag.db,
- *   memoria.json e textos em books/, wiki/ e modern/ (o app monta o índice do RAG com eles).
+ *   memoria.json, textos em books/, wiki/ e modern/ (o app monta o índice do RAG com eles) e laika_nome.txt
+ *   (o nome do modelo: o pacote vira um backup com esse nome, sem trocar a versão em uso).
  * Os arquivos viram entradas do Importador (que reconhece cada um pelo conteúdo); os textos vão
  * para um Corpus. Backups exportados pelo app e checkpoints do PyTorch também são zip: veja {@link #tipo}.
  */
@@ -26,6 +27,9 @@ public final class Pacote {
     /** Arquivos do zip que não servem para nada aqui (ex.: qa/, notebooks). */
     public final List<String> ignorados = new ArrayList<>();
     public int textos;
+    /** O nome do modelo (PROJETO da célula 1 do Colab, em laika_nome.txt), ou null. */
+    public String nome;
+    static final String ARQUIVO_NOME = "laika_nome.txt";
 
     private Pacote() {
     }
@@ -98,6 +102,13 @@ public final class Pacote {
                     continue;
                 }
                 String nome = caminho.substring(caminho.lastIndexOf('/') + 1);
+                if (caminho.equals(ARQUIVO_NOME)) {
+                    byte[] b = new byte[200];
+                    int n = lerTudo(z, b);
+                    String s = new String(b, 0, n, StandardCharsets.UTF_8).replaceAll("\\s+", " ").trim();
+                    if (!s.isEmpty()) r.nome = s.length() > 60 ? s.substring(0, 60) : s;
+                    continue;
+                }
                 File destino = corpus == null ? null : corpus.destino(caminho);
                 String ext = destino == null ? extensao(nome) : null;
                 if (destino == null && ext == null) {

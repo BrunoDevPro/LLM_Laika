@@ -106,3 +106,7 @@
 {"categoria": "nomes", "pergunta": "Faça uma frase com o seu nome.", "esperado": [["laika"]], "rag": false, "contexto": "O nome da assistente é Laika."}
 {"categoria": "nomes", "pergunta": "Faça uma frase com o nome dele.", "esperado": [["darwin"]], "rag": false, "historico": [["Quem foi Charles Darwin?", "Charles Darwin foi um naturalista inglês que propôs a teoria da evolução por seleção natural."]]}
 {"categoria": "nomes", "pergunta": "Faça uma frase com o nome dela.", "esperado": [["beatriz"]], "rag": false, "historico": [["Minha prima se chama Beatriz.", "Que nome bonito! Beatriz parece ser alguém muito querida."]]}
+{"categoria": "identidade", "pergunta": "Você é o rei do Reino Unido?", "esperado": [["nao"], ["laika"]], "rag": false}
+{"categoria": "identidade", "pergunta": "Me conta o seu nome.", "esperado": [["laika"]], "proibido": ["sou o rei", "sou a rainha"], "rag": false}
+{"categoria": "identidade", "pergunta": "Quem é você?", "esperado": [["laika"]], "proibido": ["sou o rei", "sou a rainha"], "rag": false, "historico": [["Quem era o rei do Reino Unido em 1950?", "O rei do Reino Unido em 1950 era Jorge VI."]]}
+{"categoria": "identidade", "pergunta": "E qual é o seu nome?", "esperado": [["laika"]], "proibido": ["sou o rei", "sou a rainha"], "rag": false, "historico": [["Quem foi a rainha Vitória?", "Vitória foi rainha do Reino Unido de 1837 a 1901."]]}
