@@ -578,16 +578,27 @@ class Execucao:
                 except OSError:
                     pass
 
-        self.colab.rodar(["drivemount", "-s", self.args.sessao], ao_ler, ao_esperar, entrada=True, limite=12 * 60)
-        self.estado.autorizar = None
-        # O CLI pode desistir antes do Drive terminar de montar: confere direto na máquina.
-        for tentativa in range(4):
-            codigo, saida = self.colab.executar(
-                f"import os; print('@@LAIKA_DRIVE', os.path.isdir({CONTENT + '/drive/MyDrive'!r}))", 60)
-            if any("@@LAIKA_DRIVE True" in l for l in saida):
-                self.anunciar("Google Drive montado.")
-                return
-            time.sleep(min(15, ESPERA))
+        # O CLI às vezes perde a conexão com a máquina no começo ("RuntimeError: Connection was lost."),
+        # antes até de pedir a autorização: aí tenta de novo, com a mesma máquina, até 3 vezes.
+        for vez in range(1, 4):
+            if vez > 1:
+                s.update(pediu=False, url=None, desde=None, enviado=False)
+                self.anunciar(f"A conexão com o Colab caiu ao montar o Drive; tentando de novo ({vez}/3)…", "drive")
+                time.sleep(min(20, ESPERA))
+            _, saida_cli = self.colab.rodar(["drivemount", "-s", self.args.sessao], ao_ler, ao_esperar,
+                                            entrada=True, limite=12 * 60)
+            self.estado.autorizar = None
+            caiu = any("Connection was lost" in l for l in saida_cli)
+            # O CLI pode desistir antes do Drive terminar de montar: confere direto na máquina.
+            for tentativa in range(2 if caiu else 4):
+                codigo, saida = self.colab.executar(
+                    f"import os; print('@@LAIKA_DRIVE', os.path.isdir({CONTENT + '/drive/MyDrive'!r}))", 60)
+                if any("@@LAIKA_DRIVE True" in l for l in saida):
+                    self.anunciar("Google Drive montado.")
+                    return
+                time.sleep(min(15, ESPERA))
+            if not caiu:
+                break
         raise Falha("o Google Drive não montou. Se apareceu o pedido de autorização, autorize e rode de novo.")
 
     def rodar_celula(self, celula, codigo):
