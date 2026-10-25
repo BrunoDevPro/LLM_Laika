@@ -74,3 +74,6 @@
 {"pergunta": "Quanto é 7 + 5?", "titulo": null}
 {"pergunta": "Corrija a frase: eu vai na escola.", "titulo": null}
 {"pergunta": "Obrigado!", "titulo": null}
+{"pergunta": "Quando aconteceu a queda de Constantinopla?", "titulo": ["Queda de Constantinopla", "Constantinopla"]}
+{"pergunta": "Faça uma frase com o meu nome.", "titulo": null}
+{"pergunta": "Mas em que mês foi?", "titulo": null}

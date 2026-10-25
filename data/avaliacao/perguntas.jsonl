@@ -89,3 +89,20 @@
 {"categoria": "pedidos", "pergunta": "Escreva uma frase com a palavra noite.", "esperado": [["noite"]], "rag": false}
 {"categoria": "pedidos", "pergunta": "Complete a frase: Quem espera", "esperado": [["sempre alcanca", "alcanca"]], "rag": false}
 {"categoria": "pedidos", "pergunta": "Resuma em uma frase: O menino acordou cedo, tomou café e foi para a escola de bicicleta. No caminho, viu um cachorro perdido e parou para ajudar.", "esperado": [["menino"], ["cachorro"]], "rag": false}
+{"categoria": "acontecimentos", "pergunta": "Quando aconteceu a queda de Constantinopla?", "esperado": [["1453"]]}
+{"categoria": "acontecimentos", "pergunta": "Em que mês foi a Proclamação da República no Brasil?", "esperado": [["novembro"]], "rag": false}
+{"categoria": "acontecimentos", "pergunta": "Quem era o imperador bizantino quando Constantinopla caiu?", "esperado": [["constantino"]]}
+{"categoria": "acontecimentos", "pergunta": "O que foi a Lei Áurea e por que ela foi assinada?", "esperado": [["escravidao", "escravos"]], "rag": false}
+{"categoria": "acontecimentos", "pergunta": "Quando terminou a Segunda Guerra Mundial?", "esperado": [["1945"]]}
+{"categoria": "acontecimentos", "pergunta": "Quando ocorreu a Batalha de Hastings?", "esperado": [["1066"]], "contexto": "A Batalha de Hastings ocorreu em 14 de outubro de 1066, no sul da Inglaterra, entre o exército normando de Guilherme, duque da Normandia, e o exército inglês do rei Haroldo II."}
+{"categoria": "acontecimentos", "pergunta": "Em que mês foi a Batalha de Hastings?", "esperado": [["outubro"]], "contexto": "A Batalha de Hastings ocorreu em 14 de outubro de 1066, no sul da Inglaterra, entre o exército normando de Guilherme, duque da Normandia, e o exército inglês do rei Haroldo II."}
+{"categoria": "acontecimentos", "pergunta": "Quem liderou a Revolta dos Malês?", "esperado": [["africanos", "muculmanos", "escravizados"]], "contexto": "A Revolta dos Malês foi liderada por africanos muçulmanos escravizados e libertos, em Salvador, na Bahia, na madrugada de 25 de janeiro de 1835."}
+{"categoria": "seguimento", "pergunta": "Mas em que mês foi?", "esperado": [["maio"]], "rag": false, "historico": [["Quando foi a queda de Constantinopla?", "Foi em 1453."]]}
+{"categoria": "seguimento", "pergunta": "Foi em que mês?", "esperado": [["setembro"]], "rag": false, "historico": [["Em que ano o Brasil ficou independente?", "O Brasil ficou independente em 1822."]]}
+{"categoria": "seguimento", "pergunta": "Mas quem fez isso?", "esperado": [["cabral"]], "rag": false, "historico": [["O que aconteceu em 1500, no Brasil?", "Em 22 de abril de 1500, a frota portuguesa chegou ao litoral da Bahia."]]}
+{"categoria": "seguimento", "pergunta": "Mas quando?", "esperado": [["1888"]], "rag": false, "historico": [["O que foi a Lei Áurea?", "A Lei Áurea foi a lei que aboliu a escravidão no Brasil, assinada pela princesa Isabel."]]}
+{"categoria": "nomes", "pergunta": "Faça uma frase com o meu nome.", "esperado": [["marina"]], "rag": false, "contexto": "O nome do usuário é Marina."}
+{"categoria": "nomes", "pergunta": "Escreva uma mensagem de bom dia com o meu nome.", "esperado": [["renato"], ["bom dia"]], "rag": false, "contexto": "O nome do usuário é Renato."}
+{"categoria": "nomes", "pergunta": "Faça uma frase com o seu nome.", "esperado": [["laika"]], "rag": false, "contexto": "O nome da assistente é Laika."}
+{"categoria": "nomes", "pergunta": "Faça uma frase com o nome dele.", "esperado": [["darwin"]], "rag": false, "historico": [["Quem foi Charles Darwin?", "Charles Darwin foi um naturalista inglês que propôs a teoria da evolução por seleção natural."]]}
+{"categoria": "nomes", "pergunta": "Faça uma frase com o nome dela.", "esperado": [["beatriz"]], "rag": false, "historico": [["Minha prima se chama Beatriz.", "Que nome bonito! Beatriz parece ser alguém muito querida."]]}

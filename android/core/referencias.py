@@ -58,6 +58,10 @@ PERGUNTAS = [
     "O planeta Marte tem água?", "Qual é o tamanho do rio Amazonas?", "O que foi o Sputnik 2?",
     "Quem foi Pedro II do Brasil?", "Para que serve o petróleo?", "Fale sobre o escritor Machado de Assis.",
     "Qual é a língua da França?", "Saturno tem anéis?", "Qual é a população do Brasil?",
+    "Mas em que mês foi?", "Foi em que mês?", "E o mês?", "Quem era o líder?", "Mas quem fez isso?",
+    "Quem governava na época?", "Mas quando?", "Em que mês nasce a primavera?", "Quando foi a queda de Constantinopla?",
+    "O que foi a queda de Constantinopla e por que aconteceu?", "Faça uma frase com o meu nome.",
+    "Faça uma frase com o nome dele.", "O que é um século?", "Qual foi o motivo?",
 ]
 
 # Conversas anteriores para a "memória de IA" (histórico no prompt).
@@ -72,7 +76,7 @@ HISTORICO = [
 ]
 
 MEMORIA = [
-    "meu nome é ana maria", "Qual é o meu nome?", "eu moro em Recife e gosto de futebol",
+    "Faça uma frase com o meu nome.", "meu nome é ana maria", "Faça uma frase com o meu nome.", "Qual é o meu nome?", "eu moro em Recife e gosto de futebol",
     "Onde eu moro?", "eu tenho 12 anos", "Quantos anos eu tenho?", "não gosto de chuva",
     "Do que eu não gosto?", "minha cor favorita é azul", "Qual é a minha cor favorita?",
     "meu animal favorito é o gato", "Qual é o meu animal favorito?",
@@ -81,6 +85,8 @@ MEMORIA = [
     "Você gosta de futebol?", "O que é um vulcão?", "Do que eu gosto?",
     "Esqueça tudo", "O que você sabe sobre mim?", "Qual é o meu nome?",
     "Meu nome é", "Eu moro em", "Lembre que", "eu não gosto de", "Eu tenho", "Lembre-se:", "Meu nome é Bia.",
+    "Escreva um poema usando o meu nome.", "Faça uma frase com o seu nome.", "Quantas letras tem o meu nome?",
+    "Meu nome é bonito?", "Use o teu nome numa frase.", "Qual é o seu nome?",
 ]
 
 

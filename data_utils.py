@@ -1,6 +1,7 @@
 """Utilitários de dados que não dependem de torch (fáceis de testar)."""
 
 import re
+import zlib
 from pathlib import Path
 
 USER_TOKEN = "<|user|>"
@@ -205,10 +206,21 @@ def wiki_definition(title, first_paragraph):
 # copiar a pergunta nem inventar. Uma parte vem com o trecho de OUTRO artigo e a resposta "não sei".
 
 _YEAR = r"\b(?:1\d{3}|20\d{2})\b"
+_MONTHS = r"(?:janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)"
+_EVENT = (r"\b(?:ocorreu|ocorrida|ocorrido|aconteceu|teve lugar|teve início|começou|iniciou-se|terminou|"
+          r"foi assinad[oa]|foi proclamad[oa]|foi realizad[oa]|foi travad[oa]|foi declarad[oa])\b")
 _READING = [
     (re.compile(r"\bnasceu (?:em|no|na) [A-ZÁÉÍÓÚÂÊÔÃÕ]"), ["Onde {x} nasceu?", "Onde nasceu {x}?"]),
     (re.compile(r"\bnasceu\b.*" + _YEAR), ["Quando {x} nasceu?", "Em que ano {x} nasceu?"]),
     (re.compile(r"\b(?:morreu|faleceu)\b.*" + _YEAR), ["Quando {x} morreu?", "Em que ano {x} morreu?"]),
+    # Acontecimentos ("A queda de Constantinopla ocorreu em 29 de maio de 1453"): com dia e mês, e só com o ano.
+    (re.compile(_EVENT + r".*\b\d{1,2}º? de " + _MONTHS + r" de " + _YEAR, re.IGNORECASE),
+     ["Quando aconteceu {xa}?", "Em que mês foi {xa}?", "{Xa} foi em que mês?", "Em que dia foi {xa}?",
+      "Quando foi {xa}?", "{Xa} aconteceu em que data?"]),
+    (re.compile(_EVENT + r".*" + _YEAR, re.IGNORECASE),
+     ["Quando aconteceu {xa}?", "Em que ano foi {xa}?", "{Xa} aconteceu em que ano?", "Quando foi {xa}?"]),
+    (re.compile(r"\b(?:liderad[oa]s?|comandad[oa]s?|chefiad[oa]s?|conduzid[oa]s?) por\b"),
+     ["Quem liderou {xa}?", "Quem comandou {xa}?", "Quem estava à frente de {xa}?"]),
     (re.compile(r"\b(?:fica|está situad[oa]|está localizad[oa]|situa-se|localiza-se)\b"),
      ["Onde fica {x}?", "Em que lugar fica {x}?"]),
     (re.compile(r"\b(fundad[oa]|criad[oa]|inaugurad[oa]|construíd[oa])\s+em\b.*" + _YEAR),
@@ -246,7 +258,11 @@ def _reading_pairs(title, text, pos):
             if m:
                 verb = m.group(1) if m.groups() else ""
                 answer = _PRONOUN.sub(x + " ", sentence, count=1)
-                pairs.append((forms[len(pairs) % len(forms)].format(x=x, v=verb), answer))
+                # Com o artigo da frase, quando ela começa pelo assunto: "a queda de Constantinopla".
+                art = re.match(r"(O|A|Os|As) " + re.escape(x) + r"\b", sentence, re.IGNORECASE)
+                xa = (art.group(0)[0].lower() + art.group(0)[1:]) if art else x
+                forma = forms[zlib.crc32(sentence.encode()) % len(forms)]  # varia a forma, sempre igual por frase
+                pairs.append((forma.format(x=x, v=verb, xa=xa, Xa=xa[0].upper() + xa[1:]), answer))
                 break
     return pairs
 
@@ -533,11 +549,30 @@ _FOLLOW_STARTS = {"e", "mas", "entao", "tambem"}
 _FOLLOW_PHRASES = ["explique melhor", "explica melhor", "fale mais", "conte mais", "diga mais", "mais detalhes",
                    "outro exemplo", "outra vez", "de novo", "nao entendi", "o que voce quis dizer",
                    "resposta longa", "responda com detalhes"]  # o gatilho sozinho ("Resposta longa.") pede mais da anterior
+# Perguntas curtas só com palavras "genéricas" dependem da anterior: "Foi em que mês?", "Em que ano?", "Quem era o
+# líder?", "Qual foi o motivo?" (sem o assunto, só fazem sentido com a mensagem de antes).
+_FOLLOW_GENERIC = set("""
+mes meses dia dias ano anos data datas seculo seculos hora horas epoca periodo exatamente lider lideres chefe
+responsavel responsaveis motivo motivos causa causas razao culpa culpado autor autores rei rainha presidente
+imperador governante comandante resultado consequencia consequencias certeza exato direito governava governavam reinava comandava mandava liderou
+""".split())
 # Mensagens sociais curtas: não precisam do histórico (e com ele o modelo tende a repetir a resposta anterior).
 _SOCIAL = set("""
 oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal
 show otimo sim nao kkk kkkk haha blz
 """.split())
+
+
+def generic_follow_up(question):
+    """Curta e só com palavras genéricas: "Foi em que mês?", "Quem era o líder?", "Qual foi o motivo?".
+    Depende da conversa anterior e não vale buscar no RAG (acharia o artigo "Mês"). Definições ("O que é um
+    século?") ficam de fora."""
+    words = [w.strip(_NAME_STRIP) for w in normalize(question).split()]
+    words = [w for w in words if w]
+    if not words or len(words) > 6 or " ".join(words[:3]) in ("o que e", "o que sao", "o que significa"):
+        return False
+    conteudo = content_words(question)
+    return bool(conteudo) and all(w in _FOLLOW_GENERIC for w in conteudo)
 
 
 def follows_up(question):
@@ -558,8 +593,11 @@ def follows_up(question):
     junto = " " + " ".join(words) + " "
     if any(f" {f} " in junto for f in _FOLLOW_PHRASES):
         return True
+    conteudo = content_words(question)
+    if generic_follow_up(question):
+        return True
     # Bem curta e sem assunto próprio: "Por quê?", "Como assim?", "Quando?", "Explique melhor."
-    return len(words) <= 2 and not content_words(question) and not all(w in _SOCIAL for w in words)
+    return len(words) <= 2 and not conteudo and not all(w in _SOCIAL for w in words)
 
 
 def rag_queries(question):
@@ -607,7 +645,7 @@ def wants_rag(question):
         first_words = first_words[1:]
     if first_words and (first_words[0] == "dê" or normalize(first_words[0]) in _INSTRUCTIONS):
         return False
-    if personal_words(question):
+    if personal_words(question) or generic_follow_up(question):
         return False
     return bool(content_words(question))
 

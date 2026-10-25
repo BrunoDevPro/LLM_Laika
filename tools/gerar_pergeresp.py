@@ -41,6 +41,7 @@ import simnao2 as SN2  # noqa: E402
 import simnao3 as SN3  # noqa: E402
 import pessoas1, pessoas2, pessoas3, conceitos1, conceitos2  # noqa: E402,E401
 import eventos as EV  # noqa: E402
+import eventos2 as EV2  # noqa: E402
 
 TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
 QA_DIR = ROOT / "data" / "qa"
@@ -1624,7 +1625,8 @@ def seculo(ano):
     return (ano - 1) // 100 + 1
 
 
-def nome_seculo(s, extenso=True):
+def nome_seculo(s, extenso=False):
+    # Sem o "(quinze)" por padrão: o modelo copiava o molde com o número errado ("século XIV (doze)").
     return f"século {romano(s)} ({por_extenso(s)})" if extenso else f"século {romano(s)}"
 
 
@@ -1679,27 +1681,27 @@ def pessoas_sections():
             datas.append(([f"Em que século viveu {nome}?", f"{Nome} viveu em que século?",
                            f"Em que época viveu {nome}?"][i % 3], vida))
             datas.append((f"Quando {nome} nasceu?",
-                          f"{Nome} nasceu em {nasc} ({ano_extenso(nasc)}), no {nome_seculo(s1)}."))
+                          f"{Nome} nasceu em {nasc}, no {nome_seculo(s1)}."))
             datas.append((f"Quando {nome} morreu?", f"{Nome} morreu em {morte}, no {nome_seculo(s2)}."))
             datas.append((f"Quantos anos {nome} viveu?",
                           f"{Nome} viveu cerca de {morte - nasc} anos: nasceu em {nasc} e morreu em {morte}."))
             errado = nasc + [12, -9, 23, -17, 31][i % 5]
             if i % 2 == 0:
                 sim.append((f"{Nome} nasceu em {ano_extenso(nasc)}?",
-                            f"Sim. {Nome} nasceu em {nasc} ({ano_extenso(nasc)})."))
+                            f"Sim. {Nome} nasceu em {nasc}."))
             else:
                 sim.append((f"{Nome} nasceu em {ano_extenso(errado)}?",
-                            f"Não. {Nome} nasceu em {nasc} ({ano_extenso(nasc)}), e não em {errado}."))
+                            f"Não. {Nome} nasceu em {nasc}, e não em {errado}."))
             outro = s1 + (1 if i % 4 < 2 else -1)
             if i % 2 == 1 or outro in (s1, s2):
                 sim.append((f"{Nome} viveu no século {romano(s1)}?", f"Sim. {vida}"))
             else:
                 sim.append((f"{Nome} viveu no século {romano(outro)}?", f"Não. {vida}"))
             if i % 2 == 1:
-                sim.append((f"{Nome} morreu em {ano_extenso(morte)}?", f"Sim. {Nome} morreu em {morte} ({ano_extenso(morte)})."))
+                sim.append((f"{Nome} morreu em {ano_extenso(morte)}?", f"Sim. {Nome} morreu em {morte}."))
             else:
                 sim.append((f"{Nome} morreu em {ano_extenso(morte + 14)}?",
-                            f"Não. {Nome} morreu em {morte} ({ano_extenso(morte)}), e não em {morte + 14}."))
+                            f"Não. {Nome} morreu em {morte}, e não em {morte + 14}."))
         longa = f"{q_foi} {o_que}" + (f" {vida}" if vida else "")
         quem.append((com_gatilho(i, f"Quem {foi} {nome}?"), longa))
         fez.append((com_gatilho(i + 3, f"O que {nome} {fizeram}?"), longa))
@@ -1716,7 +1718,7 @@ def datas_sections(rng):
         por_ano.setdefault(a, []).append(fato)
         quando_foi = f"Foi em {data_curta(d, m, a)}." if d else f"Foi em {a}, no {nome_seculo(s)}."
         quando.append((f"Quando foi {nome}?", f"{quando_foi} {'Nesse dia' if d else 'Nesse ano'}, {fato}."))
-        quando.append((f"Em que ano foi {nome}?", f"{Nome} foi em {a} ({ano_extenso(a)}), no {nome_seculo(s)}."))
+        quando.append((f"Em que ano foi {nome}?", f"{Nome} foi em {a}, no {nome_seculo(s)}."))
         quando.append(([f"Em que século foi {nome}?", f"{Nome} aconteceu em que século?"][i % 2],
                         f"{Nome} foi no {nome_seculo(s)}, em {a}."))
         texto = f"{Nome} foi em {data_curta(d, m, a) if d else a}. {cap(fato)}. {mais}"
@@ -1767,7 +1769,7 @@ def datas_sections(rng):
         secs.append(([f"Em que século fica o ano {a}?", f"O ano {a} é de que século?", f"{a} é de que século?"][i % 3],
                       resposta))
         secs.append(([f"O ano de {ano_extenso(a)} fica em que século?", f"Em que século fica o ano {ano_extenso(a)}?"][i % 2],
-                     resposta.replace(f"O ano {a} ", f"O ano de {ano_extenso(a)}, ou {a}, ", 1)))
+                     resposta))
         if i % 3 == 0:
             secs.append((f"Como se escreve o ano {a} por extenso?", f"O ano {a} por extenso é {ano_extenso(a)}."))
         elif i % 3 == 1:
@@ -1775,7 +1777,7 @@ def datas_sections(rng):
     for n in list(range(1, 51)) + [60, 70, 80, 90, 99, 100, 200, 400, 500, 900, 1000, 1500, 1822, 1888, 1889, 1922, 2000, 2024]:
         R = romano(n)
         secs.append(([f"Quanto vale {R} em algarismos romanos?", f"Que número é {R} em algarismos romanos?",
-                      f"Quanto é {R} em números?"][n % 3], f"{R} vale {n} ({ano_extenso(n)})."))
+                      f"Quanto é {R} em números?"][n % 3], f"{R} vale {n}."))
     return [("Datas: quando foi", quando), ("Datas: o que aconteceu", aconteceu), ("Datas: sim ou não", sim),
             ("Séculos, anos por extenso e algarismos romanos", secs)]
 
@@ -1829,7 +1831,7 @@ def novas_conversas():
             Nome = cap(nome)
             conv.append(([f"Em que século {pron} viveu?", f"E quando {pron} nasceu?"][i % 2],
                          f"{Nome} viveu entre {nasc} e {morte}, no {nome_seculo(seculo(nasc))}." if i % 2 == 0
-                         else f"{cap(pron)} nasceu em {nasc} ({ano_extenso(nasc)})."))
+                         else f"{cap(pron)} nasceu em {nasc}."))
         convs.append(conv)
         if i % 4 == 1:
             convs.append([(f"Quem {foi} {nome}?", q_foi), ("Explique melhor.", f"{q_foi} {o_que}")])
@@ -1848,6 +1850,171 @@ def novas_conversas():
         elif d:
             convs.append([(f"O que aconteceu em {data_extenso(d, m, a)}?", f"Em {data_curta(d, m, a)}, {fato}."),
                           ("Explique melhor.", f"Em {data_curta(d, m, a)}, {fato}. {mais}")])
+    return convs
+
+
+# =====================================================================
+# ACONTECIMENTOS: QUEM FEZ, POR QUÊ, LÍDER, MÊS (tools/eventos2.py) E O NOME DO USUÁRIO / DA LAIKA
+# =====================================================================
+def _com_artigo(x, contracoes):
+    art, _, resto = x.partition(" ")
+    return f"{contracoes[art]} {resto}" if art in contracoes and resto else f"{contracoes['']} {x}"
+
+
+def em_artigo(x):
+    """"a queda de Constantinopla" -> "na queda de Constantinopla"."""
+    return _com_artigo(x, {"o": "no", "a": "na", "os": "nos", "as": "nas", "": "em"})
+
+
+def por_artigo(x):
+    """"a queda de Constantinopla" -> "pela queda de Constantinopla"."""
+    return _com_artigo(x, {"o": "pelo", "a": "pela", "os": "pelos", "as": "pelas", "": "por"})
+
+
+def _quando(d, m, a):
+    return f"Foi em {data_curta(d, m, a)}." if d else f"Foi em {a}."
+
+
+def detalhes_sections():
+    """Quem fez, por que aconteceu, quem estava no poder, o mês, e perguntas que juntam duas coisas."""
+    quem, porque, lider, juntas, meses = [], [], [], [], []
+    for i, (nome, d, m, a, fato, mais) in enumerate(EV.EVENTOS):
+        Nome = cap(nome)
+        if d:
+            mes = MESES[m - 1][0]
+            resp_mes = f"{Nome} foi em {mes} de {a}, no dia {d}."
+            meses.append(([f"Em que mês foi {nome}?", f"{Nome} foi em que mês?", f"Em que mês aconteceu {nome}?",
+                           f"{Nome} aconteceu em que mês?"][i % 4], resp_mes))
+            meses.append(([f"Em que mês e ano foi {nome}?", f"Foi em que mês {nome}?", f"Qual foi o mês {de_artigo(nome)}?"]
+                          [i % 3], resp_mes))
+        if nome not in EV2.DETALHES:
+            continue
+        q, pq, lq, la = EV2.DETALHES[nome]
+        quem.append(([f"Quem foi o responsável {por_artigo(nome)}?", f"Quem liderou {nome}?",
+                      f"Quem esteve à frente {de_artigo(nome)}?", f"Quem fez {nome}?"][i % 4], q))
+        porque.append(([f"Por que aconteceu {nome}?", f"Qual foi o motivo {de_artigo(nome)}?",
+                        f"Por que {nome} aconteceu?", f"O que causou {nome}?"][i % 4], pq))
+        if i % 2 == 0:
+            porque.append(([f"Qual foi a causa {de_artigo(nome)}?", f"Por que houve {nome}?"][i % 4 // 2], pq))
+        if lq:
+            lider.append((lq, la))
+            lider.append((f"{lq[:-1]}, e em que ano foi isso?", f"{la} Isso foi em {a}."))
+        juntas.append((f"O que foi {nome} e por que aconteceu?", f"{cap(fato)}. {pq}"))
+        juntas.append(([f"O que aconteceu {em_artigo(nome)}, quando?", f"O que aconteceu {em_artigo(nome)} e quando foi?",
+                        f"O que aconteceu {em_artigo(nome)}, e quando?"][i % 3],
+                       f"Em {data_curta(d, m, a) if d else a}, {fato}."))
+        juntas.append(([f"Quando foi {nome} e quem fez isso?", f"Quando aconteceu {nome} e quem participou?"][i % 2],
+                       f"{_quando(d, m, a)} {q}"))
+        juntas.append((f"Quem foi o responsável {por_artigo(nome)} e por quê?", f"{q} {pq}"))
+    return [("Acontecimentos: quem fez", quem), ("Acontecimentos: por quê", porque),
+            ("Acontecimentos: quem estava no poder", lider), ("Acontecimentos: duas perguntas em uma", juntas),
+            ("Acontecimentos: em que mês", meses)]
+
+
+def detalhes_conversas():
+    """"O que foi X e por que aconteceu?" -> "Mas quando?", "O que aconteceu em X, quando?" -> "Mas quem fez isso?",
+    "Quando foi X?" -> "Mas em que mês foi?" -> "E o dia?" e outras."""
+    convs = []
+    for i, (nome, d, m, a, fato, mais) in enumerate(EV.EVENTOS):
+        quando = _quando(d, m, a)
+        if d:
+            mes = MESES[m - 1][0]
+            conv = [(["Quando foi {}?", "Em que ano foi {}?", "Quando aconteceu {}?"][i % 3].format(nome), f"Foi em {a}."),
+                    (["Mas em que mês foi?", "Foi em que mês?", "E em que mês?", "Em que mês foi isso?", "E o mês?",
+                      "Mas foi em que mês?"][i % 6], f"Foi em {mes} de {a}.")]
+            if i % 2 == 0:
+                conv.append((["E o dia?", "Em que dia?", "Foi em que dia?", "E em que dia foi?"][i % 4],
+                             f"Foi no dia {d} de {mes}."))
+            convs.append(conv)
+        if nome not in EV2.DETALHES:
+            continue
+        q, pq, lq, la = EV2.DETALHES[nome]
+        convs.append([(f"O que foi {nome} e por que aconteceu?", f"{cap(fato)}. {pq}"),
+                      (["Mas quando?", "E quando foi isso?", "Mas quando foi?", "Quando foi isso?"][i % 4], quando)])
+        convs.append([([f"O que aconteceu {em_artigo(nome)}, quando?", f"O que aconteceu {em_artigo(nome)}, e quando?"][i % 2],
+                       f"Em {data_curta(d, m, a) if d else a}, {fato}."),
+                      (["Mas quem fez isso?", "E quem fez isso?", "Quem foi o responsável?", "Mas quem estava por trás disso?"]
+                       [i % 4], q)])
+        convs.append([(f"Por que aconteceu {nome}?", pq),
+                      (["E quem fez isso?", "Mas quem liderou?", "Quem foi o responsável?"][i % 3], q)])
+        convs.append([(f"Quem foi o responsável {por_artigo(nome)}?", q),
+                      (["E por quê?", "Mas por quê?", "Por que fizeram isso?"][i % 3], pq)])
+        if lq:
+            convs.append([(lq, la), (["Mas quando foi isso?", "E em que ano foi?", "Quando foi isso?"][i % 3], quando)])
+            convs.append([(f"O que foi {nome}?", f"{cap(fato)}."),
+                          (["Quem era o líder na época?", "E quem governava na época?", "Quem estava no poder?"][i % 3], la)])
+    return convs
+
+
+NOMES_USUARIO = ["Ana", "Bruno", "Carla", "Daniel", "Eduarda", "Felipe", "Gabriela", "Heitor", "Isabela", "João",
+                 "Larissa", "Marcos", "Natália", "Otávio", "Paula", "Rafael", "Sara", "Thiago", "Valéria", "Yuri",
+                 "Ana Maria", "José Carlos"]
+FRASES_NOME = ["{n} é uma pessoa muito especial.", "{n} acordou cedo e foi caminhar no parque.",
+               "Hoje é um ótimo dia para {n} aprender algo novo.", "{n} gosta de ler um bom livro antes de dormir.",
+               "Todos ficaram felizes quando {n} chegou à festa.", "{n}, você é capaz de conseguir tudo o que quiser!",
+               "O sorriso de {n} ilumina qualquer lugar.", "{n} tem muitos amigos e adora conversar."]
+PEDIDOS_NOME = ["Faça uma frase usando o meu nome.", "Escreva uma frase com o meu nome.", "Use o meu nome numa frase.",
+                "Crie uma frase com o meu nome.", "Faça uma frase bonita com o meu nome.", "Me escreva uma frase com meu nome."]
+
+
+def nomes_sections():
+    """Pedidos com o nome do usuário (que a memória põe no Contexto) e com o nome da Laika."""
+    usuario, laika = [], []
+    for i, n in enumerate(NOMES_USUARIO):
+        ctx = f"O nome do usuário é {n}."
+        for k in range(2):
+            usuario.append((rag_question(PEDIDOS_NOME[(i + k) % len(PEDIDOS_NOME)], ctx),
+                            FRASES_NOME[(i + 3 * k) % len(FRASES_NOME)].format(n=n)))
+        letras = sum(c.isalpha() for c in n)
+        extras = [("Quantas letras tem o meu nome?", f"O seu nome, {n}, tem {letras} letras."),
+                  ("Qual é a primeira letra do meu nome?", f"A primeira letra do seu nome é {n[0]}."),
+                  ("Escreva uma mensagem de bom dia com o meu nome.", f"Bom dia, {n}! Que o seu dia seja leve e cheio de coisas boas."),
+                  ("Faça um poema curto com o meu nome.", f"{n}, nome de gente querida,\nque deixa mais bonita a vida.\nCom um sorriso no olhar,\n{n} faz o mundo brilhar."),
+                  ("Me deseje boa noite usando o meu nome.", f"Boa noite, {n}! Durma bem e tenha bons sonhos."),
+                  ("Escreva o meu nome ao contrário.", f"O seu nome ao contrário fica {n[::-1].capitalize()}.")]
+        for q, a in [extras[i % len(extras)], extras[(i + 2) % len(extras)]]:
+            usuario.append((rag_question(q, ctx), a))
+    ctx_laika = "O nome da assistente é Laika."
+    for q, a in [("Faça uma frase com o seu nome.", "Meu nome é Laika, e eu adoro aprender coisas novas."),
+                 ("Escreva uma frase usando o seu nome.", "A Laika está sempre pronta para ajudar."),
+                 ("Use o seu nome numa frase.", "Laika é o nome de uma cadela que foi ao espaço em 1957, e hoje também é o meu."),
+                 ("Quantas letras tem o seu nome?", "O meu nome, Laika, tem 5 letras."),
+                 ("Qual é a primeira letra do seu nome?", "A primeira letra do meu nome é L, de Laika."),
+                 ("Faça um poema curto com o seu nome.", "Laika, nome de estrela,\nque viajou pelo céu.\nHoje sou eu quem conversa,\ncom você, aqui, sem véu.")]:
+        laika.append((rag_question(q, ctx_laika), a))
+        laika.append((q, a))
+    return [("Nome do usuário (Contexto da memória)", usuario), ("Nome da Laika", laika)]
+
+
+def nomes_conversas():
+    """"Faça uma frase com o nome dele" depois de "Quem foi X?", o nome de um amigo e o do próprio usuário."""
+    convs = []
+    for i, (nome, g, nasc, morte, q_foi, o_que) in enumerate(PESSOAS_V):
+        if g == "p":
+            continue
+        frase = _FRASES.split(o_que)[0]
+        sobrenome = nome.split()[-1]
+        if sobrenome not in frase:
+            continue
+        pron = "dele" if g == "m" else "dela"
+        pedido = [f"Faça uma frase com o nome {pron}.", f"Escreva uma frase usando o nome {pron}.",
+                  f"Use o nome {pron} numa frase.", "Crie uma frase com esse nome."][i % 4]
+        convs.append([(f"Quem foi {nome}?", q_foi), (pedido, frase)])
+    amigos = [("Minha amiga se chama Júlia.", "dela", "Júlia"), ("Meu irmão se chama Pedro.", "dele", "Pedro"),
+              ("Minha mãe se chama Teresa.", "dela", "Teresa"), ("Meu cachorro se chama Thor.", "dele", "Thor"),
+              ("Minha professora se chama Helena.", "dela", "Helena"), ("Meu avô se chama Antônio.", "dele", "Antônio"),
+              ("Minha gata se chama Mel.", "dela", "Mel"), ("Meu melhor amigo se chama Lucas.", "dele", "Lucas")]
+    for i, (msg, pron, n) in enumerate(amigos):
+        convs.append([(msg, f"Que nome bonito! {n} parece ser alguém muito querido."),
+                      ([f"Faça uma frase com o nome {pron}.", f"Escreva uma frase usando o nome {pron}."][i % 2],
+                       FRASES_NOME[i % len(FRASES_NOME)].format(n=n).replace("pessoa", "companhia" if "cachorro" in msg or "gata" in msg else "pessoa"))])
+    for i, n in enumerate(NOMES_USUARIO[:12]):
+        convs.append([(f"Meu nome é {n}.", f"Prazer, {n}! Vou lembrar o seu nome."),
+                      (PEDIDOS_NOME[i % len(PEDIDOS_NOME)], FRASES_NOME[i % len(FRASES_NOME)].format(n=n))])
+    convs.append([("Qual é o seu nome?", "Meu nome é Laika."),
+                  ("Faça uma frase com ele.", "Laika é o nome de uma cadela que foi ao espaço em 1957, e hoje também é o meu.")])
+    convs.append([("Como você se chama?", "Eu me chamo Laika."),
+                  ("Use esse nome numa frase.", "A Laika adora conversar e aprender coisas novas.")])
     return convs
 
 
@@ -1967,7 +2134,7 @@ def build():
     vistas |= {_chave(item.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0]) for _, items in sections for item in items}
     genericas, leitura_genericas = generic_sections()
     genericas += longas_sections(rng)
-    novas_secoes = pessoas_sections() + datas_sections(rng) + conceitos_sections() + gatilho_sections()
+    novas_secoes = pessoas_sections() + datas_sections(rng) + conceitos_sections() + gatilho_sections() + detalhes_sections() + nomes_sections()
     genericas += novas_secoes
     repetidas = 0
     for title, pares in genericas:
@@ -1998,7 +2165,7 @@ def build():
     with open(QA_DIR / "identidade.txt", "w", encoding="utf-8") as f:
         f.write("# Quem é a Laika. Este arquivo tem peso maior no fine-tuning.\n\n")
         f.write("\n".join(ex(q, a) for q, a in identidade) + "\n")
-    convs = conversas() + novas_conversas()
+    convs = conversas() + novas_conversas() + detalhes_conversas() + nomes_conversas()
     with open(QA_DIR / "conversas.jsonl", "w", encoding="utf-8") as f:
         for c in convs:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")
