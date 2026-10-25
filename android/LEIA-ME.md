@@ -93,7 +93,7 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   perguntas curtas como "Mas em que mês foi?" ou "Quem era o líder?" usam a conversa anterior, sem buscar no RAG.
 - Na 1.9: ao trocar de modelo com conversa ou memória novas, dá para **salvar por cima** do backup de onde a
   versão veio (sem criar outro); na tela de versões, **Limpar** apaga a conversa e/ou a memória de um backup. Um zip
-  do Colab feito com um **PROJETO** (célula 1) entra direto nos backups com o nome do projeto, sem trocar o modelo
+  do Colab feito com um **NOME** ou um **PROJETO** (célula 1) entra direto nos backups com esse nome, sem trocar o modelo
   em uso. A barrinha "Criatividade" agora se chama **Temperatura**.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
