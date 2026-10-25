@@ -491,6 +491,51 @@ def converter_sft(mensagens, max_trocas=5):
     return pares
 
 
+SFT_JUNTAS = "sft_todas.jsonl"
+
+
+def ler_sft(pasta, gravar=True):
+    """As conversas do SFT de `pasta` ([[pergunta, resposta], ...] por conversa).
+
+    O download grava um arquivo por grupo de linhas (milhares de arquivos pequenos, para poder continuar de
+    onde parou), e ler milhares de arquivos no Google Drive é muito lento. Por isso eles também ficam juntos em
+    sft_todas.jsonl; se ele estiver desatualizado (o .pronto diz quantos grupos já foram juntados), os arquivos
+    dos grupos são lidos em paralelo e o junto é gravado de novo (gravar=True)."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    pasta = Path(pasta)
+    estado = _estado(pasta / ".pronto")
+    grupos = estado.get("grupos", {})
+    juntas = pasta / SFT_JUNTAS
+    if juntas.exists() and estado.get("juntas") == len(grupos):
+        inicio = time.time()
+        conversas = [json.loads(l) for l in juntas.read_text(encoding="utf-8").splitlines() if l.strip()]
+        print(f"GigaVerbo-SFT: {len(conversas):,} conversas lidas de {juntas} em {time.time() - inicio:.0f} s",
+              flush=True)
+        return conversas
+    arquivos = sorted(pasta.glob("sft_*_*_*.jsonl"))
+    if not arquivos:
+        return []
+    print(f"GigaVerbo-SFT: lendo {len(arquivos):,} arquivos de {pasta} (só desta vez; depois fica tudo em "
+          f"{SFT_JUNTAS})...", flush=True)
+    inicio, linhas = time.time(), []
+    with ThreadPoolExecutor(32) as ex:  # no Drive, o que demora é abrir cada arquivo: em paralelo vai bem mais rápido
+        for i, texto in enumerate(ex.map(lambda f: f.read_text(encoding="utf-8"), arquivos), 1):
+            linhas += [l for l in texto.splitlines() if l.strip()]
+            if i % 300 == 0 or i == len(arquivos):
+                print(f"  {i:,}/{len(arquivos):,} arquivos ({time.time() - inicio:.0f} s)", flush=True)
+    if gravar:
+        try:
+            parcial = juntas.with_suffix(".parcial")
+            parcial.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+            os.replace(parcial, juntas)
+            estado["juntas"] = len(grupos)
+            _gravar_estado(pasta / ".pronto", estado)
+        except OSError as error:
+            print("  não consegui gravar o arquivo junto:", error)
+    return [json.loads(l) for l in linhas]
+
+
 def download_sft(pasta, total, subconjuntos=SFT_PADRAO, nota_min=4.0, tokens_max=1500):
     """Grava ~`total` conversas do GigaVerbo-v2-SFT em data/sft/sft_SUB_AA_GG.jsonl (uma conversa por linha,
     lista de [pergunta, resposta], como o data/qa/conversas.jsonl). Pega um grupo de linhas de cada arquivo por
@@ -577,6 +622,7 @@ def download_sft(pasta, total, subconjuntos=SFT_PADRAO, nota_min=4.0, tokens_max
                 arq.close()
     n = sum(feitos.values())
     print(f"GigaVerbo-SFT pronto: {n:,} conversas em {pasta}")
+    ler_sft(pasta)  # junta tudo num arquivo só (o fine-tuning lê bem mais rápido)
 
 
 def main():
