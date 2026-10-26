@@ -15,7 +15,8 @@ conhecimento, GigaVerbo-v2-SFT e `avaliar.py`; em 25/10/2026, app 1.8: leitura d
 sem datas por extenso, +1.048 perguntas de quem fez, por quê, líder, mês e duas perguntas em uma, seguimentos como
 "Mas em que mês foi?", nome do usuário e da Laika no Contexto em "Faça uma frase com o meu nome"; app 1.9: PROJETO
 no Colab (cada modelo com as suas pastas e o zip indo direto para os backups do app com o nome), salvar por cima e
-limpar backups no app, "Temperatura" no menu, identidade reforçada contra os personagens do SFT).
+limpar backups no app, "Temperatura" no menu, identidade reforçada contra os personagens do SFT; em 26/10/2026, app
+1.10: chats com memória própria e título dado pela IA, apelido dos modelos, botão + no campo de mensagem).
 
 ## 1. O que é
 
@@ -43,7 +44,7 @@ O nome é uma homenagem à cadela Laika (Sputnik 2, 1957). A interface e os come
 | Dados no Drive | 495 livros (~17 M palavras) + ~99 mil artigos aproveitados de 100 mil (~31 M palavras, ~314 palavras/artigo) ≈ **80 M tokens** |
 | Índice RAG | `laika_rag.db` 636 MB, **1,09 milhão de trechos** (678 mil wiki, 413 mil livros, 124 textos) |
 | Velocidade de treino medida | T4: ~95 mil tokens/s com o modelo de 14M (≈ 9 TFLOPS efetivos) |
-| Exemplos de fine-tuning escritos | `pergeresp.txt` 15426 + `identidade.txt` 274 + `leitura.txt` 512 = **16212** (3333 genéricas de `tools/genericas_*.py`; 627 respostas longas, 438 "por quê" e 975 sim ou não de `tools/longas*.py`, `porque*.py`, `simnao*.py`; 5313 de pessoas, datas, séculos, conceitos e gatilho de `tools/pessoas*.py`, `eventos.py`, `conceitos*.py`; 1048 de quem fez, por quê, líder, mês e nomes de `tools/eventos2.py` e `nomes_sections`; 164 de identidade de `tools/identidade4.py`) + `conversas.jsonl` com **2299** conversas de 2 a 3 trocas |
+| Exemplos de fine-tuning escritos | `pergeresp.txt` 16117 + `identidade.txt` 274 + `leitura.txt` 512 = **16903** (3333 genéricas de `tools/genericas_*.py`; 627 respostas longas, 438 "por quê" e 975 sim ou não de `tools/longas*.py`, `porque*.py`, `simnao*.py`; 5313 de pessoas, datas, séculos, conceitos e gatilho de `tools/pessoas*.py`, `eventos.py`, `conceitos*.py`; 1048 de quem fez, por quê, líder, mês e nomes de `tools/eventos2.py` e `nomes_sections`; 164 de identidade de `tools/identidade4.py`; 691 títulos de chat de `titulos_sections`) + `conversas.jsonl` com **2299** conversas de 2 a 3 trocas |
 | Preset de 100M (`colab_100m`) | 103,5M parâmetros, RoPE, contexto 2048, vocabulário 24 mil, 8 mil passos de 262 mil tokens (~2,1 bilhões); **ainda não treinado**. Configuração completa em `TREINO_100M.md` |
 | Textos próprios (`data/modern/`) | 130 (20 maiores + 110 simples) |
 
@@ -175,10 +176,22 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
 - **Versões e backups** (`core/Armazem`): versão = modelos + tokenizer + índice + memória + conversa; arquivos
   grandes em `blobs/`, compartilhados entre backups. `ConversorPt` lê os `.pt` (pickle mínimo) no celular, com
   saída idêntica ao `exportar_modelo.py` (que agora grava um rodapé `INFO` com val loss, step e se é de chat).
-- **Backups (1.9)**: a versão em uso guarda `origem` (o backup de onde veio, apagado quando os arquivos mudam).
-  Ao trocar de modelo com mudanças, `SeletorModelos.confirmarUso` oferece "Salvar por cima de <origem>"
-  (`Armazem.salvarPorCima`, só se os arquivos forem os mesmos: `origemDoAtual`), "Guardar como backup novo" ou "Trocar sem
-  guardar". Na tela de versões, "Limpar" apaga a conversa e/ou a memória de um backup (`Armazem.limpar`). Um pacote com
+- **Chats (1.10)** (`core/Chats`, `ListaChats`): como nos assistentes de conversa, cada chat tem a sua conversa e a sua
+  memória (`laika/chats/<id>/chat.json`, `conversa.json`, `memoria.json`; `atual.txt` = o aberto), sem depender do
+  modelo. Painel pela esquerda (botão ☰): "Novo chat", a lista e os arquivados; segurar renomeia, arquiva ou apaga.
+  Depois da primeira resposta, a IA dá o título (`Texto.PEDIDO_TITULO` + a 1ª mensagem, guloso, até 16 tokens;
+  `Texto.limparTitulo` usa o começo da mensagem se vier vazio ou estranho; o fine-tuning tem exemplos com a mesma
+  frase, `gerar_pergeresp.titulos_sections`); renomear fixa o título (`tituloManual`). Na primeira vez, a conversa
+  e a memória de cada versão viram um chat ("Conversa de <modelo>", sem repetir as iguais; `chats/migrado`).
+  Trocar de modelo não pergunta mais nada: se o modelo em uso não está em nenhum backup (mesmos arquivos,
+  `Armazem.backupComMesmosArquivos`), ele é guardado antes. O seletor mostra o modelo em uso uma vez só (sem o backup
+  igual), pelo **apelido** (`Versao.apelido`, `Armazem.apelidar`, vale para as versões com os mesmos arquivos; segurar
+  o cartão ou "Apelido" em Versões e backups) com o nome oficial menor embaixo, sem os detalhes (que ficam em
+  Versões e backups). O botão **+** do campo (`MaisOpcoes`) tem resposta longa, completar texto e memória de IA (fica
+  azul com resposta longa ou completar ligados); o menu ⋮ deixou "Opções" (fontes, RAG, memória do usuário) embaixo,
+  logo acima de "Limpar conversa". A tela Treinar não mostra mais as descrições das células: segurar o nome abre a
+  explicação (os comentários da célula).
+- **Backups (1.9)**: a versão em uso guarda `origem` (o backup de onde veio, apagado quando os arquivos mudam). Um pacote com
   `laika_nome.txt` (PROJETO) vira um backup com esse nome (`backupComTrocas`: arquivos da versão em uso + os novos, a
   memória do usuário, sem conversa; nome repetido ganha a data), sem trocar a versão em uso, e o app oferece "Usar agora".
   A tela Treinar mostra o `PROJETO` da célula 1 (o `RAMO` continua vindo do GitHub).
@@ -324,6 +337,8 @@ app (tela Colab) --API do GitHub--> workflow colab.yml (runner Linux) --Colab CL
     Cada projeto tem as suas pastas; os dados baixados são de todos. **NOME separado** (1.9.1): o usuário pôs um
     PROJETO só para dar nome ao fine-tuning do 100M, a pasta nova estava vazia e a célula 4 falhou (sem tokenizer). Depois
     copiou os arquivos à mão e o Drive os chamou de "Cópia de ...": daí o `PARTIR_DE` e o renomear na célula 1 (1.9.2).
+34. **Chats em vez de conversa por versão** (1.10, pedido do usuário): a conversa e a memória presas à versão faziam a
+    troca de modelo perguntar "salvar/não salvar" e duplicavam o modelo no seletor (o em uso e o backup igual).
 
 ## 8. Limitações conhecidas
 

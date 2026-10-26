@@ -48818,3 +48818,2078 @@ que viajou pelo céu.
 Hoje sou eu quem conversa,
 com você, aqui, sem véu. <|end|>
 
+# ===== Títulos de chat (691) =====
+
+<|user|> Dê um título curto para esta conversa: Oi, tudo bem?
+<|assistant|> Cumprimento <|end|>
+
+<|user|> Dê um título curto para esta conversa: Bom dia, Laika!
+<|assistant|> Bom dia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Olá! Como você está?
+<|assistant|> Conversa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Meu nome é Ana.
+<|assistant|> Apresentação <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me ajude a estudar para a prova de matemática.
+<|assistant|> Estudo de matemática <|end|>
+
+<|user|> Dê um título curto para esta conversa: Escreva um poema sobre o mar.
+<|assistant|> Poema sobre o mar <|end|>
+
+<|user|> Dê um título curto para esta conversa: Conte uma história curta.
+<|assistant|> História curta <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quanto é 25 vezes 4?
+<|assistant|> Conta de multiplicação <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quanto é 120 dividido por 8?
+<|assistant|> Conta de divisão <|end|>
+
+<|user|> Dê um título curto para esta conversa: Corrija esta frase: eu fui na escola ontem.
+<|assistant|> Correção de frase <|end|>
+
+<|user|> Dê um título curto para esta conversa: Resuma em uma frase: O menino acordou cedo e foi para a escola.
+<|assistant|> Resumo de texto <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me dê dicas para dormir melhor.
+<|assistant|> Dicas para dormir <|end|>
+
+<|user|> Dê um título curto para esta conversa: Como fazer um bolo simples?
+<|assistant|> Receita de bolo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Escreva uma mensagem de aniversário para minha mãe.
+<|assistant|> Mensagem de aniversário <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem é você?
+<|assistant|> Sobre a Laika <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é o seu nome?
+<|assistant|> Nome da Laika <|end|>
+
+<|user|> Dê um título curto para esta conversa: Complete a frase: Quem espera
+<|assistant|> Completar frase <|end|>
+
+<|user|> Dê um título curto para esta conversa: Traduza bom dia para o inglês.
+<|assistant|> Tradução <|end|>
+
+<|user|> Dê um título curto para esta conversa: Estou triste hoje.
+<|assistant|> Conversa de apoio <|end|>
+
+<|user|> Dê um título curto para esta conversa: Lembre que amanhã tenho dentista.
+<|assistant|> Lembrete <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da França?
+<|assistant|> Capital da França <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da Itália?
+<|assistant|> Capital da Itália <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital do Japão?
+<|assistant|> Capital do Japão <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da Argentina?
+<|assistant|> Capital da Argentina <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital de Portugal?
+<|assistant|> Capital de Portugal <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da Alemanha?
+<|assistant|> Capital da Alemanha <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital do Canadá?
+<|assistant|> Capital do Canadá <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital do Egito?
+<|assistant|> Capital do Egito <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital do Peru?
+<|assistant|> Capital do Peru <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da Austrália?
+<|assistant|> Capital da Austrália <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital do Chile?
+<|assistant|> Capital do Chile <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital do México?
+<|assistant|> Capital do México <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da Espanha?
+<|assistant|> Capital da Espanha <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da Índia?
+<|assistant|> Capital da Índia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Qual é a capital da China?
+<|assistant|> Capital da China <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as planárias.
+<|assistant|> Texto sobre planárias <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as águas-vivas?
+<|assistant|> Águas-vivas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os polvos.
+<|assistant|> Polvos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre tubarões.
+<|assistant|> Texto sobre tubarões <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os golfinhos?
+<|assistant|> Golfinhos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre morcegos.
+<|assistant|> Morcegos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as corujas.
+<|assistant|> Texto sobre corujas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os pinguins?
+<|assistant|> Pinguins <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os flamingos.
+<|assistant|> Flamingos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre papagaios.
+<|assistant|> Texto sobre papagaios <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os tucanos?
+<|assistant|> Tucanos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre beija-flores.
+<|assistant|> Beija-flores <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a onça-pintada.
+<|assistant|> Texto sobre onça-pintada <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o lobo-guará?
+<|assistant|> Lobo-guará <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as capivaras.
+<|assistant|> Capivaras <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o tamanduá-bandeira.
+<|assistant|> Texto sobre tamanduá-bandeira <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o bicho-preguiça?
+<|assistant|> Bicho-preguiça <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre tatus.
+<|assistant|> Tatus <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os elefantes.
+<|assistant|> Texto sobre elefantes <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as girafas?
+<|assistant|> Girafas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os leões.
+<|assistant|> Leões <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre tigres.
+<|assistant|> Texto sobre tigres <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os ursos-polares?
+<|assistant|> Ursos-polares <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre pandas.
+<|assistant|> Pandas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os cangurus.
+<|assistant|> Texto sobre cangurus <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os camelos?
+<|assistant|> Camelos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os cavalos.
+<|assistant|> Cavalos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre vacas.
+<|assistant|> Texto sobre vacas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as galinhas?
+<|assistant|> Galinhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre cupins.
+<|assistant|> Cupins <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as minhocas.
+<|assistant|> Texto sobre minhocas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as aranhas?
+<|assistant|> Aranhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os escorpiões.
+<|assistant|> Escorpiões <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre mosquitos.
+<|assistant|> Texto sobre mosquitos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as joaninhas?
+<|assistant|> Joaninhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre vaga-lumes.
+<|assistant|> Vaga-lumes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os caracóis.
+<|assistant|> Texto sobre caracóis <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os jacarés?
+<|assistant|> Jacarés <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as tartarugas marinhas.
+<|assistant|> Tartarugas marinhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre cobras.
+<|assistant|> Texto sobre cobras <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os camaleões?
+<|assistant|> Camaleões <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre dinossauros.
+<|assistant|> Dinossauros <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os lobos.
+<|assistant|> Texto sobre lobos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as raposas?
+<|assistant|> Raposas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os macacos.
+<|assistant|> Macacos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre gorilas.
+<|assistant|> Texto sobre gorilas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o peixe-boi?
+<|assistant|> Peixe-boi <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a arara-azul.
+<|assistant|> Arara-azul <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o mico-leão-dourado.
+<|assistant|> Texto sobre mico-leão-dourado <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os corais?
+<|assistant|> Corais <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as baleias-jubarte.
+<|assistant|> Baleias-jubarte <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre abelhas sem ferrão.
+<|assistant|> Texto sobre abelhas sem ferrão <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as formigas-cortadeiras?
+<|assistant|> Formigas-cortadeiras <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre cactos.
+<|assistant|> Cactos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as samambaias.
+<|assistant|> Texto sobre samambaias <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os cogumelos?
+<|assistant|> Cogumelos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as orquídeas.
+<|assistant|> Orquídeas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre girassóis.
+<|assistant|> Texto sobre girassóis <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os ipês?
+<|assistant|> Ipês <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre araucárias.
+<|assistant|> Araucárias <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as plantas carnívoras.
+<|assistant|> Texto sobre plantas carnívoras <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as algas?
+<|assistant|> Algas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as sementes.
+<|assistant|> Sementes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre árvores frutíferas.
+<|assistant|> Texto sobre árvores frutíferas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as plantas medicinais?
+<|assistant|> Plantas medicinais <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre manguezais.
+<|assistant|> Manguezais <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os recifes de coral.
+<|assistant|> Texto sobre recifes de coral <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o Cerrado?
+<|assistant|> Cerrado <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Caatinga.
+<|assistant|> Caatinga <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o Pantanal.
+<|assistant|> Texto sobre Pantanal <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a Mata Atlântica?
+<|assistant|> Mata Atlântica <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Floresta Amazônica.
+<|assistant|> Floresta Amazônica <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o Pampa.
+<|assistant|> Texto sobre Pampa <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as geleiras?
+<|assistant|> Geleiras <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as cavernas.
+<|assistant|> Cavernas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre cachoeiras.
+<|assistant|> Texto sobre cachoeiras <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os terremotos?
+<|assistant|> Terremotos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre tsunamis.
+<|assistant|> Tsunamis <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os furacões.
+<|assistant|> Texto sobre furacões <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os tornados?
+<|assistant|> Tornados <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os raios.
+<|assistant|> Raios <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o arco-íris.
+<|assistant|> Texto sobre arco-íris <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as auroras polares?
+<|assistant|> Auroras polares <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre marés.
+<|assistant|> Marés <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os eclipses.
+<|assistant|> Texto sobre eclipses <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o efeito estufa?
+<|assistant|> Efeito estufa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o aquecimento global.
+<|assistant|> Aquecimento global <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a camada de ozônio.
+<|assistant|> Texto sobre camada de ozônio <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o desmatamento?
+<|assistant|> Desmatamento <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre queimadas.
+<|assistant|> Queimadas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a poluição.
+<|assistant|> Texto sobre poluição <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a compostagem?
+<|assistant|> Compostagem <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a biodiversidade.
+<|assistant|> Biodiversidade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre nascentes.
+<|assistant|> Texto sobre nascentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as estações do ano?
+<|assistant|> Estações do ano <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre buracos negros.
+<|assistant|> Buracos negros <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os cometas.
+<|assistant|> Texto sobre cometas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os asteroides?
+<|assistant|> Asteroides <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as estrelas cadentes.
+<|assistant|> Estrelas cadentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre Marte.
+<|assistant|> Texto sobre Marte <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é Júpiter?
+<|assistant|> Júpiter <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre Saturno.
+<|assistant|> Saturno <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre Vênus.
+<|assistant|> Texto sobre Vênus <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é Mercúrio?
+<|assistant|> Mercúrio <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre Netuno.
+<|assistant|> Netuno <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre Plutão.
+<|assistant|> Texto sobre Plutão <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a Via Láctea?
+<|assistant|> Via Láctea <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre constelações.
+<|assistant|> Constelações <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os astronautas?
+<|assistant|> Astronautas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os foguetes.
+<|assistant|> Foguetes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre telescópios.
+<|assistant|> Texto sobre telescópios <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a gravidade?
+<|assistant|> Gravidade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o Big Bang.
+<|assistant|> Big Bang <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as fases da Lua.
+<|assistant|> Texto sobre fases da Lua <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os satélites artificiais?
+<|assistant|> Satélites artificiais <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os átomos.
+<|assistant|> Átomos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre moléculas.
+<|assistant|> Texto sobre moléculas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a eletricidade?
+<|assistant|> Eletricidade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre ímãs.
+<|assistant|> Ímãs <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a energia solar.
+<|assistant|> Texto sobre energia solar <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a energia eólica?
+<|assistant|> Energia eólica <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as usinas hidrelétricas.
+<|assistant|> Usinas hidrelétricas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o petróleo.
+<|assistant|> Texto sobre petróleo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o plástico?
+<|assistant|> Plástico <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o vidro.
+<|assistant|> Vidro <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os metais.
+<|assistant|> Texto sobre metais <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o DNA?
+<|assistant|> DNA <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os genes.
+<|assistant|> Genes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre vírus.
+<|assistant|> Texto sobre vírus <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as bactérias?
+<|assistant|> Bactérias <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre fungos.
+<|assistant|> Fungos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as células.
+<|assistant|> Texto sobre células <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a evolução?
+<|assistant|> Evolução <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os fósseis.
+<|assistant|> Fósseis <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a luz.
+<|assistant|> Texto sobre luz <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o som?
+<|assistant|> Som <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a temperatura.
+<|assistant|> Temperatura <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os estados da matéria.
+<|assistant|> Texto sobre estados da matéria <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o ciclo da água?
+<|assistant|> Ciclo da água <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a reciclagem.
+<|assistant|> Reciclagem <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a química.
+<|assistant|> Texto sobre química <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a física?
+<|assistant|> Física <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a biologia.
+<|assistant|> Biologia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a matemática.
+<|assistant|> Texto sobre matemática <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a geometria?
+<|assistant|> Geometria <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a astronomia.
+<|assistant|> Astronomia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o sono.
+<|assistant|> Texto sobre sono <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os sonhos?
+<|assistant|> Sonhos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a digestão.
+<|assistant|> Digestão <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o estômago.
+<|assistant|> Texto sobre estômago <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os rins?
+<|assistant|> Rins <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o fígado.
+<|assistant|> Fígado <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a pele.
+<|assistant|> Texto sobre pele <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os olhos?
+<|assistant|> Olhos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre ouvidos.
+<|assistant|> Ouvidos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os dentes.
+<|assistant|> Texto sobre dentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o esqueleto?
+<|assistant|> Esqueleto <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as vitaminas.
+<|assistant|> Vitaminas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre proteínas.
+<|assistant|> Texto sobre proteínas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os carboidratos?
+<|assistant|> Carboidratos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a alimentação saudável.
+<|assistant|> Alimentação saudável <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os exercícios físicos.
+<|assistant|> Texto sobre exercícios físicos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a ansiedade?
+<|assistant|> Ansiedade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o estresse.
+<|assistant|> Estresse <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a febre.
+<|assistant|> Texto sobre febre <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a gripe?
+<|assistant|> Gripe <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a dengue.
+<|assistant|> Dengue <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os antibióticos.
+<|assistant|> Texto sobre antibióticos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o sistema imunológico?
+<|assistant|> Sistema imunológico <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o coração.
+<|assistant|> Coração <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o cérebro.
+<|assistant|> Texto sobre cérebro <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a respiração?
+<|assistant|> Respiração <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o sangue.
+<|assistant|> Sangue <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a puberdade.
+<|assistant|> Texto sobre puberdade <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a higiene?
+<|assistant|> Higiene <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os primeiros socorros.
+<|assistant|> Primeiros socorros <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre computadores.
+<|assistant|> Texto sobre computadores <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a internet?
+<|assistant|> Internet <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre celulares.
+<|assistant|> Celulares <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a inteligência artificial.
+<|assistant|> Texto sobre inteligência artificial <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os robôs?
+<|assistant|> Robôs <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os algoritmos.
+<|assistant|> Algoritmos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a programação.
+<|assistant|> Texto sobre programação <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os aplicativos?
+<|assistant|> Aplicativos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre redes sociais.
+<|assistant|> Redes sociais <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as notícias falsas.
+<|assistant|> Texto sobre notícias falsas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as senhas?
+<|assistant|> Senhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os golpes na internet.
+<|assistant|> Golpes na internet <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o GPS.
+<|assistant|> Texto sobre GPS <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o Wi-Fi?
+<|assistant|> Wi-Fi <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a televisão.
+<|assistant|> Televisão <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o rádio.
+<|assistant|> Texto sobre rádio <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o telefone?
+<|assistant|> Telefone <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os aviões.
+<|assistant|> Aviões <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre trens.
+<|assistant|> Texto sobre trens <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os navios?
+<|assistant|> Navios <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre carros elétricos.
+<|assistant|> Carros elétricos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as bicicletas.
+<|assistant|> Texto sobre bicicletas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os videogames?
+<|assistant|> Videogames <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os modelos de linguagem.
+<|assistant|> Modelos de linguagem <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a impressora 3D.
+<|assistant|> Texto sobre impressora 3D <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a energia nuclear?
+<|assistant|> Energia nuclear <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a câmera fotográfica.
+<|assistant|> Câmera fotográfica <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o capitalismo.
+<|assistant|> Texto sobre capitalismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o comunismo?
+<|assistant|> Comunismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o socialismo.
+<|assistant|> Socialismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a social-democracia.
+<|assistant|> Texto sobre social-democracia <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o liberalismo?
+<|assistant|> Liberalismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o anarquismo.
+<|assistant|> Anarquismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o fascismo.
+<|assistant|> Texto sobre fascismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o nazismo?
+<|assistant|> Nazismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a ditadura.
+<|assistant|> Ditadura <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a monarquia.
+<|assistant|> Texto sobre monarquia <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a república?
+<|assistant|> República <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre eleições.
+<|assistant|> Eleições <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o voto.
+<|assistant|> Texto sobre voto <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os três poderes?
+<|assistant|> Três poderes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o Congresso Nacional.
+<|assistant|> Congresso Nacional <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre impostos.
+<|assistant|> Texto sobre impostos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a inflação?
+<|assistant|> Inflação <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o Plano Real.
+<|assistant|> Plano Real <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o dinheiro.
+<|assistant|> Texto sobre dinheiro <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os bancos?
+<|assistant|> Bancos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os juros.
+<|assistant|> Juros <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a poupança.
+<|assistant|> Texto sobre poupança <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o desemprego?
+<|assistant|> Desemprego <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a desigualdade social.
+<|assistant|> Desigualdade social <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a globalização.
+<|assistant|> Texto sobre globalização <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os direitos humanos?
+<|assistant|> Direitos humanos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a cidadania.
+<|assistant|> Cidadania <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o racismo.
+<|assistant|> Texto sobre racismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o preconceito?
+<|assistant|> Preconceito <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o bullying.
+<|assistant|> Bullying <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a sustentabilidade.
+<|assistant|> Texto sobre sustentabilidade <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a economia?
+<|assistant|> Economia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o PIB.
+<|assistant|> PIB <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a política.
+<|assistant|> Texto sobre política <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os partidos políticos?
+<|assistant|> Partidos políticos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a esquerda e a direita na política.
+<|assistant|> Esquerda e a direita na política <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o feminismo.
+<|assistant|> Texto sobre feminismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a religião?
+<|assistant|> Religião <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a filosofia.
+<|assistant|> Filosofia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a ética.
+<|assistant|> Texto sobre ética <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a democracia?
+<|assistant|> Democracia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o trabalho infantil.
+<|assistant|> Trabalho infantil <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o futebol?
+<|assistant|> Futebol <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Copa do Mundo.
+<|assistant|> Copa do Mundo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as Olimpíadas.
+<|assistant|> Texto sobre Olimpíadas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o vôlei?
+<|assistant|> Vôlei <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o basquete.
+<|assistant|> Basquete <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a natação.
+<|assistant|> Texto sobre natação <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o xadrez?
+<|assistant|> Xadrez <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a capoeira.
+<|assistant|> Capoeira <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o samba.
+<|assistant|> Texto sobre samba <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a bossa nova?
+<|assistant|> Bossa nova <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o forró.
+<|assistant|> Forró <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o carnaval.
+<|assistant|> Texto sobre carnaval <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as festas juninas?
+<|assistant|> Festas juninas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o folclore brasileiro.
+<|assistant|> Folclore brasileiro <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o Saci-Pererê.
+<|assistant|> Texto sobre Saci-Pererê <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o Curupira?
+<|assistant|> Curupira <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Iara.
+<|assistant|> Iara <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a lenda do boto.
+<|assistant|> Texto sobre lenda do boto <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a mula sem cabeça?
+<|assistant|> Mula sem cabeça <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o boitatá.
+<|assistant|> Boitatá <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o bumba meu boi.
+<|assistant|> Texto sobre bumba meu boi <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a literatura brasileira?
+<|assistant|> Literatura brasileira <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a música.
+<|assistant|> Música <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o cinema.
+<|assistant|> Texto sobre cinema <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o teatro?
+<|assistant|> Teatro <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a pintura.
+<|assistant|> Pintura <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a dança.
+<|assistant|> Texto sobre dança <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a poesia?
+<|assistant|> Poesia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre contos de fadas.
+<|assistant|> Contos de fadas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as histórias em quadrinhos.
+<|assistant|> Texto sobre histórias em quadrinhos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a arte?
+<|assistant|> Arte <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a língua portuguesa.
+<|assistant|> Língua portuguesa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a culinária brasileira.
+<|assistant|> Texto sobre culinária brasileira <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a feijoada?
+<|assistant|> Feijoada <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o acarajé.
+<|assistant|> Acarajé <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o pão de queijo.
+<|assistant|> Texto sobre pão de queijo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o brigadeiro?
+<|assistant|> Brigadeiro <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o churrasco.
+<|assistant|> Churrasco <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a tapioca.
+<|assistant|> Texto sobre tapioca <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o chimarrão?
+<|assistant|> Chimarrão <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o Brasil.
+<|assistant|> Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as regiões do Brasil.
+<|assistant|> Texto sobre regiões do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o Nordeste?
+<|assistant|> Nordeste <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Amazônia.
+<|assistant|> Amazônia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o rio Amazonas.
+<|assistant|> Texto sobre rio Amazonas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o rio São Francisco?
+<|assistant|> Rio São Francisco <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre continentes.
+<|assistant|> Continentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os oceanos.
+<|assistant|> Texto sobre oceanos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a África?
+<|assistant|> África <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Europa.
+<|assistant|> Europa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Ásia.
+<|assistant|> Texto sobre Ásia <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a Antártida?
+<|assistant|> Antártida <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre desertos.
+<|assistant|> Desertos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as montanhas.
+<|assistant|> Texto sobre montanhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as ilhas?
+<|assistant|> Ilhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as cidades.
+<|assistant|> Cidades <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o campo.
+<|assistant|> Texto sobre campo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os mapas?
+<|assistant|> Mapas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a amizade.
+<|assistant|> Amizade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a família.
+<|assistant|> Texto sobre família <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a escola?
+<|assistant|> Escola <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os professores.
+<|assistant|> Professores <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a leitura.
+<|assistant|> Texto sobre leitura <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os livros?
+<|assistant|> Livros <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre bibliotecas.
+<|assistant|> Bibliotecas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o trabalho.
+<|assistant|> Texto sobre trabalho <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o respeito?
+<|assistant|> Respeito <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a gentileza.
+<|assistant|> Gentileza <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a honestidade.
+<|assistant|> Texto sobre honestidade <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a solidariedade?
+<|assistant|> Solidariedade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o voluntariado.
+<|assistant|> Voluntariado <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a felicidade.
+<|assistant|> Texto sobre felicidade <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a saudade?
+<|assistant|> Saudade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o amor.
+<|assistant|> Amor <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a coragem.
+<|assistant|> Texto sobre coragem <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a gratidão?
+<|assistant|> Gratidão <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a paciência.
+<|assistant|> Paciência <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o tempo.
+<|assistant|> Texto sobre tempo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o calendário?
+<|assistant|> Calendário <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o trânsito.
+<|assistant|> Trânsito <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre férias.
+<|assistant|> Texto sobre férias <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os animais de estimação?
+<|assistant|> Animais de estimação <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a cozinha.
+<|assistant|> Cozinha <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o lixo.
+<|assistant|> Texto sobre lixo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a água potável?
+<|assistant|> Água potável <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a energia elétrica em casa.
+<|assistant|> Energia elétrica em casa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Terra.
+<|assistant|> Texto sobre Terra <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o Sistema Solar?
+<|assistant|> Sistema Solar <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre vulcões.
+<|assistant|> Vulcões <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as nuvens.
+<|assistant|> Texto sobre nuvens <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a chuva?
+<|assistant|> Chuva <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o vento.
+<|assistant|> Vento <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre rios.
+<|assistant|> Texto sobre rios <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as praias?
+<|assistant|> Praias <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o solo.
+<|assistant|> Solo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as rochas.
+<|assistant|> Texto sobre rochas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as secas?
+<|assistant|> Secas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as enchentes.
+<|assistant|> Enchentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o clima do Brasil.
+<|assistant|> Texto sobre clima do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é a energia?
+<|assistant|> Energia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre baterias.
+<|assistant|> Baterias <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os cachorros.
+<|assistant|> Texto sobre cachorros <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os gatos?
+<|assistant|> Gatos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os porcos.
+<|assistant|> Porcos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre ovelhas.
+<|assistant|> Texto sobre ovelhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as abelhas?
+<|assistant|> Abelhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre borboletas.
+<|assistant|> Borboletas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os sapos.
+<|assistant|> Texto sobre sapos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os golfinhos-rotadores?
+<|assistant|> Golfinhos-rotadores <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre as araras.
+<|assistant|> Araras <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre jabutis.
+<|assistant|> Texto sobre jabutis <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são as galinhas-d'angola?
+<|assistant|> Galinhas-d'angola <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre peixes.
+<|assistant|> Peixes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as vacinas.
+<|assistant|> Texto sobre vacinas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o diabetes?
+<|assistant|> Diabetes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a pressão alta.
+<|assistant|> Pressão alta <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a depressão.
+<|assistant|> Texto sobre depressão <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o autismo?
+<|assistant|> Autismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre alergias.
+<|assistant|> Alergias <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os músculos.
+<|assistant|> Texto sobre músculos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o intestino?
+<|assistant|> Intestino <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o paladar.
+<|assistant|> Paladar <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o olfato.
+<|assistant|> Texto sobre olfato <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o judô?
+<|assistant|> Judô <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o atletismo.
+<|assistant|> Atletismo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a ginástica.
+<|assistant|> Texto sobre ginástica <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o surfe?
+<|assistant|> Surfe <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o skate.
+<|assistant|> Skate <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Fórmula 1.
+<|assistant|> Texto sobre Fórmula 1 <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o tênis?
+<|assistant|> Tênis <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o Natal.
+<|assistant|> Natal <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Páscoa.
+<|assistant|> Texto sobre Páscoa <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que é o Ano-Novo?
+<|assistant|> Ano-Novo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o Dia das Mães.
+<|assistant|> Dia das Mães <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre as Olimpíadas do Rio.
+<|assistant|> Texto sobre Olimpíadas do Rio <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os médicos?
+<|assistant|> Médicos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre enfermeiros.
+<|assistant|> Enfermeiros <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre os bombeiros.
+<|assistant|> Texto sobre bombeiros <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os agricultores?
+<|assistant|> Agricultores <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre os cientistas.
+<|assistant|> Cientistas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre engenheiros.
+<|assistant|> Texto sobre engenheiros <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que são os programadores?
+<|assistant|> Programadores <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre jornalistas.
+<|assistant|> Jornalistas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi os povos indígenas do Brasil?
+<|assistant|> Povos indígenas do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a escravidão no Brasil.
+<|assistant|> Escravidão no Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Lei Áurea.
+<|assistant|> Texto sobre Lei Áurea <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi os quilombos?
+<|assistant|> Quilombos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre Zumbi dos Palmares.
+<|assistant|> Zumbi dos Palmares <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Independência do Brasil.
+<|assistant|> Texto sobre Independência do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o Império do Brasil?
+<|assistant|> Império do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre Dom Pedro II.
+<|assistant|> Dom Pedro II <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Proclamação da República.
+<|assistant|> Texto sobre Proclamação da República <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Inconfidência Mineira?
+<|assistant|> Inconfidência Mineira <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre Tiradentes.
+<|assistant|> Tiradentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Era Vargas.
+<|assistant|> Texto sobre Era Vargas <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a ditadura militar no Brasil?
+<|assistant|> Ditadura militar no Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Constituição de 1988.
+<|assistant|> Constituição de 1988 <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o SUS.
+<|assistant|> Texto sobre SUS <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi Brasília?
+<|assistant|> Brasília <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a imigração no Brasil.
+<|assistant|> Imigração no Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o ciclo do ouro.
+<|assistant|> Texto sobre ciclo do ouro <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o ciclo do café?
+<|assistant|> Ciclo do café <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Pré-História.
+<|assistant|> Pré-História <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a invenção da escrita.
+<|assistant|> Texto sobre invenção da escrita <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o Egito Antigo?
+<|assistant|> Egito Antigo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre pirâmides do Egito.
+<|assistant|> Pirâmides do Egito <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Grécia Antiga.
+<|assistant|> Texto sobre Grécia Antiga <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o Império Romano?
+<|assistant|> Império Romano <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Idade Média.
+<|assistant|> Idade Média <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre vikings.
+<|assistant|> Texto sobre vikings <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi as Grandes Navegações?
+<|assistant|> Grandes Navegações <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre o Renascimento.
+<|assistant|> Renascimento <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Revolução Francesa.
+<|assistant|> Texto sobre Revolução Francesa <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Revolução Industrial?
+<|assistant|> Revolução Industrial <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Primeira Guerra Mundial.
+<|assistant|> Primeira Guerra Mundial <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a Segunda Guerra Mundial.
+<|assistant|> Texto sobre Segunda Guerra Mundial <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o Holocausto?
+<|assistant|> Holocausto <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Guerra Fria.
+<|assistant|> Guerra Fria <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre o Muro de Berlim.
+<|assistant|> Texto sobre Muro de Berlim <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a corrida espacial?
+<|assistant|> Corrida espacial <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a chegada do homem à Lua.
+<|assistant|> Chegada do homem à Lua <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a ONU.
+<|assistant|> Texto sobre ONU <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me fale sobre a Revolução Russa.
+<|assistant|> Revolução Russa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Faça um texto sobre a União Soviética.
+<|assistant|> Texto sobre União Soviética <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Machado de Assis?
+<|assistant|> Machado de Assis <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Santos Dumont fez?
+<|assistant|> Santos Dumont <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Tiradentes.
+<|assistant|> Tiradentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Dom Pedro I?
+<|assistant|> Dom Pedro I <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Dom Pedro II fez?
+<|assistant|> Dom Pedro II <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre a princesa Isabel.
+<|assistant|> a princesa Isabel <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Zumbi dos Palmares?
+<|assistant|> Zumbi dos Palmares <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Dandara fez?
+<|assistant|> Dandara <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Pedro Álvares Cabral.
+<|assistant|> Pedro Álvares Cabral <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi José Bonifácio?
+<|assistant|> José Bonifácio <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Anita Garibaldi fez?
+<|assistant|> Anita Garibaldi <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Chiquinha Gonzaga.
+<|assistant|> Chiquinha Gonzaga <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Oswaldo Cruz?
+<|assistant|> Oswaldo Cruz <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Carlos Chagas fez?
+<|assistant|> Carlos Chagas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Vital Brazil.
+<|assistant|> Vital Brazil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Carmen Miranda?
+<|assistant|> Carmen Miranda <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Pixinguinha fez?
+<|assistant|> Pixinguinha <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Noel Rosa.
+<|assistant|> Noel Rosa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Cartola?
+<|assistant|> Cartola <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Tom Jobim fez?
+<|assistant|> Tom Jobim <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Vinicius de Moraes.
+<|assistant|> Vinicius de Moraes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Elis Regina?
+<|assistant|> Elis Regina <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Luiz Gonzaga fez?
+<|assistant|> Luiz Gonzaga <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Carlos Drummond de Andrade.
+<|assistant|> Carlos Drummond de Andrade <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Cecília Meireles?
+<|assistant|> Cecília Meireles <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Clarice Lispector fez?
+<|assistant|> Clarice Lispector <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Monteiro Lobato.
+<|assistant|> Monteiro Lobato <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Jorge Amado?
+<|assistant|> Jorge Amado <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Graciliano Ramos fez?
+<|assistant|> Graciliano Ramos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Guimarães Rosa.
+<|assistant|> Guimarães Rosa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi José de Alencar?
+<|assistant|> José de Alencar <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Castro Alves fez?
+<|assistant|> Castro Alves <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Carolina Maria de Jesus.
+<|assistant|> Carolina Maria de Jesus <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Tarsila do Amaral?
+<|assistant|> Tarsila do Amaral <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Candido Portinari fez?
+<|assistant|> Candido Portinari <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Aleijadinho.
+<|assistant|> Aleijadinho <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Oscar Niemeyer?
+<|assistant|> Oscar Niemeyer <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Lúcio Costa fez?
+<|assistant|> Lúcio Costa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Getúlio Vargas.
+<|assistant|> Getúlio Vargas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Juscelino Kubitschek?
+<|assistant|> Juscelino Kubitschek <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Rui Barbosa fez?
+<|assistant|> Rui Barbosa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Marechal Rondon.
+<|assistant|> Marechal Rondon <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Chico Mendes?
+<|assistant|> Chico Mendes <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Irmã Dulce fez?
+<|assistant|> Irmã Dulce <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Paulo Freire.
+<|assistant|> Paulo Freire <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Pelé?
+<|assistant|> Pelé <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Garrincha fez?
+<|assistant|> Garrincha <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Ayrton Senna.
+<|assistant|> Ayrton Senna <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Maria Esther Bueno?
+<|assistant|> Maria Esther Bueno <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Adhemar Ferreira da Silva fez?
+<|assistant|> Adhemar Ferreira da Silva <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Albert Einstein.
+<|assistant|> Albert Einstein <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Isaac Newton?
+<|assistant|> Isaac Newton <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Galileu Galilei fez?
+<|assistant|> Galileu Galilei <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Nicolau Copérnico.
+<|assistant|> Nicolau Copérnico <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Charles Darwin?
+<|assistant|> Charles Darwin <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Marie Curie fez?
+<|assistant|> Marie Curie <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Louis Pasteur.
+<|assistant|> Louis Pasteur <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Alexander Fleming?
+<|assistant|> Alexander Fleming <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Thomas Edison fez?
+<|assistant|> Thomas Edison <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Nikola Tesla.
+<|assistant|> Nikola Tesla <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Graham Bell?
+<|assistant|> Graham Bell <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que os irmãos Wright fez?
+<|assistant|> os irmãos Wright <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Johannes Gutenberg.
+<|assistant|> Johannes Gutenberg <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Leonardo da Vinci?
+<|assistant|> Leonardo da Vinci <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Arquimedes fez?
+<|assistant|> Arquimedes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Pitágoras.
+<|assistant|> Pitágoras <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Hipócrates?
+<|assistant|> Hipócrates <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Gregor Mendel fez?
+<|assistant|> Gregor Mendel <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Dmitri Mendeleiev.
+<|assistant|> Dmitri Mendeleiev <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Edward Jenner?
+<|assistant|> Edward Jenner <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Florence Nightingale fez?
+<|assistant|> Florence Nightingale <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Stephen Hawking.
+<|assistant|> Stephen Hawking <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Ada Lovelace?
+<|assistant|> Ada Lovelace <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Alan Turing fez?
+<|assistant|> Alan Turing <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Carl Sagan.
+<|assistant|> Carl Sagan <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Johannes Kepler?
+<|assistant|> Johannes Kepler <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Antoine Lavoisier fez?
+<|assistant|> Antoine Lavoisier <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Michael Faraday.
+<|assistant|> Michael Faraday <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi James Watt?
+<|assistant|> James Watt <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Guglielmo Marconi fez?
+<|assistant|> Guglielmo Marconi <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Landell de Moura.
+<|assistant|> Landell de Moura <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Yuri Gagarin?
+<|assistant|> Yuri Gagarin <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Neil Armstrong fez?
+<|assistant|> Neil Armstrong <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Cristóvão Colombo.
+<|assistant|> Cristóvão Colombo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Vasco da Gama?
+<|assistant|> Vasco da Gama <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Fernão de Magalhães fez?
+<|assistant|> Fernão de Magalhães <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Marco Polo.
+<|assistant|> Marco Polo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Amelia Earhart?
+<|assistant|> Amelia Earhart <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Roald Amundsen fez?
+<|assistant|> Roald Amundsen <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Jacques Cousteau.
+<|assistant|> Jacques Cousteau <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Wangari Maathai?
+<|assistant|> Wangari Maathai <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Jane Goodall fez?
+<|assistant|> Jane Goodall <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Rachel Carson.
+<|assistant|> Rachel Carson <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Sigmund Freud?
+<|assistant|> Sigmund Freud <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Júlio César fez?
+<|assistant|> Júlio César <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Alexandre, o Grande.
+<|assistant|> Alexandre, o Grande <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Cleópatra?
+<|assistant|> Cleópatra <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Napoleão Bonaparte fez?
+<|assistant|> Napoleão Bonaparte <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Abraham Lincoln.
+<|assistant|> Abraham Lincoln <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi George Washington?
+<|assistant|> George Washington <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Mahatma Gandhi fez?
+<|assistant|> Mahatma Gandhi <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Martin Luther King.
+<|assistant|> Martin Luther King <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Nelson Mandela?
+<|assistant|> Nelson Mandela <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Rosa Parks fez?
+<|assistant|> Rosa Parks <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Joana d'Arc.
+<|assistant|> Joana d'Arc <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Simón Bolívar?
+<|assistant|> Simón Bolívar <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Winston Churchill fez?
+<|assistant|> Winston Churchill <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Anne Frank.
+<|assistant|> Anne Frank <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Madre Teresa de Calcutá?
+<|assistant|> Madre Teresa de Calcutá <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Martinho Lutero fez?
+<|assistant|> Martinho Lutero <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Confúcio.
+<|assistant|> Confúcio <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Sócrates?
+<|assistant|> Sócrates <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Platão fez?
+<|assistant|> Platão <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Aristóteles.
+<|assistant|> Aristóteles <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi William Shakespeare?
+<|assistant|> William Shakespeare <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Miguel de Cervantes fez?
+<|assistant|> Miguel de Cervantes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Luís de Camões.
+<|assistant|> Luís de Camões <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Fernando Pessoa?
+<|assistant|> Fernando Pessoa <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que José Saramago fez?
+<|assistant|> José Saramago <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Victor Hugo.
+<|assistant|> Victor Hugo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Liev Tolstói?
+<|assistant|> Liev Tolstói <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Charles Dickens fez?
+<|assistant|> Charles Dickens <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Agatha Christie.
+<|assistant|> Agatha Christie <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Wolfgang Amadeus Mozart?
+<|assistant|> Wolfgang Amadeus Mozart <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Ludwig van Beethoven fez?
+<|assistant|> Ludwig van Beethoven <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Johann Sebastian Bach.
+<|assistant|> Johann Sebastian Bach <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Heitor Villa-Lobos?
+<|assistant|> Heitor Villa-Lobos <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Vincent van Gogh fez?
+<|assistant|> Vincent van Gogh <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Pablo Picasso.
+<|assistant|> Pablo Picasso <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Michelangelo?
+<|assistant|> Michelangelo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Frida Kahlo fez?
+<|assistant|> Frida Kahlo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Walt Disney.
+<|assistant|> Walt Disney <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Charlie Chaplin?
+<|assistant|> Charlie Chaplin <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que Bob Marley fez?
+<|assistant|> Bob Marley <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Michael Jackson.
+<|assistant|> Michael Jackson <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quem foi Elvis Presley?
+<|assistant|> Elvis Presley <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que John Lennon fez?
+<|assistant|> John Lennon <|end|>
+
+<|user|> Dê um título curto para esta conversa: Me conte sobre Freddie Mercury.
+<|assistant|> Freddie Mercury <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a chegada dos portugueses ao Brasil?
+<|assistant|> Chegada dos portugueses ao Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a primeira missa no Brasil?
+<|assistant|> Primeira missa no Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a fundação de Salvador?
+<|assistant|> Fundação de Salvador <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a fundação de São Paulo?
+<|assistant|> Fundação de São Paulo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a fundação do Rio de Janeiro?
+<|assistant|> Fundação do Rio de Janeiro <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a fundação de Recife?
+<|assistant|> Fundação de Recife <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a fundação de Curitiba?
+<|assistant|> Fundação de Curitiba <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a fundação de Porto Alegre?
+<|assistant|> Fundação de Porto Alegre <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a fundação de Belo Horizonte?
+<|assistant|> Fundação de Belo Horizonte <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a execução de Tiradentes?
+<|assistant|> Execução de Tiradentes <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a abertura dos portos do Brasil?
+<|assistant|> Abertura dos portos do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o Dia do Fico?
+<|assistant|> Dia do Fico <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Independência do Brasil?
+<|assistant|> Independência do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a primeira Constituição do Brasil?
+<|assistant|> Primeira Constituição do Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a Batalha do Riachuelo?
+<|assistant|> Batalha do Riachuelo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Lei do Ventre Livre?
+<|assistant|> Lei do Ventre Livre <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a abolição da escravidão no Brasil?
+<|assistant|> Abolição da escravidão no Brasil <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a Proclamação da República?
+<|assistant|> Proclamação da República <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o voo do 14-Bis?
+<|assistant|> Voo do 14-Bis <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a Revolta da Chibata?
+<|assistant|> Revolta da Chibata <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Semana de Arte Moderna?
+<|assistant|> Semana de Arte Moderna <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a Revolução de 1930?
+<|assistant|> Revolução de 1930 <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a inauguração do Cristo Redentor?
+<|assistant|> Inauguração do Cristo Redentor <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a criação da Petrobras?
+<|assistant|> Criação da Petrobras <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a morte de Getúlio Vargas?
+<|assistant|> Morte de Getúlio Vargas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a inauguração de Brasília?
+<|assistant|> Inauguração de Brasília <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o golpe militar de 1964?
+<|assistant|> Golpe militar de 1964 <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o fim da ditadura militar?
+<|assistant|> Fim da ditadura militar <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Constituição de 1988?
+<|assistant|> Constituição de 1988 <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o lançamento do real?
+<|assistant|> Lançamento do real <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a coroação de Carlos Magno?
+<|assistant|> Coroação de Carlos Magno <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a assinatura da Magna Carta?
+<|assistant|> Assinatura da Magna Carta <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a queda de Constantinopla?
+<|assistant|> Queda de Constantinopla <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a chegada de Cristóvão Colombo à América?
+<|assistant|> Chegada de Cristóvão Colombo à América <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o Tratado de Tordesilhas?
+<|assistant|> Tratado de Tordesilhas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a publicação das 95 teses de Lutero?
+<|assistant|> Publicação das 95 teses de Lutero <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o fim da primeira volta ao mundo?
+<|assistant|> Fim da primeira volta ao mundo <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o Grande Incêndio de Londres?
+<|assistant|> Grande Incêndio de Londres <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o terremoto de Lisboa?
+<|assistant|> Terremoto de Lisboa <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Independência dos Estados Unidos?
+<|assistant|> Independência dos Estados Unidos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a Tomada da Bastilha?
+<|assistant|> Tomada da Bastilha <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a primeira vacina?
+<|assistant|> Primeira vacina <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o Grito de Dolores?
+<|assistant|> Grito de Dolores <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a Independência da Argentina?
+<|assistant|> Independência da Argentina <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a primeira mensagem do telégrafo de Morse?
+<|assistant|> Primeira mensagem do telégrafo de Morse <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a publicação de A Origem das Espécies?
+<|assistant|> Publicação de A Origem das Espécies <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a Proclamação de Emancipação?
+<|assistant|> Proclamação de Emancipação <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o assassinato de Abraham Lincoln?
+<|assistant|> Assassinato de Abraham Lincoln <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a patente do telefone?
+<|assistant|> Patente do telefone <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a inauguração da Torre Eiffel?
+<|assistant|> Inauguração da Torre Eiffel <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a primeira sessão de cinema?
+<|assistant|> Primeira sessão de cinema <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o primeiro voo dos irmãos Wright?
+<|assistant|> Primeiro voo dos irmãos Wright <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a chegada ao Polo Sul?
+<|assistant|> Chegada ao Polo Sul <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o naufrágio do Titanic?
+<|assistant|> Naufrágio do Titanic <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o início da Primeira Guerra Mundial?
+<|assistant|> Início da Primeira Guerra Mundial <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a abertura do Canal do Panamá?
+<|assistant|> Abertura do Canal do Panamá <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Revolução Russa?
+<|assistant|> Revolução Russa <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o fim da Primeira Guerra Mundial?
+<|assistant|> Fim da Primeira Guerra Mundial <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a primeira Copa do Mundo?
+<|assistant|> Primeira Copa do Mundo <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o início da Segunda Guerra Mundial?
+<|assistant|> Início da Segunda Guerra Mundial <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o ataque a Pearl Harbor?
+<|assistant|> Ataque a Pearl Harbor <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o Dia D?
+<|assistant|> Dia D <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o bombardeio de Hiroshima?
+<|assistant|> Bombardeio de Hiroshima <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a fundação da ONU?
+<|assistant|> Fundação da ONU <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a independência da Índia?
+<|assistant|> Independência da Índia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o protesto de Rosa Parks?
+<|assistant|> Protesto de Rosa Parks <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o lançamento do Sputnik 1?
+<|assistant|> Lançamento do Sputnik 1 <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a viagem da cadela Laika ao espaço?
+<|assistant|> Viagem da cadela Laika ao espaço <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o discurso Eu tenho um sonho?
+<|assistant|> Discurso Eu tenho um sonho <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o primeiro transplante de coração?
+<|assistant|> Primeiro transplante de coração <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a chegada do homem à Lua?
+<|assistant|> Chegada do homem à Lua <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Revolução dos Cravos?
+<|assistant|> Revolução dos Cravos <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o acidente de Chernobyl?
+<|assistant|> Acidente de Chernobyl <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi a queda do Muro de Berlim?
+<|assistant|> Queda do Muro de Berlim <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a libertação de Nelson Mandela?
+<|assistant|> Libertação de Nelson Mandela <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o lançamento do telescópio Hubble?
+<|assistant|> Lançamento do telescópio Hubble <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o primeiro site da internet?
+<|assistant|> Primeiro site da internet <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi o fim da União Soviética?
+<|assistant|> Fim da União Soviética <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu o ataque às Torres Gêmeas?
+<|assistant|> Ataque às Torres Gêmeas <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o começo da circulação do euro?
+<|assistant|> Começo da circulação do euro <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a chegada do robô Curiosity a Marte?
+<|assistant|> Chegada do robô Curiosity a Marte <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a declaração da pandemia de covid-19?
+<|assistant|> Declaração da pandemia de covid-19 <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o lançamento do telescópio James Webb?
+<|assistant|> Lançamento do telescópio James Webb <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a destruição de Pompeia?
+<|assistant|> Destruição de Pompeia <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a Inconfidência Mineira?
+<|assistant|> Inconfidência Mineira <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi o início da Guerra do Paraguai?
+<|assistant|> Início da Guerra do Paraguai <|end|>
+
+<|user|> Dê um título curto para esta conversa: O que foi a Revolta da Vacina?
+<|assistant|> Revolta da Vacina <|end|>
+
+<|user|> Dê um título curto para esta conversa: Por que aconteceu a descoberta da penicilina?
+<|assistant|> Descoberta da penicilina <|end|>
+
+<|user|> Dê um título curto para esta conversa: Quando foi as Diretas Já?
+<|assistant|> Diretas Já <|end|>
+

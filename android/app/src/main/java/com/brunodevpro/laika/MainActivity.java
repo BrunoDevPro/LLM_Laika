@@ -54,12 +54,14 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
     private Motor motor;
     private PainelTarefa painel;
     private MenuOpcoes menu;
+    private MaisOpcoes mais;
+    private ListaChats listaChats;
     private LinearLayout mensagens;
     private ScrollView rolagem;
     private View vazio, descer;
-    private TextView estado, versaoNome;
+    private TextView estado, versaoNome, titulo;
     private EditText entrada;
-    private ImageButton enviar;
+    private ImageButton enviar, botaoMais;
     private final Map<Motor.Mensagem, TextView> bolhas = new HashMap<>();
     private final Handler ui = new Handler(Looper.getMainLooper());
     private boolean ofereceuBackup;
@@ -124,6 +126,12 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         enviar = findViewById(R.id.enviar);
         estado = findViewById(R.id.estado);
         versaoNome = findViewById(R.id.versao_nome);
+        titulo = findViewById(R.id.titulo);
+        botaoMais = findViewById(R.id.mais);
+        mais = new MaisOpcoes(this, motor, this::estadoMudou);
+        listaChats = new ListaChats(this, motor);
+        botaoMais.setOnClickListener(v -> mais.mostrar(v));
+        findViewById(R.id.chats).setOnClickListener(v -> listaChats.mostrar());
 
         // Barras do sistema e teclado: o topo desce abaixo da barra de status, a barra de texto sobe com o teclado.
         View topo = findViewById(R.id.topo), barra = findViewById(R.id.barra);
@@ -222,6 +230,8 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         motor.removerOuvinte(this);
         ui.removeCallbacks(animarPontos);
         menu.fechar();
+        mais.fechar();
+        listaChats.fechar();
         super.onStop();
     }
 
@@ -446,9 +456,18 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
     }
 
     @Override
+    public void chatsMudaram() {
+        if (listaChats.aberta()) listaChats.atualizar();
+    }
+
+    @Override
     public void estadoMudou() {
         estado.setText(linhaDeEstado());
-        versaoNome.setText(motor.nomeVersao.isEmpty() ? getString(R.string.versoes_curto) : motor.nomeVersao);
+        titulo.setText(com.brunodevpro.laika.core.Chats.SEM_TITULO.equals(motor.tituloChat)
+                ? getString(R.string.app_name) : motor.tituloChat);
+        versaoNome.setText(motor.nomeExibido.isEmpty() ? getString(R.string.versoes_curto) : motor.nomeExibido);
+        botaoMais.setImageTintList(mais.algoLigado()
+                ? android.content.res.ColorStateList.valueOf(getColor(R.color.azul)) : null);
         painel.atualizar();
         enviar.setImageResource(motor.gerando ? R.drawable.ic_parar : R.drawable.ic_enviar);
         enviar.setContentDescription(getString(motor.gerando ? R.string.parar : R.string.enviar));
@@ -467,7 +486,7 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         Armazem.Versao b = bs.get(0);
         new AlertDialog.Builder(this).setTitle("A versão em uso não abriu")
                 .setMessage(motor.erro + "\n\nVoltar para o backup mais recente, \"" + b.nome + "\"?")
-                .setPositiveButton("Voltar para o backup", (d, w) -> motor.usarBackup(b.id, null))
+                .setPositiveButton("Voltar para o backup", (d, w) -> motor.usarBackup(b.id))
                 .setNegativeButton("Agora não", null).show();
     }
 
@@ -489,14 +508,14 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
 
     private void limparConversa() {
         new AlertDialog.Builder(this).setTitle("Limpar a conversa?")
-                .setMessage("As mensagens somem da tela e a memória de IA começa do zero. "
-                        + "O que a Laika guardou sobre você continua.")
+                .setMessage("As mensagens deste chat somem e a memória de IA começa do zero. "
+                        + "O que a Laika guardou sobre você neste chat continua.")
                 .setPositiveButton("Limpar", (d, w) -> motor.limparConversa())
                 .setNegativeButton("Cancelar", null).show();
     }
 
     private void mostrarMemoria() {
-        new AlertDialog.Builder(this).setTitle("O que a Laika lembra de você")
+        new AlertDialog.Builder(this).setTitle("O que a Laika lembra de você neste chat")
                 .setMessage(motor.resumoMemoria() + "\n\nPara ensinar, diga \"meu nome é…\", \"eu moro em…\", "
                         + "\"eu gosto de…\" ou \"lembre que…\".")
                 .setPositiveButton("OK", null)

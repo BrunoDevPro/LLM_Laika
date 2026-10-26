@@ -203,36 +203,34 @@ class PacoteTest {
         assertEquals(2, armazem.backups().size());
     }
 
-    /** Salvar por cima do backup de origem e limpar a conversa/memória de um backup, sem criar outro. */
+    /** O modelo em uso e o backup com os mesmos arquivos são o mesmo modelo; o apelido vale para os dois. */
     @Test
-    void salvarPorCimaELimpar() throws Exception {
+    void mesmosArquivosEApelido() throws Exception {
+        assertNull(armazem.backupComMesmosArquivos());
         Armazem.Versao b = armazem.fazerBackup("Meu modelo");
         assertEquals(b.id, armazem.atual().origem);
-        assertNotNull(armazem.origemDoAtual());
+        assertEquals(b.id, armazem.backupComMesmosArquivos().id);
         Files.writeString(armazem.conversaAtual().toPath(), "[{\"u\": true, \"t\": \"oi\"}]");
-        Files.writeString(armazem.memoriaAtual().toPath(), "{\"nome\": \"Ana\", \"notas\": []}");
-        assertNull(armazem.backupIgualAoAtual());
-        assertEquals(b.id, armazem.origemDoAtual().id);
-        armazem.salvarPorCima(b.id);
-        assertEquals(1, armazem.backups().size());
-        assertNotNull(armazem.backupIgualAoAtual());
-        assertEquals(1, armazem.backup(b.id).mensagens());
-        armazem.limpar(b.id, true, false);
-        assertEquals(0, armazem.backup(b.id).mensagens());
-        assertTrue(armazem.backup(b.id).resumoMemoria().contains("Ana"));
-        assertEquals(1, armazem.atual().mensagens());  // a versão em uso não muda
-        armazem.limpar(b.id, false, true);
-        assertFalse(armazem.backup(b.id).resumoMemoria().contains("Ana"));
-        // Outro modelo na versão em uso: o backup de origem já não serve para "salvar por cima".
+        assertEquals(b.id, armazem.backupComMesmosArquivos().id);  // a conversa não conta mais
+        armazem.apelidar(null, "  Laika esperta ");
+        assertEquals("Laika esperta", armazem.atual().nomeExibido());
+        assertEquals("Laika esperta", armazem.backup(b.id).apelido);
+        assertEquals("Meu modelo", armazem.backup(b.id).nome);
+        armazem.apelidar(b.id, "");
+        assertNull(armazem.atual().apelido);
+        assertEquals("Meu modelo", armazem.backup(b.id).nomeExibido());
+        // Outro modelo na versão em uso: nenhum backup tem os mesmos arquivos.
         File tok = armazem.temporario("txt");
         Files.copy(new File(assets, "tokenizer.txt").toPath(), tok.toPath());
         java.util.Map<String, Armazem.Arquivo> trocas = new java.util.LinkedHashMap<>();
         trocas.put(Armazem.TOKENIZER, armazem.guardar(tok, "txt", "tokenizer.txt", "outro"));
         armazem.aplicar(trocas, null, null);
         assertNull(armazem.atual().origem);
-        assertNull(armazem.origemDoAtual());
+        assertNull(armazem.backupComMesmosArquivos());
+        armazem.apelidar(b.id, "Antigo");
         armazem.usarBackup(b.id);
-        assertEquals(b.id, armazem.atual().origem);
+        assertEquals("Antigo", armazem.atual().nomeExibido());
+        assertEquals(b.id, armazem.backupComMesmosArquivos().id);
     }
 
     /** O resultado do treino no celular do app 1.1 vira um backup, sem trocar a versão em uso. */

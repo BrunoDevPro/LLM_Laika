@@ -2033,6 +2033,60 @@ def identidade_conversas():
     return convs
 
 
+# =====================================================================
+# TÍTULOS DE CHAT (app 1.10): o app pede "Dê um título curto para esta conversa: <1ª mensagem>"
+# (android/core Texto.PEDIDO_TITULO) depois da primeira resposta de cada chat.
+# =====================================================================
+PEDIDO_TITULO = "Dê um título curto para esta conversa: "
+TITULOS_FIXOS = [
+    ("Oi, tudo bem?", "Cumprimento"), ("Bom dia, Laika!", "Bom dia"), ("Olá! Como você está?", "Conversa"),
+    ("Meu nome é Ana.", "Apresentação"), ("Me ajude a estudar para a prova de matemática.", "Estudo de matemática"),
+    ("Escreva um poema sobre o mar.", "Poema sobre o mar"), ("Conte uma história curta.", "História curta"),
+    ("Quanto é 25 vezes 4?", "Conta de multiplicação"), ("Quanto é 120 dividido por 8?", "Conta de divisão"),
+    ("Corrija esta frase: eu fui na escola ontem.", "Correção de frase"),
+    ("Resuma em uma frase: O menino acordou cedo e foi para a escola.", "Resumo de texto"),
+    ("Me dê dicas para dormir melhor.", "Dicas para dormir"), ("Como fazer um bolo simples?", "Receita de bolo"),
+    ("Escreva uma mensagem de aniversário para minha mãe.", "Mensagem de aniversário"),
+    ("Quem é você?", "Sobre a Laika"), ("Qual é o seu nome?", "Nome da Laika"),
+    ("Complete a frase: Quem espera", "Completar frase"), ("Traduza bom dia para o inglês.", "Tradução"),
+    ("Estou triste hoje.", "Conversa de apoio"), ("Lembre que amanhã tenho dentista.", "Lembrete"),
+]
+CAPITAIS_TITULO = ["da França", "da Itália", "do Japão", "da Argentina", "de Portugal", "da Alemanha", "do Canadá",
+                   "do Egito", "do Peru", "da Austrália", "do Chile", "do México", "da Espanha", "da Índia", "da China"]
+
+
+def _sem_artigo_titulo(x):
+    art, _, resto = x.partition(" ")
+    return cap(resto if art in ("o", "a", "os", "as") and resto else x)
+
+
+def titulos_sections():
+    """Pares (primeira mensagem -> título curto): o assunto, sem "O que é", em 1 a 5 palavras."""
+    pares = list(TITULOS_FIXOS)
+    for pais in CAPITAIS_TITULO:
+        pares.append((f"Qual é a capital {pais}?", f"Capital {pais}"))
+    temas = [(t, False) for t in TEMAS] + [(t, True) for t in TEMAS_PASSADO]
+    for i, ((assunto, curta, texto), passado) in enumerate(temas):
+        x = sem_artigo(assunto, i)
+        if i % 3 == 0:
+            art, _, resto = assunto.partition(" ")
+            pares.append((f"Faça um texto sobre {x}.",
+                          "Texto sobre " + (resto if art in ("o", "a", "os", "as") and resto else assunto)))
+        elif i % 3 == 1:
+            verbo = "foi" if passado else ("são" if assunto.split(" ", 1)[0] in ("os", "as") else "é")
+            pares.append((f"O que {verbo} {assunto}?", _sem_artigo_titulo(assunto)))
+        else:
+            pares.append((f"Me fale sobre {x}.", _sem_artigo_titulo(assunto)))
+    for i, (nome, g, nasc, morte, q_foi, o_que) in enumerate(PESSOAS_V):
+        pares.append(([f"Quem foi {nome}?", f"O que {nome} fez?", f"Me conte sobre {nome}."][i % 3], nome))
+    for i, (nome, d, m, a, fato, mais) in enumerate(EV.EVENTOS):
+        pares.append(([f"Quando foi {nome}?", f"O que foi {nome}?", f"Por que aconteceu {nome}?"][i % 3],
+                      _sem_artigo_titulo(nome)))
+    # O app só aceita títulos de até 6 palavras e 40 letras (Texto.limparTitulo).
+    pares = [(q, a) for q, a in pares if len(a) <= 40 and len(a.split()) <= 6]
+    return [("Títulos de chat", [(PEDIDO_TITULO + q, a) for q, a in pares])]
+
+
 def _chave(question):
     return " ".join(re.sub(r"[^\w\s]", " ", question.lower()).split())
 
@@ -2157,7 +2211,7 @@ def build():
     vistas |= {_chave(item.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0]) for _, items in sections for item in items}
     genericas, leitura_genericas = generic_sections()
     genericas += longas_sections(rng)
-    novas_secoes = pessoas_sections() + datas_sections(rng) + conceitos_sections() + gatilho_sections() + detalhes_sections() + nomes_sections()
+    novas_secoes = pessoas_sections() + datas_sections(rng) + conceitos_sections() + gatilho_sections() + detalhes_sections() + nomes_sections() + titulos_sections()
     genericas += novas_secoes
     repetidas = 0
     for title, pares in genericas:

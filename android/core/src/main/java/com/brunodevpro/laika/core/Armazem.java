@@ -90,6 +90,8 @@ public final class Armazem {
     public static final class Versao {
         public final String id;
         public String nome;
+        /** Apelido dado pelo usuário (aparece em destaque; o nome fica embaixo, menor), ou null. */
+        public String apelido;
         public long criado, alterado;
         /** Na versão em uso: o backup de onde ela veio (com os mesmos arquivos), ou null. */
         public String origem;
@@ -103,6 +105,11 @@ public final class Armazem {
 
         public File memoria() {
             return new File(pasta, "memoria.json");
+        }
+
+        /** O apelido, se houver; senão o nome. */
+        public String nomeExibido() {
+            return apelido != null && !apelido.isEmpty() ? apelido : nome;
         }
 
         public File conversa() {
@@ -218,6 +225,7 @@ public final class Armazem {
         v.criado = ((Number) m.get("criado")).longValue();
         v.alterado = m.get("alterado") instanceof Number ? ((Number) m.get("alterado")).longValue() : v.criado;
         v.origem = m.get("origem") instanceof String ? (String) m.get("origem") : null;
+        v.apelido = m.get("apelido") instanceof String ? (String) m.get("apelido") : null;
         Map<String, Object> arqs = (Map<String, Object>) m.get("arquivos");
         for (String papel : PAPEIS) if (arqs.get(papel) != null) v.arquivos.put(papel, Arquivo.de(arqs.get(papel)));
         return v;
@@ -230,6 +238,7 @@ public final class Armazem {
         m.put("criado", v.criado);
         m.put("alterado", v.alterado);
         if (v.origem != null) m.put("origem", v.origem);
+        if (v.apelido != null && !v.apelido.isEmpty()) m.put("apelido", v.apelido);
         Map<String, Object> arqs = new LinkedHashMap<>();
         for (Map.Entry<String, Arquivo> e : v.arquivos.entrySet()) arqs.put(e.getKey(), e.getValue().json());
         m.put("arquivos", arqs);
@@ -323,6 +332,38 @@ public final class Armazem {
         return r;
     }
 
+    /**
+     * Um backup com os mesmos arquivos (modelos, tokenizer e índice) da versão em uso, ou null. Desde a 1.10 a
+     * conversa e a memória ficam nos chats, então só os arquivos contam: é o mesmo modelo.
+     */
+    public Versao backupComMesmosArquivos() throws IOException {
+        Versao a = atual();
+        Versao melhor = null;
+        for (Versao b : backups()) {
+            if (!refs(b).equals(refs(a))) continue;
+            if (b.id.equals(a.origem)) return b;
+            if (melhor == null) melhor = b;
+        }
+        return melhor;
+    }
+
+    /** Dá um apelido (vazio = tira) à versão id (null = a em uso) e às outras com os mesmos arquivos. */
+    public void apelidar(String id, String apelido) throws IOException {
+        Versao alvo = id == null ? atual() : backup(id);
+        String a = apelido == null || apelido.trim().isEmpty() ? null : apelido.trim();
+        List<Versao> todas = new ArrayList<>(backups());
+        todas.add(atual());
+        for (Versao v : todas) {
+            if (v.id == null ? alvo.id == null : v.id.equals(alvo.id)) continue;
+            if (refs(v).equals(refs(alvo))) {
+                v.apelido = a;
+                gravar(v);
+            }
+        }
+        alvo.apelido = a;
+        gravar(alvo);
+    }
+
     /** O backup idêntico à versão em uso (mesmos arquivos, memória e conversa), ou null. */
     public Versao backupIgualAoAtual() throws IOException {
         Versao a = atual();
@@ -353,6 +394,7 @@ public final class Armazem {
         copiarPasta(a, pasta);
         Versao b = new Versao(id, pasta);
         b.nome = nome;
+        b.apelido = a.apelido;
         b.criado = b.alterado = System.currentTimeMillis();
         b.arquivos.putAll(a.arquivos);
         gravar(b);
@@ -361,48 +403,13 @@ public final class Armazem {
         return b;
     }
 
-    /**
-     * O backup de onde a versão em uso veio, se ele ainda existe e tem os mesmos arquivos (modelo, tokenizer
-     * e índice): só a conversa e a memória podem ter mudado. Senão, null.
-     */
-    public Versao origemDoAtual() throws IOException {
-        Versao a = atual();
-        if (a.origem == null || !new File(backupsDir, a.origem).isDirectory()) return null;
-        try {
-            Versao b = backup(a.origem);
-            return refs(b).equals(refs(a)) ? b : null;
-        } catch (IOException | RuntimeException e) {
-            return null;
-        }
-    }
-
-    /** Grava a conversa e a memória da versão em uso por cima do backup id (sem criar outro). */
-    public void salvarPorCima(String id) throws IOException {
-        Versao a = atual(), b = backup(id);
-        copiarPasta(a, b.pasta);
-        b.arquivos.clear();
-        b.arquivos.putAll(a.arquivos);
-        b.alterado = System.currentTimeMillis();
-        gravar(b);
-        a.origem = id;
-        gravar(a);
-    }
-
-    /** Apaga a conversa e/ou a memória de um backup (id) ou da versão em uso (id null). */
-    public void limpar(String id, boolean conversa, boolean memoria) throws IOException {
-        Versao v = id == null ? atual() : backup(id);
-        if (conversa && v.conversa().exists() && !v.conversa().delete()) throw new IOException("não consegui apagar a conversa");
-        if (memoria && v.memoria().exists() && !v.memoria().delete()) throw new IOException("não consegui apagar a memória");
-        v.alterado = System.currentTimeMillis();
-        gravar(v);
-    }
-
     /** Passa a usar o backup (a versão em uso vira uma cópia dele; o backup não muda). */
     public void usarBackup(String id) throws IOException {
         Versao b = backup(id);
         copiarPasta(b, atualDir);
         Versao a = new Versao(null, atualDir);
         a.nome = b.nome;
+        a.apelido = b.apelido;
         a.criado = b.criado;
         a.alterado = System.currentTimeMillis();
         a.arquivos.putAll(b.arquivos);

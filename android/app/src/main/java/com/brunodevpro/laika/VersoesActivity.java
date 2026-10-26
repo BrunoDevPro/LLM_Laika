@@ -216,7 +216,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         try {
             atual = armazem.atual();
             backups = armazem.backups();
-            igual = armazem.backupIgualAoAtual();
+            igual = armazem.backupComMesmosArquivos();
         } catch (IOException e) {
             conteudo.addView(texto("Erro ao ler as versões: " + e.getMessage(), 15, R.color.perigo, false));
             return;
@@ -225,26 +225,28 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         // Versão em uso
         secao("EM USO");
         LinearLayout c = cartao(true);
-        c.addView(texto(atual.nome, 18, R.color.topo_texto, true));
-        c.addView(texto("desde " + data(atual.alterado) + (igual != null ? " · salva no backup \"" + igual.nome + "\""
-                : " · com mudanças que não estão em nenhum backup"), 12, R.color.topo_sub, false));
+        c.addView(texto(atual.nomeExibido(), 18, R.color.topo_texto, true));
+        if (!atual.nomeExibido().equals(atual.nome)) c.addView(texto(atual.nome, 13, R.color.topo_sub, false));
+        c.addView(texto("desde " + data(atual.alterado) + (igual != null ? " · salvo no backup \"" + igual.nomeExibido() + "\""
+                : " · não está em nenhum backup"), 12, R.color.topo_sub, false));
         detalhe(c, "Chat", descricao(atual, Armazem.CHAT));
         detalhe(c, "Completar texto", descricao(atual, Armazem.BASE));
         detalhe(c, "Tokenizer", descricao(atual, Armazem.TOKENIZER));
         detalhe(c, "Busca (RAG)", descricao(atual, Armazem.INDICE));
-        detalhe(c, "Memória", atual.resumoMemoria());
-        detalhe(c, "Conversa", plural(atual.mensagens(), "mensagem", "mensagens"));
         LinearLayout l = linhaDeBotoes(c);
         botao(l, "Fazer backup", true, v -> pedirNomeDoBackup());
         botao(l, "Renomear", false, v -> renomear(null, atual.nome));
-        botao(l, "Exportar", false, v -> exportar(atual));
+        LinearLayout l2 = linhaDeBotoes(c);
+        botao(l2, "Apelido", false, v -> SeletorModelos.pedirApelido(this, motor, null, atual));
+        botao(l2, "Exportar", false, v -> exportar(atual));
 
         // Atualização
         secao("ATUALIZAR");
         LinearLayout u = cartao(false);
         u.addView(texto("Usar um modelo novo", 16, R.color.topo_texto, true));
         TextView ajuda = texto("laika_pacote.zip do Colab, os .pt e o tokenizer.json, ou um backup .zip do app. "
-                + "A versão em uso vai para os backups antes da troca.", 13, R.color.texto_laika, false);
+                + "O modelo em uso vai para os backups antes da troca; os chats continuam como estão.", 13,
+                R.color.texto_laika, false);
         ajuda.setPadding(0, dp(4), 0, 0);
         u.addView(ajuda);
         LinearLayout lu = linhaDeBotoes(u);
@@ -262,17 +264,18 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         for (Armazem.Versao b : backups) {
             boolean ehIgual = igual != null && igual.id.equals(b.id);
             LinearLayout cb = cartao(false);
-            cb.addView(texto(b.nome, 16, R.color.topo_texto, true));
-            cb.addView(texto(data(b.criado) + (ehIgual ? " · igual à versão em uso" : ""), 12, R.color.topo_sub, false));
+            cb.addView(texto(b.nomeExibido(), 16, R.color.topo_texto, true));
+            if (!b.nomeExibido().equals(b.nome)) cb.addView(texto(b.nome, 13, R.color.topo_sub, false));
+            cb.addView(texto(data(b.criado) + (ehIgual ? " · é o modelo em uso" : ""), 12, R.color.topo_sub, false));
             detalhe(cb, "Chat", descricao(b, Armazem.CHAT));
+            detalhe(cb, "Completar texto", descricao(b, Armazem.BASE));
             detalhe(cb, "Busca (RAG)", descricao(b, Armazem.INDICE));
-            detalhe(cb, "Memória", b.resumoMemoria() + " · conversa: " + plural(b.mensagens(), "mensagem", "mensagens"));
             LinearLayout lb = linhaDeBotoes(cb);
-            botao(lb, "Usar", true, v -> usar(b, igual != null));
+            if (!ehIgual) botao(lb, "Usar", true, v -> SeletorModelos.confirmarUso(this, motor, b));
             botao(lb, "Renomear", false, v -> renomear(b.id, b.nome));
+            botao(lb, "Apelido", false, v -> SeletorModelos.pedirApelido(this, motor, b.id, b));
             LinearLayout lb2 = linhaDeBotoes(cb);
             botao(lb2, "Exportar", false, v -> exportar(b));
-            botao(lb2, "Limpar", false, v -> limpar(b));
             TextView apagar = botao(lb2, "Apagar", false, v -> apagar(b));
             apagar.setTextColor(getColor(R.color.perigo));
         }
@@ -282,10 +285,6 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
                 armazem.espacoUsado() >> 20), 12, R.color.aviso, false);
         rodape.setPadding(dp(4), dp(14), dp(4), dp(8));
         conteudo.addView(rodape);
-    }
-
-    private static String plural(int n, String um, String varios) {
-        return n + " " + (n == 1 ? um : varios);
     }
 
     // ---------- ações ----------
@@ -320,24 +319,6 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
     private void renomear(String id, String nomeAtual) {
         pedirTexto(id == null ? "Renomear a versão em uso" : "Renomear o backup", nomeAtual, "Renomear",
                 nome -> motor.renomear(id, nome));
-    }
-
-    private void usar(Armazem.Versao b, boolean atualJaSalva) {
-        SeletorModelos.confirmarUso(this, motor, b, atualJaSalva);
-    }
-
-    /** Apaga a conversa e/ou a memória guardadas no backup, sem criar outro. */
-    private void limpar(Armazem.Versao b) {
-        int msgs = b.mensagens();
-        boolean[] marcados = {msgs > 0, false};
-        String[] itens = {"Conversa (" + plural(msgs, "mensagem", "mensagens") + ")",
-                "Memória (" + b.resumoMemoria() + ")"};
-        new AlertDialog.Builder(this).setTitle("Limpar \"" + b.nome + "\"")
-                .setMultiChoiceItems(itens, marcados, (d, i, sim) -> marcados[i] = sim)
-                .setPositiveButton("Limpar", (d, w) -> {
-                    if (marcados[0] || marcados[1]) motor.limparBackup(b.id, marcados[0], marcados[1]);
-                })
-                .setNegativeButton("Cancelar", null).show();
     }
 
     private void apagar(Armazem.Versao b) {

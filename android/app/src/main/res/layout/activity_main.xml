@@ -14,23 +14,25 @@
         android:background="@color/topo"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="12dp"
+        android:paddingStart="2dp"
         android:paddingTop="8dp"
         android:paddingEnd="2dp"
         android:paddingBottom="8dp">
 
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/circulo_branco"
-            android:contentDescription="@null"
-            android:padding="3dp"
-            android:src="@drawable/logo_laika" />
+        <!-- Lista de chats (abre pela esquerda) -->
+        <ImageButton
+            android:id="@+id/chats"
+            android:layout_width="44dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/chats"
+            android:focusable="false"
+            android:src="@drawable/ic_chats" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="4dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -38,6 +40,8 @@
                 android:id="@+id/titulo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="@string/app_name"
                 android:textColor="@color/topo_texto"
                 android:textSize="19sp"
@@ -258,6 +262,17 @@
         android:gravity="bottom"
         android:orientation="horizontal"
         android:padding="8dp">
+
+        <!-- +: resposta longa, completar texto e memória de IA -->
+        <ImageButton
+            android:id="@+id/mais"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/botao_redondo"
+            android:contentDescription="@string/mais_opcoes"
+            android:focusable="false"
+            android:src="@drawable/ic_mais_campo" />
 
         <EditText
             android:id="@+id/entrada"

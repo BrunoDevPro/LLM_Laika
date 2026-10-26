@@ -13,5 +13,7 @@
     <string name="colab">Treinar</string>
     <string name="cancelar">Cancelar</string>
     <string name="modelos">Escolher o modelo</string>
+    <string name="chats">Chats</string>
+    <string name="mais_opcoes">Resposta longa, completar texto e memória de IA</string>
     <string name="descer">Ir para o fim da conversa</string>
 </resources>
