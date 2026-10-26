@@ -346,19 +346,20 @@ def knowledge_examples(articles, forms=4):
     return examples
 
 
-def synthetic_examples(book_texts, n, seed=0, summary_texts=None, summary_share=0.2):
+def synthetic_examples(book_texts, n, seed=0, summary_texts=None, summary_share=0.0):
     """Cria pares pergunta/resposta cujas respostas saem dos próprios livros.
 
     Isso ensina o modelo a responder usando o que aprendeu no pré-treino, em vez
     de devolver sempre alguma resposta decorada do pergeresp. Uma parte
-    (summary_share) são pedidos de resumo com trechos de summary_texts.
+    (summary_share, desligada por padrão) são pedidos de resumo extrativo com trechos de summary_texts:
+    eles ensinavam que resumir é copiar uma frase do texto.
     """
     import random
 
     rng = random.Random(seed)
     n_summary = int(n * summary_share)
     summaries = summary_examples(summary_texts if summary_texts is not None else book_texts,
-                                 n_summary, seed=seed)
+                                 n_summary, seed=seed) if n_summary > 0 else []
     n -= len(summaries)
 
     paragraphs = [p for text in book_texts for p in book_paragraphs(text)]

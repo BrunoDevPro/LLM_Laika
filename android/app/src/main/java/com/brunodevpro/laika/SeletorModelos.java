@@ -21,14 +21,14 @@ import com.brunodevpro.laika.core.Armazem;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Painel flutuante (sobe do rodapé, sem trocar de tela) com todos os modelos do celular: a versão em uso e
- * os backups. Um toque troca de modelo; "Versões e backups" abre a tela completa (importar, exportar...).
+ * Painel flutuante (sobe do rodapé, sem trocar de tela) com todos os modelos do celular: o em uso (uma vez só) e
+ * os backups, pelo apelido. Um toque troca de modelo; segurar dá um apelido; "Versões e backups" abre a tela
+ * completa (detalhes, importar, exportar...).
  */
 final class SeletorModelos {
     private final Activity tela;
@@ -56,11 +56,6 @@ final class SeletorModelos {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR")).format(new Date(t));
     }
 
-    private static String modelo(Armazem.Versao v) {
-        Armazem.Arquivo a = v.arquivos.get(Armazem.CHAT);
-        return a == null || a.descricao == null ? "" : a.descricao;
-    }
-
     void mostrar() {
         Armazem armazem = motor.armazem;
         if (armazem == null) return;
@@ -69,7 +64,7 @@ final class SeletorModelos {
         try {
             atual = armazem.atual();
             backups = armazem.backups();
-            igual = armazem.backupIgualAoAtual();
+            igual = armazem.backupComMesmosArquivos();
         } catch (IOException e) {
             new AlertDialog.Builder(tela).setMessage("Erro ao ler os modelos: " + e.getMessage())
                     .setPositiveButton("OK", null).show();
@@ -89,25 +84,27 @@ final class SeletorModelos {
         la.gravity = Gravity.CENTER_HORIZONTAL;
         la.bottomMargin = dp(12);
         raiz.addView(alca, la);
+        TextView titulo = texto("Modelos", 20, R.color.topo_texto, true);
+        titulo.setPadding(0, 0, 0, dp(10));
+        raiz.addView(titulo);
 
-        raiz.addView(texto("Modelos", 20, R.color.topo_texto, true));
-        TextView sub = texto(backups.isEmpty()
-                ? "Só há a versão em uso. Faça um backup ou importe um modelo novo em Versões e backups."
-                : "Toque num modelo para usá-lo. A conversa e a memória vão junto com cada versão.",
-                13, R.color.aviso, false);
-        sub.setPadding(0, dp(2), 0, dp(10));
-        raiz.addView(sub);
-
+        // O modelo em uso aparece uma vez só: o backup com os mesmos arquivos é ele.
         LinearLayout lista = new LinearLayout(tela);
         lista.setOrientation(LinearLayout.VERTICAL);
-        cartao(lista, atual.nome, "Em uso" + (modelo(atual).isEmpty() ? "" : " · " + modelo(atual)), true, null);
+        cartao(lista, atual, true, null, v -> {
+            d.dismiss();
+            pedirApelido(tela, motor, null, atual);
+            return true;
+        });
         for (Armazem.Versao b : backups) {
-            boolean ehIgual = igual != null && igual.id.equals(b.id);
-            String desc = data(b.criado) + (ehIgual ? " · igual à em uso" : "")
-                    + (modelo(b).isEmpty() ? "" : "\n" + modelo(b));
-            cartao(lista, b.nome, desc, false, ehIgual ? null : v -> {
+            if (igual != null && igual.id.equals(b.id)) continue;
+            cartao(lista, b, false, v -> {
                 d.dismiss();
-                confirmarUso(tela, motor, b, igual != null);
+                confirmarUso(tela, motor, b);
+            }, v -> {
+                d.dismiss();
+                pedirApelido(tela, motor, b.id, b);
+                return true;
             });
         }
         ScrollView rolagem = new ScrollView(tela);
@@ -148,7 +145,9 @@ final class SeletorModelos {
         d.show();
     }
 
-    private void cartao(LinearLayout pai, String nome, String descricao, boolean emUso, View.OnClickListener acao) {
+    /** O apelido em destaque e, se houver, o nome oficial embaixo, menor e em cinza. Segurar: dar um apelido. */
+    private void cartao(LinearLayout pai, Armazem.Versao v, boolean emUso, View.OnClickListener acao,
+                        View.OnLongClickListener segurar) {
         LinearLayout c = new LinearLayout(tela);
         c.setOrientation(LinearLayout.HORIZONTAL);
         c.setGravity(Gravity.CENTER_VERTICAL);
@@ -156,26 +155,46 @@ final class SeletorModelos {
         c.setPadding(dp(14), dp(12), dp(14), dp(12));
         LinearLayout textos = new LinearLayout(tela);
         textos.setOrientation(LinearLayout.VERTICAL);
-        textos.addView(texto(nome, 16, R.color.topo_texto, true));
-        TextView d = texto(descricao, 12, R.color.topo_sub, false);
-        d.setPadding(0, dp(2), 0, 0);
-        textos.addView(d);
+        textos.addView(texto(v.nomeExibido(), 16, R.color.topo_texto, true));
+        if (!v.nomeExibido().equals(v.nome)) {
+            TextView oficial = texto(v.nome, 12, R.color.topo_sub, false);
+            oficial.setPadding(0, dp(2), 0, 0);
+            textos.addView(oficial);
+        }
         c.addView(textos, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         if (emUso) {
             ImageView ok = new ImageView(tela);
             ok.setImageResource(R.drawable.ic_ok);
             c.addView(ok, new LinearLayout.LayoutParams(dp(24), dp(24)));
         }
-        if (acao != null) {
-            c.setForeground(tela.getDrawable(R.drawable.item_menu));
-            c.setOnClickListener(acao);
-        } else if (!emUso) {
-            c.setAlpha(0.6f);
-        }
+        c.setForeground(tela.getDrawable(R.drawable.item_menu));
+        if (acao != null) c.setOnClickListener(acao);
+        c.setOnLongClickListener(segurar);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         lp.bottomMargin = dp(8);
         pai.addView(c, lp);
+    }
+
+    /** Diálogo do apelido de um modelo (id null = o em uso). Vazio tira o apelido. */
+    static void pedirApelido(Activity tela, Motor motor, String id, Armazem.Versao v) {
+        android.widget.EditText campo = new android.widget.EditText(tela);
+        campo.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        campo.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(40)});
+        campo.setText(v.apelido == null ? "" : v.apelido);
+        campo.setHint(v.nome);
+        campo.setSelectAllOnFocus(true);
+        android.widget.FrameLayout moldura = new android.widget.FrameLayout(tela);
+        int pad = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, tela.getResources().getDisplayMetrics());
+        moldura.setPadding(pad, pad / 2, pad, 0);
+        moldura.addView(campo);
+        AlertDialog d = new AlertDialog.Builder(tela).setTitle("Apelido do modelo").setView(moldura)
+                .setPositiveButton("Guardar", (di, w) -> motor.apelidar(id, campo.getText().toString()))
+                .setNeutralButton("Tirar", (di, w) -> motor.apelidar(id, ""))
+                .setNegativeButton("Cancelar", null).create();
+        if (d.getWindow() != null) d.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        d.show();
+        campo.requestFocus();
     }
 
     private void botao(LinearLayout linha, String rotulo, boolean primario, View.OnClickListener acao) {
@@ -190,58 +209,23 @@ final class SeletorModelos {
     }
 
     /**
-     * Troca para um backup. Se a versão em uso tiver mudanças fora dos backups (conversa, memória ou arquivos),
-     * pergunta o que fazer: salvar por cima do backup de onde ela veio (sem criar outro), guardar como backup
-     * novo ou trocar sem guardar.
+     * Troca de modelo. A conversa e a memória são do chat aberto (não do modelo), então não há nada para salvar:
+     * troca direto.
      */
-    static void confirmarUso(Activity tela, Motor motor, Armazem.Versao b, boolean atualJaSalva) {
+    static void confirmarUso(Activity tela, Motor motor, Armazem.Versao b) {
         if (motor.ocupado()) {
             new AlertDialog.Builder(tela).setMessage("Espere terminar: " + motor.tarefa).setPositiveButton("OK", null).show();
             return;
         }
-        if (atualJaSalva) {
-            new AlertDialog.Builder(tela).setTitle("Usar \"" + b.nome + "\"?")
-                    .setMessage("A conversa, a memória e o modelo passam a ser os deste backup.")
-                    .setPositiveButton("Usar", (d, w) -> motor.usarBackup(b.id, null))
-                    .setNegativeButton("Cancelar", null).show();
-            return;
-        }
-        Armazem.Versao origem = null;
-        try {
-            origem = motor.armazem.origemDoAtual();
-        } catch (IOException ignorado) {
-            // sem a origem, só as outras opções
-        }
-        List<String> opcoes = new ArrayList<>();
-        List<Runnable> acoes = new ArrayList<>();
-        if (origem != null) {
-            String id = origem.id;
-            opcoes.add("Salvar por cima de \"" + origem.nome + "\" e trocar");
-            acoes.add(() -> motor.usarBackupSalvandoPorCima(b.id, id));
-        }
-        opcoes.add("Guardar como backup novo e trocar");
-        acoes.add(() -> motor.usarBackup(b.id, motor.nomeVersao + " (" + data(System.currentTimeMillis()) + ")"));
-        opcoes.add("Trocar sem guardar (a conversa e a memória novas se perdem)");
-        acoes.add(() -> motor.usarBackup(b.id, null));
-        TextView titulo = new TextView(tela);
-        titulo.setText("Usar \"" + b.nome + "\"?\n\nA versão em uso (\"" + motor.nomeVersao + "\") tem mudanças que não "
-                + "estão em nenhum backup (conversa, memória ou arquivos). O que fazer com elas?");
-        titulo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        titulo.setTextColor(tela.getColor(R.color.topo_texto));
-        int pad = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, tela.getResources().getDisplayMetrics());
-        titulo.setPadding(pad, pad, pad, pad / 2);
-        new AlertDialog.Builder(tela).setCustomTitle(titulo)
-                .setItems(opcoes.toArray(new String[0]), (d, i) -> acoes.get(i).run())
-                .setNegativeButton("Cancelar", null).show();
+        motor.usarBackup(b.id);
     }
 
-    /** Um modelo novo chegou aos backups (PROJETO do Colab): oferece usar agora. */
+    /** Um modelo novo chegou aos backups (NOME ou PROJETO do Colab): oferece usar agora. */
     static void mostrarBackupNovo(Activity tela, Motor motor, String titulo, String texto, String id) {
         new AlertDialog.Builder(tela).setTitle(titulo).setMessage(texto)
                 .setPositiveButton("Usar agora", (d, w) -> {
                     try {
-                        Armazem.Versao b = motor.armazem.backup(id);
-                        confirmarUso(tela, motor, b, motor.armazem.backupIgualAoAtual() != null);
+                        confirmarUso(tela, motor, motor.armazem.backup(id));
                     } catch (IOException e) {
                         new AlertDialog.Builder(tela).setMessage("Erro ao abrir o backup: " + e.getMessage())
                                 .setPositiveButton("OK", null).show();

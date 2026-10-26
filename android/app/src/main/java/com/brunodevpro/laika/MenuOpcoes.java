@@ -24,8 +24,8 @@ import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 
 /**
- * O menu da tela de conversa: as opções de marcar (num grupo que abre e fecha), as barrinhas de
- * temperatura e de tamanho das respostas, e os atalhos (memória, versões, treinar, limpar).
+ * O menu da tela de conversa: as barrinhas de temperatura e de tamanho das respostas, os atalhos (memória,
+ * versões, treinar) e, embaixo, as opções de marcar (num grupo que abre e fecha) e "Limpar conversa".
  */
 final class MenuOpcoes {
     interface Acoes {
@@ -79,8 +79,6 @@ final class MenuOpcoes {
         lista.setOrientation(LinearLayout.VERTICAL);
         lista.setPadding(dp(8), dp(8), dp(8), dp(8));
 
-        montarOpcoes(lista);
-        divisoria(lista);
         barra(lista, "Temperatura", "mais previsível", "mais criativa",
                 (int) Math.round(Motor.TEMP_MIN * 100), (int) Math.round(Motor.TEMP_MAX * 100),
                 (int) Math.round(motor.temperatura * 100),
@@ -97,6 +95,8 @@ final class MenuOpcoes {
         item(lista, R.drawable.ic_lampada, "O que a Laika lembra de mim", R.color.texto_laika, acoes::memoria);
         item(lista, R.drawable.ic_versoes, "Versões e backups", R.color.texto_laika, acoes::versoes);
         item(lista, R.drawable.ic_treinar, "Treinar", R.color.texto_laika, acoes::treinar);
+        divisoria(lista);
+        montarOpcoes(lista);
         item(lista, R.drawable.ic_limpar, "Limpar conversa", R.color.perigo, acoes::limpar);
 
         ScrollView rolagem = new ScrollView(tela);
@@ -166,26 +166,15 @@ final class MenuOpcoes {
 
         caixa(grupo, "Mostrar fontes", "*Título no fim das respostas", motor.mostrarFontes, v -> motor.mostrarFontes = v);
         caixa(grupo, "Buscar nos textos (RAG)", "Wikipédia, livros e textos do app", motor.usarRag, v -> motor.usarRag = v);
-        caixa(grupo, "Memória do usuário", "Seu nome, cidade, gostos e \"lembre que…\"", motor.usarMemoria,
+        caixa(grupo, "Memória do usuário", "Seu nome, cidade, gostos e \"lembre que…\" (cada chat tem a sua)", motor.usarMemoria,
                 v -> motor.usarMemoria = v);
-        caixa(grupo, "Memória de IA", "Lembra das últimas 5 mensagens da conversa", motor.usarHistorico,
-                v -> motor.usarHistorico = v);
-        caixa(grupo, "Respostas longas", "Respostas bem mais detalhadas (o mesmo que pedir \"resposta longa\")",
-                motor.respostasLongas, v -> motor.respostasLongas = v);
-        if (motor.temBase) {
-            caixa(grupo, "Modo completar texto", "Escreva um começo e a Laika continua", motor.modoCompletar, v -> {
-                motor.modoCompletar = v;
-                motor.aviso(v ? "Modo completar texto: escreva o começo de um texto e a Laika continua "
-                        + "(sem RAG nem memória)." : "Modo conversa.");
-            });
-        }
+        // Resposta longa, completar texto e memória de IA ficam no botão + do campo de mensagem (MaisOpcoes).
 
         Runnable atualizar = () -> {
             boolean aberto = prefs.getBoolean("opcoes_abertas", false);
             grupo.setVisibility(aberto ? View.VISIBLE : View.GONE);
             seta.setRotation(aberto ? 180 : 0);
-            int ligadas = (motor.mostrarFontes ? 1 : 0) + (motor.usarRag ? 1 : 0) + (motor.usarMemoria ? 1 : 0)
-                    + (motor.usarHistorico ? 1 : 0) + (motor.modoCompletar ? 1 : 0) + (motor.respostasLongas ? 1 : 0);
+            int ligadas = (motor.mostrarFontes ? 1 : 0) + (motor.usarRag ? 1 : 0) + (motor.usarMemoria ? 1 : 0);
             resumo.setText(aberto ? "" : ligadas + " ligada" + (ligadas == 1 ? "" : "s"));
         };
         atualizar.run();

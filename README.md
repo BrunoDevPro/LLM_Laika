@@ -29,6 +29,7 @@ Veja `android/LEIA-ME.md` para instalar o APK, configurar a tela Treinar e gerar
 | Modelo maior (~50M; precisa de mais dados) | 1; 2 com `ARTIGOS = "1 milhão"`; 3 com `PRESET = "colab_50m"` e `MODO = "do_zero"`; 4 |
 | **Modelo de 100M** (contexto 2048, A100) | 1; 2 com `ARTIGOS = "todos"`, `CAROLINA`, `GIGAVERBO = 1,5 bilhão` e `SFT = 300 mil`; 3 com `PRESET = "colab_100m"`; 4; 6; 7. Ver **`TREINO_100M.md`** |
 | Dar um nome ao modelo no app (vai direto para os backups) | 1 com um `NOME`; depois as células de sempre (ex.: 4 e 6) |
+| Fine-tuning novo do 100M sem mexer no atual | 1 com um `PROJETO` e `PARTIR_DE = "padrão"`; 4; 6; 7 |
 | **Outro modelo sem apagar o atual** (ex.: um pequeno) | 1 com um `PROJETO`; 3 com `MODO = "do_zero"`; 4; 6. Cada projeto tem as suas pastas `checkpoints_<nome>` e `tokens_<nome>` no Drive, e o app guarda o zip direto nos backups com esse nome |
 | Ligar as células pelo app, sem deixar o Colab aberto | 0 (uma vez só) |
 
@@ -142,8 +143,9 @@ Em 2 épocas (`--epochs`), cada lote mistura três coisas:
    máximo 2 vezes por época, `--max-qa-repeat`; com os ~7.600 atuais, cada um entra uma vez por época, ~37%);
    o `identidade.txt` tem peso extra (`--identity-boost`).
 2. Milhares de exemplos gerados automaticamente (`--synthetic`, 10 mil): "Continue o texto: …", "Escreva uma frase
-   com a palavra X", "Complete a frase: …", "Resuma o texto: …" (trechos dos livros do Gutenberg, com um
-   resumo extrativo: a frase que melhor representa o trecho) e até 3000 "O que é X?" da Wikipédia.
+   com a palavra X", "Complete a frase: …" e até 3000 "O que é X?" da Wikipédia. Os resumos vêm dos 1.008
+   escritos à mão (`tools/resumos*.py`, com outras palavras) e do SFT; o antigo "Resuma o texto" dos livros, que
+   copiava uma frase do trecho, só volta com `--resumos-extrativos 0.2`.
 3. Trechos de texto puros (`--replay`), para o modelo não esquecer o português.
 
 A cada época o script mostra respostas para 8 perguntas de teste. Se ele voltar a responder tudo com o

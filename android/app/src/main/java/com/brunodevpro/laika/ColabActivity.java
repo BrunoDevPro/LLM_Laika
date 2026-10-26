@@ -531,14 +531,19 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         cb.setTypeface(cb.getTypeface(), Typeface.BOLD);
         cb.setTextColor(getColor(R.color.topo_texto));
         cb.setChecked(sempre || marcadas.contains(c.numero));
-        ligado(cb, !sempre && !c.soNavegador);
+        if (sempre || c.soNavegador) {  // não dá para desmarcar, mas segurar ainda mostra a explicação
+            cb.setClickable(false);
+            cb.setAlpha(0.45f);
+        }
         k.addView(cb);
-        String desc = c.soNavegador ? "Só no navegador (" + (c.numero == 0 ? "rode uma vez para ligar o app ao Colab" : "conversa interativa")
-                + ")." : sempre ? "Sempre roda antes das outras (monta o Drive, baixa o código). NOME: o nome do modelo no app (vai "
-                + "direto para os backups). PROJETO: só para um modelo novo, do zero, em pastas só dele (comece pela célula 3)." : resumo(c);
-        TextView d = texto(desc, 12, R.color.aviso, false);
-        d.setPadding(dp(32), 0, 0, dp(2));
-        k.addView(d);
+        // Sem textos embaixo das células: a explicação (os comentários da célula no notebook) abre ao segurar o nome.
+        String explicacao = c.soNavegador ? "Só funciona no navegador, no Colab." : c.descricao;
+        cb.setOnLongClickListener(v -> {
+            new AlertDialog.Builder(this).setTitle(c.numero + ") " + c.nome)
+                    .setMessage(explicacao == null || explicacao.isEmpty() ? c.titulo : explicacao)
+                    .setPositiveButton("OK", null).show();
+            return true;
+        });
         if (c.soNavegador) return;
         LinearLayout params = new LinearLayout(this);
         params.setOrientation(LinearLayout.VERTICAL);
@@ -554,13 +559,6 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             params.setVisibility(marcada ? View.VISIBLE : View.GONE);
             guardarEscolhas();
         });
-    }
-
-    /** Descrição curta: o resto do título, ou a primeira linha dos comentários. */
-    private static String resumo(Caderno.Celula c) {
-        String resto = c.titulo.substring(Math.min(c.titulo.length(), c.nome.length())).replaceFirst("^[\\s:—]+", "");
-        String s = resto.isEmpty() ? c.descricao.split("\n")[0] : resto;
-        return s.length() > 160 ? s.substring(0, 157) + "…" : s;
     }
 
     /** O valor escolhido, ou o padrão do notebook se o guardado não vale mais (o parâmetro mudou de tipo). */

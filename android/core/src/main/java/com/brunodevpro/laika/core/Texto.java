@@ -192,6 +192,33 @@ public final class Texto {
 
     /** Gatilho de resposta longa (LONG_TRIGGER do data_utils.py), que a opção "Respostas longas" do app acrescenta. */
     public static final String GATILHO_LONGO = "Resposta longa.";
+
+    /** O pedido de título de um chat (o fine-tuning tem exemplos com esta frase: gerar_pergeresp.titulos_sections). */
+    public static final String PEDIDO_TITULO = "Dê um título curto para esta conversa: ";
+
+    /**
+     * O título que a IA gerou, limpo (primeira linha, sem aspas nem ponto final, até 6 palavras e 40 letras). Se veio
+     * vazio ou estranho (pergunta, frase longa), usa o começo da primeira mensagem do usuário.
+     */
+    public static String limparTitulo(String gerado, String pergunta) {
+        String t = gerado == null ? "" : gerado.trim();
+        int nl = t.indexOf('\n');
+        if (nl >= 0) t = t.substring(0, nl).trim();
+        t = t.replaceAll("^[\"'“”«»*\\s]+|[\"'“”«»*.!:;,\\s]+$", "");
+        String[] palavras = t.split("\\s+");
+        boolean ruim = t.isEmpty() || t.endsWith("?") || palavras.length > 6 || t.length() > 40
+                || t.toLowerCase(Locale.ROOT).startsWith("dê um título");
+        if (ruim) {
+            t = pergunta == null ? "" : pergunta.trim().replaceAll("\\s+", " ").replaceAll("[?.!]+$", "");
+            if (t.length() > 40) {
+                int corte = t.lastIndexOf(' ', 40);
+                t = t.substring(0, corte > 15 ? corte : 40) + "…";
+            }
+        }
+        if (t.isEmpty()) return Chats.SEM_TITULO;
+        return Character.toUpperCase(t.charAt(0)) + t.substring(1);
+    }
+
     private static final Pattern GATILHOS = Pattern.compile(
             "\\b(?:explique melhor|explica melhor|resposta longa|responda com detalhes)\\b[.:!,]?",
             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | UNICODE);

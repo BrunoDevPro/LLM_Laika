@@ -38,7 +38,7 @@ python rag.py build
 ```
 
 `SFT = "300 mil conversas"` (o atalho **Dados para 100M** já põe): conversas do GigaVerbo-v2-SFT (Apache 2.0,
-geradas por outra IA e filtradas por qualidade; 70% pedidos variados e 30% perguntas com contexto, ~1 GB) para o
+geradas por outra IA e filtradas por qualidade; 60% pedidos variados, 30% perguntas com contexto e 10% resumos, ~1 GB) para o
 fine-tuning. Os pesos continuam do zero: são só exemplos de pergunta e resposta.
 
 Leva de 1 a 3 horas, a maior parte na Wikipédia e no índice do RAG. Se cair, rode de novo: os três
