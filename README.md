@@ -143,8 +143,9 @@ Em 2 épocas (`--epochs`), cada lote mistura três coisas:
    máximo 2 vezes por época, `--max-qa-repeat`; com os ~7.600 atuais, cada um entra uma vez por época, ~37%);
    o `identidade.txt` tem peso extra (`--identity-boost`).
 2. Milhares de exemplos gerados automaticamente (`--synthetic`, 10 mil): "Continue o texto: …", "Escreva uma frase
-   com a palavra X", "Complete a frase: …", "Resuma o texto: …" (trechos dos livros do Gutenberg, com um
-   resumo extrativo: a frase que melhor representa o trecho) e até 3000 "O que é X?" da Wikipédia.
+   com a palavra X", "Complete a frase: …" e até 3000 "O que é X?" da Wikipédia. Os resumos vêm dos 1.008
+   escritos à mão (`tools/resumos*.py`, com outras palavras) e do SFT; o antigo "Resuma o texto" dos livros, que
+   copiava uma frase do trecho, só volta com `--resumos-extrativos 0.2`.
 3. Trechos de texto puros (`--replay`), para o modelo não esquecer o português.
 
 A cada época o script mostra respostas para 8 perguntas de teste. Se ele voltar a responder tudo com o

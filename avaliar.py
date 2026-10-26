@@ -9,9 +9,11 @@ Mede três coisas:
   1) perplexidade num texto fixo que nunca entra no treino (data/avaliacao/textos.txt): quanto o modelo
      "se surpreende" com português comum (menor é melhor);
   2) ~100 perguntas fixas (data/avaliacao/perguntas.jsonl), por categoria (identidade, fatos sem e com
-     RAG, leitura, seguimento, resposta longa, contas, sim ou não, datas, generalização, "não sei"...).
+     RAG, leitura, seguimento, resposta longa, contas, sim ou não, datas, generalização, "não sei", resumo...).
      Cada uma tem as palavras esperadas na resposta; as respostas são geradas sem sorteio (sempre o token
-     mais provável), então a mesma versão dá sempre o mesmo resultado;
+     mais provável), então a mesma versão dá sempre o mesmo resultado. Nos resumos, a resposta também
+     não pode ser longa demais (max_palavras) nem copiada do texto (max_copia: fração de sequências de
+     4 palavras iguais às do texto);
   3) a busca do RAG (data/avaliacao/rag.jsonl): para cada pergunta, o artigo que deveria vir (ou nenhum).
      Conta acertos, perguntas sem contexto e contextos errados. Só roda com o índice (data/rag/laika_rag.db).
 
@@ -73,6 +75,16 @@ def contem(resposta, alternativas):
     return any(" " + " ".join(normalize(a).replace("-", " ").split()) in alvo for a in alternativas)
 
 
+def copia(resposta, texto, n=4):
+    """Fração das sequências de n palavras da resposta que aparecem iguais no texto (0 = escreveu com as próprias
+    palavras, 1 = copiou tudo). Um resumo que só repete frases do texto passa nas palavras esperadas, mas não resume."""
+    def grupos(s):
+        w = normalize(s).split()
+        return [tuple(w[i:i + n]) for i in range(len(w) - n + 1)]
+    r, t = grupos(resposta), set(grupos(texto))
+    return sum(g in t for g in r) / len(r) if r else 0.0
+
+
 def nota(item, resposta):
     """(acertou?, fração das palavras esperadas encontradas)."""
     grupos = item.get("esperado", [])
@@ -82,6 +94,11 @@ def nota(item, resposta):
     if any(contem(resposta, p) for p in item.get("proibido", [])):
         ok, parcial = False, 0.0
     if item.get("min_palavras") and len(resposta.split()) < item["min_palavras"]:
+        ok = False
+    if item.get("max_palavras") and len(resposta.split()) > item["max_palavras"]:
+        ok = False
+    # Resumos: reprovado se a resposta for quase toda copiada da pergunta (o texto a resumir está nela).
+    if "max_copia" in item and copia(resposta, item["pergunta"]) > item["max_copia"]:
         ok = False
     return ok, parcial
 
@@ -106,8 +123,11 @@ def avaliar_perguntas(model, tokenizer, itens, rag, device, max_padrao):
     for item in itens:
         resposta, fonte = responder(model, tokenizer, item, rag, device, max_padrao)
         ok, parcial = nota(item, resposta)
-        resultados.append({"categoria": item["categoria"], "pergunta": item["pergunta"], "resposta": resposta,
-                           "fonte": fonte, "acertou": ok, "parcial": round(parcial, 3)})
+        r = {"categoria": item["categoria"], "pergunta": item["pergunta"], "resposta": resposta,
+             "fonte": fonte, "acertou": ok, "parcial": round(parcial, 3)}
+        if "max_copia" in item:
+            r["copia"] = round(copia(resposta, item["pergunta"]), 3)
+        resultados.append(r)
     return resultados
 
 
@@ -224,6 +244,14 @@ def main():
         linha_ppl += f"{m['perplexidade']:.2f}".rjust(16)
     print(linha_total)
     print(linha_ppl)
+    # Quanto dos resumos é cópia do texto (menor é melhor; acima de ~0,5 o modelo está copiando, não resumindo).
+    linha_copia, tem = "cópia nos resumos".ljust(22), False
+    for n in nomes:
+        c = [r["copia"] for r in relatorio["modelos"][n]["respostas"] if "copia" in r]
+        tem |= bool(c)
+        linha_copia += (f"{sum(c) / len(c):.2f}" if c else "-").rjust(16)
+    if tem:
+        print(linha_copia)
     if len(nomes) == 2:
         a, b = (relatorio["modelos"][n]["respostas"] for n in nomes)
         mudou = [(x, y) for x, y in zip(a, b) if x["acertou"] != y["acertou"]]

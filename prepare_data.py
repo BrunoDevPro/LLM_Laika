@@ -446,7 +446,10 @@ def download_gigaverbo(pasta, tokens, subconjunto="edu_high", toxico_max=2):
 # Licença Apache 2.0. É gerado por outra IA (Qwen2.5) e filtrado por nota de qualidade; os pesos da Laika
 # continuam treinados do zero, isto só entra como exemplo de pergunta e resposta no fine-tuning.
 SFT = "Polygl0t/gigaverbo-v2-sft"
-SFT_PADRAO = "general:0.7,retrieval:0.3"
+# summarization (desde a 1.11): resumos que reescrevem o texto (notícias e artigos; média de ~80 palavras para
+# textos de ~200), para o modelo não aprender que resumir é copiar uma frase. Quem já tinha baixado general e
+# retrieval só baixa o que falta de summarization.
+SFT_PADRAO = "general:0.6,retrieval:0.3,summarization:0.1"
 # Exemplos que falam de outra IA ("sou o Qwen, da Alibaba") estragariam a identidade da Laika.
 _SFT_OUTRA_IA = re.compile(r"\b(?:qwen|alibaba|openai|chatgpt|gpt-?[345]|anthropic|claude|gemini|llama|deepseek|"
                            r"mistral|tucano|copilot)\b", re.IGNORECASE)
@@ -541,7 +544,7 @@ def download_sft(pasta, total, subconjuntos=SFT_PADRAO, nota_min=4.0, tokens_max
     lista de [pergunta, resposta], como o data/qa/conversas.jsonl). Pega um grupo de linhas de cada arquivo por
     rodada (espalhado) e continua de onde parou (.pronto).
 
-    subconjuntos: "general:0.7,retrieval:0.3" (nome:fração). nota_min: instruct_score mínimo (1 a 5).
+    subconjuntos: "general:0.6,retrieval:0.3,summarization:0.1" (nome:fração). nota_min: instruct_score mínimo (1 a 5).
     tokens_max: tamanho máximo do exemplo (token_count do dataset); o finetune ainda tira o que não couber."""
     try:
         import fsspec
@@ -645,7 +648,7 @@ def main():
                         help="conversas do GigaVerbo-v2-SFT para o fine-tuning (ex.: 300000; 0 = não baixar)")
     parser.add_argument("--sft-dir", default="data/sft")
     parser.add_argument("--sft-subconjuntos", default=SFT_PADRAO,
-                        help=f"subconjuntos e frações (padrão {SFT_PADRAO}; há também summarization, rewriting...)")
+                        help=f"subconjuntos e frações (padrão {SFT_PADRAO}; há também rewriting, translation...)")
     parser.add_argument("--sft-nota-min", type=float, default=4.0, help="nota de qualidade mínima (1 a 5)")
     parser.add_argument("--sft-tokens-max", type=int, default=1500,
                         help="tamanho máximo de cada exemplo (o de 100M tem janela de 2048)")

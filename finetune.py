@@ -5,7 +5,7 @@ Para o modelo não decorar o pergeresp (e responder tudo com ele), cada lote mis
      ~7,5 mil exemplos, cada um aparece uma vez por época, ~37%); o identidade.txt (nome da
      Laika) tem peso extra;
   2) exemplos sintéticos: "continue o texto", "frase com a palavra X", "complete a frase"
-     (de todos os textos) e "resuma o texto" (trechos dos livros do Gutenberg), as perguntas
+     (de todos os textos), as perguntas
      "O que é X?" tiradas da Wikipédia (data/qa_auto/) e ~20 mil perguntas com Contexto tiradas
      dos trechos da Wikipédia ("Onde X nasceu?", "O que X inventou?"; 10% com o trecho errado e a
      resposta "não sei");
@@ -75,6 +75,9 @@ parser.add_argument("--max-qa-repeat", type=int, default=2, help="máximo de vez
 parser.add_argument("--max-text-mb", type=float, default=40,
                     help="MB de texto (amostrados) usados para exemplos sintéticos e replay")
 parser.add_argument("--max-summary-books", type=int, default=80)
+parser.add_argument("--resumos-extrativos", type=float, default=0.0,
+                    help="fração dos sintéticos com resumo extrativo dos livros (uma frase copiada do trecho); era 0,2, "
+                         "mas ensinava a copiar em vez de resumir: os resumos agora vêm escritos à mão e do SFT")
 parser.add_argument("--rag-db", default="data/rag/laika_rag.db")
 parser.add_argument("--rag-share", type=float, default=0.7,
                     help="fração das perguntas (que pedem informação) que ganham Contexto do RAG")
@@ -155,9 +158,11 @@ book_files = [f for folder in args.books for f in sorted(Path(folder).glob("*.tx
 if not book_files:
     raise SystemExit(f"Nenhum texto em {args.books}: o fine-tuning usa os textos para gerar exemplos.")
 book_texts = sample_texts(book_files, args.max_text_mb * 1e6)
-summary_files = sorted(Path(args.summary_books).glob("*.txt"))
-random.shuffle(summary_files)
-summary_texts = [p.read_text(encoding="utf-8") for p in summary_files[:args.max_summary_books]]
+summary_texts = []
+if args.resumos_extrativos > 0:
+    summary_files = sorted(Path(args.summary_books).glob("*.txt"))
+    random.shuffle(summary_files)
+    summary_texts = [p.read_text(encoding="utf-8") for p in summary_files[:args.max_summary_books]]
 print(f"Textos usados: {len(book_texts)} de {len(book_files)} arquivos "
       f"(~{sum(map(len, book_texts)) / 1e6:.0f} M caracteres)")
 
@@ -174,9 +179,9 @@ identity_texts = set(parse_qa_text((Path(args.qa) / "identidade.txt").read_text(
     if (Path(args.qa) / "identidade.txt").exists() else set()
 
 syn_texts = synthetic_examples(book_texts, args.synthetic, seed=args.seed,
-                               summary_texts=summary_texts or None)
-print(f"Exemplos sintéticos gerados dos textos: {len(syn_texts)} "
-      f"(resumos de {len(summary_texts)} livros do Gutenberg incluídos)")
+                               summary_texts=summary_texts or None, summary_share=args.resumos_extrativos)
+print(f"Exemplos sintéticos gerados dos textos: {len(syn_texts)}"
+      + (f" (resumos extrativos de {len(summary_texts)} livros incluídos)" if args.resumos_extrativos > 0 else ""))
 if Path(args.qa_auto).exists():
     print("Perguntas automáticas (Wikipédia):")
     auto = load_qa_examples(args.qa_auto)
@@ -546,9 +551,12 @@ SAMPLE_HISTORY = [("Qual é a capital da França?", "A capital da França é Par
 SAMPLE_PROMPTS = [
     "Qual é o seu nome?", "Oi", "O que é um vulcão?", "Quem foi Santos Dumont?", "Qual é a capital da França?",
     "Complete a frase: Quem espera", "Escreva uma frase com a palavra noite.",
-    "Resuma o texto: O menino acordou cedo, tomou café e foi para a escola de bicicleta. "
-    "No caminho, viu um cachorro perdido e parou para ajudar. Por isso, chegou atrasado, "
-    "mas a professora entendeu quando ele contou o que tinha acontecido.",
+    # Um texto com uma ideia central e detalhes para cortar (o do menino era uma lista de ações sem o que resumir).
+    "Resuma em uma frase: A prefeitura de Lagoa Bonita começou a trocar as lâmpadas antigas da iluminação pública "
+    "por lâmpadas de LED. A troca deve terminar em seis meses e vai alcançar quase quatro mil postes. Segundo a "
+    "prefeitura, as novas lâmpadas gastam cerca de metade da energia e duram muito mais, o que vai reduzir a conta "
+    "de luz do município. Os moradores também esperam ruas mais claras e seguras à noite. O dinheiro economizado "
+    "deve ser usado na reforma das praças.",
 ]
 
 

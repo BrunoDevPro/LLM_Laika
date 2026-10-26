@@ -43,6 +43,7 @@ import pessoas1, pessoas2, pessoas3, conceitos1, conceitos2  # noqa: E402,E401
 import eventos as EV  # noqa: E402
 import eventos2 as EV2  # noqa: E402
 import identidade4 as ID4  # noqa: E402
+import resumos1, resumos2, resumos3, resumos4, resumos5, resumos6, resumos7  # noqa: E402,E401
 
 TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
 QA_DIR = ROOT / "data" / "qa"
@@ -1437,6 +1438,40 @@ CONTINENTES = ["na Europa", "na Ásia", "na África", "na América do Sul", "na 
 ARTIGO_PAIS = {"do": "o ", "da": "a ", "dos": "os ", "de": ""}
 
 
+# Resumos escritos à mão (tools/resumos*.py): o texto -> uma frase, duas frases ou três tópicos, com outras
+# palavras. Antes, a maior parte dos resumos do fine-tuning era extrativa (uma frase do próprio texto), e o modelo
+# aprendeu que resumir é copiar.
+PEDIDOS_RESUMO_UMA = ["Resuma em uma frase: {}", "Resuma este texto em uma frase: {}",
+                      "Qual é a ideia principal deste texto? {}", "Faça um resumo de uma frase: {}",
+                      "Diga em uma frase do que trata este texto: {}", "{}\n\nResuma o texto acima em uma frase."]
+PEDIDOS_RESUMO_CURTO = ["Resuma o texto: {}", "Resuma: {}", "Faça um resumo do texto: {}",
+                        "Faça um resumo curto deste texto: {}", "Resuma em poucas palavras: {}",
+                        "Resuma o texto abaixo.\n\n{}", "{}\n\nResuma o texto acima.", "Resuma em duas frases: {}"]
+PEDIDOS_RESUMO_TOPICOS = ["Resuma em tópicos: {}", "Faça um resumo em tópicos: {}",
+                          "Liste os pontos principais deste texto: {}", "Quais são os pontos principais do texto? {}",
+                          "Resuma em três tópicos: {}", "{}\n\nQuais são os pontos principais desse texto?"]
+
+
+def resumos_sections():
+    """Três resumos de cada texto: os 176 textos longos (resumos1..3) e os textos novos (resumos4..7)."""
+    longas = {pergunta: texto for _, pergunta, texto in LONGAS}
+    textos = []
+    for m in (resumos1, resumos2, resumos3):
+        for pergunta, resumos in m.RESUMOS.items():
+            if pergunta not in longas:
+                raise SystemExit(f"resumo de um texto longo que não existe: {pergunta!r}")
+            textos.append((longas[pergunta],) + resumos)
+    for m in (resumos4, resumos5, resumos6, resumos7):
+        textos += m.TEXTOS
+    pares = []
+    for i, (texto, frase, curto, topicos) in enumerate(textos):
+        pares.append((PEDIDOS_RESUMO_UMA[i % len(PEDIDOS_RESUMO_UMA)].format(texto), frase))
+        pares.append((PEDIDOS_RESUMO_CURTO[i % len(PEDIDOS_RESUMO_CURTO)].format(texto), curto))
+        pares.append((PEDIDOS_RESUMO_TOPICOS[i % len(PEDIDOS_RESUMO_TOPICOS)].format(texto),
+                      "\n".join("- " + t for t in topicos)))
+    return [("Resumos escritos à mão", pares)]
+
+
 def longas_sections(rng):
     """Respostas longas (2 parágrafos), "por quê" e sim ou não."""
     longas = []
@@ -2211,7 +2246,7 @@ def build():
     vistas |= {_chave(item.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0]) for _, items in sections for item in items}
     genericas, leitura_genericas = generic_sections()
     genericas += longas_sections(rng)
-    novas_secoes = pessoas_sections() + datas_sections(rng) + conceitos_sections() + gatilho_sections() + detalhes_sections() + nomes_sections() + titulos_sections()
+    novas_secoes = pessoas_sections() + datas_sections(rng) + conceitos_sections() + gatilho_sections() + detalhes_sections() + nomes_sections() + titulos_sections() + resumos_sections()
     genericas += novas_secoes
     repetidas = 0
     for title, pares in genericas:
