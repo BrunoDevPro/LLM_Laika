@@ -28,6 +28,7 @@ import java.util.List;
 /**
  * A lista de chats, num painel que abre pela esquerda (como nos assistentes de conversa): "Novo chat", os chats
  * do mais recente para o mais antigo e, embaixo, os arquivados. Um toque abre; segurar renomeia, arquiva ou apaga.
+ * Arrastar para a esquerda (ou tocar fora) fecha.
  */
 final class ListaChats {
     private final Activity tela;
@@ -63,7 +64,7 @@ final class ListaChats {
     }
 
     void mostrar() {
-        LinearLayout raiz = new LinearLayout(tela);
+        LinearLayout raiz = new Arrastavel(tela, this::fechar);
         raiz.setOrientation(LinearLayout.VERTICAL);
         raiz.setBackgroundColor(tela.getColor(R.color.fundo));
         raiz.setPadding(dp(14), dp(40), dp(14), dp(16));
@@ -105,13 +106,63 @@ final class ListaChats {
         Window w = janela.getWindow();
         if (w != null) {
             w.setBackgroundDrawable(new ColorDrawable(0));
-            int largura = Math.min(dp(340), (int) (tela.getResources().getDisplayMetrics().widthPixels * 0.85));
+            int largura = Math.min(dp(280), (int) (tela.getResources().getDisplayMetrics().widthPixels * 0.72));
             w.setLayout(largura, ViewGroup.LayoutParams.MATCH_PARENT);
             w.setGravity(Gravity.START);
             w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             w.setDimAmount(0.4f);
         }
         janela.show();
+        // Entra deslizando pela esquerda.
+        raiz.setTranslationX(-dp(280));
+        raiz.animate().translationX(0).setDuration(180).start();
+    }
+
+    /** O painel acompanha o dedo para a esquerda; soltando depois de um terço da largura, fecha. */
+    private static final class Arrastavel extends LinearLayout {
+        private final int folga;
+        private final Runnable fechar;
+        private float x0, y0;
+
+        Arrastavel(android.content.Context c, Runnable fechar) {
+            super(c);
+            folga = android.view.ViewConfiguration.get(c).getScaledTouchSlop();
+            this.fechar = fechar;
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(android.view.MotionEvent e) {
+            if (e.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
+                x0 = e.getRawX();
+                y0 = e.getRawY();
+            } else if (e.getActionMasked() == android.view.MotionEvent.ACTION_MOVE) {
+                float dx = e.getRawX() - x0, dy = e.getRawY() - y0;
+                return dx < -folga && Math.abs(dx) > Math.abs(dy);  // arrasto para a esquerda: o painel assume
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onTouchEvent(android.view.MotionEvent e) {
+            switch (e.getActionMasked()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    x0 = e.getRawX();
+                    return true;
+                case android.view.MotionEvent.ACTION_MOVE:
+                    setTranslationX(Math.min(0, e.getRawX() - x0));
+                    return true;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    if (getTranslationX() < -getWidth() / 3f) {
+                        animate().translationX(-getWidth()).setDuration(120).withEndAction(fechar).start();
+                    } else {
+                        animate().translationX(0).setDuration(120).start();
+                    }
+                    return true;
+                default:
+                    return super.onTouchEvent(e);
+            }
+        }
     }
 
     /** Remonta a lista (chamado também quando um título chega ou um chat some). */

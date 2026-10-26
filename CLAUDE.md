@@ -190,7 +190,11 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
   Versões e backups). O botão **+** do campo (`MaisOpcoes`) tem resposta longa, completar texto e memória de IA (fica
   azul com resposta longa ou completar ligados); o menu ⋮ deixou "Opções" (fontes, RAG, memória do usuário) embaixo,
   logo acima de "Limpar conversa". A tela Treinar não mostra mais as descrições das células: segurar o nome abre a
-  explicação (os comentários da célula).
+  explicação (os comentários da célula). 1.10.1: o + não mexe no teclado (`PopupWindow` sem foco); o painel de chats
+  é mais fino (até 280 dp) e fecha arrastando para a esquerda (`ListaChats.Arrastavel`); cada resposta guarda o modelo
+  que a gerou (`r` = arquivo do chat, `m` = nome, no `conversa.json`) e, onde o modelo muda (ou no fim, se o modelo
+  em uso é outro), aparece a linha discreta "*modelo X usado" com o apelido (`Motor.marcarModelos`, calculada, não
+  salva), no lugar do antigo aviso "Usando o modelo X".
 - **Backups (1.9)**: a versão em uso guarda `origem` (o backup de onde veio, apagado quando os arquivos mudam). Um pacote com
   `laika_nome.txt` (PROJETO) vira um backup com esse nome (`backupComTrocas`: arquivos da versão em uso + os novos, a
   memória do usuário, sem conversa; nome repetido ganha a data), sem trocar a versão em uso, e o app oferece "Usar agora".

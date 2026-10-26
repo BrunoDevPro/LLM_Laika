@@ -65,6 +65,10 @@ final class Motor {
         boolean completar;
         /** trecho: o texto que o RAG achou e entrou no prompt (para "Ver o trecho usado"). */
         volatile String texto, fonte, detalhe, trecho;
+        /** O modelo que gerou esta resposta (o arquivo do chat e o nome na hora), ou null (resposta da memória). */
+        volatile String modeloRef, modeloNome;
+        /** A linha "*modelo X usado" onde o modelo muda (calculada, não é salva). */
+        boolean marcaModelo;
 
         Mensagem(boolean usuario, boolean aviso, String texto) {
             this.usuario = usuario;
@@ -138,7 +142,9 @@ final class Motor {
     private Laika chat, base;
     private IndiceRag rag;
     private Memoria memoria;
-    private String refChat, refBase;
+    private volatile String refChat, refBase;
+    /** Arquivo do modelo de chat -> nome exibido (apelido ou nome), de todas as versões, para as marcas de modelo. */
+    private volatile Map<String, String> nomesPorRef = new java.util.HashMap<>();
     Chats chats;
     /** O chat aberto (muda na thread de fundo) e o que a tela mostra (muda na thread principal, junto com conversa). */
     private volatile Chats.Chat chatAtual;
@@ -429,6 +435,7 @@ final class Motor {
             aviso("O índice desta versão não abriu: " + e.getMessage());
         }
         pronto = true;
+        atualizarNomes();
     }
 
     // ---------- chats ----------
@@ -478,12 +485,64 @@ final class Motor {
             chatDaTela = c;
             conversa.clear();
             conversa.addAll(lidas);
+            marcarModelos(false);
             for (Ouvinte o : new ArrayList<>(ouvintes)) {
                 o.conversaTrocada();
                 o.chatsMudaram();
             }
         });
         avisarEstado();
+    }
+
+    /**
+     * As linhas discretas "*modelo X usado": depois da última resposta de cada trecho da conversa feito com um modelo
+     * diferente do seguinte (ou do modelo em uso, no fim). Na thread principal; avisar = redesenhar se mudou.
+     */
+    private void marcarModelos(boolean avisar) {
+        List<Mensagem> base = new ArrayList<>();
+        for (Mensagem m : conversa) if (!m.marcaModelo) base.add(m);
+        List<Mensagem> nova = new ArrayList<>();
+        Map<String, String> nomes = nomesPorRef;
+        for (int i = 0; i < base.size(); i++) {
+            Mensagem m = base.get(i);
+            nova.add(m);
+            if (m.usuario || m.aviso || m.modeloRef == null) continue;
+            String proximo = refChat;
+            for (int k = i + 1; k < base.size(); k++) {
+                Mensagem n = base.get(k);
+                if (!n.usuario && !n.aviso && n.modeloRef != null) {
+                    proximo = n.modeloRef;
+                    break;
+                }
+            }
+            if (proximo == null || m.modeloRef.equals(proximo)) continue;
+            String nome = nomes.containsKey(m.modeloRef) ? nomes.get(m.modeloRef) : m.modeloNome;
+            Mensagem marca = new Mensagem(false, true, "*modelo " + nome + " usado");
+            marca.marcaModelo = true;
+            nova.add(marca);
+        }
+        boolean igual = nova.size() == conversa.size();
+        for (int i = 0; igual && i < nova.size(); i++) {
+            Mensagem a = nova.get(i), b = conversa.get(i);
+            igual = a == b || (a.marcaModelo && b.marcaModelo && a.texto.equals(b.texto));
+        }
+        if (igual) return;
+        conversa.clear();
+        conversa.addAll(nova);
+        if (avisar) for (Ouvinte o : new ArrayList<>(ouvintes)) o.conversaTrocada();
+    }
+
+    /** Os nomes (apelidos) dos modelos de todas as versões, para as marcas "*modelo X usado". */
+    private void atualizarNomes() throws IOException {
+        Map<String, String> m = new java.util.HashMap<>();
+        for (Armazem.Versao b : armazem.backups()) {
+            Armazem.Arquivo a = b.arquivos.get(Armazem.CHAT);
+            if (a != null) m.put(a.ref, b.nomeExibido());
+        }
+        Armazem.Versao v = armazem.atual();
+        m.put(v.arquivos.get(Armazem.CHAT).ref, v.nomeExibido());
+        nomesPorRef = m;
+        naTela(() -> marcarModelos(true));
     }
 
     private void avisarChats() {
@@ -645,6 +704,8 @@ final class Motor {
                 msg.detalhe = (String) m.get("d");
                 msg.trecho = (String) m.get("c");
                 msg.completar = Boolean.TRUE.equals(m.get("x"));
+                msg.modeloRef = (String) m.get("r");
+                msg.modeloNome = (String) m.get("m");
                 r.add(msg);
             }
         } catch (Exception e) {
@@ -667,6 +728,10 @@ final class Motor {
             if (m.detalhe != null) o.put("d", m.detalhe);
             if (m.trecho != null) o.put("c", m.trecho);
             if (m.completar) o.put("x", true);
+            if (m.modeloRef != null) {
+                o.put("r", m.modeloRef);
+                o.put("m", m.modeloNome);
+            }
             lista.add(o);
         }
         String json = Json.escrever(lista);
@@ -807,10 +872,13 @@ final class Motor {
                     mudou(resp);
                 }, cancelar::get);
                 resp.texto = texto + " " + r;
+                resp.modeloRef = refChat;
+                resp.modeloNome = nomeExibido;
             } else {
                 String direto = comMemoria ? memoria.tratar(texto) : null;
                 if (direto != null) {
                     resp.texto = direto;
+                    resp.modeloRef = resp.modeloNome = null;  // a memória respondeu, não o modelo
                 } else {
                     if (chat == null) {  // foi liberado para o modelo de completar texto (modelo grande)
                         if (base != null) {
@@ -831,6 +899,8 @@ final class Motor {
                         mudou(resp);
                     }, cancelar::get);
                     resp.texto = r.isEmpty() ? SEM_RESPOSTA : r;
+                    resp.modeloRef = refChat;
+                    resp.modeloNome = nomeExibido;
                     if (fontes) resp.fonte = p.fonte;
                     resp.trecho = p.trecho;
                 }
@@ -852,7 +922,10 @@ final class Motor {
         }
         mudou(resp);
         gerando = false;
-        naTela(this::salvarConversa);
+        naTela(() -> {
+            salvarConversa();
+            marcarModelos(true);
+        });
         avisarEstado();
         Chats.Chat c = chatAtual;
         if (c != null && c.semTitulo() && !resp.texto.startsWith("Erro:")) tituloDoChat(c, texto, completar);
@@ -930,8 +1003,7 @@ final class Motor {
         emFundo("Trocando de modelo…", false, () -> {
             if (armazem.backupComMesmosArquivos() == null) armazem.fazerBackup(nomeVersao);
             armazem.usarBackup(id);
-            carregarVersao();
-            aviso("Usando o modelo \"" + nomeExibido + "\".");
+            carregarVersao();  // e as marcas "*modelo X usado" dos chats (atualizarNomes)
             avisarEstado();
         });
     }
@@ -941,6 +1013,7 @@ final class Motor {
         emFundo("Guardando o apelido…", false, () -> {
             armazem.apelidar(id, apelido);
             nomeExibido = armazem.atual().nomeExibido();
+            atualizarNomes();
         });
     }
 
@@ -949,6 +1022,7 @@ final class Motor {
             armazem.renomear(id, nome);
             if (id == null) nomeVersao = nome;
             nomeExibido = armazem.atual().nomeExibido();
+            atualizarNomes();
         });
     }
 

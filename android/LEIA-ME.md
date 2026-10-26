@@ -94,7 +94,9 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
 - Na 1.10: **chats** como nos assistentes de conversa (botão ☰ no canto de cima): cada chat tem a sua conversa e
   a sua memória, a IA dá o título (dá para renomear), e dá para arquivar e apagar. Trocar de modelo não pergunta
   mais nada. Cada modelo pode ter um **apelido** (segure o modelo no seletor, ou "Apelido" em Versões e backups).
-  O botão **+** do campo de mensagem tem resposta longa, completar texto e memória de IA.
+  O botão **+** do campo de mensagem tem resposta longa, completar texto e memória de IA (e não abre nem fecha o
+  teclado). O painel de chats fecha arrastando para a esquerda. Num chat em que outro modelo respondeu, aparece
+  "*modelo X usado" (com o apelido) depois das respostas dele.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o

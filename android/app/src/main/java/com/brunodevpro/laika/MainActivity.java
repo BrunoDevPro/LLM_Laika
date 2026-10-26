@@ -323,8 +323,9 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         lp.bottomMargin = dp(4);
         if (m.aviso) {
             lp.gravity = Gravity.CENTER_HORIZONTAL;
-            t.setTextSize(13);
+            t.setTextSize(m.marcaModelo ? 12 : 13);
             t.setTextColor(getColor(R.color.aviso));
+            if (m.marcaModelo) t.setTypeface(t.getTypeface(), Typeface.ITALIC);
             t.setGravity(Gravity.CENTER);
             t.setPadding(dp(16), dp(2), dp(16), dp(2));
         } else {

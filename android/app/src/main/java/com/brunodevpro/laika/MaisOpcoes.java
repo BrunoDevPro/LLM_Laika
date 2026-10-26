@@ -20,6 +20,8 @@ final class MaisOpcoes {
     private final Motor motor;
     private final Runnable mudou;
     private PopupWindow janela;
+    /** O toque no + que fecha o painel (toque fora) não pode reabri-lo logo em seguida. */
+    private long fechadoEm;
 
     MaisOpcoes(Activity tela, Motor motor, Runnable mudou) {
         this.tela = tela;
@@ -36,6 +38,7 @@ final class MaisOpcoes {
             janela.dismiss();
             return;
         }
+        if (android.os.SystemClock.uptimeMillis() - fechadoEm < 300) return;
         LinearLayout lista = new LinearLayout(tela);
         lista.setOrientation(LinearLayout.VERTICAL);
         lista.setPadding(dp(6), dp(6), dp(6), dp(6));
@@ -49,10 +52,13 @@ final class MaisOpcoes {
         }
         caixa(lista, "Memória de IA", motor.usarHistorico, v -> motor.usarHistorico = v);
 
-        janela = new PopupWindow(lista, dp(230), ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        // Sem foco: abrir o painel não mexe no teclado (aberto continua aberto, fechado continua fechado).
+        janela = new PopupWindow(lista, dp(230), ViewGroup.LayoutParams.WRAP_CONTENT, false);
+        janela.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         janela.setBackgroundDrawable(tela.getDrawable(R.drawable.painel));
         janela.setElevation(dp(12));
         janela.setOutsideTouchable(true);
+        janela.setOnDismissListener(() -> fechadoEm = android.os.SystemClock.uptimeMillis());
         lista.measure(View.MeasureSpec.makeMeasureSpec(dp(230), View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED);
         // Abre logo acima do botão (o campo fica no rodapé, e o teclado pode estar aberto).
         int[] pos = new int[2];
