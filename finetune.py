@@ -28,6 +28,7 @@ pré-treino nunca é sobrescrito: dá para repetir só este script à vontade.
 """
 
 import argparse
+import gc
 import json
 import math
 import multiprocessing
@@ -303,9 +304,14 @@ def find_contexts(questions, k):
             print("  não consegui gravar o cache de contextos:", error)
 
     if faltam:
-        nucleos = min(os.cpu_count() or 1, 16)
+        # Até 8 processos. Cada um é uma cópia do processo principal, que já tem o SFT e o conhecimento na memória;
+        # o gc.freeze() impede que o coletor de lixo de cada cópia passe por esses objetos e obrigue o sistema a
+        # duplicá-los (com 12 cópias, a máquina do Colab ficou sem memória e foi desligada no meio das buscas).
+        nucleos = min(os.cpu_count() or 1, 8)
         inicio = time.time()
         if nucleos > 1 and len(faltam) >= 200:
+            gc.collect()
+            gc.freeze()
             pool = multiprocessing.get_context("fork").Pool(nucleos, _abrir_no_processo, (rag.arquivo,))
             resultados = pool.imap(_buscar_no_processo, [(q, k) for q in faltam], chunksize=8)
         else:
@@ -318,11 +324,12 @@ def find_contexts(questions, k):
                     vel = i / max(1e-6, time.time() - inicio)
                     print(f"  RAG: {i}/{len(faltam)} buscas ({vel:.1f}/s com {nucleos if pool else 1} núcleo(s); "
                           f"faltam ~{(len(faltam) - i) / vel / 60:.0f} min)", flush=True)
-                if i % 5000 == 0:
+                if i % 2000 == 0:
                     gravar()  # se cair, a próxima vez continua daqui
         finally:
             if pool is not None:
                 pool.terminate()
+                gc.unfreeze()
         gravar()
     return cache
 
