@@ -168,6 +168,8 @@ final class MenuOpcoes {
         caixa(grupo, "Buscar nos textos (RAG)", "Wikipédia, livros e textos do app", motor.usarRag, v -> motor.usarRag = v);
         caixa(grupo, "Memória do usuário", "Seu nome, cidade, gostos e \"lembre que…\" (cada chat tem a sua)", motor.usarMemoria,
                 v -> motor.usarMemoria = v);
+        caixa(grupo, "Respostas rápidas", "No máximo 2 trechos do RAG no prompt: a resposta começa bem antes",
+                motor.respostasRapidas, v -> motor.respostasRapidas = v);
         // Resposta longa, completar texto e memória de IA ficam no botão + do campo de mensagem (MaisOpcoes).
 
         Runnable atualizar = () -> {

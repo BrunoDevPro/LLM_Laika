@@ -25,7 +25,7 @@ test {
     useJUnitPlatform()
     maxHeapSize = "2g"
     // Arquivos gerados por exportar_modelo.py e core/referencias.py (os testes são pulados se faltarem).
-    systemProperty "laika.assets", file("../app/src/main/assets").absolutePath
+    systemProperty "laika.assets", System.getenv("LAIKA_ASSETS") ?: file("../app/src/main/assets").absolutePath
     systemProperty "laika.referencias", file("build/referencias").absolutePath
     // Pasta com finetuned.pt, pretrain_best.pt e tokenizer.json (testes da importação no app).
     systemProperty "laika.livros", System.getenv("LAIKA_LIVROS") ?: "none"

@@ -43,6 +43,8 @@ import pessoas1, pessoas2, pessoas3, conceitos1, conceitos2  # noqa: E402,E401
 import eventos as EV  # noqa: E402
 import eventos2 as EV2  # noqa: E402
 import identidade4 as ID4  # noqa: E402
+import biografias as BIO  # noqa: E402
+import titulos as TIT  # noqa: E402
 import resumos1, resumos2, resumos3, resumos4, resumos5, resumos6, resumos7  # noqa: E402,E401
 
 TEXTOS_SIMPLES = TEXTOS_1 + TEXTOS_2
@@ -1501,6 +1503,8 @@ def longas_sections(rng):
         if outro[2] == capital:
             outro = caps[(i + 1) % len(caps)]
         sim.append((f"A capital {prep} {pais} é {capital}?", f"Sim. A capital {prep} {pais} é {capital}."))
+        # 1.12: mais uma forma com "Sim" (havia mais "Não" que "Sim", e o modelo começava quase tudo com "Não").
+        sim.append((f"{capital} é a capital {prep} {pais}?", f"Sim. {capital} é a capital {prep} {pais}."))
         sim.append((f"A capital {prep} {pais} é {outro[2]}?",
                     f"Não. A capital {prep} {pais} é {capital}. {outro[2]} é a capital {outro[1]} {outro[0]}."))
         art = ARTIGO_PAIS[prep]
@@ -1528,6 +1532,7 @@ def longas_sections(rng):
     for i, (obra, autor) in enumerate(LIVROS):
         outro = next(a for _, a in LIVROS[i + 1:] + LIVROS[:i] if a != autor)
         sim.append((f"{obra} foi escrito por {autor}?", f"Sim. {obra} foi escrito por {autor}."))
+        sim.append((f"{autor} escreveu {obra}?", f"Sim. {autor} escreveu {obra}."))
         sim.append((f"{obra} foi escrito por {outro}?", f"Não. {obra} foi escrito por {autor}, e não por {outro}."))
     # Animais: a classe certa e uma com que costuma ser confundido.
     for i, (animal, classe, motivo) in enumerate(SN.ANIMAIS):
@@ -1535,6 +1540,7 @@ def longas_sections(rng):
         pron = "ela" if animal.startswith("a ") else "ele"
         art = SN.ARTIGO_CLASSE[classe]
         sim.append((f"{nome} é {art} {classe}?", f"Sim. {nome} é {art} {classe}: {pron} {motivo}."))
+        sim.append((f"É verdade que {animal} é {art} {classe}?", f"Sim. {nome} é {art} {classe}: {pron} {motivo}."))
         confusoes = SN.CONFUSOES[classe]
         for k in range(min(2, len(confusoes))):  # até duas classes erradas por animal
             errada = confusoes[(i + k) % len(confusoes)]
@@ -1707,8 +1713,12 @@ def pessoas_sections():
                      f"Pelo que {nome} {'ficaram' if plural else 'ficou'} conhecid{fim}?",
                      f"Qual é a importância {de_artigo(nome)}?"][i % 3], o_que))
         pron = {"m": "ele", "f": "ela", "p": "eles"}[g]
-        quem.append(([f"Quem {foi} {nome} e o que {pron} {fizeram}?", f"Me fale sobre {nome}.",
-                      f"O que você sabe sobre {nome}?"][i % 3], f"{q_foi} {o_que}"))
+        # Duas perguntas em uma (1.12: o modelo respondia só a primeira): sempre, em formas variadas.
+        quem.append(([f"Quem {foi} {nome} e o que {pron} {fizeram}?", f"Quem {foi} {nome} e o que {pron} {fizeram} de importante?",
+                      f"Quem {foi} {nome} e por que {pron} {'são' if plural else 'é'} famos{fim}?",
+                      f"O que {nome} {fizeram} e quem {foi}?"][i % 4],
+                     f"{q_foi} {o_que}" if i % 4 != 3 else f"{o_que} {q_foi}"))
+        quem.append(([f"Me fale sobre {nome}.", f"O que você sabe sobre {nome}?"][i % 2], f"{q_foi} {o_que}"))
         vida = ""
         if nasc and morte:
             s1, s2 = seculo(nasc), seculo(morte)
@@ -1718,6 +1728,9 @@ def pessoas_sections():
                            f"Em que época viveu {nome}?"][i % 3], vida))
             datas.append((f"Quando {nome} nasceu?",
                           f"{Nome} nasceu em {nasc}, no {nome_seculo(s1)}."))
+            datas.append(([f"Quem {foi} {nome} e quando {pron} {'nasceram' if plural else 'nasceu'}?",
+                           f"Quando {nome} {'nasceram' if plural else 'nasceu'} e o que {pron} {fizeram}?"][i % 2],
+                          f"{q_foi} {Nome} nasceu em {nasc}." if i % 2 == 0 else f"{Nome} nasceu em {nasc}. {o_que}"))
             datas.append((f"Quando {nome} morreu?", f"{Nome} morreu em {morte}, no {nome_seculo(s2)}."))
             datas.append((f"Quantos anos {nome} viveu?",
                           f"{Nome} viveu cerca de {morte - nasc} anos: nasceu em {nasc} e morreu em {morte}."))
@@ -2117,6 +2130,32 @@ def titulos_sections():
     for i, (nome, d, m, a, fato, mais) in enumerate(EV.EVENTOS):
         pares.append(([f"Quando foi {nome}?", f"O que foi {nome}?", f"Por que aconteceu {nome}?"][i % 3],
                       _sem_artigo_titulo(nome)))
+    # 1.12: o modelo copiava o começo da mensagem. Mais exemplos, com o assunto em outras palavras:
+    pares += TIT.TITULOS                                   # pedidos variados, escritos à mão
+    textos = [t for m in (resumos4, resumos5, resumos6, resumos7) for t in m.TEXTOS]
+    for i, ((texto, *_), tema) in enumerate(zip(textos, TIT.TEMAS_RESUMOS)):  # "Resuma: <texto>" -> "Resumo: <tema>"
+        pedido = (PEDIDOS_RESUMO_UMA + PEDIDOS_RESUMO_CURTO + PEDIDOS_RESUMO_TOPICOS)[i % 20]
+        pares.append((pedido.format(texto), f"Resumo: {tema}"))
+    for i, (assunto, pergunta, texto) in enumerate(LONGAS):
+        if assunto:
+            x = _sem_artigo_titulo(assunto)
+            pares.append(([pergunta, f"Escreva um texto longo sobre {assunto}.", f"Resuma o texto: {texto}"][i % 3],
+                          [x, f"Texto sobre {x[0].lower() + x[1:] if not x.split()[0][1:].isupper() else x}",
+                           f"Resumo: {x}"][i % 3]))
+    rotulo = {"idiomas": "Idiomas de {n}", "nasc": "Nascimento de {n}", "def": "{n}", "curso": "Estudos de {n}",
+              "conjuge": "Casamento de {n}", "filhos": "Filhos de {n}", "premios": "Prêmios de {n}",
+              "obras": "Obras de {n}", "instrumentos": "Instrumentos de {n}", "clubes": "Times de {n}",
+              "mora": "Onde mora {n}"}
+    rng_t = random.Random(11)
+    for _ in range(400):                                    # perguntas sobre um fato de alguém -> "Idiomas de X"
+        pessoa = BIO.pessoa(rng_t)
+        chave, pergunta, _ = rng_t.choice(BIO.perguntas(pessoa, rng_t))
+        pares.append((pergunta, rotulo[chave].format(n=pessoa["nome"])))
+    for i, (nome, g, nasc, morte, q_foi, o_que) in enumerate(PESSOAS_V):
+        pron = {"m": "ele", "f": "ela", "p": "eles"}[g]
+        pares.append(([f"Quem foi {nome} e o que {pron} fez?", f"Por que {nome} é famoso?",
+                       f"Em que século viveu {nome}?", f"Fale um pouco sobre a vida de {nome}."][i % 4],
+                      [nome, nome, f"Época de {nome}", f"Vida de {nome}"][i % 4]))
     # O app só aceita títulos de até 6 palavras e 40 letras (Texto.limparTitulo).
     pares = [(q, a) for q, a in pares if len(a) <= 40 and len(a.split()) <= 6]
     return [("Títulos de chat", [(PEDIDO_TITULO + q, a) for q, a in pares])]
@@ -2287,7 +2326,13 @@ def build():
     with open(QA_DIR / "leitura.txt", "w", encoding="utf-8") as f:
         f.write("# Interpretação de texto: Contexto + Pergunta, no mesmo formato que o RAG usa.\n\n")
         f.write("\n".join(leitura) + "\n")
-    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(identidade)} | leitura.txt: {len(leitura)}")
+    bios = BIO.exemplos()
+    with open(QA_DIR / "biografias.txt", "w", encoding="utf-8") as f:
+        f.write("# Gerado por tools/biografias.py: biografias inventadas como Contexto e perguntas sobre um fato da pessoa\n"
+                "# (idiomas, estudos, casamento, filhos, prêmios, obras, times...), com a resposta completa.\n\n")
+        f.write("\n".join(ex(rag_question(q, c), a) for c, q, a in bios) + "\n")
+    print(f"pergeresp.txt: {total} exemplos | identidade.txt: {len(identidade)} | leitura.txt: {len(leitura)} | "
+          f"biografias.txt: {len(bios)}")
 
 
 if __name__ == "__main__":

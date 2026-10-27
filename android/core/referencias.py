@@ -23,12 +23,16 @@ sys.path.insert(0, str(ROOT))
 
 from tokenizers import Tokenizer  # noqa: E402
 
-from chat import build_prompt, end_penalty, min_answer_tokens  # noqa: E402
-from data_utils import (content_words, follows_up, question_name, rag_queries, wants_long, wants_rag,  # noqa: E402
-                        without_trigger)
+from chat import build_prompt, end_penalty, generate, min_answer_tokens  # noqa: E402
+from data_utils import (content_words, direct_math, follows_up, question_name, rag_queries,  # noqa: E402
+                        social_message, wants_long, wants_rag, wants_summary, without_trigger)
 from memory import Memory  # noqa: E402
 from model import build_model  # noqa: E402
 from rag import RagIndex, _stem  # noqa: E402
+
+RESUMO = ("Resuma em uma frase: A prefeitura começou a trocar as lâmpadas antigas da iluminação pública por "
+          "lâmpadas de LED. A troca deve terminar em seis meses e vai alcançar quase quatro mil postes. As novas "
+          "lâmpadas gastam metade da energia e duram muito mais, o que vai reduzir a conta de luz da cidade.")
 
 PERGUNTAS = [
     "Qual é o seu nome?", "Oi", "O que é um vulcão?", "Quem foi Santos Dumont?", "Qual é a capital da França?",
@@ -62,6 +66,10 @@ PERGUNTAS = [
     "Quem governava na época?", "Mas quando?", "Em que mês nasce a primavera?", "Quando foi a queda de Constantinopla?",
     "O que foi a queda de Constantinopla e por que aconteceu?", "Faça uma frase com o meu nome.",
     "Faça uma frase com o nome dele.", "O que é um século?", "Qual foi o motivo?",
+    "Bom dia!", "Tchau, Laika!", "Oi, tudo bem?", "Valeu!", "Boa noite", "Quanto é 7 dividido por 2?",
+    "Calcule 6 x 7", "Quanto é 2,5 × 4?", "Quanto é 1 ÷ 3?", "Quanto é 5 ÷ 0?", "Quanto é 10 - 15?",
+    "Quanto é 100 menos 1?", "Quanto é o PIB?",
+    RESUMO,
 ]
 
 # Conversas anteriores para a "memória de IA" (histórico no prompt).
@@ -208,7 +216,8 @@ def main():
         linhas.append({"pergunta": p, "palavras": content_words(p), "radicais": [_stem(w) for w in content_words(p)], "quer_rag": wants_rag(p), "top": top,
                        "melhor": best["title"] if best else None, "nome": question_name(p), "segue": follows_up(p),
                        "sem_gatilho": without_trigger(p), "longa": wants_long(p),
-                       "consultas": rag_queries(p), "contextos": contextos})
+                       "consultas": rag_queries(p), "contextos": contextos,
+                       "social": social_message(p), "resumo": wants_summary(p), "conta": direct_math(p)})
     gravar("rag.jsonl", linhas)
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -240,6 +249,17 @@ def main():
                 linhas.append({"pergunta": p, "memoria": i % 3 == 0, "bloco": bloco, "max_novos": max_novos,
                                "historico": [list(t) for t in hist], "prompt": prompt, "fonte": fonte})
         gravar("prompt.jsonl", linhas)
+
+    # Geração gulosa com as travas da 1.12: sem copiar nos resumos (avoid_copy) e sem repetir trechos de 6 tokens.
+    model = modelo_fp16(ck / "finetuned.pt")
+    linhas = []
+    for p, copia, n in ((RESUMO, True, 60), (RESUMO, False, 60), ("O que é um vulcão? Resposta longa.", False, 120),
+                        ("Conte uma história curta.", False, 120)):
+        prompt = f"<|user|> {p} <|assistant|>"
+        torch.manual_seed(0)
+        resposta = generate(model, tok, prompt, "cpu", n, temperature=1.0, top_k=1, avoid_copy=copia)
+        linhas.append({"prompt": prompt, "evitar_copia": copia, "max_novos": n, "resposta": resposta})
+    gravar("geracao.jsonl", linhas)
 
     gravar("penalidade.jsonl", [{"max_novos": m, "minimo": min_answer_tokens(m),
                                  "valores": [end_penalty(k, min_answer_tokens(m)) for k in range(70)]}

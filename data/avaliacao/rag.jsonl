@@ -77,3 +77,10 @@
 {"pergunta": "Quando aconteceu a queda de Constantinopla?", "titulo": ["Queda de Constantinopla", "Constantinopla"]}
 {"pergunta": "Faça uma frase com o meu nome.", "titulo": null}
 {"pergunta": "Mas em que mês foi?", "titulo": null}
+{"pergunta": "Quem é Neymar?", "titulo": "Neymar"}
+{"pergunta": "Quem é Taylor Swift?", "titulo": "Taylor Swift"}
+{"pergunta": "Quem é Anitta?", "titulo": "Anitta"}
+{"pergunta": "O que é o Java?", "titulo": "Java (linguagem de programação)"}
+{"pergunta": "Me fale sobre a ilha de Java.", "titulo": "Java"}
+{"pergunta": "Bom dia!", "titulo": null}
+{"pergunta": "Tchau, Laika!", "titulo": null}

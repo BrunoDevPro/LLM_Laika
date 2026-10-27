@@ -133,7 +133,8 @@ final class Motor {
     private final AtomicBoolean cancelar = new AtomicBoolean(), pararTarefa = new AtomicBoolean();
     private final Random rng = new Random();
     private final Set<Ouvinte> ouvintes = new LinkedHashSet<>();
-    private final int threads = Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors()));
+    // Todos os núcleos (até 8): o trabalho é dividido em pedaços pequenos, então os núcleos lentos não atrasam os rápidos.
+    private final int threads = Math.max(1, Math.min(8, Runtime.getRuntime().availableProcessors()));
 
     final List<Mensagem> conversa = new ArrayList<>();
 
@@ -167,6 +168,8 @@ final class Motor {
     /** usarHistorico: a "memória de IA" (as últimas trocas da conversa entram no prompt). */
     /** respostasLongas: acrescenta o gatilho "Resposta longa." à pergunta e usa o tamanho máximo. */
     boolean mostrarFontes, usarRag, usarMemoria, usarHistorico, modoCompletar, respostasLongas;
+    /** Respostas rápidas: no máximo 2 trechos do RAG no prompt (Laika.maxTrechos). */
+    boolean respostasRapidas;
     double temperatura;
     int tamanhoResposta;
 
@@ -177,6 +180,7 @@ final class Motor {
         usarRag = prefs.getBoolean("rag", true);
         usarMemoria = prefs.getBoolean("memoria", true);
         usarHistorico = prefs.getBoolean("historico", true);
+        respostasRapidas = prefs.getBoolean("rapidas", false);
         respostasLongas = prefs.getBoolean("longas", false);
         temperatura = Math.max(TEMP_MIN, Math.min(TEMP_MAX, prefs.getFloat("temperatura", 0.7f)));
         tamanhoResposta = Math.max(TAMANHO_MIN, Math.min(400, prefs.getInt("tamanho", 80)));
@@ -194,7 +198,7 @@ final class Motor {
 
     void salvarOpcoes() {
         prefs.edit().putBoolean("fontes", mostrarFontes).putBoolean("rag", usarRag)
-                .putBoolean("memoria", usarMemoria).putBoolean("historico", usarHistorico)
+                .putBoolean("memoria", usarMemoria).putBoolean("historico", usarHistorico).putBoolean("rapidas", respostasRapidas)
                 .putBoolean("longas", respostasLongas)
                 .putFloat("temperatura", (float) temperatura).putInt("tamanho", tamanhoResposta).apply();
         avisarEstado();
@@ -637,6 +641,9 @@ final class Motor {
                 op.temperatura = 0.2;
                 op.topK = 1;
                 op.maxNovos = 16;
+                // O título copiava o começo da mensagem: a mesma trava dos resumos (não continuar sequências de 4
+                // tokens iguais às do prompt) deixa o modelo dizer o assunto com outras palavras.
+                op.evitarCopia = true;
                 Laika.Prompt pr = chat.montarPrompt(Texto.PEDIDO_TITULO + p, null, null, op.maxNovos, new ArrayList<>());
                 gerado = chat.gerar(pr.texto, op, true, rng, parcial -> {
                 }, () -> false);
@@ -876,9 +883,11 @@ final class Motor {
                 resp.modeloNome = nomeExibido;
             } else {
                 String direto = comMemoria ? memoria.tratar(texto) : null;
+                // Contas simples ("Quanto é 7 + 5?") são calculadas aqui: o modelo errava quase todas.
+                if (direto == null) direto = Texto.contaDireta(texto);
                 if (direto != null) {
                     resp.texto = direto;
-                    resp.modeloRef = resp.modeloNome = null;  // a memória respondeu, não o modelo
+                    resp.modeloRef = resp.modeloNome = null;  // a memória ou a conta respondeu, não o modelo
                 } else {
                     if (chat == null) {  // foi liberado para o modelo de completar texto (modelo grande)
                         if (base != null) {
@@ -892,6 +901,8 @@ final class Motor {
                     // Respostas longas: o gatilho do fine-tuning ("Resposta longa.") e o tamanho máximo.
                     String paraModelo = longas && !Texto.querLonga(texto) ? texto + " " + Texto.GATILHO_LONGO : texto;
                     op.maxNovos = Texto.querLonga(paraModelo) ? tamanhoMaximo() : tamanho;
+                    op.evitarCopia = Texto.querResumo(paraModelo);
+                    chat.maxTrechos = respostasRapidas ? 2 : 0;
                     Laika.Prompt p = chat.montarPrompt(paraModelo, comRag ? rag : null, comMemoria ? memoria : null,
                             op.maxNovos, historico);
                     String r = chat.gerar(p.texto, op, true, rng, parcial -> {

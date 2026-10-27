@@ -44,7 +44,7 @@ from tokenizers import Tokenizer
 
 from chat import build_prompt, generate, with_citation
 from data_utils import (load_qa_examples, parse_qa_text, synthetic_examples, fit_context, split_conversation,
-                        reading_examples, chat_turn, rag_chunks, wants_rag, knowledge_examples, normalize,
+                        reading_examples, chat_turn, rag_chunks, wants_rag, knowledge_examples, normalize, wants_summary,
                         MAX_CONTEXT_WORDS,
                         ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, USER_TOKEN)
 from model import build_model
@@ -64,6 +64,9 @@ parser.add_argument("--wiki-leitura", type=int, default=20000,
 parser.add_argument("--wiki-mb", type=float, default=40, help="MB de artigos lidos para essas perguntas")
 parser.add_argument("--history-share", type=float, default=0.3,
                     help="fração dos exemplos que ganham 1 a 4 trocas anteriores (memória de IA)")
+parser.add_argument("--resumo-boost", type=int, default=3,
+                    help="peso extra dos resumos escritos à mão (vezes o do pergeresp): eram ~1 mil num meio de centenas "
+                         "de milhares de exemplos, e o modelo continuava copiando o texto")
 parser.add_argument("--identity-boost", type=int, default=2,
                     help="peso extra do identidade.txt (quem é a Laika)")
 parser.add_argument("--identity-share", type=float, default=0.005,
@@ -214,13 +217,14 @@ def select_articles(files, n, exclude):
         for block in f.read_text(encoding="utf-8").split("\n\n") + ["."]:
             block = block.strip()
             if block and block[-1] not in ".!?…" and len(block) < 120:
-                if title and normalize(title) not in exclude:
+                # Títulos desambiguados ("Santos Dumont (cruzador)") ficam fora: ver data_utils.homonym_article.
+                if title and "(" not in title and normalize(title) not in exclude:
                     item = (words * peso, title, i)
                     (heapq.heappush if len(heap) < n else heapq.heappushpop)(heap, item)
                 title, words = block, 0
             else:
                 words += len(block.split())
-        if title and normalize(title) not in exclude:
+        if title and "(" not in title and normalize(title) not in exclude:
             item = (words * peso, title, i)
             (heapq.heappush if len(heap) < n else heapq.heappushpop)(heap, item)
         if (i + 1) % 100 == 0:
@@ -422,7 +426,13 @@ def encode_chat(texts, identity=frozenset()):
     return items, too_long
 
 
+# Resumos escritos à mão (pedidos de resumo com o texto na mensagem) ganham peso extra, como a identidade.
+resumo_texts = [t for t in qa_texts if t not in identity_texts and wants_summary(split_conversation(t)[1])
+                and not split_conversation(t)[1].startswith("Dê um título")]
+resumo_set = set(resumo_texts)
+qa_texts = [t for t in qa_texts if t not in resumo_set]
 qa_data, qa_long = encode_chat(qa_texts, identity_texts)
+resumo_data, _ = encode_chat(resumo_texts)
 id_data, _ = encode_chat(list(identity_texts))
 syn_data, _ = encode_chat(syn_texts)
 know_data, _ = encode_chat(know_texts)
@@ -443,7 +453,8 @@ def split(items):
 
 qa_train, qa_val = split(qa_data)
 id_train, id_val = split(id_data)
-qa_val += id_val
+resumo_train, resumo_val = split(resumo_data)
+qa_val += id_val + resumo_val
 syn_train, syn_val = split(syn_data)
 know_train, know_val = split(know_data)
 sft_train, sft_val = split(sft_data)
@@ -454,12 +465,15 @@ if qa_train:
     wanted = args.qa_share / (1 - args.qa_share) * len(syn_train)
     qa_repeat = min(args.max_qa_repeat, max(1, round(wanted / len(qa_train))))
 know_repeat = args.conhecimento_repetir if know_train else 0
+resumo_repeat = max(1, qa_repeat) * args.resumo_boost if resumo_train else 0
 id_repeat = 0
 if id_train:
-    outros = len(syn_train) + len(qa_train) * qa_repeat + len(know_train) * know_repeat + len(sft_train)
+    outros = (len(syn_train) + len(qa_train) * qa_repeat + len(resumo_train) * resumo_repeat
+              + len(know_train) * know_repeat + len(sft_train))
     id_repeat = max(qa_repeat * args.identity_boost, min(16, math.ceil(args.identity_share * outros / len(id_train))))
 print(f"Treino: {len(syn_train)} sintéticos + {len(qa_train)} do pergeresp (x{qa_repeat}) + "
-      f"{len(id_train)} de identidade (x{id_repeat}) + {len(know_train)} de conhecimento (x{know_repeat}) + "
+      f"{len(id_train)} de identidade (x{id_repeat}) + {len(resumo_train)} resumos (x{resumo_repeat}) + "
+      f"{len(know_train)} de conhecimento (x{know_repeat}) + "
       f"{len(sft_train)} do SFT | validação: {len(syn_val)} sintéticos + {len(qa_val)} escritos à mão + "
       f"{len(know_val)} de conhecimento + {len(sft_val)} do SFT")
 
@@ -565,7 +579,7 @@ def show_samples():
     model.eval()
     for question in SAMPLE_PROMPTS:
         prompt, source = build_prompt(question, tokenizer, block, rag, None, max_new_tokens=60)
-        answer = generate(model, tokenizer, prompt, device, max_new_tokens=60)
+        answer = generate(model, tokenizer, prompt, device, max_new_tokens=60, avoid_copy=wants_summary(question))
         print(f"   Você: {question}\n   LLM:  {with_citation(answer, source)}")
     # Memória de IA: a pergunta só faz sentido com a anterior.
     prompt, source = build_prompt("E da Itália?", tokenizer, block, rag, None, 60, SAMPLE_HISTORY)
@@ -579,7 +593,8 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
 
 
 def epoch_batches():
-    return make_batches(syn_train + qa_train * qa_repeat + id_train * id_repeat + know_train * know_repeat
+    return make_batches(syn_train + qa_train * qa_repeat + id_train * id_repeat + resumo_train * resumo_repeat
+                        + know_train * know_repeat
                         + sft_train)
 
 

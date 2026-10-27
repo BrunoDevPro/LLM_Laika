@@ -2,8 +2,11 @@ package com.brunodevpro.laika.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
@@ -25,6 +28,8 @@ public final class Laika {
         public double topP = 0.9;
         public double penalidade = 1.15;
         public int maxNovos = 80;
+        /** Pedido de resumo (Texto.querResumo): penaliza copiar sequências do prompt (avoid_copy do chat.py). */
+        public boolean evitarCopia;
         /** Saída: quantos tokens a última chamada de gerar() produziu e quantos tinha o prompt. */
         public int gerados, tokensPrompt;
     }
@@ -42,6 +47,9 @@ public final class Laika {
 
     public final Modelo modelo;
     public final Tokenizador tok;
+    /** Máximo de trechos do RAG no prompt (0 = o padrão da janela, Texto.trechosRag). "Respostas rápidas" usa 2:
+     * no celular, o tempo vai quase todo em ler o prompt, e 6 trechos com o modelo de 100M levavam dezenas de segundos. */
+    public int maxTrechos;
     private final int endId;
     private final int[] proibidos;
 
@@ -78,7 +86,8 @@ public final class Laika {
             if (!nota.isEmpty()) partes.add(nota);
         }
         List<IndiceRag.Trecho> achados = rag != null && Texto.querRag(busca)
-                ? rag.contextos(busca, Texto.trechosRag(bloco)) : new ArrayList<>();
+                ? rag.contextos(busca, maxTrechos > 0 ? Math.min(maxTrechos, Texto.trechosRag(bloco))
+                : Texto.trechosRag(bloco)) : new ArrayList<>();
         if (!achados.isEmpty()) {
             List<String> textos = new ArrayList<>();
             for (IndiceRag.Trecho t : achados) {
@@ -118,6 +127,12 @@ public final class Laika {
         return new Prompt(String.join(" ", turnos), fonte, trecho);
     }
 
+    /** Resumos: o token que continuaria uma cópia de COPIA_N tokens do prompt perde PENALIDADE_COPIA (chat.py). */
+    public static final int COPIA_N = 4;
+    public static final double PENALIDADE_COPIA = 4.0;
+    /** Nenhuma sequência de SEM_REPETIR_N tokens se repete dentro da resposta (NO_REPEAT_N do chat.py). */
+    public static final int SEM_REPETIR_N = 6;
+
     /** Com um tamanho máximo grande, a resposta tende a ser mais longa (min_answer_tokens do chat.py). */
     public static int minimoResposta(int maxNovos) {
         return Math.max(0, (maxNovos - 60) / 2);
@@ -144,6 +159,14 @@ public final class Laika {
         Modelo.Cache cache = modelo.novoCache();
         int bloco = modelo.block;
         int minimo = pararNoFim ? minimoResposta(op.maxNovos) : 0;
+        Map<List<Integer>, Set<Integer>> copia = new HashMap<>();
+        if (op.evitarCopia) {
+            for (int i = 0; i + COPIA_N <= promptLen; i++) {
+                List<Integer> chave = new ArrayList<>(COPIA_N - 1);
+                for (int j = i; j < i + COPIA_N - 1; j++) chave.add(promptIds[j]);
+                copia.computeIfAbsent(chave, x -> new HashSet<>()).add(promptIds[i + COPIA_N - 1]);
+            }
+        }
 
         for (int passo = 0; passo < op.maxNovos; passo++) {
             if (cancelado != null && cancelado.getAsBoolean()) break;
@@ -160,6 +183,22 @@ public final class Laika {
             for (int t : proibidos) if (t >= 0) logits[t] = Float.NEGATIVE_INFINITY;
             if (!pararNoFim && endId >= 0) logits[endId] = Float.NEGATIVE_INFINITY;
             if (minimo > 0 && endId >= 0) logits[endId] = (float) (logits[endId] - penalidadeFim(n - promptLen, minimo));
+
+            int g = n - promptLen;
+            if (!copia.isEmpty() && g >= COPIA_N - 1) {
+                List<Integer> chave = new ArrayList<>(COPIA_N - 1);
+                for (int j = n - (COPIA_N - 1); j < n; j++) chave.add(ids[j]);
+                Set<Integer> seguintes = copia.get(chave);
+                if (seguintes != null) for (int t : seguintes) logits[t] = (float) (logits[t] - PENALIDADE_COPIA);
+            }
+            if (pararNoFim && g >= SEM_REPETIR_N - 1) {
+                int k = SEM_REPETIR_N - 1;
+                for (int i = promptLen; i + SEM_REPETIR_N <= n; i++) {
+                    boolean igual = true;
+                    for (int j = 0; j < k && igual; j++) igual = ids[i + j] == ids[n - k + j];
+                    if (igual) logits[ids[i + k]] = Float.NEGATIVE_INFINITY;
+                }
+            }
 
             // Penaliza só tokens que o próprio modelo já gerou (os últimos 60).
             Set<Integer> gerados = new LinkedHashSet<>();
