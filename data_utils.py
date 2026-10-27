@@ -225,6 +225,23 @@ _READING = [
      ["Onde fica {x}?", "Em que lugar fica {x}?"]),
     (re.compile(r"\b(fundad[oa]|criad[oa]|inaugurad[oa]|construíd[oa])\s+em\b.*" + _YEAR),
      ["Quando {x} foi {v}?"]),
+    # 1.12: o que se pergunta sobre uma pessoa ("Quantos idiomas Fernando Pessoa falava?"): a resposta é a frase
+    # do trecho que traz o fato, com os nomes (dos idiomas, dos prêmios, dos times...).
+    (re.compile(r"\b(?:falava|fala|falou|dominava|domina|escrevia)\b[^.]*\b(?:idiomas|línguas|inglês|francês|alemão|"
+                r"espanhol|italiano|latim|grego|russo|japonês)\b"),
+     ["Quantos idiomas {x} falava?", "Que línguas {x} falava?", "Quais idiomas {x} falava?"]),
+    (re.compile(r"\b(?:estudou|formou-se|graduou-se|licenciou-se|doutorou-se|cursou)\b"),
+     ["O que {x} estudou?", "Onde {x} estudou?"]),
+    (re.compile(r"\b(?:casou-se|casou|casad[oa]) com\b"), ["Com quem {x} se casou?", "{x} foi casado com quem?"]),
+    (re.compile(r"\b(?:teve|tem|tiveram) (?:\w+ )?(?:filhos|filhas|filho|filha)\b"),
+     ["Quantos filhos {x} teve?", "{x} teve filhos?"]),
+    (re.compile(r"\b(?:recebeu|ganhou|venceu|conquistou) (?:\w+ )?(?:prêmio|prémio|prêmios|medalha|medalhas|oscar|óscar|"
+                r"grammy|nobel|troféu|títulos)\b", re.IGNORECASE),
+     ["Que prêmios {x} ganhou?", "{x} ganhou algum prêmio?", "Quais prêmios {x} recebeu?"]),
+    (re.compile(r"\b(?:jogou|joga|atuou|atua) (?:pelo|pela|pelos|pelas)\b"),
+     ["Em que times {x} jogou?", "Por quais clubes {x} jogou?"]),
+    (re.compile(r"\b(?:tocava|toca|tocou)\b"), ["Que instrumento {x} tocava?", "{x} tocava o quê?"]),
+    (re.compile(r"\b(?:filh[oa]) d[eoa]s? [A-ZÁÉÍÓÚ]"), ["Quem eram os pais de {x}?", "{x} era filho de quem?"]),
     (re.compile(r"\b(inventou|criou|desenvolveu|projetou|construiu|escreveu|compôs|pintou|dirigiu|descobriu|"
                 r"fundou|gravou|publicou|venceu|conquistou)\b"), ["O que {x} {v}?"]),
     (re.compile(r"\b[\d.]+ habitantes\b"), ["Quantos habitantes tem {x}?", "Qual é a população de {x}?"]),
@@ -267,6 +284,26 @@ def _reading_pairs(title, text, pos):
     return pairs
 
 
+def compound_question(x, pairs):
+    """Duas perguntas em uma ("Quem foi X e o que ele escreveu?") com as duas respostas juntas, ou None.
+
+    pairs: [(pergunta, resposta)] do mesmo assunto. A 2ª pergunta troca o nome por "ele"/"ela" quando é uma pessoa
+    (alguma pergunta "Quem foi/é" ou "nasceu") e o nome não está no fim ("onde nasceu ele" fica de fora)."""
+    pessoa = any(q.startswith(("Quem foi", "Quem é")) or re.search(
+        r"nasceu|morreu|idiomas|línguas|estudou|se casou|filhos|prêmio|jogou|tocava|pais de|escreveu|pintou|compôs", q)
+        for q, _ in pairs)
+    ela = any(re.search(r"\b(?:é|foi) uma\b", a) for _, a in pairs)
+    first = pairs[0]
+    for q2, a2 in pairs[1:]:
+        if q2 == first[0] or a2 == first[1] or q2.rstrip("?").endswith(x):
+            continue
+        if pessoa:
+            q2 = q2.replace(x, "ela" if ela else "ele")
+        q2 = q2[0].lower() + q2[1:] if not q2.startswith(x) else q2
+        return f"{first[0].rstrip('?')} e {q2}", f"{first[1]} {a2}"
+    return None
+
+
 def reading_examples(passages, n, chunks=1, seed=0, negative_share=0.1):
     """Até n exemplos 'Contexto: <trecho> / Pergunta: ...' a partir de [(título, trecho, posição)].
 
@@ -283,7 +320,16 @@ def reading_examples(passages, n, chunks=1, seed=0, negative_share=0.1):
     rng.shuffle(found)
     titles = list(by_title)
     examples = []
-    for title, text, question, answer in found[:n]:
+    # 1.12: ~10% com duas perguntas em uma ("Quem foi X e o que ele escreveu?"; antes só a 1ª era respondida).
+    by_found = {}
+    for title, text, question, answer in found:
+        by_found.setdefault((title, text), []).append((question, answer))
+    compounds = [(t, x, c) for (t, x), ps in by_found.items() if len(ps) >= 2
+                 for c in [compound_question(_PAREN.sub("", t).strip(), ps)] if c]
+    rng.shuffle(compounds)
+    for title, text, (question, answer) in compounds[:n // 10]:
+        examples.append(chat_turn(rag_question(question, text), answer))
+    for title, text, question, answer in found[:n - len(examples)]:
         if len(titles) > 1 and rng.random() < negative_share:
             other = rng.choice(titles)
             if other != title:
@@ -320,6 +366,23 @@ def _lead(text, max_words=80):
     return " ".join(out).strip()
 
 
+# Homônimos: navios, filmes, novelas, clubes... com o nome de um assunto famoso ("Santos Dumont (cruzador)",
+# "Bom Dia" é uma telenovela, "A Via Láctea" é um filme). Sem Contexto, ensinavam "Quem foi Santos Dumont?" ->
+# "foi um cruzador pesado". Ficam fora do conhecimento (no RAG e na leitura com Contexto continuam).
+_HOMONIMO = re.compile(
+    r"\b(?:é|foi|são|foram|era) (?:um|uma|uns|umas) (?:[\wÀ-ÿ-]+ ){0,3}?(?:filme|telefilme|documentário|telenovela|"
+    r"novela|minissérie|série|seriado|sitcom|programa|reality|desenho|anime|mangá|álbum|single|canção|música|"
+    r"jogo|videojogo|navio|cruzador|couraçado|encouraçado|contratorpedeiro|fragata|submarino|corveta|clube|time|"
+    r"equipe|agremiação|banda|grupo|dupla|emissora|canal|rádio|revista|jornal|periódico|livro|romance|peça|"
+    r"ópera|episódio|personagem|estação|rodovia|partido|empresa|marca|escola de samba|torneio|edição)\b",
+    re.IGNORECASE)
+
+
+def homonym_article(title, text):
+    """Artigo com título desambiguado ("X (navio)") ou de obra, veículo ou organização (ver _HOMONIMO)."""
+    return "(" in title or bool(_HOMONIMO.search(_lead(text)[:200]))
+
+
 def knowledge_examples(articles, forms=4):
     """Exemplos sem Contexto para [(título, [trechos do artigo])]: cada fato em `forms` perguntas diferentes.
 
@@ -329,7 +392,7 @@ def knowledge_examples(articles, forms=4):
     examples = []
     for title, texts in articles:
         x = _PAREN.sub("", title).strip()
-        if not texts or not x or len(x) > 50 or x.startswith("Lista"):
+        if not texts or not x or len(x) > 50 or x.startswith("Lista") or homonym_article(title, texts[0]):
             continue
         facts, seen = [], set()
         for pos, text in enumerate(texts):
@@ -340,6 +403,9 @@ def knowledge_examples(articles, forms=4):
         for q, a in facts:
             variants = list(dict.fromkeys(w.format(q=q, ql=q[0].lower() + q[1:]) for w in KNOWLEDGE_WRAPS))
             examples += [chat_turn(v, a) for v in variants[:forms]]
+        both = compound_question(x, facts) if len(facts) >= 2 else None
+        if both:
+            examples.append(chat_turn(*both))
         lead = _lead(texts[0])
         if len(lead.split()) >= 12 and lead.endswith("."):
             examples += [chat_turn(f.format(x=x), lead) for f in KNOWLEDGE_ABOUT[:forms]]
@@ -627,6 +693,58 @@ def personal_words(text):
     return found
 
 
+# Cumprimentos e despedidas não vão para o RAG: "Bom dia!" achava a novela "Bom Dia" e "Tchau!", um filme.
+_SOCIAL_RAG = _SOCIAL | set("laika ate mais amanha adeus falou abraco abracos pra para voce tambem muito e ai ola".split())
+
+
+def social_message(question):
+    """Só cumprimento, agradecimento ou despedida ("Bom dia!", "Oi, tudo bem?", "Tchau, Laika!")."""
+    words = [w.strip(_NAME_STRIP) for w in normalize(question).split()]
+    words = [w for w in words if w]
+    return bool(words) and len(words) <= 6 and all(w in _SOCIAL_RAG for w in words)
+
+
+_SUMMARY = re.compile(r"\bresum|\bideia principal|\bpontos principais")
+
+
+def wants_summary(question):
+    """Pedido de resumo de um texto que veio na própria mensagem: a geração evita copiar o texto (chat.generate)."""
+    return len(question.split()) > 30 and bool(_SUMMARY.search(normalize(question)))
+
+
+# Contas simples respondidas sem o modelo ("Quanto é 7 + 5?"): o modelo de 100M errava todas.
+_CONTA = re.compile(r"^(?:quanto (?:e|da|sao)|calcule|qual (?:e|eh) o resultado de|resolva)?\s*"
+                    r"(-?\d+(?:[.,]\d+)?)\s*(\+|-|x|\*|×|÷|/|:|mais|menos|vezes|dividido por)\s*"
+                    r"(-?\d+(?:[.,]\d+)?)\s*[?.!=]*$")
+_OPERADOR = {"+": "+", "mais": "+", "-": "-", "menos": "-", "x": "×", "*": "×", "×": "×", "vezes": "×",
+             "÷": "÷", "/": "÷", ":": "÷", "dividido por": "÷"}
+
+
+def _numero(d):
+    """Decimal -> texto com vírgula, sem zeros sobrando (3.50 -> "3,5")."""
+    from decimal import Decimal
+    t = format(d.normalize() if d != d.to_integral_value() else d.to_integral_value(), "f")
+    return ("0" if t in ("-0", "") else t).replace(".", ",")
+
+
+def direct_math(question):
+    """Resposta pronta de uma conta com dois números ("7 + 5 = 12."), ou None. Igual ao Texto.contaDireta."""
+    from decimal import Decimal, ROUND_HALF_UP
+    m = _CONTA.match(" ".join(normalize(question).split()))
+    if not m:
+        return None
+    a, b = (Decimal(x.replace(",", ".")) for x in (m.group(1), m.group(3)))
+    op = _OPERADOR[m.group(2)]
+    if op == "÷" and b == 0:
+        return "Não dá para dividir por zero."
+    r = {"+": a + b, "-": a - b, "×": a * b}.get(op)
+    if r is None:
+        r = (a / b).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+    if abs(r) >= Decimal(10) ** 15:
+        return None
+    return f"{_numero(a)} {op} {_numero(b)} = {_numero(r)}."
+
+
 def wants_rag(question):
     """Decide se vale procurar contexto nos textos para esta pergunta.
 
@@ -636,7 +754,7 @@ def wants_rag(question):
     ("Faça um texto sobre X", "Me conte sobre X") usam o RAG com o assunto, se ele não for
     pessoal ("Fale sobre você").
     """
-    if "Contexto:" in question or len(question.split()) > 40:
+    if "Contexto:" in question or len(question.split()) > 40 or social_message(question):
         return False
     topic = request_topic(question)
     if topic is not None:

@@ -20,8 +20,8 @@ from pathlib import Path
 import torch
 
 from data_utils import (USER_TOKEN, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, MAX_CONTEXT_WORDS,
-                        LONG_TRIGGER, MAX_HISTORY, chat_turn, fit_context, follows_up, rag_chunks, wants_rag,
-                        wants_long, without_trigger)
+                        LONG_TRIGGER, MAX_HISTORY, chat_turn, direct_math, fit_context, follows_up, rag_chunks,
+                        wants_rag, wants_long, wants_summary, without_trigger)
 from model import build_model
 
 
@@ -101,11 +101,22 @@ def end_penalty(step, min_tokens):
     return 0.0 if step >= min_tokens else 3.0 * (1 - step / min_tokens)
 
 
+# Resumos (avoid_copy): o token que continuaria uma sequência de COPY_N tokens igual à do prompt perde
+# COPY_PENALTY no logit; sem isso o modelo "resumia" copiando a primeira frase do texto.
+COPY_N, COPY_PENALTY = 4, 4.0
+# Nenhuma sequência de NO_REPEAT_N tokens se repete dentro da resposta (as respostas longas entravam em ciclo).
+NO_REPEAT_N = 6
+
+
 @torch.no_grad()
 def generate(model, tokenizer, prompt, device, max_new_tokens=80, temperature=0.7,
-             top_k=40, top_p=0.9, repetition_penalty=1.15, stop_at_end=True):
+             top_k=40, top_p=0.9, repetition_penalty=1.15, stop_at_end=True, avoid_copy=False):
     ids = tokenizer.encode(prompt).ids
     prompt_len = len(ids)
+    copy_next = {}
+    if avoid_copy:
+        for i in range(prompt_len - COPY_N + 1):
+            copy_next.setdefault(tuple(ids[i:i + COPY_N - 1]), set()).add(ids[i + COPY_N - 1])
     end_id = tokenizer.token_to_id(END_TOKEN)
     banned = [tokenizer.token_to_id(t) for t in (USER_TOKEN, ASSISTANT_TOKEN, PAD_TOKEN, EOT_TOKEN)]
     if not stop_at_end:
@@ -130,6 +141,16 @@ def generate(model, tokenizer, prompt, device, max_new_tokens=80, temperature=0.
                 logits[token_id] = -float("inf")
         if min_tokens and end_id is not None:
             logits[end_id] -= end_penalty(len(ids) - prompt_len, min_tokens)
+
+        gen = ids[prompt_len:]
+        if copy_next and len(gen) >= COPY_N - 1:
+            for token_id in copy_next.get(tuple(gen[-(COPY_N - 1):]), ()):
+                logits[token_id] -= COPY_PENALTY
+        if stop_at_end and len(gen) >= NO_REPEAT_N - 1:
+            key = tuple(gen[-(NO_REPEAT_N - 1):])
+            for i in range(len(gen) - NO_REPEAT_N + 1):
+                if tuple(gen[i:i + NO_REPEAT_N - 1]) == key:
+                    logits[gen[i + NO_REPEAT_N - 1]] = -float("inf")
 
         # Penaliza só tokens que o próprio modelo já gerou (não a pergunta nem o contexto).
         for token_id in set(ids[prompt_len:][-60:]):
@@ -225,13 +246,15 @@ def main():
             continue
 
         answer = memory.handle(text) if memory is not None else None
+        answer = answer or direct_math(text)
         if answer:
             print("LLM:", answer)
         else:
             pergunta = f"{text} {LONG_TRIGGER}" if longa and not wants_long(text) else text
             max_new = max(args.max_new_tokens, model.block_size // 4) if wants_long(pergunta) else args.max_new_tokens
             prompt, source = build_prompt(pergunta, tokenizer, model.block_size, rag, memory, max_new, history)
-            answer = generate(model, tokenizer, prompt, device, max_new, args.temperature)
+            answer = generate(model, tokenizer, prompt, device, max_new, args.temperature,
+                              avoid_copy=wants_summary(pergunta))
             n_prompt, n_resp = len(tokenizer.encode(prompt).ids), len(tokenizer.encode(answer).ids)
             print("LLM:", with_citation(answer, source) if show_sources else answer)
             print(f"     ({n_resp} tokens na resposta, {n_prompt + n_resp} no total)")

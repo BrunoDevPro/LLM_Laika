@@ -329,11 +329,16 @@ public final class Modelo {
     private void matmul(float[] x, int t, int in, Matriz w, float[] bias, int outDim, float[] out) {
         float[] tabela = w.h != null ? tabelaMeias() : null;
         paralelo(outDim, (long) t * in * outDim >= 65536, (ini, fim) -> {
+            // Pesos em float16 com vários tokens (o prompt): converte a linha uma vez só, e não uma vez por token
+            // (com 500 tokens de prompt, a conversão se repetia 500 vezes). Mesmos valores, mesma soma.
+            float[] linha = w.h != null && t > 1 ? new float[in] : null;
             for (int o = ini; o < fim; o++) {
                 int wo = o * in;
                 float b = bias == null ? 0f : bias[o];
+                if (linha != null) for (int j = 0; j < in; j++) linha[j] = tabela[w.h[wo + j] & 0xFFFF];
                 for (int i = 0; i < t; i++) {
-                    float d = w.f != null ? dot(x, i * in, w.f, wo, in) : dotMeia(x, i * in, w.h, wo, in, tabela);
+                    float d = w.f != null ? dot(x, i * in, w.f, wo, in)
+                            : linha != null ? dot(x, i * in, linha, 0, in) : dotMeia(x, i * in, w.h, wo, in, tabela);
                     out[i * outDim + o] = d + b;
                 }
             }
@@ -392,14 +397,20 @@ public final class Modelo {
             f.rodar(0, n);
             return;
         }
+        // Pedaços pequenos distribuídos sob demanda: nos celulares, metade dos núcleos é bem mais lenta, e com
+        // partes iguais todos esperavam o mais lento. Cada linha da saída continua calculada do mesmo jeito.
+        int bloco = Math.max(1, n / (threads * 8));
+        java.util.concurrent.atomic.AtomicInteger proximo = new java.util.concurrent.atomic.AtomicInteger();
+        Runnable trabalho = () -> {
+            for (int ini; (ini = proximo.getAndAdd(bloco)) < n; ) f.rodar(ini, Math.min(n, ini + bloco));
+        };
         int partes = threads;
         CountDownLatch pronto = new CountDownLatch(partes - 1);
         Throwable[] erro = new Throwable[1];
         for (int p = 1; p < partes; p++) {
-            int ini = (int) ((long) n * p / partes), fim = (int) ((long) n * (p + 1) / partes);
             pool.execute(() -> {
                 try {
-                    f.rodar(ini, fim);
+                    trabalho.run();
                 } catch (Throwable e) {
                     erro[0] = e;
                 } finally {
@@ -407,7 +418,7 @@ public final class Modelo {
                 }
             });
         }
-        f.rodar(0, (int) ((long) n / partes));
+        trabalho.run();
         try {
             pronto.await();
         } catch (InterruptedException e) {

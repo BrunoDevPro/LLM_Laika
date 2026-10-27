@@ -336,9 +336,63 @@ public final class Texto {
     }
 
     /** Decide se vale procurar contexto nos textos (mesma regra do wants_rag). */
+    /** Cumprimentos e despedidas não vão para o RAG (_SOCIAL_RAG do data_utils.py). */
+    private static final Set<String> SOCIAIS_RAG = conjunto(
+            "oi ola ei opa obrigado obrigada valeu tchau ate logo bom boa dia tarde noite tudo bem beleza ok certo legal "
+            + "show otimo sim nao kkk kkkk haha blz "
+            + "laika ate mais amanha adeus falou abraco abracos pra para voce tambem muito e ai ola");
+
+    /** Só cumprimento, agradecimento ou despedida ("Bom dia!", "Tchau, Laika!"): social_message do data_utils.py. */
+    public static boolean mensagemSocial(String pergunta) {
+        List<String> ws = new ArrayList<>();
+        for (String w : separar(normalizar(pergunta))) {
+            String limpa = tirarPontas(w, NOME_PONTAS);
+            if (!limpa.isEmpty()) ws.add(limpa);
+        }
+        return !ws.isEmpty() && ws.size() <= 6 && SOCIAIS_RAG.containsAll(ws);
+    }
+
+    private static final Pattern RESUMO = Pattern.compile("\\bresum|\\bideia principal|\\bpontos principais");
+
+    /** Pedido de resumo de um texto que veio na mensagem (wants_summary): a geração evita copiar o texto. */
+    public static boolean querResumo(String pergunta) {
+        return separar(pergunta).length > 30 && RESUMO.matcher(normalizar(pergunta)).find();
+    }
+
+    private static final Pattern CONTA = Pattern.compile(
+            "^(?:quanto (?:e|da|sao)|calcule|qual (?:e|eh) o resultado de|resolva)?\\s*"
+            + "(-?\\d+(?:[.,]\\d+)?)\\s*(\\+|-|x|\\*|×|÷|/|:|mais|menos|vezes|dividido por)\\s*"
+            + "(-?\\d+(?:[.,]\\d+)?)\\s*[?.!=]*$");
+
+    private static String numero(java.math.BigDecimal d) {
+        java.math.BigDecimal s = d.stripTrailingZeros();
+        String t = s.scale() <= 0 ? s.toBigInteger().toString() : s.toPlainString();
+        return t.replace('.', ',');
+    }
+
+    /** Resposta pronta de uma conta com dois números ("7 + 5 = 12."), ou null (direct_math do data_utils.py). */
+    public static String contaDireta(String pergunta) {
+        Matcher m = CONTA.matcher(String.join(" ", separar(normalizar(pergunta))));
+        if (!m.matches()) return null;
+        java.math.BigDecimal a = new java.math.BigDecimal(m.group(1).replace(',', '.'));
+        java.math.BigDecimal b = new java.math.BigDecimal(m.group(3).replace(',', '.'));
+        String o = m.group(2);
+        String op = o.equals("+") || o.equals("mais") ? "+" : o.equals("-") || o.equals("menos") ? "-"
+                : o.equals("x") || o.equals("*") || o.equals("×") || o.equals("vezes") ? "×" : "÷";
+        java.math.BigDecimal r;
+        if (op.equals("÷")) {
+            if (b.signum() == 0) return "Não dá para dividir por zero.";
+            r = a.divide(b, 4, java.math.RoundingMode.HALF_UP);
+        } else {
+            r = op.equals("+") ? a.add(b) : op.equals("-") ? a.subtract(b) : a.multiply(b);
+        }
+        if (r.abs().compareTo(java.math.BigDecimal.TEN.pow(15)) >= 0) return null;
+        return numero(a) + " " + op + " " + numero(b) + " = " + numero(r) + ".";
+    }
+
     public static boolean querRag(String pergunta) {
         String[] todas = separar(pergunta);
-        if (pergunta.contains("Contexto:") || todas.length > 40) return false;
+        if (pergunta.contains("Contexto:") || todas.length > 40 || mensagemSocial(pergunta)) return false;
         String assunto = assuntoDoPedido(pergunta);
         if (assunto != null) return palavrasPessoais(assunto).isEmpty();
         List<String> primeiras = new ArrayList<>();

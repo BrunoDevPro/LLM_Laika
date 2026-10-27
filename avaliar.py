@@ -29,7 +29,7 @@ from pathlib import Path
 import torch
 
 from chat import build_prompt, generate
-from data_utils import normalize, rag_question, wants_long
+from data_utils import direct_math, normalize, rag_question, wants_long, wants_summary
 from model import build_model
 
 PASTA = Path("data/avaliacao")
@@ -105,6 +105,9 @@ def nota(item, resposta):
 
 def responder(model, tokenizer, item, rag, device, max_padrao):
     pergunta = item["pergunta"]
+    # Contas simples são respondidas sem o modelo, como no chat e no app (direct_math).
+    if not item.get("contexto") and not item.get("historico") and direct_math(pergunta):
+        return direct_math(pergunta), None
     max_novos = item.get("max_tokens") or (max(max_padrao, model.block_size // 4) if wants_long(pergunta)
                                             else max_padrao)
     if item.get("contexto"):
@@ -114,7 +117,8 @@ def responder(model, tokenizer, item, rag, device, max_padrao):
     historico = [tuple(t) for t in item.get("historico", [])]
     prompt, fonte = build_prompt(pergunta, tokenizer, model.block_size, usar_rag, None, max_novos, historico)
     # Sem sorteio: top_k=1 escolhe sempre o token mais provável (mesmo resultado em toda execução).
-    resposta = generate(model, tokenizer, prompt, device, max_novos, temperature=1.0, top_k=1)
+    resposta = generate(model, tokenizer, prompt, device, max_novos, temperature=1.0, top_k=1,
+                        avoid_copy=wants_summary(pergunta))
     return resposta, fonte
 
 

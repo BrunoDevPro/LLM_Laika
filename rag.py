@@ -29,7 +29,7 @@ from data_utils import _SENTENCE_SPLIT, content_words, normalize, question_name,
 
 DEFAULT_DB = "data/rag/laika_rag.db"
 # Mude quando a busca mudar: o cache de contextos do finetune.py (contextos_cache.json) é refeito.
-RAG_VERSAO = "1.7"
+RAG_VERSAO = "1.12"
 SOURCES = [("data/wiki", "wiki"), ("data/modern", "texto"), ("data/books", "livro")]
 PASSAGE_WORDS = 80
 KIND_BONUS = {"texto": 0.2, "wiki": 0.15, "livro": 0.0}
@@ -240,7 +240,7 @@ class RagIndex:
     def _query(self, match, k):
         try:
             return self.con.execute(
-                "SELECT title, text, kind, pos FROM passages WHERE passages MATCH ? "
+                "SELECT title, text, kind, pos, rowid FROM passages WHERE passages MATCH ? "
                 "ORDER BY bm25(passages, 4.0, 1.0) LIMIT ?", (match, k)).fetchall()
         except sqlite3.OperationalError:
             return []
@@ -255,6 +255,9 @@ class RagIndex:
         name_words = content_words(question_name(question) or "")
         if name_words and name_words != words:
             title_rows += self._query(" AND ".join(f'title:"{w}"' for w in name_words), 15)
+        # 1c) Títulos que COMEÇAM pelas palavras ("Pantanal", "Pelé"): com muitos artigos, os 15 de 1) podiam ser
+        # só homônimos ("TV Pantanal", "Isto É Pelé"), e o artigo principal nem entrava na disputa.
+        title_rows += self._query('title: ^"' + " ".join(words) + '"', 15)
         # 2) Qualquer trecho com as palavras: exata OU com o mesmo radical ("cadelas" acha "cadela").
         terms = []
         for w in words:
@@ -269,7 +272,7 @@ class RagIndex:
         # "Sputnik 2" x "Sputnik-1", "Pedro II" x "Pedro I".
         short_numbers = set(re.findall(r"(?<![\d.,])\d{1,2}(?![\d.,])|\b[IVXLC]{1,5}\b", question))
         results, seen = [], set()
-        for rank, (title, text, kind, pos) in enumerate(rows):
+        for rank, (title, text, kind, pos, rowid) in enumerate(rows):
             if (title, text) in seen or (kind == "texto" and normalize(title) == "laika"):
                 continue  # o texto em que a IA se apresenta só confundiria as perguntas sobre a cadela
             seen.add((title, text))
@@ -298,7 +301,7 @@ class RagIndex:
                     score += 0.15
             elif in_title > 0 and main_words:
                 extra = len(main_words - query_stems) / len(main_words)
-                score -= 0.3 * extra              # "Prêmio Machado de Assis" < "Machado de Assis"
+                score -= 0.5 * extra              # "Prêmio Machado de Assis" < "Machado de Assis"
             if "(" in title:
                 if desamb and desamb <= query_stems:
                     score += 0.3                  # "Marte (planeta)" em "o planeta Marte tem água?"
@@ -311,7 +314,18 @@ class RagIndex:
             score += 0.2 * _proximity(text_tokens, words)
             score -= 0.002 * rank
             results.append({"title": title, "text": text, "kind": kind,
-                            "coverage": coverage, "in_title": in_title, "score": score})
+                            "coverage": coverage, "in_title": in_title, "score": score, "rowid": rowid})
+        # Homônimos ("Java", a ilha, e "Java (linguagem de programação)"): sem pista na pergunta, ganha um pouco o
+        # artigo mais antigo da Wikipédia (o índice segue a ordem de criação), que costuma ser o sentido mais
+        # conhecido (a linguagem é o artigo 545; a ilha, o 15.980). Pistas ("a ilha de Java") pesam mais.
+        grupos = {}
+        for r in results:
+            if r["kind"] == "wiki":
+                grupos.setdefault(normalize(re.sub(r"\s*\(.*?\)", "", r["title"])), []).append((r["rowid"], r["title"]))
+        antigos = {min(g)[1] for g in grupos.values() if len({t for _, t in g}) > 1}
+        for r in results:
+            if r["kind"] == "wiki" and r["title"] in antigos:
+                r["score"] += 0.3
         results.sort(key=lambda r: r["score"], reverse=True)
         return results
 

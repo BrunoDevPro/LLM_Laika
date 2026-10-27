@@ -43,27 +43,32 @@ public final class IndiceRag implements AutoCloseable {
     /** Um trecho achado na busca. */
     public static final class Trecho {
         public final String titulo, texto, tipo;
-        public final double cobertura, emTitulo, nota;
+        public final double cobertura, emTitulo;
+        public double nota;
+        /** rowid no índice: a ordem dos artigos da Wikipédia (de criação). */
+        final long id;
 
-        Trecho(String titulo, String texto, String tipo, double cobertura, double emTitulo, double nota) {
+        Trecho(String titulo, String texto, String tipo, double cobertura, double emTitulo, double nota, long id) {
             this.titulo = titulo;
             this.texto = texto;
             this.tipo = tipo;
             this.cobertura = cobertura;
             this.emTitulo = emTitulo;
             this.nota = nota;
+            this.id = id;
         }
     }
 
     private static final class Linha {
         final String titulo, texto, tipo;
-        final long pos;
+        final long pos, id;
 
-        Linha(String titulo, String texto, String tipo, long pos) {
+        Linha(String titulo, String texto, String tipo, long pos, long id) {
             this.titulo = titulo;
             this.texto = texto;
             this.tipo = tipo;
             this.pos = pos;
+            this.id = id;
         }
     }
 
@@ -76,12 +81,13 @@ public final class IndiceRag implements AutoCloseable {
 
     private List<Linha> consulta(String match, int k) {
         List<Linha> r = new ArrayList<>();
-        try (SQLiteStatement st = con.prepare("SELECT title, text, kind, pos FROM passages WHERE passages MATCH ? "
+        try (SQLiteStatement st = con.prepare("SELECT title, text, kind, pos, rowid FROM passages WHERE passages MATCH ? "
                 + "ORDER BY bm25(passages, 4.0, 1.0) LIMIT ?")) {
             st.bindText(1, match);
             st.bindLong(2, k);
             while (st.step()) {
-                r.add(new Linha(st.getText(0), st.getText(1), st.getText(2), st.isNull(3) ? 0 : st.getLong(3)));
+                r.add(new Linha(st.getText(0), st.getText(1), st.getText(2), st.isNull(3) ? 0 : st.getLong(3),
+                        st.getLong(4)));
             }
         } catch (RuntimeException e) {
             return new ArrayList<>();  // consulta inválida para o FTS5: sem resultados
@@ -183,6 +189,9 @@ public final class IndiceRag implements AutoCloseable {
             for (String w : doNome) p2.add("title:\"" + w + "\"");
             linhas.addAll(consulta(String.join(" AND ", p2), 15));
         }
+        // 1c) Títulos que COMEÇAM pelas palavras ("Pantanal", "Pelé"): com muitos artigos, os 15 de 1) podiam ser
+        // só homônimos ("TV Pantanal", "Isto É Pelé"), e o artigo principal nem entrava na disputa.
+        linhas.addAll(consulta("title: ^\"" + String.join(" ", palavras) + "\"", 15));
         // 2) Qualquer trecho com as palavras: exata OU com o mesmo radical.
         List<String> termos = new ArrayList<>();
         for (String w : palavras) {
@@ -244,7 +253,7 @@ public final class IndiceRag implements AutoCloseable {
             } else if (emTitulo > 0 && !palavrasPrincipais.isEmpty()) {
                 Set<String> extra = new HashSet<>(palavrasPrincipais);
                 extra.removeAll(radicaisPergunta);
-                nota -= 0.3 * extra.size() / palavrasPrincipais.size();
+                nota -= 0.5 * extra.size() / palavrasPrincipais.size();
             }
             if (l.titulo.contains("(")) {
                 if (!desamb.isEmpty() && radicaisPergunta.containsAll(desamb)) {
@@ -259,8 +268,28 @@ public final class IndiceRag implements AutoCloseable {
             if (!numerosTitulo.isEmpty()) nota += 0.1;
             nota += 0.2 * proximidade(tokensTexto, palavras);
             nota -= 0.002 * rank;
-            resultados.add(new Trecho(l.titulo, l.texto, l.tipo, cobertura, emTitulo, nota));
+            resultados.add(new Trecho(l.titulo, l.texto, l.tipo, cobertura, emTitulo, nota, l.id));
         }
+        // Homônimos ("Java" e "Java (linguagem de programação)"): sem pista na pergunta, ganha um pouco o artigo
+        // mais antigo da Wikipédia (a ordem do índice é a de criação), como no rag.py.
+        Map<String, long[]> antigo = new HashMap<>();   // título principal -> {menor id, nº de títulos}
+        Map<String, String> tituloAntigo = new HashMap<>();
+        Map<String, Set<String>> titulos = new HashMap<>();
+        for (Trecho r : resultados) {
+            if (!"wiki".equals(r.tipo)) continue;
+            String chave = Texto.normalizar(r.titulo.replaceAll("\\s*\\(.*?\\)", ""));
+            titulos.computeIfAbsent(chave, x -> new HashSet<>()).add(r.titulo);
+            long[] a = antigo.get(chave);
+            if (a == null || r.id < a[0] || (r.id == a[0] && r.titulo.compareTo(tituloAntigo.get(chave)) < 0)) {
+                antigo.put(chave, new long[]{r.id});
+                tituloAntigo.put(chave, r.titulo);
+            }
+        }
+        Set<String> antigos = new HashSet<>();
+        for (Map.Entry<String, Set<String>> e : titulos.entrySet()) {
+            if (e.getValue().size() > 1) antigos.add(tituloAntigo.get(e.getKey()));
+        }
+        for (Trecho r : resultados) if ("wiki".equals(r.tipo) && antigos.contains(r.titulo)) r.nota += 0.3;
         // Ordenação estável, como o sort do Python.
         Collections.sort(resultados, (a, b) -> Double.compare(b.nota, a.nota));
         return resultados;

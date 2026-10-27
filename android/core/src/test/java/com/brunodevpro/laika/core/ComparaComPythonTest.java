@@ -163,6 +163,9 @@ class ComparaComPythonTest {
             assertEquals(c.get("sem_gatilho"), Texto.semGatilho(p), "semGatilho: " + p);
             assertEquals(c.get("longa"), Texto.querLonga(p), "querLonga: " + p);
             assertEquals(c.get("consultas"), Texto.consultasRag(p), "consultas: " + p);
+            assertEquals(c.get("social"), Texto.mensagemSocial(p), "mensagemSocial: " + p);
+            assertEquals(c.get("resumo"), Texto.querResumo(p), "querResumo: " + p);
+            assertEquals(c.get("conta"), Texto.contaDireta(p), "contaDireta: " + p);
             Map<?, ?> contextos = (Map<?, ?>) c.get("contextos");
             for (int k : new int[]{1, 2, 3, 6}) {
                 List<List<String>> obtido = new ArrayList<>();
@@ -219,6 +222,23 @@ class ComparaComPythonTest {
         System.out.println("prompt: " + comHistorico + " prompts com histórico iguais ao Python");
         assertTrue(comHistorico > 0, "nenhum prompt com histórico");
         f.delete();
+    }
+
+    @Test
+    void geracaoGulosa() throws IOException {
+        // Travas da 1.12: evitar cópia do prompt nos resumos e não repetir trechos de 6 tokens (chat.generate).
+        File f = new File(refs, "geracao.jsonl");
+        assumeTrue(f.exists(), "referencias.py antigo, sem geracao.jsonl");
+        Laika laika = new Laika(chat, tok);
+        for (Map<String, Object> c : ler("geracao.jsonl")) {
+            Laika.Opcoes op = new Laika.Opcoes();
+            op.temperatura = 1.0;
+            op.topK = 1;
+            op.maxNovos = ((Double) c.get("max_novos")).intValue();
+            op.evitarCopia = (Boolean) c.get("evitar_copia");
+            String r = laika.gerar((String) c.get("prompt"), op, true, new Random(0), null, null);
+            assertEquals(c.get("resposta"), r, "geração: " + c.get("prompt") + " evitarCopia=" + op.evitarCopia);
+        }
     }
 
     @Test

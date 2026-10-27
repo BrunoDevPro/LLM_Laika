@@ -97,6 +97,14 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   O botão **+** do campo de mensagem tem resposta longa, completar texto e memória de IA (e não abre nem fecha o
   teclado). O painel de chats fecha arrastando para a esquerda. Num chat em que outro modelo respondeu, aparece
   "*modelo X usado" (com o apelido) depois das respostas dele.
+- Na 1.12: contas simples ("Quanto é 7 + 5?", "Calcule 6 x 7") são calculadas pelo app, sem o modelo;
+  cumprimentos e despedidas ("Bom dia!", "Tchau!") não buscam mais no RAG; a busca prefere o artigo cujo título
+  começa pelo assunto ("Pantanal" antes de "TV Pantanal"); nos pedidos de resumo, a geração evita copiar
+  sequências do texto; e nenhuma sequência de 6 tokens se repete dentro da resposta (as respostas longas
+  entravam em ciclo). O app também ficou mais rápido para ler o prompt com o modelo de 100M (os pesos em
+  float16 não são mais convertidos de novo a cada token, e usa até 8 núcleos), e "Respostas rápidas" (Opções) usa
+  no máximo 2 trechos do RAG. O título do chat evita copiar a mensagem. Entre homônimos ("Java"), a busca prefere
+  o artigo mais antigo da Wikipédia, salvo se a pergunta der uma pista ("a ilha de Java").
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o
