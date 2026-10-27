@@ -490,6 +490,7 @@ class Execucao:
         self.escolhidas = escolhidas
         self.gpu = None if args.gpu.lower() in ("", "nenhuma", "cpu", "none") else args.gpu.upper()
         self.estado = Estado(escolhidas, self.gpu, args.ramo)
+        self.maquina_sumiu = False  # o arquivo de estado da célula sumiu: a máquina do Colab foi desligada
         self.github = GitHub()
         self.colab = Colab(args.sessao)
         self.prazo = time.monotonic() + args.prazo_min * 60
@@ -616,12 +617,19 @@ class Execucao:
         ok = any(f"@@LAIKA_OK {celula.numero} {nonce}@@" in l for l in saida) or self.conferir(celula, nonce)
         info["situacao"], info["fim"] = ("ok" if ok else "erro"), int(time.time())
         if not ok:
+            if self.maquina_sumiu:
+                raise Falha(f"a máquina do Colab foi desligada no meio da célula {celula.numero} ({celula.nome}). "
+                            "Em geral é falta de memória (RAM) ou de unidades de computação. Rode de novo: o que já "
+                            "estava salvo no Drive é reaproveitado.")
             raise Falha(f"a célula {celula.numero} ({celula.nome}) deu erro (veja o registro)")
 
     def conferir(self, celula, nonce):
         """Sem a marca de "pronto" na saída: vê no arquivo de estado como a célula terminou."""
         arquivo = f"{CONTENT}/.laika/celula_{celula.numero}.txt"
-        estado = (self.colab.ler_arquivo(arquivo) or "").strip()
+        lido = self.colab.ler_arquivo(arquivo)
+        # Sem o arquivo de estado (nem "rodando"): a máquina não existe mais ("Session ... not found").
+        self.maquina_sumiu = lido is None
+        estado = (lido or "").strip()
         if estado == f"ok {nonce}":
             return True
         if estado != f"rodando {nonce}":
