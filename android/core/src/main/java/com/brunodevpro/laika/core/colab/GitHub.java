@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  */
 public final class GitHub {
     public static final String API = "https://api.github.com";
-    public static final String WORKFLOW = "colab.yml", SINAL = "sinal.yml";
+    public static final String WORKFLOW = "colab.yml", SINAL = "sinal.yml", PUBLICAR = "publicar.yml";
     public static final String VERIFICACAO = "Laika no Colab", ARTEFATO = "laika_pacote";
     private static final Pattern DADOS = Pattern.compile("<!-- laika (\\{.*\\}) -->", Pattern.DOTALL);
 
@@ -433,10 +433,20 @@ public final class GitHub {
 
     /** Baixa o zip do artefato (é o próprio laika_pacote.zip, pronto para importar). */
     public long baixar(Artefato a, File destino, Armazem.Progresso p, BooleanSupplier cancelar) throws IOException {
+        try (OutputStream out = new FileOutputStream(destino)) {
+            return baixar(a, out, p, cancelar);
+        } catch (IOException | RuntimeException e) {
+            destino.delete();
+            throw e;
+        }
+    }
+
+    /** O mesmo, gravando num fluxo (ex.: um arquivo que o usuário escolheu em Downloads). */
+    public long baixar(Artefato a, OutputStream out, Armazem.Progresso p, BooleanSupplier cancelar) throws IOException {
         HttpURLConnection c = seguir(api + repoPath() + "/actions/artifacts/" + a.id + "/zip", "application/vnd.github+json");
         long total = c.getContentLengthLong() > 0 ? c.getContentLengthLong() : a.tamanho;
         long feito = 0;
-        try (InputStream in = c.getInputStream(); OutputStream out = new FileOutputStream(destino)) {
+        try (InputStream in = c.getInputStream()) {
             byte[] b = new byte[1 << 16];
             int n;
             long ultimo = 0;
@@ -449,14 +459,31 @@ public final class GitHub {
                     p.feito(feito, total);
                 }
             }
-        } catch (IOException | RuntimeException e) {
-            destino.delete();
-            throw e;
         } finally {
             c.disconnect();
         }
         if (p != null) p.feito(feito, total);
         return feito;
+    }
+
+    /**
+     * Publica o zip de um artefato como release do GitHub: dispara o workflow publicar.yml, que baixa o artefato no
+     * servidor e cria o release (o arquivo não passa pelo celular). Precisa do publicar.yml no ramo principal.
+     */
+    public void publicar(String ramo, Artefato a, String nome, String notas) throws IOException {
+        Map<String, Object> inputs = new LinkedHashMap<>();
+        inputs.put("artefato", String.valueOf(a.id));
+        inputs.put("nome", nome);
+        inputs.put("notas", notas == null ? "" : notas);
+        Map<String, Object> corpo = new LinkedHashMap<>();
+        corpo.put("ref", ramo);
+        corpo.put("inputs", inputs);
+        pedir("POST", repoPath() + "/actions/workflows/" + PUBLICAR + "/dispatches", corpo);
+    }
+
+    /** Página dos releases do repositório. */
+    public String paginaReleases() {
+        return "https://github.com/" + repo + "/releases";
     }
 
     /** O registro (log) de uma execução que já terminou: as últimas linhas do job. */
