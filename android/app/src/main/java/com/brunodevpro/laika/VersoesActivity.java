@@ -304,13 +304,32 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         for (java.util.Map.Entry<String, Armazem.Arquivo> e : v.arquivos.entrySet()) {
             if (!Armazem.INDICE.equals(e.getKey())) tamanho += Math.max(0, e.getValue().tamanho);
         }
-        new AlertDialog.Builder(this).setTitle("Publicar \"" + v.nomeExibido() + "\"?")
-                .setMessage(String.format(Locale.getDefault(), "Cria um release no repositório %s com o zip desta versão "
-                        + "(~%d MB, sem o índice completo do RAG), enviado pelo celular. O nome é o da versão, e a "
-                        + "descrição traz os dados dos modelos (parâmetros, contexto, val loss, passos, datas).\n\n"
-                        + "O token precisa da permissão Contents (leitura e escrita). O repositório é público: qualquer "
-                        + "pessoa poderá baixar.", Colab.repo(this), tamanho >> 20))
-                .setPositiveButton("Publicar", (d, w) -> motor.publicarVersao(Colab.github(this), id))
+        // Nome e descrição já preenchidos com os dados da versão; dá para mudar antes de publicar.
+        LinearLayout caixa = new LinearLayout(this);
+        caixa.setOrientation(LinearLayout.VERTICAL);
+        caixa.setPadding(dp(20), dp(4), dp(20), 0);
+        TextView info = texto(String.format(Locale.getDefault(), "Release em %s com o zip desta versão (~%d MB, sem o "
+                + "índice completo do RAG), enviado pelo celular. O repositório é público.", Colab.repo(this),
+                tamanho >> 20), 13, R.color.topo_sub, false);
+        caixa.addView(info);
+        android.widget.EditText nome = new android.widget.EditText(this);
+        nome.setHint("Nome do release");
+        nome.setText(v.nomeExibido());
+        caixa.addView(nome);
+        android.widget.EditText notas = new android.widget.EditText(this);
+        notas.setHint("Descrição");
+        notas.setText(motor.notasDaVersao(v));
+        notas.setMinLines(4);
+        notas.setMaxLines(10);
+        notas.setGravity(android.view.Gravity.TOP);
+        notas.setTextSize(13);
+        caixa.addView(notas);
+        android.widget.ScrollView rolagem = new android.widget.ScrollView(this);
+        rolagem.addView(caixa);
+        new AlertDialog.Builder(this).setTitle("Publicar no GitHub")
+                .setView(rolagem)
+                .setPositiveButton("Publicar", (d, w) -> motor.publicarVersao(Colab.github(this), id,
+                        nome.getText().toString(), notas.getText().toString()))
                 .setNegativeButton("Cancelar", null).show();
     }
 

@@ -67,7 +67,8 @@ jobs:
                   return f"{num(x / 1e9, 2)} {'bilhão' if x < 2e9 else 'bilhões'}"
               return f"{num(x / 1e6, 1)} milhões"
 
-          linhas = [f"**{nome}**", ""]
+          notas = os.environ.get("NOTAS", "").strip()
+          linhas = [f"**{nome}**", ""] + ([notas, ""] if notas else [])
           if info.get("parametros"):
               p = info["parametros"]
               milhar = f"{p:,}".replace(",", ".")
@@ -87,9 +88,6 @@ jobs:
           tamanho = os.path.getsize("laika_pacote.zip")
           arquivos = [n for n in nomes if not n.endswith("/") and n not in ("laika_info.json", "laika_nome.txt")]
           linhas.append(f"- Zip: {tamanho / 2**20:.0f} MB, {len(arquivos)} arquivos")
-          notas = os.environ.get("NOTAS", "").strip()
-          if notas:
-              linhas += ["", notas]
           linhas += ["", "Para usar no celular: baixe o zip e importe no app (Versões e backups → Escolher arquivos)."]
           open("nome.txt", "w").write(nome)
           open("notas.md", "w").write("\n".join(linhas) + "\n")

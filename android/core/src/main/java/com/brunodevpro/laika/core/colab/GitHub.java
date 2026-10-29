@@ -503,8 +503,11 @@ public final class GitHub {
             r = pedir("POST", repoPath() + "/releases", corpo);
         } catch (Erro e) {
             if (e.codigo == 403 || e.codigo == 404) {
-                throw new Erro(e.codigo, "o token não pode criar releases: dê a ele a permissão Contents (leitura e "
-                        + "escrita) no GitHub e troque o token na tela Treinar");
+                // Os Modelos prontos publicam pelo GitHub Actions (que tem a permissão); daqui, o próprio token envia.
+                throw new Erro(e.codigo, "o token não tem permissão para criar releases. No GitHub: Settings → Developer "
+                        + "settings → Personal access tokens → o token do app → Repository permissions → Contents: "
+                        + "Read and write → Update. O token continua o mesmo: não precisa trocar no app. (Publicar pelos "
+                        + "Modelos prontos funciona sem isso, porque quem envia é o GitHub Actions.)");
             }
             throw e;
         }
