@@ -105,6 +105,9 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   float16 não são mais convertidos de novo a cada token, e usa até 8 núcleos), e "Respostas rápidas" (Opções) usa
   no máximo 2 trechos do RAG. O título do chat evita copiar a mensagem. Entre homônimos ("Java"), a busca prefere
   o artigo mais antigo da Wikipédia, salvo se a pergunta der uma pista ("a ilha de Java").
+- Na 1.13: em Treinar → Modelos prontos, além de "Baixar e usar", **Salvar zip** (baixa o zip com tudo da
+  versão para uma pasta do celular, sem trocar o modelo) e **Publicar no GitHub** (cria um release no repositório com
+  o zip; o arquivo vai do artefato para o release no próprio GitHub, sem passar pelo celular).
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o
@@ -120,7 +123,7 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   limpar a conversa.
 - **Modelo de 100M** (RoPE, contexto 2048): o app guarda as matrizes em float16 (~210 MB de memória) e o
   cache de atenção cresce conforme a conversa. Funciona, mas é bem mais lento que o de 7M. Na tela Treinar,
-  os atalhos **Dados para 100M** e **Modelo de 100M** preparam as células (ver `TREINO_100M.md`).
+  os atalhos **Dados para 100M** e **Modelo de 100M** preparam as células (ver `docs/TREINO_100M.md`).
 - Cada resposta mostra o tempo, a velocidade (tokens por segundo), os tokens da resposta e o total com o
   prompt; cada pergunta mostra quantos tokens tem.
 - **Respostas longas**: com a opção ligada, toda pergunta ganha " Resposta longa." no fim e o tamanho vai ao

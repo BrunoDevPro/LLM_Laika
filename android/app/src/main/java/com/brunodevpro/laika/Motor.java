@@ -1142,6 +1142,34 @@ final class Motor {
         });
     }
 
+    /** Salva o zip do Colab onde o usuário escolheu (ex.: Downloads), sem importar: a pasta com tudo da versão. */
+    void salvarZipDoColab(GitHub github, GitHub.Artefato a, Uri destino) {
+        emFundo("Baixando o zip…", true, () -> {
+            try (OutputStream out = ctx.getContentResolver().openOutputStream(destino)) {
+                if (out == null) throw new IOException("não consegui criar o arquivo");
+                github.baixar(a, out, progresso("Baixando o zip…"), pararTarefa::get);
+            } catch (IOException | RuntimeException e) {
+                try {
+                    android.provider.DocumentsContract.deleteDocument(ctx.getContentResolver(), destino);
+                } catch (Exception ignorado) {
+                    // fica um arquivo incompleto
+                }
+                throw e;
+            }
+            avisarUsuario(null, "Zip salvo. Ele tem tudo desta versão (modelo, tokenizer e, se a célula 6 incluiu, o "
+                    + "índice e os textos); dá para importar depois em Versões e backups → Escolher arquivos.");
+        });
+    }
+
+    /** Pede ao GitHub um release com o zip deste modelo (workflow publicar.yml). */
+    void publicarNoGithub(GitHub github, GitHub.Artefato a, String nome, String notas) {
+        emFundo("Pedindo o release…", false, () -> {
+            github.publicar(github.ramoPrincipal(), a, nome, notas);
+            avisarUsuario(null, "Pronto: o GitHub está criando o release \"" + nome + "\". Em alguns minutos ele aparece "
+                    + "em " + github.paginaReleases() + ", com o zip para baixar.");
+        });
+    }
+
     private void importarFontes(List<Fonte> fontes, String nomeNovo) throws Exception {
         List<Importador.Entrada> entradas = new ArrayList<>();
         List<String> feitos = new ArrayList<>(), avisos = new ArrayList<>();

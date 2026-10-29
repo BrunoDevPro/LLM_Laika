@@ -88,6 +88,14 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         }
     };
 
+    /** Artefato esperando o usuário escolher onde salvar o zip. */
+    private GitHub.Artefato salvarArtefato;
+    private final ActivityResultLauncher<String> criarZip = registerForActivityResult(
+            new ActivityResultContracts.CreateDocument("application/zip"), uri -> {
+                if (uri != null && salvarArtefato != null) motor.salvarZipDoColab(Colab.github(this), salvarArtefato, uri);
+                salvarArtefato = null;
+            });
+
     private final ActivityResultLauncher<String> pedirNotificacoes = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), ok -> {
             });
@@ -874,7 +882,42 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             LinearLayout l = linha(c);
             TextView b = botao(l, "Baixar e usar", true, v -> baixar(a));
             ligado(b, !motor.ocupado());
+            LinearLayout l2 = linha(c);
+            ligado(botao(l2, "Salvar zip", false, v -> salvarZip(a)), !motor.ocupado());
+            ligado(botao(l2, "Publicar no GitHub", false, v -> publicar(a)), !motor.ocupado());
         }
+    }
+
+    /** Baixa o zip com tudo da versão para uma pasta do celular (ex.: Downloads), sem trocar o modelo em uso. */
+    private void salvarZip(GitHub.Artefato a) {
+        salvarArtefato = a;
+        criarZip.launch("laika_" + new SimpleDateFormat("yyyy-MM-dd_HHmm", Locale.ROOT).format(new Date(a.criado)) + ".zip");
+    }
+
+    /** Lança este modelo nos releases do GitHub (o arquivo vai do artefato para o release no servidor). */
+    private void publicar(GitHub.Artefato a) {
+        LinearLayout caixa = new LinearLayout(this);
+        caixa.setOrientation(LinearLayout.VERTICAL);
+        caixa.setPadding(dp(20), dp(8), dp(20), 0);
+        android.widget.EditText nome = new android.widget.EditText(this);
+        nome.setHint("Nome da versão (ex.: Laika 1.12)");
+        nome.setText("Laika " + new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR")).format(new Date(a.criado)));
+        nome.setSelectAllOnFocus(true);
+        android.widget.EditText notas = new android.widget.EditText(this);
+        notas.setHint("O que mudou (opcional)");
+        caixa.addView(nome);
+        caixa.addView(notas);
+        new AlertDialog.Builder(this).setTitle("Publicar no GitHub")
+                .setMessage(String.format(Locale.getDefault(), "Cria um release no repositório %s com o zip deste modelo "
+                        + "(%.0f MB). O repositório é público: qualquer pessoa poderá baixar.", Colab.repo(this),
+                        a.tamanho / 1048576.0))
+                .setView(caixa)
+                .setPositiveButton("Publicar", (d, w) -> {
+                    String n = nome.getText().toString().trim();
+                    if (n.isEmpty()) n = "Laika";
+                    motor.publicarNoGithub(Colab.github(this), a, n, notas.getText().toString().trim());
+                })
+                .setNegativeButton("Cancelar", null).show();
     }
 
     private void baixar(GitHub.Artefato a) {
