@@ -896,12 +896,26 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
 
     /** Lança este modelo nos releases do GitHub (o arquivo vai do artefato para o release no servidor). */
     private void publicar(GitHub.Artefato a) {
-        new AlertDialog.Builder(this).setTitle("Publicar no GitHub?")
-                .setMessage(String.format(Locale.getDefault(), "Cria um release no repositório %s com o zip deste modelo "
-                        + "(%.0f MB). O nome e a descrição (parâmetros, contexto, val loss, tokens, data) saem do próprio "
-                        + "zip. O repositório é público: qualquer pessoa poderá baixar.", Colab.repo(this),
-                        a.tamanho / 1048576.0))
-                .setPositiveButton("Publicar", (d, w) -> motor.publicarNoGithub(Colab.github(this), a))
+        // Vazio = automático: o nome vem do zip (NOME da célula 1) e os dados do modelo (parâmetros, contexto, val loss,
+        // tokens, data) entram sempre na descrição; o texto escrito aqui vai acima deles.
+        LinearLayout caixa = new LinearLayout(this);
+        caixa.setOrientation(LinearLayout.VERTICAL);
+        caixa.setPadding(dp(20), dp(4), dp(20), 0);
+        caixa.addView(texto(String.format(Locale.getDefault(), "Release em %s com o zip deste modelo (%.0f MB). O "
+                + "repositório é público. Deixe em branco para usar o nome do zip; os dados do modelo entram sempre "
+                + "na descrição.", Colab.repo(this), a.tamanho / 1048576.0), 13, R.color.topo_sub, false));
+        android.widget.EditText nome = new android.widget.EditText(this);
+        nome.setHint("Nome (automático)");
+        caixa.addView(nome);
+        android.widget.EditText notas = new android.widget.EditText(this);
+        notas.setHint("Descrição extra (opcional)");
+        notas.setMinLines(3);
+        notas.setGravity(android.view.Gravity.TOP);
+        caixa.addView(notas);
+        new AlertDialog.Builder(this).setTitle("Publicar no GitHub")
+                .setView(caixa)
+                .setPositiveButton("Publicar", (d, w) -> motor.publicarNoGithub(Colab.github(this), a,
+                        nome.getText().toString(), notas.getText().toString()))
                 .setNegativeButton("Cancelar", null).show();
     }
 

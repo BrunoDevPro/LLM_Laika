@@ -1165,7 +1165,7 @@ final class Motor {
      * Publica uma versão do celular (id null = a em uso) nos releases do GitHub: o mesmo zip do "Exportar" (sem o
      * índice completo do RAG), com o nome da versão e uma descrição montada com os dados dos modelos.
      */
-    void publicarVersao(GitHub github, String id) {
+    void publicarVersao(GitHub github, String id, String nomeEscolhido, String notasEscolhidas) {
         emFundo("Preparando o zip…", true, () -> {
             Armazem.Versao v = id == null ? armazem.atual() : armazem.backup(id);
             File zip = new File(ctx.getCacheDir(), "release.zip");
@@ -1183,9 +1183,10 @@ final class Motor {
                     armazem.exportar(id, out, false, progresso("Preparando o zip…"));
                 }
                 if (zip.length() >= (2L << 30)) throw new IOException("o zip passa de 2 GB, o limite de um release");
-                String nome = v.nomeExibido();
+                String nome = nomeEscolhido == null || nomeEscolhido.trim().isEmpty() ? v.nomeExibido() : nomeEscolhido.trim();
+                String notas = notasEscolhidas == null || notasEscolhidas.trim().isEmpty() ? notasDaVersao(v) : notasEscolhidas;
                 String tag = "laika-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new java.util.Date());
-                rel = github.criarRelease(tag, nome, notasDaVersao(v));
+                rel = github.criarRelease(tag, nome, notas);
                 github.enviarArquivo(rel, zip, nomeDeArquivo(nome) + ".zip", progresso("Enviando para o GitHub…"),
                         pararTarefa::get);
                 avisarUsuario(null, "Publicado: \"" + nome + "\" está em " + rel.url);
@@ -1243,9 +1244,10 @@ final class Motor {
     }
 
     /** Pede ao GitHub um release com o zip deste modelo (workflow publicar.yml). */
-    void publicarNoGithub(GitHub github, GitHub.Artefato a) {
+    /** nome vazio = o do zip (laika_nome.txt); notas = texto extra, acima dos dados do modelo tirados do zip. */
+    void publicarNoGithub(GitHub github, GitHub.Artefato a, String nome, String notas) {
         emFundo("Pedindo o release…", false, () -> {
-            github.publicar(github.ramoPrincipal(), a, "", "");
+            github.publicar(github.ramoPrincipal(), a, nome == null ? "" : nome.trim(), notas == null ? "" : notas.trim());
             avisarUsuario(null, "Pronto: o GitHub está criando o release, com o nome e os dados do modelo tirados do zip. "
                     + "Em alguns minutos ele aparece em " + github.paginaReleases() + ".");
         });
