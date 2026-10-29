@@ -2,7 +2,7 @@
 # Disparado pelo app (tela Treinar → Modelos prontos → "Publicar no GitHub"): o zip vai do artefato para o
 # release aqui no servidor, sem passar pelo celular.
 name: Publicar versão
-run-name: publicar ${{ inputs.nome }}
+run-name: publicar ${{ inputs.nome || inputs.artefato }}
 
 on:
   workflow_dispatch:
@@ -11,10 +11,11 @@ on:
         description: "id do artefato laika_pacote"
         required: true
       nome:
-        description: "nome da versão (ex.: Laika 1.12)"
-        required: true
+        description: "nome da versão (vazio = o nome que está no zip, laika_nome.txt)"
+        required: false
+        default: ""
       notas:
-        description: "o que mudou (opcional)"
+        description: "texto extra (opcional; os dados do modelo vêm do laika_info.json do zip)"
         required: false
         default: ""
 
@@ -43,19 +44,68 @@ jobs:
           fi
           unzip -l laika_pacote.zip | tail -n 15
 
+      - name: Montar o nome e a descrição
+        env:
+          NOME: ${{ inputs.nome }}
+          NOTAS: ${{ inputs.notas }}
+        run: |
+          python3 - <<'PY'
+          import json, os, zipfile
+          z = zipfile.ZipFile("laika_pacote.zip")
+          nomes = set(z.namelist())
+          info = json.loads(z.read("laika_info.json")) if "laika_info.json" in nomes else {}
+          nome = os.environ.get("NOME", "").strip()
+          if not nome and "laika_nome.txt" in nomes:
+              nome = z.read("laika_nome.txt").decode("utf-8", "replace").strip()
+          nome = nome or info.get("nome") or "Laika"
+
+          def num(x, casas=3):
+              return f"{x:.{casas}f}".replace(".", ",") if isinstance(x, (int, float)) else "?"
+
+          def grande(x):
+              if x >= 1e9:
+                  return f"{num(x / 1e9, 2)} {'bilhão' if x < 2e9 else 'bilhões'}"
+              return f"{num(x / 1e6, 1)} milhões"
+
+          linhas = [f"**{nome}**", ""]
+          if info.get("parametros"):
+              p = info["parametros"]
+              milhar = f"{p:,}".replace(",", ".")
+              linhas.append(f"- Parâmetros: {grande(p)} ({milhar})")
+              linhas.append(f"- Arquitetura: {info.get('dim')} dimensões, {info.get('camadas')} camadas, "
+                            f"{info.get('cabecas')} cabeças, contexto de {info.get('contexto')} tokens"
+                            + (", RoPE" if info.get("rope") else "") + f", vocabulário de {info.get('vocabulario')}")
+          if info.get("passos_pretreino"):
+              t = info.get("tokens_pretreino")
+              linhas.append(f"- Pré-treino: {info['passos_pretreino']} passos"
+                            + (f" (~{grande(t)} de tokens)" if t else "")
+                            + f", val loss {num(info.get('val_loss_pretreino'))}")
+          if info.get("val_loss_finetuning") is not None:
+              linhas.append(f"- Fine-tuning: val loss {num(info['val_loss_finetuning'])}")
+          if info.get("data"):
+              linhas.append(f"- Treinado em: {info['data']}" + (f" (projeto {info['projeto']})" if info.get("projeto") else ""))
+          tamanho = os.path.getsize("laika_pacote.zip")
+          arquivos = [n for n in nomes if not n.endswith("/") and n not in ("laika_info.json", "laika_nome.txt")]
+          linhas.append(f"- Zip: {tamanho / 2**20:.0f} MB, {len(arquivos)} arquivos")
+          notas = os.environ.get("NOTAS", "").strip()
+          if notas:
+              linhas += ["", notas]
+          linhas += ["", "Para usar no celular: baixe o zip e importe no app (Versões e backups → Escolher arquivos)."]
+          open("nome.txt", "w").write(nome)
+          open("notas.md", "w").write("\n".join(linhas) + "\n")
+          print(nome)
+          print("\n".join(linhas))
+          PY
+
       - name: Criar o release
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          NOME: ${{ inputs.nome }}
-          NOTAS: ${{ inputs.notas }}
         run: |
+          nome="$(cat nome.txt)"
           tag="laika-$(date -u +%Y%m%d-%H%M%S)"
-          arquivo="$(printf '%s' "$NOME" | iconv -f utf-8 -t ascii//TRANSLIT | tr -cs 'A-Za-z0-9' '_' | sed 's/^_*//;s/_*$//')"
+          arquivo="$(printf '%s' "$nome" | iconv -f utf-8 -t ascii//TRANSLIT | tr -cs 'A-Za-z0-9.' '_' | sed 's/^_*//;s/_*$//')"
           arquivo="${arquivo:-laika}.zip"
           mv laika_pacote.zip "$arquivo"
-          texto="${NOTAS:-Modelo da Laika.}
-
-          Para usar no celular: baixe o zip e importe no app (Versões e backups → Escolher arquivos)."
-          gh release create "$tag" "$arquivo" --repo "$REPO" --title "$NOME" --notes "$texto"
+          gh release create "$tag" "$arquivo" --repo "$REPO" --title "$nome" --notes-file notas.md
           echo "Release criado: https://github.com/$REPO/releases/tag/$tag"

@@ -108,6 +108,10 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
 - Na 1.13: em Treinar → Modelos prontos, além de "Baixar e usar", **Salvar zip** (baixa o zip com tudo da
   versão para uma pasta do celular, sem trocar o modelo) e **Publicar no GitHub** (cria um release no repositório com
   o zip; o arquivo vai do artefato para o release no próprio GitHub, sem passar pelo celular).
+- Na alpha 0.13.1 (a numeração do app recomeçou como alpha): **Publicar** também em Versões e backups, para a
+  versão em uso e cada backup (o app monta o zip e o envia ao release; o token precisa de Contents: leitura e escrita).
+  O nome do release é o da versão e a descrição sai sozinha: parâmetros, dimensões, camadas, contexto, val loss,
+  passos e tokens do pré-treino e datas.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o

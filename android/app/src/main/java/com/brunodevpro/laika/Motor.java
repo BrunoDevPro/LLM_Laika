@@ -1161,12 +1161,93 @@ final class Motor {
         });
     }
 
+    /**
+     * Publica uma versão do celular (id null = a em uso) nos releases do GitHub: o mesmo zip do "Exportar" (sem o
+     * índice completo do RAG), com o nome da versão e uma descrição montada com os dados dos modelos.
+     */
+    void publicarVersao(GitHub github, String id) {
+        emFundo("Preparando o zip…", true, () -> {
+            Armazem.Versao v = id == null ? armazem.atual() : armazem.backup(id);
+            File zip = new File(ctx.getCacheDir(), "release.zip");
+            long precisa = 0;
+            for (Map.Entry<String, Armazem.Arquivo> e : v.arquivos.entrySet()) {
+                if (!Armazem.INDICE.equals(e.getKey())) precisa += Math.max(0, e.getValue().tamanho);
+            }
+            if (ctx.getCacheDir().getUsableSpace() < precisa + (100L << 20)) {
+                throw new IOException(String.format(Locale.getDefault(),
+                        "falta espaço no celular: o zip precisa de uns %d MB livres", (precisa >> 20) + 100));
+            }
+            GitHub.Release rel = null;
+            try {
+                try (OutputStream out = new java.io.FileOutputStream(zip)) {
+                    armazem.exportar(id, out, false, progresso("Preparando o zip…"));
+                }
+                if (zip.length() >= (2L << 30)) throw new IOException("o zip passa de 2 GB, o limite de um release");
+                String nome = v.nomeExibido();
+                String tag = "laika-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new java.util.Date());
+                rel = github.criarRelease(tag, nome, notasDaVersao(v));
+                github.enviarArquivo(rel, zip, nomeDeArquivo(nome) + ".zip", progresso("Enviando para o GitHub…"),
+                        pararTarefa::get);
+                avisarUsuario(null, "Publicado: \"" + nome + "\" está em " + rel.url);
+            } catch (Exception e) {
+                if (rel != null) {
+                    try {
+                        github.apagarRelease(rel);  // não deixa um release sem o arquivo
+                    } catch (IOException ignorado) {
+                        // fica o release vazio; dá para apagar no GitHub
+                    }
+                }
+                throw e;
+            } finally {
+                zip.delete();
+            }
+        });
+    }
+
+    /** A descrição do release: o que há na versão (parâmetros, dimensões, contexto, val loss, passos...) e a data. */
+    String notasDaVersao(Armazem.Versao v) {
+        java.text.SimpleDateFormat f = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("**").append(v.nomeExibido()).append("**");
+        if (!v.nomeExibido().equals(v.nome)) sb.append(" (").append(v.nome).append(")");
+        sb.append("\n\n");
+        String[][] partes = {{Armazem.CHAT, "Modelo de conversa"}, {Armazem.BASE, "Modelo de completar texto"},
+                {Armazem.TOKENIZER, "Tokenizer"}};
+        for (String[] p : partes) {
+            Armazem.Arquivo a = v.arquivos.get(p[0]);
+            if (a == null) continue;
+            sb.append("- ").append(p[1]).append(": ").append(a.descricao == null ? "-" : a.descricao);
+            if (a.tamanho > 0) sb.append(String.format(Locale.getDefault(), " (%.0f MB)", a.tamanho / 1048576.0));
+            sb.append("\n");
+        }
+        sb.append("- Criado em: ").append(f.format(new java.util.Date(v.criado))).append("\n");
+        sb.append("- Publicado em: ").append(f.format(new java.util.Date())).append(" pelo app Laika ")
+                .append(nomeDaVersaoDoApp()).append("\n\n");
+        sb.append("Para usar no celular: baixe o zip e importe no app (Versões e backups → Escolher arquivos).");
+        return sb.toString();
+    }
+
+    private String nomeDaVersaoDoApp() {
+        try {
+            return ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "?";
+        }
+    }
+
+    /** "Laika 1.12 (100M)" -> "Laika_1.12_100M" (nome do arquivo do release). */
+    static String nomeDeArquivo(String nome) {
+        String s = java.text.Normalizer.normalize(nome, java.text.Normalizer.Form.NFKD).replaceAll("\\p{M}", "")
+                .replaceAll("[^A-Za-z0-9.]+", "_").replaceAll("^_+|_+$", "");
+        return s.isEmpty() ? "laika" : s;
+    }
+
     /** Pede ao GitHub um release com o zip deste modelo (workflow publicar.yml). */
-    void publicarNoGithub(GitHub github, GitHub.Artefato a, String nome, String notas) {
+    void publicarNoGithub(GitHub github, GitHub.Artefato a) {
         emFundo("Pedindo o release…", false, () -> {
-            github.publicar(github.ramoPrincipal(), a, nome, notas);
-            avisarUsuario(null, "Pronto: o GitHub está criando o release \"" + nome + "\". Em alguns minutos ele aparece "
-                    + "em " + github.paginaReleases() + ", com o zip para baixar.");
+            github.publicar(github.ramoPrincipal(), a, "", "");
+            avisarUsuario(null, "Pronto: o GitHub está criando o release, com o nome e os dados do modelo tirados do zip. "
+                    + "Em alguns minutos ele aparece em " + github.paginaReleases() + ".");
         });
     }
 

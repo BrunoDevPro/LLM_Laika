@@ -6,6 +6,7 @@ import com.brunodevpro.laika.core.dados.Parado;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -479,6 +480,77 @@ public final class GitHub {
         corpo.put("ref", ramo);
         corpo.put("inputs", inputs);
         pedir("POST", repoPath() + "/actions/workflows/" + PUBLICAR + "/dispatches", corpo);
+    }
+
+    /** Um release recém-criado, esperando o arquivo. */
+    public static final class Release {
+        public long id;
+        public String url, envio;
+    }
+
+    /**
+     * Cria o release (ainda sem o arquivo). Se o envio do arquivo falhar, {@link #apagarRelease} o tira, para não ficar
+     * um release vazio. O token precisa de Contents: leitura e escrita.
+     */
+    @SuppressWarnings("unchecked")
+    public Release criarRelease(String tag, String nome, String notas) throws IOException {
+        Map<String, Object> corpo = new LinkedHashMap<>();
+        corpo.put("tag_name", tag);
+        corpo.put("name", nome);
+        corpo.put("body", notas);
+        Object r;
+        try {
+            r = pedir("POST", repoPath() + "/releases", corpo);
+        } catch (Erro e) {
+            if (e.codigo == 403 || e.codigo == 404) {
+                throw new Erro(e.codigo, "o token não pode criar releases: dê a ele a permissão Contents (leitura e "
+                        + "escrita) no GitHub e troque o token na tela Treinar");
+            }
+            throw e;
+        }
+        Map<String, Object> m = (Map<String, Object>) r;
+        Release rel = new Release();
+        rel.id = numero(m, "id");
+        rel.url = texto(m, "html_url");
+        String envio = texto(m, "upload_url");
+        rel.envio = envio == null ? null : envio.replaceAll("\\{.*\\}$", "");
+        return rel;
+    }
+
+    /** Envia o zip para o release (uploads.github.com), mostrando o andamento. */
+    public void enviarArquivo(Release rel, File arquivo, String nome, Armazem.Progresso p, BooleanSupplier cancelar)
+            throws IOException {
+        HttpURLConnection c = abrir("POST", rel.envio + "?name=" + q(nome), true, "application/vnd.github+json");
+        c.setReadTimeout(10 * 60_000);
+        c.setDoOutput(true);
+        c.setFixedLengthStreamingMode(arquivo.length());
+        c.setRequestProperty("Content-Type", "application/zip");
+        long total = arquivo.length(), feito = 0, ultimo = 0;
+        try {
+            try (InputStream in = new FileInputStream(arquivo); OutputStream out = c.getOutputStream()) {
+                byte[] b = new byte[1 << 16];
+                int n;
+                while ((n = in.read(b)) > 0) {
+                    if (cancelar != null && cancelar.getAsBoolean()) throw new Parado();
+                    out.write(b, 0, n);
+                    feito += n;
+                    if (p != null && feito - ultimo > (1 << 20)) {
+                        ultimo = feito;
+                        p.feito(feito, total);
+                    }
+                }
+            }
+            int codigo = c.getResponseCode();
+            if (codigo >= 400) throw erro(c, codigo);
+            ler(c.getInputStream());
+        } finally {
+            c.disconnect();
+        }
+        if (p != null) p.feito(total, total);
+    }
+
+    public void apagarRelease(Release rel) throws IOException {
+        pedir("DELETE", repoPath() + "/releases/" + rel.id, null);
     }
 
     /** Página dos releases do repositório. */

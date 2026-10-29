@@ -239,6 +239,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         LinearLayout l2 = linhaDeBotoes(c);
         botao(l2, "Apelido", false, v -> SeletorModelos.pedirApelido(this, motor, null, atual));
         botao(l2, "Exportar", false, v -> exportar(atual));
+        botao(l2, "Publicar", false, v -> publicar(null, atual));
 
         // Atualização
         secao("ATUALIZAR");
@@ -276,6 +277,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
             botao(lb, "Apelido", false, v -> SeletorModelos.pedirApelido(this, motor, b.id, b));
             LinearLayout lb2 = linhaDeBotoes(cb);
             botao(lb2, "Exportar", false, v -> exportar(b));
+            botao(lb2, "Publicar", false, v -> publicar(b.id, b));
             TextView apagar = botao(lb2, "Apagar", false, v -> apagar(b));
             apagar.setTextColor(getColor(R.color.perigo));
         }
@@ -288,6 +290,29 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
     }
 
     // ---------- ações ----------
+
+    /** Lança a versão nos releases do GitHub: nome da versão e descrição com os dados dos modelos, automáticos. */
+    private void publicar(String id, Armazem.Versao v) {
+        if (!Colab.configurado(this)) {
+            new AlertDialog.Builder(this).setTitle("Publicar no GitHub")
+                    .setMessage("Primeiro ligue o app ao GitHub na tela Treinar (repositório e token).")
+                    .setPositiveButton("Abrir Treinar", (d, w) -> startActivity(new android.content.Intent(this, ColabActivity.class)))
+                    .setNegativeButton("Cancelar", null).show();
+            return;
+        }
+        long tamanho = 0;
+        for (java.util.Map.Entry<String, Armazem.Arquivo> e : v.arquivos.entrySet()) {
+            if (!Armazem.INDICE.equals(e.getKey())) tamanho += Math.max(0, e.getValue().tamanho);
+        }
+        new AlertDialog.Builder(this).setTitle("Publicar \"" + v.nomeExibido() + "\"?")
+                .setMessage(String.format(Locale.getDefault(), "Cria um release no repositório %s com o zip desta versão "
+                        + "(~%d MB, sem o índice completo do RAG), enviado pelo celular. O nome é o da versão, e a "
+                        + "descrição traz os dados dos modelos (parâmetros, contexto, val loss, passos, datas).\n\n"
+                        + "O token precisa da permissão Contents (leitura e escrita). O repositório é público: qualquer "
+                        + "pessoa poderá baixar.", Colab.repo(this), tamanho >> 20))
+                .setPositiveButton("Publicar", (d, w) -> motor.publicarVersao(Colab.github(this), id))
+                .setNegativeButton("Cancelar", null).show();
+    }
 
     /** Diálogo com um campo de texto (nome do backup). */
     private void pedirTexto(String titulo, String valor, String botaoOk, java.util.function.Consumer<String> ok) {

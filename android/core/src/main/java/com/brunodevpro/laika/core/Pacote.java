@@ -102,6 +102,7 @@ public final class Pacote {
                     continue;
                 }
                 String nome = caminho.substring(caminho.lastIndexOf('/') + 1);
+                if (caminho.equals("laika_info.json")) continue;  // dados do modelo para o release do GitHub
                 if (caminho.equals(ARQUIVO_NOME)) {
                     byte[] b = new byte[200];
                     int n = lerTudo(z, b);
