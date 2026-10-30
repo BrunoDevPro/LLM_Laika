@@ -124,6 +124,9 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   longa; avalie cada resposta (acertou, em parte, errou e nota de 0 a 5, com comentário); o relatório soma tudo e
   exporta em .md ou .csv. Em **Treinar**, o saldo de **unidades de computação** do Colab (workflow `unidades.yml`,
   que roda `colab usage` sem ligar máquina; ~1 min, sozinho a cada 2 h ou em "Atualizar").
+- Na alpha 0.14.1: em Testar respostas, o modelo em uso aparece no topo com **Trocar**, há a opção **Respostas
+  rápidas**, os botões não aparecem mais cortados e o relatório começa reduzido (toque para estender; lá ficam
+  Exportar, Renomear e Excluir).
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o
