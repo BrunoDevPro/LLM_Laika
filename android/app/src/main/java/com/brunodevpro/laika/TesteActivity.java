@@ -41,7 +41,7 @@ import java.util.Locale;
  * Testar respostas: o usuário escreve uma pergunta, escolhe quantas respostas a Laika vai dar (e a temperatura, o
  * tamanho, RAG, memória, resposta longa) e avalia cada uma (acertou, em parte ou errou, e uma nota de 0 a 5). O
  * relatório soma tudo e pode ser exportado (Markdown ou CSV). As respostas ficam fora dos chats; o teste fica salvo
- * em teste.json até "Novo teste".
+ * em teste.json até "Excluir" no relatório.
  */
 public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
     private static final String[] VEREDITOS = {"acertou", "parcial", "errou"};
@@ -58,7 +58,12 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
     private String rascunho = "";
     private int quantas = 3, tamanho = 80;
     private double temperatura = 0.7;
-    private boolean comRag = true, comMemoria = false, longas = false;
+    private boolean comRag = true, comMemoria = false, longas = false, rapidas;
+    /** O relatório começa reduzido (só a linha do resumo); o estado fica guardado. */
+    private boolean relatorioAberto;
+    /** O modelo que a tela mostra: muda pelo seletor, e a tela se refaz quando a troca termina. */
+    private String modeloMostrado;
+    private boolean prontoMostrado;
 
     // Geração em andamento: o caso, quantas faltam e a bolha que mostra o texto parcial.
     private JSONObject casoGerando;
@@ -85,6 +90,8 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         temperatura = motor.temperatura;
         tamanho = Math.min(motor.tamanhoResposta, motor.tamanhoMaximo());
         comRag = motor.usarRag;
+        rapidas = motor.respostasRapidas;
+        relatorioAberto = getSharedPreferences("tela", MODE_PRIVATE).getBoolean("teste_relatorio_aberto", false);
         if (salvo != null) {
             rascunho = salvo.getString("rascunho", "");
             exportarCsv = salvo.getBoolean("csv");
@@ -136,6 +143,19 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
     @Override
     public void estadoMudou() {
         painel.atualizar();
+        boolean pronto = motor.pronto && !motor.ocupado();
+        if (pronto != prontoMostrado || !java.util.Objects.equals(motor.nomeExibido, modeloMostrado)) montar();
+    }
+
+    @Override
+    public void backupNovo(String titulo, String texto, String id) {
+        SeletorModelos.mostrarBackupNovo(this, motor, titulo, texto, id);
+    }
+
+    @Override
+    public void aviso(String titulo, String texto) {
+        if (titulo == null) Toast.makeText(this, texto, Toast.LENGTH_LONG).show();
+        else new AlertDialog.Builder(this).setTitle(titulo).setMessage(texto).setPositiveButton("OK", null).show();
     }
 
     // ---------- arquivo ----------
@@ -228,7 +248,8 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.rightMargin = dp(8);
-        lp.topMargin = dp(8);
+        // Margens iguais em cima e embaixo: na linha centralizada, só a de cima empurrava o botão para fora (cortado).
+        lp.topMargin = lp.bottomMargin = dp(4);
         l.addView(b, lp);
         return b;
     }
@@ -244,7 +265,7 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.rightMargin = dp(6);
-        lp.topMargin = dp(6);
+        lp.topMargin = lp.bottomMargin = dp(3);
         l.addView(b, lp);
         return b;
     }
@@ -252,7 +273,7 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
     /** Um valor com − e + (quantas respostas, temperatura, tamanho). */
     private void ajuste(LinearLayout pai, String rotulo, String valor, Runnable menos, Runnable mais) {
         LinearLayout l = linha(pai);
-        l.setPadding(0, dp(6), 0, 0);
+        l.setPadding(0, dp(2), 0, 0);
         TextView r = texto(rotulo, 14, R.color.texto_laika, false);
         l.addView(r, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
         escolha(l, "−", false, v -> {
@@ -292,6 +313,26 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         conteudo.removeAllViews();
         aoVivo = null;
         JSONArray casos = casos();
+        modeloMostrado = motor.nomeExibido;
+        prontoMostrado = motor.pronto && !motor.ocupado();
+
+        // Modelo: o em uso; "Trocar" abre o mesmo seletor do chat (a versão em uso muda no app todo).
+        secao("MODELO");
+        LinearLayout cm = cartao();
+        LinearLayout lm = linha(cm);
+        LinearLayout nomes = new LinearLayout(this);
+        nomes.setOrientation(LinearLayout.VERTICAL);
+        nomes.addView(texto(modeloMostrado == null ? "—" : modeloMostrado, 16, R.color.topo_texto, true));
+        String sit = motor.erro != null ? motor.erro : !prontoMostrado ? "carregando…" : motor.descricaoModelo;
+        if (sit != null && !sit.isEmpty()) nomes.addView(texto(sit, 12, R.color.topo_sub, false));
+        lm.addView(nomes, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        botao(lm, "Trocar", false, v -> {
+            if (casoGerando != null) {
+                Toast.makeText(this, "Pare a geração antes de trocar de modelo.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            new SeletorModelos(this, motor).mostrar();
+        });
 
         // Pergunta nova
         secao("PERGUNTA");
@@ -319,6 +360,7 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         caixa(c, "Busca (RAG)", comRag, v -> comRag = v);
         caixa(c, "Memória do usuário no Contexto", comMemoria, v -> comMemoria = v);
         caixa(c, "Resposta longa", longas, v -> longas = v);
+        caixa(c, "Respostas rápidas (até 2 trechos do RAG)", rapidas, v -> rapidas = v);
         TextView dica = texto("Com temperatura acima de zero, cada resposta sai diferente: gere várias para ver "
                 + "quantas acertam. Nada disso entra nos chats.", 12, R.color.aviso, false);
         dica.setPadding(0, dp(4), 0, 0);
@@ -337,20 +379,34 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         if (casos.length() > 0) secao("PERGUNTAS TESTADAS (" + casos.length() + ")");
         for (int i = casos.length() - 1; i >= 0; i--) mostrarCaso(casos.optJSONObject(i), i);
 
-        // Relatório
+        // Relatório: reduzido (nome e uma linha); tocar no topo estende ou reduz.
         secao("RELATÓRIO");
         LinearLayout r = cartao();
-        TextView nome = texto(teste.optString("nome"), 16, R.color.topo_texto, true);
-        r.addView(nome);
-        TextView resumo = texto(resumo(), 14, R.color.texto_laika, false);
-        resumo.setPadding(0, dp(4), 0, 0);
-        resumo.setLineSpacing(0, 1.15f);
-        r.addView(resumo);
-        LinearLayout l1 = linha(r);
-        botao(l1, "Exportar", true, v -> escolherFormato());
-        botao(l1, "Renomear", false, v -> renomear());
-        LinearLayout l2 = linha(r);
-        botao(l2, "Novo teste", false, v -> novo());
+        LinearLayout topo = linha(r);
+        topo.setOnClickListener(v -> {
+            relatorioAberto = !relatorioAberto;
+            getSharedPreferences("tela", MODE_PRIVATE).edit().putBoolean("teste_relatorio_aberto", relatorioAberto).apply();
+            montar();
+        });
+        LinearLayout cab = new LinearLayout(this);
+        cab.setOrientation(LinearLayout.VERTICAL);
+        cab.addView(texto(teste.optString("nome"), 16, R.color.topo_texto, true));
+        cab.addView(texto(resumoCurto(), 13, R.color.topo_sub, false));
+        topo.addView(cab, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        TextView seta = texto(relatorioAberto ? "▴" : "▾", 22, R.color.topo_sub, false);
+        seta.setPadding(dp(12), 0, dp(4), 0);
+        topo.addView(seta);
+        if (relatorioAberto) {
+            TextView resumo = texto(resumo() + porPergunta(), 14, R.color.texto_laika, false);
+            resumo.setPadding(0, dp(8), 0, 0);
+            resumo.setLineSpacing(0, 1.15f);
+            r.addView(resumo);
+            LinearLayout l1 = linha(r);
+            l1.setPadding(0, dp(6), 0, 0);
+            botao(l1, "Exportar", true, v -> escolherFormato());
+            botao(l1, "Renomear", false, v -> renomear());
+            botao(l1, "Excluir", false, v -> excluir());
+        }
     }
 
     private void mostrarCaso(JSONObject caso, int indice) {
@@ -384,6 +440,7 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
                 comRag = o.optBoolean("rag", comRag);
                 comMemoria = o.optBoolean("memoria", comMemoria);
                 longas = o.optBoolean("longa", longas);
+                rapidas = o.optBoolean("rapidas", rapidas);
             }
             campoPergunta = null;
             montar();
@@ -493,15 +550,15 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
                 }).setNegativeButton("Cancelar", null).show();
     }
 
-    private void novo() {
+    private void excluir() {
         if (casoGerando != null) {
             Toast.makeText(this, "Pare a geração antes.", Toast.LENGTH_SHORT).show();
             return;
         }
-        new AlertDialog.Builder(this).setTitle("Começar um teste novo?")
-                .setMessage("As perguntas, respostas e notas deste teste serão apagadas. Exporte o relatório antes, "
-                        + "se quiser guardar.")
-                .setPositiveButton("Novo teste", (d, w) -> {
+        new AlertDialog.Builder(this).setTitle("Excluir o relatório?")
+                .setMessage("As perguntas, respostas e notas deste teste serão apagadas e começa um teste novo. "
+                        + "Exporte antes, se quiser guardar.")
+                .setPositiveButton("Excluir", (d, w) -> {
                     teste = novoTeste();
                     salvar();
                     montar();
@@ -523,6 +580,7 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         poe(op, "rag", comRag);
         poe(op, "memoria", comMemoria);
         poe(op, "longa", longas);
+        poe(op, "rapidas", rapidas);
         poe(caso, "pergunta", p);
         poe(caso, "opcoes", op);
         poe(caso, "respostas", new JSONArray());
@@ -557,7 +615,7 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         }
         JSONObject o = caso.optJSONObject("opcoes");
         motor.testar(caso.optString("pergunta"), o.optDouble("temperatura", 0.7), o.optInt("tamanho", 80),
-                o.optBoolean("rag"), o.optBoolean("memoria"), o.optBoolean("longa"),
+                o.optBoolean("rag"), o.optBoolean("memoria"), o.optBoolean("longa"), o.optBoolean("rapidas"),
                 parcial -> {
                     if (aoVivo != null) aoVivo.setText(parcial.isEmpty() ? "…" : parcial);
                 },
@@ -598,6 +656,7 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
         l.add(o.optBoolean("rag") ? "com RAG" : "sem RAG");
         if (o.optBoolean("memoria")) l.add("com memória");
         if (o.optBoolean("longa")) l.add("resposta longa");
+        if (o.optBoolean("rapidas")) l.add("rápidas");
         return String.join(" · ", l);
     }
 
@@ -624,6 +683,32 @@ public class TesteActivity extends ComponentActivity implements Motor.Ouvinte {
 
     private static String media(int soma, int n) {
         return n == 0 ? "–" : String.format(Locale.getDefault(), "%.1f", (double) soma / n);
+    }
+
+    /** Uma linha para o relatório reduzido. */
+    private String resumoCurto() {
+        JSONArray casos = casos();
+        int[] t = new int[6];
+        for (int i = 0; i < casos.length(); i++) contar(casos.optJSONObject(i).optJSONArray("respostas"), t);
+        if (t[0] == 0) return "Nenhuma resposta ainda";
+        int avaliadas = t[1] + t[2] + t[3];
+        return t[0] + " respostas · acertou " + pct(t[1], avaliadas) + " · nota " + media(t[5], t[4]);
+    }
+
+    /** No relatório estendido: uma linha por pergunta. */
+    private String porPergunta() {
+        JSONArray casos = casos();
+        if (casos.length() < 2) return "";
+        StringBuilder sb = new StringBuilder("\n");
+        for (int i = 0; i < casos.length(); i++) {
+            JSONObject caso = casos.optJSONObject(i);
+            int[] t = contar(caso.optJSONArray("respostas"), new int[6]);
+            String p = caso.optString("pergunta");
+            if (p.length() > 40) p = p.substring(0, 39) + "…";
+            sb.append("\n").append(i + 1).append(". ").append(p).append(": ").append(t[1]).append("/").append(t[0])
+                    .append(" certas · nota ").append(media(t[5], t[4]));
+        }
+        return sb.toString();
     }
 
     private String resumo() {

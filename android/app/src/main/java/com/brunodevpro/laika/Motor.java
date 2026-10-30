@@ -796,7 +796,7 @@ final class Motor {
      * (as mesmas do chat: RAG, memória, contas, gatilho de resposta longa). parcial recebe o texto enquanto é gerado.
      */
     void testar(String pergunta, double temp, int tamanho, boolean comRag, boolean comMemoria, boolean longas,
-                java.util.function.Consumer<String> parcial, FimTeste fim) {
+                boolean rapidas, java.util.function.Consumer<String> parcial, FimTeste fim) {
         if (gerando || !pronto || tarefa != null) {
             fim.fim(null, !pronto || tarefa != null ? "A Laika ainda está carregando ou trocando de modelo."
                     : "Espere a resposta do chat terminar.");
@@ -830,7 +830,7 @@ final class Motor {
                     String paraModelo = longas && !Texto.querLonga(pergunta) ? pergunta + " " + Texto.GATILHO_LONGO : pergunta;
                     op.maxNovos = Texto.querLonga(paraModelo) ? tamanhoMaximo() : Math.min(tamanho, tamanhoMaximo());
                     op.evitarCopia = Texto.querResumo(paraModelo);
-                    chat.maxTrechos = respostasRapidas ? 2 : 0;
+                    chat.maxTrechos = rapidas ? 2 : 0;
                     Laika.Prompt p = chat.montarPrompt(paraModelo, comRag ? rag : null, comMemoria ? memoria : null,
                             op.maxNovos, new ArrayList<>());
                     String t = chat.gerar(p.texto, op, true, rng, pa -> naTela(() -> parcial.accept(pa)), cancelar::get);

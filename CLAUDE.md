@@ -233,7 +233,10 @@ Os `.bat` são ASCII com CRLF. Nada disso foi testado num Windows real.
   as respostas anteriores e as setas ‹ › da bolha (`Motor.mostrarVersao`) trocam; o histórico usa a que está na tela.
   `TesteActivity` (menu ⋮ → Testar respostas, `Motor.testar`: fora da conversa, sem histórico e sem `memoria.tratar`,
   que gravaria na memória): N respostas por pergunta, veredito + nota 0–5 + comentário, relatório e exportação .md/.csv;
-  fica em `files/teste.json` até "Novo teste".
+  fica em `files/teste.json` até "Excluir". 0.14.1: a tela mostra o modelo em uso com "Trocar" (o `SeletorModelos` do chat),
+  tem "Respostas rápidas" (`Motor.testar(..., rapidas, ...)`: até 2 trechos) e o relatório começa reduzido (uma linha;
+  tocar estende, com uma linha por pergunta, Exportar, Renomear e Excluir). Os botões das linhas centralizadas têm
+  margem igual em cima e embaixo (só a de cima empurrava o botão para fora e ele aparecia cortado).
 - **O treino no celular (GPU) foi retirado** na versão 1.2 do app, a pedido do usuário; o treino fica no Colab,
   ligado pela tela Colab. O que sobrou dele é só a montagem do índice a partir de textos.
 - Testes do núcleo: `ComparaComPythonTest`, `VersoesTest`, `PacoteTest`, `dados/IndiceTest` (índice igual ao do
