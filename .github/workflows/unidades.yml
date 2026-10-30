@@ -1,0 +1,64 @@
+# Consulta quantas unidades de computação do Colab a conta ainda tem (Colab CLI, "colab usage"), a pedido do
+# app (tela Treinar). Não liga nenhuma máquina. O app lê a linha "LAIKA_UNIDADES" do registro (escrita em duas
+# partes no script, porque o GitHub também mostra o script no registro).
+name: Laika unidades
+run-name: "unidades ${{ inputs.pedido }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      pedido:
+        description: "Identificação do pedido (o app usa para achar esta execução)"
+        required: false
+        default: ""
+
+concurrency:
+  group: laika-unidades
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  unidades:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Instalar o Colab CLI
+        run: |
+          python3 -m venv "$RUNNER_TEMP/colab"
+          "$RUNNER_TEMP/colab/bin/pip" install -q "google-colab-cli>=0.7.5,<0.8"
+          echo "$RUNNER_TEMP/colab/bin" >> "$GITHUB_PATH"
+
+      - name: Consultar as unidades
+        env:
+          COLAB_ADC: ${{ secrets.COLAB_ADC }}
+        run: |
+          if [ -z "$COLAB_ADC" ]; then
+            echo "LAIKA_""UNIDADES erro=Falta o segredo COLAB_ADC (rode a célula 0 do colab.ipynb no navegador)"
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$COLAB_ADC" > "$RUNNER_TEMP/adc.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/adc.json"
+          set +e
+          saida="$(colab --auth=adc usage 2>&1)"
+          codigo=$?
+          rm -f "$RUNNER_TEMP/adc.json"
+          # Sem e-mails no registro (o repositório é público).
+          saida="$(printf '%s' "$saida" | sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/(e-mail)/g')"
+          printf '%s\n' "$saida"
+          SAIDA="$saida" python3 - <<'PY'
+          import os, re
+          s = os.environ["SAIDA"]
+          def numero(padrao):
+              m = re.search(padrao, s, re.I)
+              return m.group(1).replace(",", "") if m else ""
+          saldo = numero(r"balance[^0-9\-]*(-?[\d.,]+)")
+          taxa = numero(r"rate[^0-9\-]*(-?[\d.,]+)")
+          if saldo:
+              print("LAIKA_" + f"UNIDADES saldo={saldo} taxa={taxa}")
+          else:
+              linha = " ".join(s.split())[:300]
+              print("LAIKA_" + f"UNIDADES erro=Resposta do Colab CLI sem o saldo: {linha}")
+          PY
+          exit $codigo

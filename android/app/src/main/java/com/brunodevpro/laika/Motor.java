@@ -67,8 +67,29 @@ final class Motor {
         volatile String texto, fonte, detalhe, trecho;
         /** O modelo que gerou esta resposta (o arquivo do chat e o nome na hora), ou null (resposta da memória). */
         volatile String modeloRef, modeloNome;
-        /** A linha "*modelo X usado" onde o modelo muda (calculada, não é salva). */
+        /** A linha com o nome do modelo, em cima da resposta, onde o modelo muda (calculada, não é salva). */
         boolean marcaModelo;
+        /**
+         * "Gerar outra": as respostas já geradas para a mesma pergunta (texto, fonte, detalhe, trecho, modelo), e qual
+         * delas está na tela. null enquanto só existe uma.
+         */
+        List<String[]> versoes;
+        int versao;
+        /** Gerando outra resposta: no fim, ela entra em versoes. */
+        boolean regenerando;
+
+        String[] retrato() {
+            return new String[]{texto, fonte, detalhe, trecho, modeloRef, modeloNome};
+        }
+
+        void mostrar(String[] v) {
+            texto = v[0];
+            fonte = v[1];
+            detalhe = v[2];
+            trecho = v[3];
+            modeloRef = v[4];
+            modeloNome = v[5];
+        }
 
         Mensagem(boolean usuario, boolean aviso, String texto) {
             this.usuario = usuario;
@@ -130,7 +151,17 @@ final class Motor {
         t.setDaemon(true);
         return t;
     });
-    private final AtomicBoolean cancelar = new AtomicBoolean(), pararTarefa = new AtomicBoolean();
+    /**
+     * Segunda fila, para o que não mexe no modelo carregado (publicar, exportar, salvar o zip): roda enquanto o
+     * chat continua funcionando. Uma tarefa por vez nela; pedir outra mostra "Espere terminar".
+     */
+    private final ExecutorService lado = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "laika-lado");
+        t.setDaemon(true);
+        return t;
+    });
+    private final AtomicBoolean cancelar = new AtomicBoolean(), pararTarefa = new AtomicBoolean(),
+            pararLado = new AtomicBoolean();
     private final Random rng = new Random();
     private final Set<Ouvinte> ouvintes = new LinkedHashSet<>();
     // Todos os núcleos (até 8): o trabalho é dividido em pedaços pequenos, então os núcleos lentos não atrasam os rápidos.
@@ -160,6 +191,9 @@ final class Motor {
     volatile int progresso = -1;
     /** A tarefa em andamento pode ser cancelada (importação, índice, download). */
     volatile boolean tarefaCancelavel;
+    /** Tarefa da segunda fila (publicar, exportar, salvar zip), que não bloqueia o chat; e o progresso dela. */
+    volatile String tarefaLado;
+    volatile int progressoLado = -1;
     volatile String nomeVersao = "", nomeExibido = "";
     volatile String descricaoIndice = "", descricaoModelo = "";
     volatile boolean temBase;
@@ -212,14 +246,43 @@ final class Motor {
         ouvintes.remove(o);
     }
 
+    /** Uma tarefa que mexe na versão em uso (trocar de modelo, importar): o chat espera ela acabar. */
     boolean ocupado() {
         return tarefa != null;
     }
 
-    /** Pede para parar a tarefa longa em andamento (ela desfaz o que estava fazendo). */
+    /** Alguma tarefa em andamento, de qualquer fila (para a faixa de progresso e o serviço em primeiro plano). */
+    boolean algumaTarefa() {
+        return tarefa != null || tarefaLado != null;
+    }
+
+    /** O texto da faixa de progresso: as tarefas das duas filas, com a porcentagem quando dá para medir. */
+    String textoTarefas() {
+        List<String> l = new ArrayList<>();
+        String t = tarefa, tl = tarefaLado;
+        if (t != null) l.add(progresso >= 0 ? String.format(Locale.getDefault(), "%s %d%%", t, progresso) : t);
+        if (tl != null) l.add(progressoLado >= 0 ? String.format(Locale.getDefault(), "%s %d%%", tl, progressoLado) : tl);
+        return l.isEmpty() ? null : String.join(" · ", l);
+    }
+
+    /** Progresso para a barra: o da tarefa principal, ou o da segunda fila; -1 se não dá para medir. */
+    int progressoTarefas() {
+        return tarefa != null ? progresso : tarefaLado != null ? progressoLado : -1;
+    }
+
+    boolean algumaCancelavel() {
+        return (tarefa != null && tarefaCancelavel) || tarefaLado != null;
+    }
+
+    /** Pede para parar as tarefas longas em andamento (elas desfazem o que estavam fazendo). */
     void cancelarTarefa() {
         pararTarefa.set(true);
+        pararLado.set(true);
         if (tarefa != null) tarefa("Cancelando…", -1);
+        if (tarefaLado != null) {
+            tarefaLado = "Cancelando…";
+            avisarEstado();
+        }
     }
 
     // ---------- avisos para as telas ----------
@@ -402,20 +465,36 @@ final class Motor {
         chat = base = null;
         rag = null;
         tok = null;
+        refTokAberto = refIndiceAberto = null;
         pronto = false;
     }
 
-    /** Carrega a versão em uso: modelo, tokenizer, índice, memória e conversa. */
+    /** Arquivos já abertos (tokenizer e índice): na troca de modelo, o que não mudou não é aberto de novo. */
+    private String refTokAberto, refIndiceAberto;
+
+    /**
+     * Carrega a versão em uso: modelo, tokenizer e índice. Na troca de modelo, o tokenizer e o índice iguais aos
+     * que já estão abertos são reaproveitados (o índice completo tem ~4 GB, e contar os trechos dele de novo levava
+     * segundos), e a contagem de trechos de cada índice fica guardada.
+     */
     private void carregarVersao() throws IOException {
-        fecharTudo();
+        if (chat != null) chat.modelo.fechar();
+        if (base != null) base.modelo.fechar();
+        chat = base = null;
+        pronto = false;
         erro = null;
         Armazem.Versao v = armazem.atual();
         nomeVersao = v.nome;
         nomeExibido = v.nomeExibido();
         Armazem.Arquivo arqChat = v.arquivos.get(Armazem.CHAT);
         descricaoModelo = arqChat.descricao == null ? "" : arqChat.descricao;
-        try (InputStream in = armazem.abrir(v.arquivos.get(Armazem.TOKENIZER).ref)) {
-            tok = new Tokenizador(in);
+        String refTok = v.arquivos.get(Armazem.TOKENIZER).ref;
+        if (tok == null || !refTok.equals(refTokAberto)) {
+            tok = null;
+            try (InputStream in = armazem.abrir(refTok)) {
+                tok = new Tokenizador(in);
+            }
+            refTokAberto = refTok;
         }
         refChat = arqChat.ref;
         chat = carregar(refChat);
@@ -426,20 +505,66 @@ final class Motor {
         if (!temBase) modoCompletar = false;
 
         Armazem.Arquivo ind = v.arquivos.get(Armazem.INDICE);
-        File db = armazem.arquivo(ind.ref);
-        if (db == null) db = indiceDeFabrica(ind.ref.substring(Armazem.FABRICA.length()));
-        try {
-            rag = new IndiceRag(abrirSomenteLeitura(db));
-            long n = rag.contarTrechos();
-            descricaoIndice = String.format(Locale.getDefault(), "%s (%,d trechos)",
-                    n > 100_000 ? "índice completo" : "índice pequeno", n);
-        } catch (RuntimeException e) {
+        if (rag == null || !ind.ref.equals(refIndiceAberto)) {
+            if (rag != null) rag.close();
             rag = null;
-            descricaoIndice = "índice com erro";
-            aviso("O índice desta versão não abriu: " + e.getMessage());
+            refIndiceAberto = null;
+            File db = armazem.arquivo(ind.ref);
+            if (db == null) db = indiceDeFabrica(ind.ref.substring(Armazem.FABRICA.length()));
+            try {
+                rag = new IndiceRag(abrirSomenteLeitura(db));
+                String chave = "trechos_" + ind.ref;
+                long n = prefs.getLong(chave, -1);
+                if (n < 0) {
+                    n = rag.contarTrechos();
+                    prefs.edit().putLong(chave, n).apply();
+                }
+                descricaoIndice = String.format(Locale.getDefault(), "%s (%,d trechos)",
+                        n > 100_000 ? "índice completo" : "índice pequeno", n);
+                refIndiceAberto = ind.ref;
+            } catch (RuntimeException e) {
+                rag = null;
+                descricaoIndice = "índice com erro";
+                aviso("O índice desta versão não abriu: " + e.getMessage());
+            }
         }
         pronto = true;
         atualizarNomes();
+    }
+
+    /** Refs dos modelos já lidos uma vez nesta sessão (o sistema guarda o arquivo na memória de disco). */
+    private final Set<String> aquecidos = java.util.Collections.synchronizedSet(new java.util.HashSet<>());
+
+    /**
+     * Ao abrir o painel de modelos: lê em segundo plano os arquivos dos modelos dos backups mais recentes, para o
+     * sistema deixá-los no cache de disco. Trocar de modelo logo depois fica bem mais rápido (a leitura do arquivo
+     * de ~200 MB era a maior parte da espera). Só uma vez por modelo em cada sessão.
+     */
+    void preaquecerModelos() {
+        Armazem a = armazem;
+        if (a == null) return;
+        new Thread(() -> {
+            try {
+                List<Armazem.Versao> bs = a.backups();
+                int n = 0;
+                for (Armazem.Versao v : bs) {
+                    if (n >= 3) break;
+                    Armazem.Arquivo arq = v.arquivos.get(Armazem.CHAT);
+                    if (arq == null || arq.ref.equals(refChat) || !aquecidos.add(arq.ref)) continue;
+                    File f = a.arquivo(arq.ref);
+                    if (f == null || !f.exists()) continue;
+                    n++;
+                    byte[] buf = new byte[1 << 20];
+                    try (InputStream in = new FileInputStream(f)) {
+                        while (in.read(buf) > 0) {
+                            if (tarefa != null) return;  // não disputa o disco com uma troca ou importação
+                        }
+                    }
+                }
+            } catch (IOException | RuntimeException ignorado) {
+                // só uma otimização
+            }
+        }, "laika-aquecer").start();
     }
 
     // ---------- chats ----------
@@ -499,31 +624,26 @@ final class Motor {
     }
 
     /**
-     * As linhas discretas "*modelo X usado": depois da última resposta de cada trecho da conversa feito com um modelo
-     * diferente do seguinte (ou do modelo em uso, no fim). Na thread principal; avisar = redesenhar se mudou.
+     * A linha discreta com o nome do modelo, em cima da resposta, sempre que o modelo muda (e em cima da primeira
+     * resposta do chat). Trocar de modelo não mostra nada até a próxima resposta. Na thread principal;
+     * avisar = redesenhar se mudou.
      */
     private void marcarModelos(boolean avisar) {
-        List<Mensagem> base = new ArrayList<>();
-        for (Mensagem m : conversa) if (!m.marcaModelo) base.add(m);
-        List<Mensagem> nova = new ArrayList<>();
         Map<String, String> nomes = nomesPorRef;
-        for (int i = 0; i < base.size(); i++) {
-            Mensagem m = base.get(i);
-            nova.add(m);
-            if (m.usuario || m.aviso || m.modeloRef == null) continue;
-            String proximo = refChat;
-            for (int k = i + 1; k < base.size(); k++) {
-                Mensagem n = base.get(k);
-                if (!n.usuario && !n.aviso && n.modeloRef != null) {
-                    proximo = n.modeloRef;
-                    break;
+        List<Mensagem> nova = new ArrayList<>();
+        String anterior = null;
+        for (Mensagem m : conversa) {
+            if (m.marcaModelo) continue;
+            if (!m.usuario && !m.aviso && m.modeloRef != null) {
+                if (!m.modeloRef.equals(anterior)) {
+                    String nome = nomes.containsKey(m.modeloRef) ? nomes.get(m.modeloRef) : m.modeloNome;
+                    Mensagem marca = new Mensagem(false, true, nome == null ? "modelo" : nome);
+                    marca.marcaModelo = true;
+                    nova.add(marca);
                 }
+                anterior = m.modeloRef;
             }
-            if (proximo == null || m.modeloRef.equals(proximo)) continue;
-            String nome = nomes.containsKey(m.modeloRef) ? nomes.get(m.modeloRef) : m.modeloNome;
-            Mensagem marca = new Mensagem(false, true, "*modelo " + nome + " usado");
-            marca.marcaModelo = true;
-            nova.add(marca);
+            nova.add(m);
         }
         boolean igual = nova.size() == conversa.size();
         for (int i = 0; igual && i < nova.size(); i++) {
@@ -536,7 +656,7 @@ final class Motor {
         if (avisar) for (Ouvinte o : new ArrayList<>(ouvintes)) o.conversaTrocada();
     }
 
-    /** Os nomes (apelidos) dos modelos de todas as versões, para as marcas "*modelo X usado". */
+    /** Os nomes (apelidos) dos modelos de todas as versões, para as linhas com o nome do modelo. */
     private void atualizarNomes() throws IOException {
         Map<String, String> m = new java.util.HashMap<>();
         for (Armazem.Versao b : armazem.backups()) {
@@ -661,6 +781,77 @@ final class Motor {
         avisarChats();
     }
 
+    /** Uma resposta da tela de teste: o texto, a linha de detalhe, a fonte do RAG e o modelo. */
+    static final class RespostaTeste {
+        String texto, detalhe, fonte, modelo;
+    }
+
+    interface FimTeste {
+        /** Na thread principal; erro != null se não deu para gerar. */
+        void fim(RespostaTeste r, String erro);
+    }
+
+    /**
+     * Tela de teste: uma resposta para a pergunta, fora da conversa e sem histórico, com as opções dadas
+     * (as mesmas do chat: RAG, memória, contas, gatilho de resposta longa). parcial recebe o texto enquanto é gerado.
+     */
+    void testar(String pergunta, double temp, int tamanho, boolean comRag, boolean comMemoria, boolean longas,
+                java.util.function.Consumer<String> parcial, FimTeste fim) {
+        if (gerando || !pronto || tarefa != null) {
+            fim.fim(null, !pronto || tarefa != null ? "A Laika ainda está carregando ou trocando de modelo."
+                    : "Espere a resposta do chat terminar.");
+            return;
+        }
+        gerando = true;
+        cancelar.set(false);
+        avisarEstado();
+        fundo.execute(() -> {
+            RespostaTeste r = new RespostaTeste();
+            String erro = null;
+            long t0 = System.nanoTime();
+            Laika.Opcoes op = new Laika.Opcoes();
+            try {
+                op.temperatura = temp;
+                // Sem memoria.tratar: ele grava ("Meu nome é...") na memória do chat aberto. A memória só entra
+                // como Contexto no prompt, como no chat.
+                String direto = Texto.contaDireta(pergunta);
+                if (direto != null) {
+                    r.texto = direto;
+                    r.modelo = "conta (fora do modelo)";
+                } else {
+                    if (chat == null) {
+                        if (base != null) {
+                            base.modelo.fechar();
+                            base = null;
+                        }
+                        naTela(() -> parcial.accept("Carregando o modelo de conversa…"));
+                        chat = carregar(refChat);
+                    }
+                    String paraModelo = longas && !Texto.querLonga(pergunta) ? pergunta + " " + Texto.GATILHO_LONGO : pergunta;
+                    op.maxNovos = Texto.querLonga(paraModelo) ? tamanhoMaximo() : Math.min(tamanho, tamanhoMaximo());
+                    op.evitarCopia = Texto.querResumo(paraModelo);
+                    chat.maxTrechos = respostasRapidas ? 2 : 0;
+                    Laika.Prompt p = chat.montarPrompt(paraModelo, comRag ? rag : null, comMemoria ? memoria : null,
+                            op.maxNovos, new ArrayList<>());
+                    String t = chat.gerar(p.texto, op, true, rng, pa -> naTela(() -> parcial.accept(pa)), cancelar::get);
+                    r.texto = t.isEmpty() ? SEM_RESPOSTA : t;
+                    r.fonte = p.fonte;
+                    r.modelo = nomeExibido;
+                }
+                double seg = (System.nanoTime() - t0) / 1e9;
+                int n = op.gerados > 0 ? op.gerados : tok.codificar(r.texto).length;
+                r.detalhe = String.format(Locale.getDefault(), "%.1f s · %d tokens%s", seg, n,
+                        cancelar.get() ? " · interrompida" : "");
+            } catch (Throwable e) {
+                erro = "Erro: " + e.getMessage();
+            }
+            gerando = false;
+            final String e = erro;
+            naTela(() -> fim.fim(e == null ? r : null, e));
+            avisarEstado();
+        });
+    }
+
     private Laika carregar(String ref) throws IOException {
         try (InputStream in = armazem.abrir(ref)) {
             return new Laika(new Modelo(in, threads), tok);
@@ -713,6 +904,17 @@ final class Motor {
                 msg.completar = Boolean.TRUE.equals(m.get("x"));
                 msg.modeloRef = (String) m.get("r");
                 msg.modeloNome = (String) m.get("m");
+                if (m.get("v") instanceof List) {
+                    msg.versoes = new ArrayList<>();
+                    for (Object v : (List<Object>) m.get("v")) {
+                        List<Object> l = (List<Object>) v;
+                        String[] a = new String[6];
+                        for (int k = 0; k < 6 && k < l.size(); k++) a[k] = l.get(k) == null ? null : String.valueOf(l.get(k));
+                        msg.versoes.add(a);
+                    }
+                    msg.versao = m.get("i") instanceof Number ? ((Number) m.get("i")).intValue() : msg.versoes.size() - 1;
+                    if (msg.versoes.size() < 2) msg.versoes = null;
+                }
                 r.add(msg);
             }
         } catch (Exception e) {
@@ -738,6 +940,12 @@ final class Motor {
             if (m.modeloRef != null) {
                 o.put("r", m.modeloRef);
                 o.put("m", m.modeloNome);
+            }
+            if (m.versoes != null && m.versoes.size() > 1) {
+                List<Object> vs = new ArrayList<>();
+                for (String[] v : m.versoes) vs.add(java.util.Arrays.asList((Object[]) v));
+                o.put("v", vs);
+                o.put("i", m.versao);
             }
             lista.add(o);
         }
@@ -806,10 +1014,26 @@ final class Motor {
     void gerarDeNovo(Mensagem resposta) {
         int i = indicePergunta(resposta);
         if (i < 0 || gerando) return;
+        // A resposta atual fica guardada: as setas ‹ › da bolha voltam para ela.
+        if (resposta.versoes == null) {
+            resposta.versoes = new ArrayList<>();
+            resposta.versoes.add(resposta.retrato());
+        }
+        resposta.regenerando = true;
         resposta.texto = DIGITANDO;
         resposta.fonte = resposta.detalhe = resposta.trecho = null;
         mudou(resposta);
         responder(conversa.get(i), resposta, historicoAte(i));
+    }
+
+    /** Mostra outra das respostas geradas para a mesma pergunta (setas ‹ › da bolha). */
+    void mostrarVersao(Mensagem m, int i) {
+        if (gerando || m.versoes == null || i < 0 || i >= m.versoes.size()) return;
+        m.versao = i;
+        m.mostrar(m.versoes.get(i));
+        mudou(m);
+        marcarModelos(true);
+        salvarConversa();
     }
 
     /**
@@ -849,7 +1073,11 @@ final class Motor {
             if (resp == null) {
                 resp = new Mensagem(false, false, DIGITANDO);
                 resp.completar = completar;
+                // O nome do modelo aparece em cima da resposta já ao enviar, se o modelo mudou.
+                resp.modeloRef = refChat;
+                resp.modeloNome = nomeExibido;
                 adicionar(resp);
+                naTela(() -> marcarModelos(true));
             }
             responderEm(pergunta, resp, texto, historico, completar, fontes, comRag, comMemoria, temp, tamanho, longas);
         });
@@ -923,13 +1151,18 @@ final class Motor {
             int naResposta = op.gerados > 0 ? op.gerados : tok.codificar(resp.texto).length;
             pergunta.detalhe = naPergunta + (naPergunta == 1 ? " token" : " tokens");
             mudou(pergunta);
-            resp.detalhe = String.format(Locale.getDefault(), "%.1f s%s · %d tokens%s%s", seg,
-                    op.gerados > 0 ? String.format(Locale.getDefault(), " · %d tokens/s", Math.round(op.gerados / seg)) : "",
-                    naResposta,
+            resp.detalhe = String.format(Locale.getDefault(), "%.1f s · %d tokens%s%s", seg, naResposta,
                     op.tokensPrompt > 0 ? String.format(Locale.getDefault(), " · %d no total", op.tokensPrompt + op.gerados) : "",
                     cancelar.get() ? " · interrompida" : "");
         } catch (Throwable e) {
             resp.texto = "Erro: " + e.getMessage();
+        }
+        if (resp.regenerando) {
+            resp.regenerando = false;
+            if (resp.versoes != null) {
+                resp.versoes.add(resp.retrato());
+                resp.versao = resp.versoes.size() - 1;
+            }
         }
         mudou(resp);
         gerando = false;
@@ -946,6 +1179,10 @@ final class Motor {
 
     /** longa: importação/exportação/download, que segue com a tela apagada (TrabalhoService). */
     private void emFundo(String titulo, boolean longa, Tarefa t) {
+        if (tarefa != null) {
+            avisarUsuario(null, "Espere terminar: " + tarefa + " (uma troca de modelo ou importação por vez).");
+            return;
+        }
         cancelar.set(true);  // para uma resposta em andamento antes de mexer na versão
         pararTarefa.set(false);
         tarefaCancelavel = longa;
@@ -976,6 +1213,50 @@ final class Motor {
             tarefaCancelavel = false;
             tarefa(null, -1);
         });
+    }
+
+    /**
+     * Na segunda fila: o chat continua funcionando. Só uma tarefa por vez nela; pedir outra avisa "Espere terminar".
+     */
+    private void emParalelo(String titulo, Tarefa t) {
+        synchronized (lado) {
+            if (tarefaLado != null) {
+                avisarUsuario(null, "Espere terminar: " + tarefaLado + " (só uma publicação, exportação ou download "
+                        + "por vez). O chat continua funcionando enquanto isso.");
+                return;
+            }
+            tarefaLado = titulo;
+        }
+        progressoLado = -1;
+        pararLado.set(false);
+        avisarEstado();
+        TrabalhoService.iniciar(ctx);
+        lado.execute(() -> {
+            try {
+                t.rodar();
+            } catch (Throwable e) {
+                if (cancelado(e)) avisarUsuario(null, "Cancelado.");
+                else avisarUsuario("Não deu certo", e.getMessage() == null ? e.toString() : e.getMessage());
+            }
+            tarefaLado = null;
+            progressoLado = -1;
+            avisarEstado();
+        });
+    }
+
+    /** Progresso da segunda fila (o mesmo que progresso(), sem mexer na faixa da tarefa principal). */
+    private Armazem.Progresso progressoLado(String titulo) {
+        int[] ultimo = {-2};
+        return (feito, total) -> {
+            if (pararLado.get()) throw new Parado();
+            int pct = total > 0 ? (int) Math.min(100, feito * 100 / total) : -1;
+            if (pct != ultimo[0]) {
+                ultimo[0] = pct;
+                tarefaLado = total > 0 ? titulo : titulo + " " + (feito >> 20) + " MB";
+                progressoLado = pct;
+                avisarEstado();
+            }
+        };
     }
 
     private static boolean cancelado(Throwable e) {
@@ -1042,10 +1323,10 @@ final class Motor {
     }
 
     void exportar(String id, Uri destino, boolean incluirIndice) {
-        emFundo("Exportando…", true, () -> {
+        emParalelo("Exportando…", () -> {
             try (OutputStream out = ctx.getContentResolver().openOutputStream(destino)) {
                 if (out == null) throw new IOException("não consegui criar o arquivo");
-                armazem.exportar(id, out, incluirIndice, progresso("Exportando…"));
+                armazem.exportar(id, out, incluirIndice, progressoLado("Exportando…"));
             }
             avisarUsuario(null, "Backup exportado. Guarde o arquivo .zip no Google Drive para não perder seus dados.");
         });
@@ -1144,10 +1425,10 @@ final class Motor {
 
     /** Salva o zip do Colab onde o usuário escolheu (ex.: Downloads), sem importar: a pasta com tudo da versão. */
     void salvarZipDoColab(GitHub github, GitHub.Artefato a, Uri destino) {
-        emFundo("Baixando o zip…", true, () -> {
+        emParalelo("Baixando o zip…", () -> {
             try (OutputStream out = ctx.getContentResolver().openOutputStream(destino)) {
                 if (out == null) throw new IOException("não consegui criar o arquivo");
-                github.baixar(a, out, progresso("Baixando o zip…"), pararTarefa::get);
+                github.baixar(a, out, progressoLado("Baixando o zip…"), pararLado::get);
             } catch (IOException | RuntimeException e) {
                 try {
                     android.provider.DocumentsContract.deleteDocument(ctx.getContentResolver(), destino);
@@ -1166,7 +1447,7 @@ final class Motor {
      * índice completo do RAG), com o nome da versão e uma descrição montada com os dados dos modelos.
      */
     void publicarVersao(GitHub github, String id, String nomeEscolhido, String notasEscolhidas) {
-        emFundo("Preparando o zip…", true, () -> {
+        emParalelo("Preparando o zip…", () -> {
             Armazem.Versao v = id == null ? armazem.atual() : armazem.backup(id);
             File zip = new File(ctx.getCacheDir(), "release.zip");
             long precisa = 0;
@@ -1180,15 +1461,15 @@ final class Motor {
             GitHub.Release rel = null;
             try {
                 try (OutputStream out = new java.io.FileOutputStream(zip)) {
-                    armazem.exportar(id, out, false, progresso("Preparando o zip…"));
+                    armazem.exportar(id, out, false, progressoLado("Preparando o zip…"));
                 }
                 if (zip.length() >= (2L << 30)) throw new IOException("o zip passa de 2 GB, o limite de um release");
                 String nome = nomeEscolhido == null || nomeEscolhido.trim().isEmpty() ? v.nomeExibido() : nomeEscolhido.trim();
                 String notas = notasEscolhidas == null || notasEscolhidas.trim().isEmpty() ? notasDaVersao(v) : notasEscolhidas;
                 String tag = "laika-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new java.util.Date());
                 rel = github.criarRelease(tag, nome, notas);
-                github.enviarArquivo(rel, zip, nomeDeArquivo(nome) + ".zip", progresso("Enviando para o GitHub…"),
-                        pararTarefa::get);
+                github.enviarArquivo(rel, zip, nomeDeArquivo(nome) + ".zip", progressoLado("Enviando para o GitHub…"),
+                        pararLado::get);
                 avisarUsuario(null, "Publicado: \"" + nome + "\" está em " + rel.url);
             } catch (Exception e) {
                 if (rel != null) {
@@ -1246,7 +1527,7 @@ final class Motor {
     /** Pede ao GitHub um release com o zip deste modelo (workflow publicar.yml). */
     /** nome vazio = o do zip (laika_nome.txt); notas = texto extra, acima dos dados do modelo tirados do zip. */
     void publicarNoGithub(GitHub github, GitHub.Artefato a, String nome, String notas) {
-        emFundo("Pedindo o release…", false, () -> {
+        emParalelo("Pedindo o release…", () -> {
             github.publicar(github.ramoPrincipal(), a, nome == null ? "" : nome.trim(), notas == null ? "" : notas.trim());
             avisarUsuario(null, "Pronto: o GitHub está criando o release, com o nome e os dados do modelo tirados do zip. "
                     + "Em alguns minutos ele aparece em " + github.paginaReleases() + ".");

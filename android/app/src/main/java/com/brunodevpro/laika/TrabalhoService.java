@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 
-import java.util.Locale;
 
 /**
  * Mantém o app vivo (serviço em primeiro plano, com notificação) enquanto o Motor faz uma tarefa
@@ -69,24 +68,25 @@ public class TrabalhoService extends Service implements Motor.Ouvinte {
             trava.acquire(6L * 3600 * 1000);
         }
         motor.adicionarOuvinte(this);
-        if (!motor.ocupado()) terminar();
+        if (!motor.algumaTarefa()) terminar();
         return START_NOT_STICKY;
     }
 
     private Notification notificacao() {
-        String t = motor.tarefa == null ? "Terminando…" : motor.tarefa;
-        int p = motor.progresso;
+        String tt = motor.textoTarefas();
+        String t = tt == null ? "Terminando…" : tt;
+        int p = motor.progressoTarefas();
         Notification.Builder b = new Notification.Builder(this, CANAL)
                 .setSmallIcon(R.drawable.ic_notificacao)
                 .setContentTitle("Laika")
-                .setContentText(p >= 0 ? String.format(Locale.getDefault(), "%s %d%%", t, p) : t)
+                .setContentText(t)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT));
         if (p >= 0) b.setProgress(100, p, false);
         else b.setProgress(0, 0, true);
-        if (motor.tarefaCancelavel) {
+        if (motor.algumaCancelavel()) {
             PendingIntent pc = PendingIntent.getService(this, 1, new Intent(this, TrabalhoService.class).setAction(CANCELAR),
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
             b.addAction(new Notification.Action.Builder(null, "Cancelar", pc).build());
@@ -96,7 +96,7 @@ public class TrabalhoService extends Service implements Motor.Ouvinte {
 
     @Override
     public void estadoMudou() {
-        if (!motor.ocupado()) {
+        if (!motor.algumaTarefa()) {
             terminar();
             return;
         }

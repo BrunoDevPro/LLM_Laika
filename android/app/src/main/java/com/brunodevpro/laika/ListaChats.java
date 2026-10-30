@@ -35,6 +35,9 @@ final class ListaChats {
     private final Motor motor;
     private Dialog janela;
     private LinearLayout lista;
+    /** O painel que desliza (null com a gaveta fechada) e a largura dele. */
+    private View painel;
+    private int largura;
     private boolean verArquivados;
 
     ListaChats(Activity tela, Motor motor) {
@@ -59,15 +62,51 @@ final class ListaChats {
         return janela != null && janela.isShowing();
     }
 
+    /** Fecha na hora (ao escolher um chat). */
     void fechar() {
         if (janela != null) janela.dismiss();
+        painel = null;
     }
 
     void mostrar() {
-        LinearLayout raiz = new Arrastavel(tela, this::fechar);
+        if (aberta()) return;
+        criar();
+        painel.setTranslationX(-largura);
+        abrirAnimado();
+    }
+
+    /** Começa a abrir com o dedo, arrastando da tela do chat para a direita: o painel acompanha o dedo. */
+    void comecarArrasto() {
+        if (aberta()) return;
+        criar();
+        painel.setTranslationX(-largura);
+        escurecer(0);
+    }
+
+    /** dx: quanto o dedo andou para a direita desde que o arrasto começou. */
+    void arrastar(float dx) {
+        if (painel == null) return;
+        float t = Math.max(-largura, Math.min(0, dx - largura));
+        painel.setTranslationX(t);
+        escurecer(1 + t / largura);
+    }
+
+    /** Soltou o dedo: abre se passou de ~40% ou se o gesto foi rápido para a direita; senão volta. */
+    void soltar(float velocidadeX) {
+        if (painel == null) return;
+        float t = painel.getTranslationX();
+        if (velocidadeX > dp(600) || (velocidadeX > -dp(600) && t > -largura * 0.6f)) abrirAnimado();
+        else fecharAnimado();
+    }
+
+    private void criar() {
+        largura = Math.min(dp(280), (int) (tela.getResources().getDisplayMetrics().widthPixels * 0.72));
+        LinearLayout raiz = new LinearLayout(tela);
+        painel = raiz;
         raiz.setOrientation(LinearLayout.VERTICAL);
         raiz.setBackgroundColor(tela.getColor(R.color.fundo));
         raiz.setPadding(dp(14), dp(40), dp(14), dp(16));
+        raiz.setClickable(true);  // toques no painel não fecham (só fora dele)
         raiz.addView(texto("Chats", 22, R.color.topo_texto, true));
 
         LinearLayout novo = new LinearLayout(tela);
@@ -96,38 +135,64 @@ final class ListaChats {
         lista = new LinearLayout(tela);
         lista.setOrientation(LinearLayout.VERTICAL);
         ScrollView rolagem = new ScrollView(tela);
+        rolagem.setVerticalScrollBarEnabled(true);
         rolagem.addView(lista);
         raiz.addView(rolagem, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         atualizar();
 
+        // A janela ocupa a tela toda: o painel fica à esquerda e o resto (escurecido) também responde ao dedo
+        // (tocar fecha; arrastar para a esquerda, de qualquer ponto, fecha).
+        FrameLayout tudo = new Arrastavel(tela, this);
+        tudo.addView(raiz, new FrameLayout.LayoutParams(largura, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.START));
         janela = new Dialog(tela);
         janela.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        janela.setContentView(raiz);
+        janela.setContentView(tudo);
+        janela.setOnDismissListener(d -> painel = null);
         Window w = janela.getWindow();
         if (w != null) {
             w.setBackgroundDrawable(new ColorDrawable(0));
-            int largura = Math.min(dp(280), (int) (tela.getResources().getDisplayMetrics().widthPixels * 0.72));
-            w.setLayout(largura, ViewGroup.LayoutParams.MATCH_PARENT);
+            w.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             w.setGravity(Gravity.START);
             w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            w.setDimAmount(0.4f);
+            w.setDimAmount(0f);
+            w.setWindowAnimations(0);
         }
         janela.show();
-        // Entra deslizando pela esquerda.
-        raiz.setTranslationX(-dp(280));
-        raiz.animate().translationX(0).setDuration(180).start();
     }
 
-    /** O painel acompanha o dedo para a esquerda; soltando depois de um terço da largura, fecha. */
-    private static final class Arrastavel extends LinearLayout {
-        private final int folga;
-        private final Runnable fechar;
-        private float x0, y0;
+    private void abrirAnimado() {
+        if (painel == null) return;
+        View p = painel;
+        p.animate().translationX(0).setDuration(170)
+                .setUpdateListener(a -> escurecer(1 + p.getTranslationX() / largura)).start();
+    }
 
-        Arrastavel(android.content.Context c, Runnable fechar) {
+    private void fecharAnimado() {
+        if (painel == null) return;
+        View p = painel;
+        p.animate().translationX(-largura).setDuration(150)
+                .setUpdateListener(a -> escurecer(1 + p.getTranslationX() / largura))
+                .withEndAction(this::fechar).start();
+    }
+
+    /** O fundo escurece junto com o painel (0 = fechado, 1 = aberto). */
+    private void escurecer(float f) {
+        Window w = janela == null ? null : janela.getWindow();
+        if (w != null) w.setDimAmount(0.4f * Math.max(0f, Math.min(1f, f)));
+    }
+
+    /** Arrastar para a esquerda de qualquer ponto (no painel ou fora dele) leva o painel junto; tocar fora fecha. */
+    private static final class Arrastavel extends FrameLayout {
+        private final int folga;
+        private final ListaChats lista;
+        private float x0, y0;
+        private boolean arrastou;
+        private android.view.VelocityTracker vt;
+
+        Arrastavel(android.content.Context c, ListaChats lista) {
             super(c);
             folga = android.view.ViewConfiguration.get(c).getScaledTouchSlop();
-            this.fechar = fechar;
+            this.lista = lista;
         }
 
         @Override
@@ -135,30 +200,50 @@ final class ListaChats {
             if (e.getActionMasked() == android.view.MotionEvent.ACTION_DOWN) {
                 x0 = e.getRawX();
                 y0 = e.getRawY();
+                arrastou = false;
             } else if (e.getActionMasked() == android.view.MotionEvent.ACTION_MOVE) {
                 float dx = e.getRawX() - x0, dy = e.getRawY() - y0;
-                return dx < -folga && Math.abs(dx) > Math.abs(dy);  // arrasto para a esquerda: o painel assume
+                return dx < -folga && Math.abs(dx) > Math.abs(dy);  // arrasto para a esquerda: o painel vai junto
             }
             return false;
         }
 
         @Override
         public boolean onTouchEvent(android.view.MotionEvent e) {
+            if (vt == null) vt = android.view.VelocityTracker.obtain();
+            vt.addMovement(e);
+            View p = lista.painel;
             switch (e.getActionMasked()) {
                 case android.view.MotionEvent.ACTION_DOWN:
                     x0 = e.getRawX();
+                    y0 = e.getRawY();
+                    arrastou = false;
                     return true;
-                case android.view.MotionEvent.ACTION_MOVE:
-                    setTranslationX(Math.min(0, e.getRawX() - x0));
-                    return true;
-                case android.view.MotionEvent.ACTION_UP:
-                case android.view.MotionEvent.ACTION_CANCEL:
-                    if (getTranslationX() < -getWidth() / 3f) {
-                        animate().translationX(-getWidth()).setDuration(120).withEndAction(fechar).start();
-                    } else {
-                        animate().translationX(0).setDuration(120).start();
+                case android.view.MotionEvent.ACTION_MOVE: {
+                    float dx = e.getRawX() - x0;
+                    if (Math.abs(dx) > folga || Math.abs(e.getRawY() - y0) > folga) arrastou = true;
+                    if (p != null) {
+                        p.setTranslationX(Math.max(-lista.largura, Math.min(0, dx)));
+                        lista.escurecer(1 + p.getTranslationX() / lista.largura);
                     }
                     return true;
+                }
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL: {
+                    vt.computeCurrentVelocity(1000);
+                    float vx = vt.getXVelocity();
+                    vt.recycle();
+                    vt = null;
+                    if (p == null) return true;
+                    if (!arrastou) {
+                        lista.fecharAnimado();  // um toque fora do painel
+                    } else if (vx < -lista.dp(600) || (vx < lista.dp(600) && p.getTranslationX() < -lista.largura / 3f)) {
+                        lista.fecharAnimado();
+                    } else {
+                        lista.abrirAnimado();
+                    }
+                    return true;
+                }
                 default:
                     return super.onTouchEvent(e);
             }

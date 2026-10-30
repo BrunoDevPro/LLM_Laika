@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barra de rolagem discreta: fina, arredondada nas pontas e meio transparente. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#668A93B0" />
+    <corners android:radius="2dp" />
+</shape>

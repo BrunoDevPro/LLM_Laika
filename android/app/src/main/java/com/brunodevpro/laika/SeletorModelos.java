@@ -71,6 +71,7 @@ final class SeletorModelos {
             return;
         }
 
+        motor.preaquecerModelos();  // a troca fica mais rápida se o usuário escolher outro modelo
         Dialog d = new Dialog(tela);
         d.requestWindowFeature(Window.FEATURE_NO_TITLE);
         LinearLayout raiz = new LinearLayout(tela);
@@ -107,17 +108,18 @@ final class SeletorModelos {
                 return true;
             });
         }
-        ScrollView rolagem = new ScrollView(tela);
-        rolagem.addView(lista);
+        // A altura máxima é aplicada já na primeira medida: antes, o painel abria alto (no topo) e só depois
+        // encolhia para o rodapé, um pulo visível.
         int maxAltura = (int) (tela.getResources().getDisplayMetrics().heightPixels * 0.55);
+        ScrollView rolagem = new ScrollView(tela) {
+            @Override
+            protected void onMeasure(int larguraSpec, int alturaSpec) {
+                super.onMeasure(larguraSpec, View.MeasureSpec.makeMeasureSpec(maxAltura, View.MeasureSpec.AT_MOST));
+            }
+        };
+        rolagem.addView(lista);
         raiz.addView(rolagem, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
-        rolagem.post(() -> {
-            if (rolagem.getHeight() > maxAltura) {
-                rolagem.getLayoutParams().height = maxAltura;
-                rolagem.requestLayout();
-            }
-        });
 
         LinearLayout botoes = new LinearLayout(tela);
         botoes.setOrientation(LinearLayout.HORIZONTAL);

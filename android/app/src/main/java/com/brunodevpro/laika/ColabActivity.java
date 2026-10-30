@@ -64,7 +64,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
 
     private Motor motor;
     private PainelTarefa painel;
-    private LinearLayout caixaConfig, caixaCelulas, caixaExecucoes, caixaModelos, caixaConta;
+    private LinearLayout caixaConfig, caixaUnidades, caixaCelulas, caixaExecucoes, caixaModelos, caixaConta;
     private final ExecutorService rede = Executors.newSingleThreadExecutor();
     private final Handler ui = new Handler(Looper.getMainLooper());
 
@@ -76,7 +76,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
     private Map<Long, GitHub.Verificacao> verificacoes = new HashMap<>();
     private List<GitHub.Artefato> artefatos = new ArrayList<>();
     private String erroRede;
-    private boolean temWorkflow = true, buscando, visivel;
+    private boolean temWorkflow = true, buscando, visivel, consultandoUnidades;
     private long aberta = -1;
     private int rodadas;
 
@@ -111,6 +111,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         painel = new PainelTarefa(this, motor);
         LinearLayout conteudo = findViewById(R.id.conteudo);
         caixaConfig = caixa(conteudo);
+        caixaUnidades = caixa(conteudo);
         caixaCelulas = caixa(conteudo);
         caixaExecucoes = caixa(conteudo);
         caixaModelos = caixa(conteudo);
@@ -165,7 +166,15 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         motor.adicionarOuvinte(this);
         painel.atualizar();
         montarTudo();
-        if (Colab.configurado(this)) atualizar(true);
+        if (Colab.configurado(this)) {
+            atualizar(true);
+            // O saldo muda devagar: consulta sozinho se a última consulta tem mais de 2 horas.
+            android.content.SharedPreferences p = Colab.prefs(this);
+            long ultima = Math.max(p.getLong("unidades_quando", 0), p.getLong("unidades_tentativa", 0));
+            if (System.currentTimeMillis() - ultima > 2 * 3600_000L) {
+                consultarUnidades();
+            }
+        }
     }
 
     @Override
@@ -194,7 +203,6 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
     @Override
     public void estadoMudou() {
         painel.atualizar();
-        montarModelos();  // os botões de baixar ficam desligados durante outra tarefa
     }
 
     @Override
@@ -349,6 +357,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
 
     private void montarTudo() {
         montarConfig();
+        montarUnidades();
         montarCelulas();
         montarExecucoes();
         montarModelos();
@@ -880,11 +889,11 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             c.addView(texto(String.format(Locale.getDefault(), "%.0f MB · %s", a.tamanho / 1048576.0, Colab.ha(a.criado)),
                     12, R.color.topo_sub, false));
             LinearLayout l = linha(c);
-            TextView b = botao(l, "Baixar e usar", true, v -> baixar(a));
-            ligado(b, !motor.ocupado());
+            // Sempre tocáveis: se já houver uma tarefa do mesmo tipo, o Motor avisa "Espere terminar".
+            botao(l, "Baixar e usar", true, v -> baixar(a));
             LinearLayout l2 = linha(c);
-            ligado(botao(l2, "Salvar zip", false, v -> salvarZip(a)), !motor.ocupado());
-            ligado(botao(l2, "Publicar no GitHub", false, v -> publicar(a)), !motor.ocupado());
+            botao(l2, "Salvar zip", false, v -> salvarZip(a));
+            botao(l2, "Publicar no GitHub", false, v -> publicar(a));
         }
     }
 
@@ -925,6 +934,96 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                         + "uma versão nova. A versão em uso fica guardada nos backups.", a.tamanho / 1048576.0))
                 .setPositiveButton("Baixar e usar", (d, w) -> motor.baixarDoColab(Colab.github(this), a))
                 .setNegativeButton("Cancelar", null).show();
+    }
+
+    // --- unidades de computação ---
+
+    /** O saldo de unidades do Colab (última consulta, guardada) e o botão de atualizar. */
+    private void montarUnidades() {
+        caixaUnidades.removeAllViews();
+        if (!Colab.configurado(this)) return;
+        android.content.SharedPreferences p = Colab.prefs(this);
+        long quando = p.getLong("unidades_quando", 0);
+        float saldo = p.getFloat("unidades_saldo", Float.NaN), taxa = p.getFloat("unidades_taxa", Float.NaN);
+        String erro = p.getString("unidades_erro", null);
+        LinearLayout c = cartao(caixaUnidades);
+        LinearLayout l = linha(c);
+        TextView titulo = texto("Unidades de computação", 13, R.color.topo_sub, true);
+        l.addView(titulo, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        TextView atualizar = texto(consultandoUnidades ? "consultando…" : "Atualizar", 13, R.color.azul, true);
+        atualizar.setPadding(dp(12), dp(4), dp(4), dp(4));
+        if (!consultandoUnidades) atualizar.setOnClickListener(v -> consultarUnidades());
+        l.addView(atualizar);
+        if (!Float.isNaN(saldo)) {
+            c.addView(texto(String.format(Locale.getDefault(), "%.1f", saldo), 26, R.color.topo_texto, true));
+            StringBuilder sb = new StringBuilder();
+            if (!Float.isNaN(taxa) && taxa > 0) {
+                sb.append(String.format(Locale.getDefault(), "gastando %.2f por hora agora", taxa));
+            }
+            sb.append(sb.length() > 0 ? " · " : "").append("consultado ").append(Colab.ha(quando));
+            c.addView(texto(sb.toString(), 12, R.color.topo_sub, false));
+        } else if (!consultandoUnidades && erro == null) {
+            c.addView(texto("Toque em Atualizar para ver o saldo (leva cerca de um minuto).", 13, R.color.aviso, false));
+        }
+        if (consultandoUnidades) {
+            c.addView(texto("Pedindo ao GitHub Actions para consultar o Colab (cerca de um minuto)…", 12, R.color.aviso, false));
+        } else if (erro != null) {
+            TextView e = texto("Última consulta: " + erro, 12, R.color.perigo, false);
+            e.setPadding(0, dp(4), 0, 0);
+            c.addView(e);
+        }
+    }
+
+    /**
+     * Dispara o workflow unidades.yml (Colab CLI: "colab usage", sem ligar máquina), espera ele terminar e lê o
+     * saldo no registro. Numa thread própria: leva ~1 min e não pode segurar as outras consultas da tela.
+     */
+    private void consultarUnidades() {
+        if (consultandoUnidades || !Colab.configurado(this)) return;
+        consultandoUnidades = true;
+        montarUnidades();
+        String ramo = Colab.ramo(this);
+        GitHub g = Colab.github(this);
+        new Thread(() -> {
+            GitHub.Unidades u;
+            try {
+                String pedido = Colab.novoPedido();
+                long id = g.pedirUnidades(ramo, pedido);
+                GitHub.Execucao e = null;
+                long limite = System.currentTimeMillis() + 6 * 60_000L;
+                while (System.currentTimeMillis() < limite) {
+                    Thread.sleep(id > 0 && e == null ? 15_000 : 8_000);
+                    e = id > 0 ? g.execucao(id) : g.acharUnidades(pedido);
+                    if (e != null) id = e.id;
+                    if (e != null && e.terminou()) break;
+                }
+                if (e == null || !e.terminou()) throw new IOException("a consulta demorou demais (o GitHub Actions está na fila?)");
+                u = GitHub.lerUnidades(g.registro(e.id, 400));
+            } catch (GitHub.Erro e) {
+                u = new GitHub.Unidades();
+                u.erro = e.codigo == 404 ? "o workflow unidades.yml ainda não está no branch principal do repositório"
+                        : e.getMessage();
+            } catch (IOException | RuntimeException e) {
+                u = new GitHub.Unidades();
+                u.erro = e.getMessage() == null ? e.toString() : e.getMessage();
+            } catch (InterruptedException e) {
+                return;
+            }
+            GitHub.Unidades fu = u;
+            ui.post(() -> {
+                consultandoUnidades = false;
+                android.content.SharedPreferences.Editor ed = Colab.prefs(this).edit();
+                if (fu.erro == null) {
+                    ed.putFloat("unidades_saldo", (float) fu.saldo).putFloat("unidades_taxa", (float) fu.taxa)
+                            .putLong("unidades_quando", System.currentTimeMillis()).remove("unidades_erro");
+                } else {
+                    // Guarda a hora também no erro, para não repetir a consulta toda vez que a tela abre.
+                    ed.putString("unidades_erro", fu.erro).putLong("unidades_tentativa", System.currentTimeMillis());
+                }
+                ed.apply();
+                if (!isDestroyed()) montarUnidades();
+            });
+        }, "laika-unidades").start();
     }
 
     // --- conta ---
