@@ -31,7 +31,8 @@ import java.util.regex.Pattern;
  */
 public final class GitHub {
     public static final String API = "https://api.github.com";
-    public static final String WORKFLOW = "colab.yml", SINAL = "sinal.yml", PUBLICAR = "publicar.yml";
+    public static final String WORKFLOW = "colab.yml", SINAL = "sinal.yml", PUBLICAR = "publicar.yml",
+            UNIDADES = "unidades.yml";
     public static final String VERIFICACAO = "Laika no Colab", ARTEFATO = "laika_pacote";
     private static final Pattern DADOS = Pattern.compile("<!-- laika (\\{.*\\}) -->", Pattern.DOTALL);
 
@@ -408,6 +409,84 @@ public final class GitHub {
         corpo.put("ref", ramo);
         corpo.put("inputs", inputs);
         pedir("POST", repoPath() + "/actions/workflows/" + SINAL + "/dispatches", corpo);
+    }
+
+    /** O saldo de unidades de computação do Colab (workflow unidades.yml). */
+    public static final class Unidades {
+        public double saldo = Double.NaN, taxa = Double.NaN;
+        public String erro;
+    }
+
+    /** Pede a consulta das unidades (unidades.yml). Devolve o id da execução, ou 0 (aí use {@link #acharUnidades}). */
+    @SuppressWarnings("unchecked")
+    public long pedirUnidades(String ramo, String pedido) throws IOException {
+        Map<String, Object> inputs = new LinkedHashMap<>();
+        inputs.put("pedido", pedido);
+        Map<String, Object> corpo = new LinkedHashMap<>();
+        corpo.put("ref", ramo);
+        corpo.put("inputs", inputs);
+        corpo.put("return_run_details", true);
+        String caminho = repoPath() + "/actions/workflows/" + UNIDADES + "/dispatches";
+        Object r;
+        try {
+            r = pedir("POST", caminho, corpo);
+        } catch (Erro e) {
+            if (e.codigo != 422 || !String.valueOf(e.getMessage()).contains("return_run_details")) throw e;
+            corpo.remove("return_run_details");
+            r = pedir("POST", caminho, corpo);
+        }
+        if (r instanceof Map) {
+            for (String k : new String[]{"workflow_run_id", "run_id", "id"}) {
+                long id = numero((Map<String, Object>) r, k);
+                if (id > 0) return id;
+            }
+        }
+        return 0;
+    }
+
+    /** A execução da consulta de unidades com este pedido, ou null se ainda não apareceu. */
+    public Execucao acharUnidades(String pedido) throws IOException {
+        Object r = pedir("GET", repoPath() + "/actions/workflows/" + UNIDADES + "/runs?per_page=10", null);
+        for (Map<String, Object> m : lista(r, "workflow_runs")) {
+            Execucao e = execucao(m);
+            if (e.titulo != null && e.titulo.contains(pedido)) return e;
+        }
+        return null;
+    }
+
+    private static final Pattern LINHA_UNIDADES = Pattern.compile("LAIKA_UNIDADES (.*)");
+
+    /** Lê a linha "LAIKA_UNIDADES saldo=X taxa=Y" (ou "erro=...") do registro do unidades.yml. */
+    public static Unidades lerUnidades(String registro) {
+        Unidades u = new Unidades();
+        String linha = null;
+        Matcher m = LINHA_UNIDADES.matcher(registro);
+        while (m.find()) {
+            // a linha do echo do script também aparece no registro; vale a última que tem saldo= ou erro=
+            String l = m.group(1).trim();
+            if (l.startsWith("saldo=") || l.startsWith("erro=")) linha = l;
+        }
+        if (linha == null) {
+            u.erro = "a consulta terminou sem dizer o saldo (veja o registro do workflow \"Laika unidades\")";
+            return u;
+        }
+        if (linha.startsWith("erro=")) {
+            u.erro = linha.substring(5);
+            return u;
+        }
+        for (String parte : linha.split("\\s+")) {
+            int i = parte.indexOf('=');
+            if (i < 0 || i == parte.length() - 1) continue;
+            try {
+                double v = Double.parseDouble(parte.substring(i + 1));
+                if (parte.startsWith("saldo=")) u.saldo = v;
+                else if (parte.startsWith("taxa=")) u.taxa = v;
+            } catch (NumberFormatException ignorado) {
+                // fica NaN
+            }
+        }
+        if (Double.isNaN(u.saldo)) u.erro = "saldo ilegível: " + linha;
+        return u;
     }
 
     /** Os zips prontos (artefato laika_pacote), do mais novo para o mais velho. */

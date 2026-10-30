@@ -63,10 +63,16 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
     private EditText entrada;
     private ImageButton enviar, botaoMais;
     private final Map<Motor.Mensagem, TextView> bolhas = new HashMap<>();
+    /** As setas ‹ 2/3 › embaixo das respostas geradas de novo. */
+    private final Map<Motor.Mensagem, LinearLayout> setas = new HashMap<>();
     private final Handler ui = new Handler(Looper.getMainLooper());
     private boolean ofereceuBackup;
     /** A conversa está no fim (a tela acompanha a resposta); false se o usuário rolou para cima. */
     private boolean noFim = true;
+    // Arrastar para a direita, de qualquer ponto da conversa, abre a gaveta de chats (ela acompanha o dedo).
+    private float gestoX0, gestoY0;
+    private boolean gestoDecidido, gestoChats;
+    private android.view.VelocityTracker gestoVelocidade;
     private int quadro;
 
     private final Runnable animarPontos = new Runnable() {
@@ -105,6 +111,11 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
             @Override
             public void treinar() {
                 startActivity(new Intent(MainActivity.this, ColabActivity.class));
+            }
+
+            @Override
+            public void testar() {
+                startActivity(new Intent(MainActivity.this, TesteActivity.class));
             }
 
             @Override
@@ -321,11 +332,19 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.topMargin = dp(4);
         lp.bottomMargin = dp(4);
-        if (m.aviso) {
-            lp.gravity = Gravity.CENTER_HORIZONTAL;
-            t.setTextSize(m.marcaModelo ? 12 : 13);
+        if (m.marcaModelo) {
+            // O modelo que respondeu, em cima da resposta (só quando muda).
+            lp.gravity = Gravity.START;
+            lp.topMargin = dp(10);
+            lp.bottomMargin = 0;
+            t.setTextSize(12);
             t.setTextColor(getColor(R.color.aviso));
-            if (m.marcaModelo) t.setTypeface(t.getTypeface(), Typeface.ITALIC);
+            t.setTypeface(t.getTypeface(), Typeface.ITALIC);
+            t.setPadding(dp(8), 0, dp(8), 0);
+        } else if (m.aviso) {
+            lp.gravity = Gravity.CENTER_HORIZONTAL;
+            t.setTextSize(13);
+            t.setTextColor(getColor(R.color.aviso));
             t.setGravity(Gravity.CENTER);
             t.setPadding(dp(16), dp(2), dp(16), dp(2));
         } else {
@@ -348,6 +367,12 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         t.setText(conteudo(m));
         mensagens.addView(t, lp);
         bolhas.put(m, t);
+        if (!m.usuario && !m.aviso) {
+            LinearLayout s = criarSetas(m);
+            mensagens.addView(s);
+            setas.put(m, s);
+            atualizarSetas(m);
+        }
         atualizarVazio();
         // A mensagem do próprio usuário sempre leva a tela para o fim.
         rolarParaFim(m.usuario);
@@ -359,8 +384,52 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         TextView t = bolhas.get(m);
         if (t == null) return;
         t.setText(conteudo(m));
+        atualizarSetas(m);
         if (Motor.DIGITANDO.equals(m.texto)) iniciarPontos();
         rolarParaFim(false);
+    }
+
+    /** ‹ 2/3 ›: volta para as respostas anteriores depois de "Gerar outra". */
+    private LinearLayout criarSetas(Motor.Mensagem m) {
+        LinearLayout l = new LinearLayout(this);
+        l.setOrientation(LinearLayout.HORIZONTAL);
+        l.setGravity(Gravity.CENTER_VERTICAL);
+        l.setPadding(dp(2), 0, 0, dp(2));
+        for (int k = 0; k < 3; k++) {
+            TextView b = new TextView(this);
+            b.setTextColor(getColor(R.color.aviso));
+            if (k == 1) {
+                b.setTextSize(12);
+                b.setPadding(dp(2), 0, dp(2), 0);
+            } else {
+                b.setText(k == 0 ? "‹" : "›");
+                b.setTextSize(22);
+                b.setPadding(dp(12), 0, dp(12), dp(2));
+                int passo = k == 0 ? -1 : 1;
+                b.setOnClickListener(v -> {
+                    if (m.versoes == null) return;
+                    if (motor.gerando) {
+                        Toast.makeText(this, "Espere a resposta terminar.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    motor.mostrarVersao(m, m.versao + passo);
+                });
+            }
+            l.addView(b);
+        }
+        return l;
+    }
+
+    private void atualizarSetas(Motor.Mensagem m) {
+        LinearLayout l = setas.get(m);
+        if (l == null) return;
+        boolean ver = m.versoes != null && m.versoes.size() > 1 && !m.regenerando;
+        l.setVisibility(ver ? View.VISIBLE : View.GONE);
+        if (!ver) return;
+        int n = m.versoes.size(), i = m.versao;
+        ((TextView) l.getChildAt(1)).setText((i + 1) + "/" + n);
+        l.getChildAt(0).setAlpha(i > 0 ? 1f : 0.3f);
+        l.getChildAt(2).setAlpha(i < n - 1 ? 1f : 0.3f);
     }
 
     private void iniciarPontos() {
@@ -372,6 +441,7 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
     public void conversaTrocada() {
         mensagens.removeAllViews();
         bolhas.clear();
+        setas.clear();
         for (Motor.Mensagem m : new ArrayList<>(motor.conversa)) mensagemNova(m);
         atualizarVazio();
         rolarParaFim(true);
@@ -503,6 +573,59 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         } else {
             new AlertDialog.Builder(this).setTitle(titulo).setMessage(texto).setPositiveButton("OK", null).show();
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(android.view.MotionEvent e) {
+        int folga = android.view.ViewConfiguration.get(this).getScaledTouchSlop() * 2;
+        switch (e.getActionMasked()) {
+            case android.view.MotionEvent.ACTION_DOWN:
+                gestoX0 = e.getRawX();
+                gestoY0 = e.getRawY();
+                gestoDecidido = gestoChats = false;
+                if (gestoVelocidade != null) gestoVelocidade.recycle();
+                gestoVelocidade = android.view.VelocityTracker.obtain();
+                gestoVelocidade.addMovement(e);
+                break;
+            case android.view.MotionEvent.ACTION_MOVE: {
+                if (gestoVelocidade != null) gestoVelocidade.addMovement(e);
+                float dx = e.getRawX() - gestoX0, dy = e.getRawY() - gestoY0;
+                if (!gestoDecidido && (Math.abs(dx) > folga || Math.abs(dy) > folga)) {
+                    gestoDecidido = true;
+                    gestoChats = dx > 0 && Math.abs(dx) > 1.5f * Math.abs(dy) && !listaChats.aberta();
+                    if (gestoChats) {
+                        // A conversa não rola nem recebe o toque: o gesto agora é da gaveta.
+                        android.view.MotionEvent c = android.view.MotionEvent.obtain(e);
+                        c.setAction(android.view.MotionEvent.ACTION_CANCEL);
+                        super.dispatchTouchEvent(c);
+                        c.recycle();
+                        listaChats.comecarArrasto();
+                    }
+                }
+                if (gestoChats) {
+                    listaChats.arrastar(dx);
+                    return true;
+                }
+                break;
+            }
+            case android.view.MotionEvent.ACTION_UP:
+            case android.view.MotionEvent.ACTION_CANCEL:
+                if (gestoChats) {
+                    float vx = 0;
+                    if (gestoVelocidade != null) {
+                        gestoVelocidade.addMovement(e);
+                        gestoVelocidade.computeCurrentVelocity(1000);
+                        vx = gestoVelocidade.getXVelocity();
+                    }
+                    listaChats.soltar(vx);
+                    gestoChats = false;
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+        return super.dispatchTouchEvent(e);
     }
 
     // ---------- ações do menu ----------

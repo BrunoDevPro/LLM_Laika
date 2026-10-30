@@ -171,8 +171,7 @@ public class VersoesActivity extends ComponentActivity implements Motor.Ouvinte 
         b.setGravity(Gravity.CENTER);
         b.setPadding(dp(14), dp(8), dp(14), dp(8));
         b.setOnClickListener(acao);
-        b.setEnabled(!motor.ocupado());
-        b.setAlpha(motor.ocupado() ? 0.5f : 1f);
+        // Sempre tocável: se já houver uma tarefa do mesmo tipo, o Motor avisa "Espere terminar".
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.rightMargin = dp(8);

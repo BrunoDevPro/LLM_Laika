@@ -88,4 +88,6 @@ jobs:
         if: always()
         run: |
           colab --auth=adc stop -s "$SESSAO" || true
+          # O saldo que sobrou (o app mostra o da consulta própria, unidades.yml; aqui fica no registro).
+          colab --auth=adc usage 2>&1 | grep -iE "balance|rate" || true
           rm -f "$RUNNER_TEMP/adc.json"

@@ -6,7 +6,6 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.Locale;
 
 /** A faixa de progresso das tarefas longas do Motor (importar, baixar, exportar), igual em todas as telas. */
 final class PainelTarefa {
@@ -27,17 +26,17 @@ final class PainelTarefa {
     }
 
     void atualizar() {
-        String t = motor.tarefa;
+        String t = motor.textoTarefas();
         painel.setVisibility(t != null ? View.VISIBLE : View.GONE);
-        cancelar.setVisibility(t != null && motor.tarefaCancelavel ? View.VISIBLE : View.GONE);
+        cancelar.setVisibility(t != null && motor.algumaCancelavel() ? View.VISIBLE : View.GONE);
         if (t != null) {
-            int p = motor.progresso;
-            texto.setText(p >= 0 ? String.format(Locale.getDefault(), "%s %d%%", t, p) : t);
+            int p = motor.progressoTarefas();
+            texto.setText(t);
             barra.setIndeterminate(p < 0);
             if (p >= 0) barra.setProgress(p);
         }
         // Mantém a tela acesa durante as tarefas longas.
-        if (motor.ocupado() && motor.tarefaCancelavel) tela.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (t != null && motor.algumaCancelavel()) tela.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         else tela.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 }

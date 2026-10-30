@@ -112,6 +112,18 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   versão em uso e cada backup (o app monta o zip e o envia ao release; o token precisa de Contents: leitura e escrita).
   O nome do release é o da versão e a descrição sai sozinha: parâmetros, dimensões, camadas, contexto, val loss,
   passos e tokens do pré-treino e datas.
+- Na alpha 0.14.0: publicar, exportar e salvar zip rodam numa segunda fila e **não travam o chat** (dá para
+  conversar enquanto isso; pedir outra tarefa igual mostra "Espere terminar"); trocar de modelo reaproveita o
+  tokenizer e o índice quando são os mesmos (e guarda a contagem de trechos, que levava segundos no índice grande),
+  e abrir o seletor de modelos já lê os modelos dos backups para a troca ser mais rápida. Todos os diálogos têm o
+  visual do app (cantos arredondados, cores do tema, modo escuro), a barra de rolagem ficou fina e arredondada, e a
+  gaveta de chats abre arrastando para a direita de qualquer ponto da conversa (e fecha arrastando para a esquerda de
+  qualquer ponto). As mensagens não mostram mais tokens/s; o nome do modelo aparece **em cima** da resposta, só
+  quando muda. **Gerar outra** guarda as respostas anteriores: setas ‹ 2/3 › embaixo da bolha. Menu ⋮ → **Testar
+  respostas**: escreva uma pergunta, escolha quantas respostas (1 a 20), temperatura, tamanho, RAG, memória e resposta
+  longa; avalie cada resposta (acertou, em parte, errou e nota de 0 a 5, com comentário); o relatório soma tudo e
+  exporta em .md ou .csv. Em **Treinar**, o saldo de **unidades de computação** do Colab (workflow `unidades.yml`,
+  que roda `colab usage` sem ligar máquina; ~1 min, sozinho a cada 2 h ou em "Atualizar").
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o

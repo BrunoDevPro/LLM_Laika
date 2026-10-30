@@ -49,6 +49,13 @@
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name=".TesteActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden"
+            android:exported="false"
+            android:label="Testar respostas"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <service
             android:name=".TrabalhoService"
             android:exported="false"

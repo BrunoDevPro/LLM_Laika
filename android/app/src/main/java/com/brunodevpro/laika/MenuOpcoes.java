@@ -35,6 +35,8 @@ final class MenuOpcoes {
 
         void treinar();
 
+        void testar();
+
         void limpar();
 
         /** Alguma opção mudou (a tela atualiza a linha de estado). */
@@ -95,6 +97,7 @@ final class MenuOpcoes {
         item(lista, R.drawable.ic_lampada, "O que a Laika lembra de mim", R.color.texto_laika, acoes::memoria);
         item(lista, R.drawable.ic_versoes, "Versões e backups", R.color.texto_laika, acoes::versoes);
         item(lista, R.drawable.ic_treinar, "Treinar", R.color.texto_laika, acoes::treinar);
+        item(lista, R.drawable.ic_teste, "Testar respostas", R.color.texto_laika, acoes::testar);
         divisoria(lista);
         montarOpcoes(lista);
         item(lista, R.drawable.ic_limpar, "Limpar conversa", R.color.perigo, acoes::limpar);

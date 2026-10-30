@@ -2,6 +2,7 @@ package com.brunodevpro.laika.core.colab;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -266,5 +267,26 @@ class ColabTest {
         GitHub.Erro e2 = assertThrows(GitHub.Erro.class, () -> new GitHub(base, "dono/naoexiste", "tok").ramoPrincipal());
         assertEquals(404, e2.codigo);
         assertTrue(e2.getMessage().contains("repositório"), e2.getMessage());
+    }
+
+    @Test
+    void saldoDeUnidades() {
+        // O GitHub mostra o script no registro (com "LAIKA_" + "UNIDADES" separados) e depois a saída.
+        String reg = "Run if [ -z \"$COLAB_ADC\" ]; then\n"
+                + "  print(\"LAIKA_\" + f\"UNIDADES saldo={saldo} taxa={taxa}\")\n"
+                + "Current balance: 87.25 compute units\nUsage rate: 1.76/hr\n"
+                + "LAIKA_UNIDADES saldo=87.25 taxa=1.76\n";
+        GitHub.Unidades u = GitHub.lerUnidades(reg);
+        assertNull(u.erro);
+        assertEquals(87.25, u.saldo, 1e-9);
+        assertEquals(1.76, u.taxa, 1e-9);
+
+        GitHub.Unidades semTaxa = GitHub.lerUnidades("LAIKA_UNIDADES saldo=12 taxa=\n");
+        assertEquals(12, semTaxa.saldo, 1e-9);
+        assertTrue(Double.isNaN(semTaxa.taxa));
+
+        GitHub.Unidades erro = GitHub.lerUnidades("LAIKA_UNIDADES erro=Falta o segredo COLAB_ADC\n");
+        assertEquals("Falta o segredo COLAB_ADC", erro.erro);
+        assertNotNull(GitHub.lerUnidades("nada aqui").erro);
     }
 }
