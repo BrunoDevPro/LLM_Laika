@@ -397,6 +397,12 @@ app (tela Colab) --API do GitHub--> workflow colab.yml (runner Linux) --Colab CL
     são ~15% dele. No app (0.14.2), Treinar → **Estender o 100M** prepara as células 2 (sem GPU) e 3 (A100, "continuar",
     PASSOS = tokens novos ÷ 262.144) e mostra horas e unidades estimadas (`ColabActivity.confirmarExtensao`).
 
+40. **O Drive do Colab grava em segundo plano** (02/11): o usuário baixou o GigaVerbo várias vezes e a célula 2 sempre
+    dizia "já tem 0.00 bilhão". O orquestrador desligava a máquina logo depois da última célula, e o que o Drive ainda
+    não tinha enviado (os textos e o `.pronto`) se perdia. Agora `laika_colab.gravar_drive` roda `drive.flush_and_unmount()`
+    antes do `colab stop` (só com o kernel livre; no limite de tempo a célula ainda está rodando). E os downloads
+    (GigaVerbo, SFT, Carolina) contam como baixados os arquivos que já estão na pasta sem registro no `.pronto`.
+
 ## 8. Limitações conhecidas
 
 - O de 100M nunca foi treinado de verdade (só o `tiny_rope` em CPU); tempo e unidades do `docs/TREINO_100M.md` são estimativas.

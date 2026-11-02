@@ -596,6 +596,7 @@ class Execucao:
                     f"import os; print('@@LAIKA_DRIVE', os.path.isdir({CONTENT + '/drive/MyDrive'!r}))", 60)
                 if any("@@LAIKA_DRIVE True" in l for l in saida):
                     self.anunciar("Google Drive montado.")
+                    self.drive_montado = True
                     return
                 time.sleep(min(15, ESPERA))
             if not caiu:
@@ -677,8 +678,26 @@ class Execucao:
         self.estado.pacote = True
         self.anunciar(f"Zip pronto para o app ({tamanho / 2**20:.0f} MB).")
 
+    def gravar_drive(self):
+        """O Google Drive do Colab envia os arquivos em segundo plano. Desligando a máquina logo depois da última
+        célula, o que ela escreveu nos últimos minutos (o .pronto e os textos dos downloads, o pretrain_last.pt...)
+        nunca chegava ao Drive, e a próxima execução baixava ou treinava tudo de novo. flush_and_unmount espera
+        o envio terminar. Só dá com o kernel livre (no limite de tempo, a célula ainda está rodando)."""
+        if not getattr(self, "drive_montado", False) or not self.colab.kernel_livre():
+            return
+        log("Terminando de gravar no Google Drive…")  # sem anunciar: a mensagem final já está pronta
+        codigo = ("import os\nos.sync()\ntry:\n    from google.colab import drive\n    drive.flush_and_unmount()\n"
+                  "    print('@@LAIKA_GRAVADO@@')\nexcept Exception as e:\n    print('@@LAIKA_GRAVADO@@ sem flush:', e)\n")
+        _, saida = self.colab.executar(codigo, max(120, min(20 * 60, self.restante() + 10 * 60)), self.mostrar)
+        if not any("@@LAIKA_GRAVADO@@" in l for l in saida):
+            log("aviso: não deu para confirmar que o Google Drive terminou de gravar.")
+
     def desligar(self):
         self.colab.interromper()
+        try:
+            self.gravar_drive()
+        except Exception as e:  # nunca deixa a máquina ligada por causa disso
+            log(f"aviso: falhou ao terminar de gravar no Drive: {e!r}")
         self.colab.rodar(["stop", "-s", self.args.sessao], self.mostrar, limite=180)
 
     def rodar(self):

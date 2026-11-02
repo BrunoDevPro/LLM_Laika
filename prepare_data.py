@@ -295,6 +295,10 @@ def download_carolina(pasta, taxonomias, com_wikipedia=False):
             if cod == "wik" and rel.startswith("pt/") and not com_wikipedia:
                 continue  # os arquivos pt/WIK* do Carolina são a própria Wikipédia: nem baixa
             nome = "carolina_" + re.sub(r"[^A-Za-z0-9]+", "_", f"{cod}_{rel}").strip("_").lower() + ".txt"
+            if (pasta / nome).exists() and (pasta / nome).stat().st_size > 0:
+                feitos.add(chave)  # já estava na pasta, mas o .pronto não sabia (ver download_gigaverbo)
+                _gravar_estado(pronto, {"arquivos": sorted(feitos), "docs": total_docs})
+                continue
             with tempfile.TemporaryDirectory() as tmp:
                 gz = Path(tmp) / "a.xml.gz"
                 try:
@@ -365,6 +369,15 @@ def download_gigaverbo(pasta, tokens, subconjunto="edu_high", toxico_max=2):
     pronto = pasta / ".pronto"
     estado = _estado(pronto)
     feitos = dict(estado.get("grupos", {}))
+    # Arquivos no Drive que o .pronto não conhece (ele se perdia quando a máquina do Colab era desligada antes de o
+    # Drive gravar tudo): contam como baixados, ~4 bytes por token, em vez de serem baixados de novo.
+    achados = {f.stem[len("gigaverbo_"):]: f.stat().st_size // 4 for f in pasta.glob("gigaverbo_*_*.txt")
+               if f.stem[len("gigaverbo_"):] not in feitos and f.stat().st_size > 0}
+    if achados:
+        feitos.update(achados)
+        _gravar_estado(pronto, {"grupos": feitos, "subconjunto": subconjunto})
+        print(f"GigaVerbo: {len(achados)} arquivos já estavam na pasta sem registro; contados como baixados "
+              f"(~{sum(achados.values()) / 1e9:.2f} bilhão de tokens).")
     total = sum(feitos.values())
     if total >= tokens:
         print(f"GigaVerbo já baixado: {total / 1e9:.2f} bilhão de tokens em {pasta}")
@@ -555,6 +568,18 @@ def download_sft(pasta, total, subconjuntos=SFT_PADRAO, nota_min=4.0, tokens_max
     pasta.mkdir(parents=True, exist_ok=True)
     pronto = pasta / ".pronto"
     feitos = dict(_estado(pronto).get("grupos", {}))
+    # Arquivos que o .pronto não conhece (ver download_gigaverbo): contam como baixados.
+    achados = {}
+    for f in pasta.glob("sft_*_*_*.jsonl"):
+        chave = f.stem[len("sft_"):]
+        if chave not in feitos and f.stat().st_size > 0:
+            with open(f, encoding="utf-8") as g:
+                achados[chave] = sum(1 for l in g if l.strip())
+    if achados:
+        feitos.update(achados)
+        _gravar_estado(pronto, {"grupos": feitos})
+        print(f"GigaVerbo-SFT: {len(achados)} arquivos já estavam na pasta sem registro "
+              f"({sum(achados.values()):,} conversas); contados como baixados.")
     partes = []
     for item in subconjuntos.split(","):
         nome, _, frac = item.strip().partition(":")
