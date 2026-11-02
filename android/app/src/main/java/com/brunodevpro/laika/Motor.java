@@ -204,6 +204,8 @@ final class Motor {
     boolean mostrarFontes, usarRag, usarMemoria, usarHistorico, modoCompletar, respostasLongas;
     /** Respostas rápidas: no máximo 2 trechos do RAG no prompt (Laika.maxTrechos). */
     boolean respostasRapidas;
+    /** Pesos em int8 nos modelos de 20M+ parâmetros: metade da memória e cada token ~1,5× mais rápido. */
+    boolean pesosInt8;
     double temperatura;
     int tamanhoResposta;
 
@@ -215,6 +217,7 @@ final class Motor {
         usarMemoria = prefs.getBoolean("memoria", true);
         usarHistorico = prefs.getBoolean("historico", true);
         respostasRapidas = prefs.getBoolean("rapidas", false);
+        pesosInt8 = prefs.getBoolean("int8", true);
         respostasLongas = prefs.getBoolean("longas", false);
         temperatura = Math.max(TEMP_MIN, Math.min(TEMP_MAX, prefs.getFloat("temperatura", 0.7f)));
         tamanhoResposta = Math.max(TAMANHO_MIN, Math.min(400, prefs.getInt("tamanho", 80)));
@@ -233,7 +236,7 @@ final class Motor {
     void salvarOpcoes() {
         prefs.edit().putBoolean("fontes", mostrarFontes).putBoolean("rag", usarRag)
                 .putBoolean("memoria", usarMemoria).putBoolean("historico", usarHistorico).putBoolean("rapidas", respostasRapidas)
-                .putBoolean("longas", respostasLongas)
+                .putBoolean("longas", respostasLongas).putBoolean("int8", pesosInt8)
                 .putFloat("temperatura", (float) temperatura).putInt("tamanho", tamanhoResposta).apply();
         avisarEstado();
     }
@@ -852,9 +855,29 @@ final class Motor {
         });
     }
 
+    /**
+     * Liga ou desliga os pesos em int8: os modelos abertos são liberados e voltam a ser carregados (do jeito novo)
+     * na próxima resposta. Na fila de fundo, depois de uma resposta em andamento.
+     */
+    void mudarInt8(boolean ligar) {
+        if (ligar == pesosInt8) return;
+        pesosInt8 = ligar;
+        salvarOpcoes();
+        fundo.execute(() -> {
+            if (chat != null && chat.modelo.int8 != ligar && grande(chat)) {
+                chat.modelo.fechar();
+                chat = null;
+            }
+            if (base != null && base.modelo.int8 != ligar && grande(base)) {
+                base.modelo.fechar();
+                base = null;
+            }
+        });
+    }
+
     private Laika carregar(String ref) throws IOException {
         try (InputStream in = armazem.abrir(ref)) {
-            return new Laika(new Modelo(in, threads), tok);
+            return new Laika(new Modelo(in, threads, null, pesosInt8), tok);
         } catch (OutOfMemoryError e) {
             throw new IOException("falta memória no celular para este modelo");
         }

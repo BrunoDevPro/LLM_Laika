@@ -131,6 +131,12 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
   veja a conta (passos, horas de A100, unidades e quantas execuções) e prepare o passo 1 (baixar os dados, sem GPU)
   ou o passo 2 (célula 3 com MODO "continuar", PASSOS calculado, COMPILAR e A100). Se uma execução parar no limite de
   ~6 h, o passo 2 de novo continua do último passo salvo.
+- Na alpha 0.15.0: **Modelo compacto (int8)** (menu ⋮ → Opções, ligado por padrão): nos modelos de 20M+ parâmetros,
+  os pesos viram int8 ao carregar (uma escala por linha) e a conta é feita com inteiros. Metade da memória do float16
+  (o de 100M: ~105 MB em vez de ~210 MB) e cada token ~1,5× mais rápido (no PC, num modelo do tamanho do de 100M com
+  4 núcleos: 54,6 → 34,8 ms por token; a leitura do prompt melhora ~10%). O arquivo do modelo não muda; desligar a
+  opção volta ao float16 na próxima resposta. Com pesos sorteados, o token mais provável não mudou e os logits
+  ficaram a ~2% do float32; compare as respostas em Testar respostas, com a opção ligada e desligada.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o

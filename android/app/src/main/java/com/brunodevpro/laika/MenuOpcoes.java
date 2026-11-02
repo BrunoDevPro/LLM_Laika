@@ -173,6 +173,8 @@ final class MenuOpcoes {
                 v -> motor.usarMemoria = v);
         caixa(grupo, "Respostas rápidas", "No máximo 2 trechos do RAG no prompt: a resposta começa bem antes",
                 motor.respostasRapidas, v -> motor.respostasRapidas = v);
+        caixa(grupo, "Modelo compacto (int8)", "Modelos de 20M+ parâmetros: metade da memória e respostas mais "
+                + "rápidas, com uma pequena perda de precisão", motor.pesosInt8, motor::mudarInt8);
         // Resposta longa, completar texto e memória de IA ficam no botão + do campo de mensagem (MaisOpcoes).
 
         Runnable atualizar = () -> {

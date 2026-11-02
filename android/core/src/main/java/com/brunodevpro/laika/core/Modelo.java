@@ -20,6 +20,10 @@ import java.util.concurrent.Executors;
  * em float32, com os mesmos valores), e o cache cresce conforme a conversa em vez de reservar a
  * janela inteira (2048 posições) de uma vez.
  *
+ * Com int8 (a partir de LIMITE_INT8 parâmetros), cada linha das matrizes vira bytes de -127 a 127 com uma
+ * escala (o maior valor da linha ÷ 127), convertidos ao carregar: metade da memória do float16 e, como cada
+ * token novo lê todos os pesos, a resposta sai mais rápido. Os logits mudam um pouco (erro de ~0,4% por peso).
+ *
  * As multiplicações de matriz são divididas entre os núcleos do processador.
  */
 public final class Modelo {
@@ -27,12 +31,19 @@ public final class Modelo {
 
     /** Acima disto (parâmetros), as matrizes ficam em float16 na memória. */
     public static final long LIMITE_COMPACTO = 60_000_000L;
+    /**
+     * A partir disto, o int8 (quando pedido) vale: nos modelos pequenos a resposta já é rápida e o erro do int8
+     * pesa mais na qualidade.
+     */
+    public static final long LIMITE_INT8 = 20_000_000L;
 
     public final int vocab, block, dim, heads, layers, headDim;
     /** RoPE (LAIKA002) em vez da tabela de posições aprendidas. */
     public final boolean rope;
     /** Matrizes em float16 (short[]) em vez de float32. */
     public final boolean compacto;
+    /** Matrizes em int8 com uma escala por linha (vale mais que compacto). */
+    public final boolean int8;
     private final float[] posEmb, lnfW, lnfB, ropeCos, ropeSin;
     private final Matriz tokEmb;
     private final float[][] ln1W, ln1B, ln2W, ln2B, ff1B, ff2B;
@@ -40,14 +51,29 @@ public final class Modelo {
     private final ExecutorService pool;
     private final int threads;
 
-    /** Uma matriz de pesos: float32 (f) ou float16 (h, convertido na hora pela tabela MEIAS). */
+    /**
+     * Uma matriz de pesos [linhas][colunas]: float32 (f), float16 (h, convertido na hora pela tabela de meias) ou
+     * int8 (q, vezes a escala da linha).
+     */
     private static final class Matriz {
         final float[] f;
         final short[] h;
+        final byte[] q;
+        final float[] escala;
 
-        Matriz(float[] f, short[] h) {
+        Matriz(float[] f, short[] h, byte[] q, float[] escala) {
             this.f = f;
             this.h = h;
+            this.q = q;
+            this.escala = escala;
+        }
+
+        /** O peso [linha][j] de uma linha de `colunas` colunas. */
+        float peso(int linha, int colunas, int j, float[] tabela) {
+            int i = linha * colunas + j;
+            if (f != null) return f[i];
+            if (h != null) return tabela[h[i] & 0xFFFF];
+            return q[i] * escala[linha];
         }
     }
 
@@ -70,6 +96,18 @@ public final class Modelo {
 
     /** compacto: null = decide pelo tamanho (LIMITE_COMPACTO); true/false força (testes). */
     public Modelo(InputStream in, int threads, Boolean compacto) throws IOException {
+        this(in, threads, compacto, false);
+    }
+
+    /**
+     * int8: matrizes em int8 se o modelo tiver pelo menos LIMITE_INT8 parâmetros (forcarInt8 = em qualquer tamanho,
+     * para testes).
+     */
+    public Modelo(InputStream in, int threads, Boolean compacto, boolean int8) throws IOException {
+        this(in, threads, compacto, int8, false);
+    }
+
+    public Modelo(InputStream in, int threads, Boolean compacto, boolean int8, boolean forcarInt8) throws IOException {
         DataInputStream d = new DataInputStream(new java.io.BufferedInputStream(in, 1 << 16));
         byte[] magic = new byte[8];
         d.readFully(magic);
@@ -87,9 +125,10 @@ public final class Modelo {
         headDim = dim / heads;
         float theta = rope ? c.getFloat() : 0f;
         long parametros = ConversorPt.parametros(vocab, rope ? 0 : block, dim, layers);
-        this.compacto = compacto != null ? compacto : parametros > LIMITE_COMPACTO;
+        this.int8 = forcarInt8 || (int8 && parametros >= LIMITE_INT8);
+        this.compacto = !this.int8 && (compacto != null ? compacto : parametros > LIMITE_COMPACTO);
 
-        tokEmb = matriz(d, vocab * dim);
+        tokEmb = matriz(d, vocab, dim);
         posEmb = rope ? null : ler(d, block * dim);
         ln1W = new float[layers][]; ln1B = new float[layers][]; qkvW = new Matriz[layers]; projW = new Matriz[layers];
         ln2W = new float[layers][]; ln2B = new float[layers][]; ff1W = new Matriz[layers]; ff1B = new float[layers][];
@@ -97,13 +136,13 @@ public final class Modelo {
         for (int l = 0; l < layers; l++) {
             ln1W[l] = ler(d, dim);
             ln1B[l] = ler(d, dim);
-            qkvW[l] = matriz(d, 3 * dim * dim);
-            projW[l] = matriz(d, dim * dim);
+            qkvW[l] = matriz(d, 3 * dim, dim);
+            projW[l] = matriz(d, dim, dim);
             ln2W[l] = ler(d, dim);
             ln2B[l] = ler(d, dim);
-            ff1W[l] = matriz(d, 4 * dim * dim);
+            ff1W[l] = matriz(d, 4 * dim, dim);
             ff1B[l] = ler(d, 4 * dim);
-            ff2W[l] = matriz(d, 4 * dim * dim);
+            ff2W[l] = matriz(d, dim, 4 * dim);
             ff2B[l] = ler(d, dim);
         }
         lnfW = ler(d, dim);
@@ -135,14 +174,27 @@ public final class Modelo {
         }) : null;
     }
 
-    private Matriz matriz(DataInputStream d, int n) throws IOException {
-        if (!compacto) return new Matriz(ler(d, n), null);
-        tabelaMeias();
+    private Matriz matriz(DataInputStream d, int linhas, int colunas) throws IOException {
+        int n = linhas * colunas;
+        if (!compacto && !int8) return new Matriz(ler(d, n), null, null, null);
+        float[] tabela = tabelaMeias();
         byte[] raw = new byte[n * 2];
         d.readFully(raw);
         short[] h = new short[n];
         ByteBuffer.wrap(raw).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(h);
-        return new Matriz(null, h);
+        if (!int8) return new Matriz(null, h, null, null);
+        // int8 simétrico por linha: escala = maior |peso| da linha ÷ 127.
+        byte[] q = new byte[n];
+        float[] escala = new float[linhas];
+        for (int o = 0; o < linhas; o++) {
+            int ini = o * colunas;
+            float max = 0;
+            for (int j = 0; j < colunas; j++) max = Math.max(max, Math.abs(tabela[h[ini + j] & 0xFFFF]));
+            float esc = max > 0 ? max / 127f : 1f, inv = 1f / esc;
+            escala[o] = esc;
+            for (int j = 0; j < colunas; j++) q[ini + j] = (byte) Math.round(tabela[h[ini + j] & 0xFFFF] * inv);
+        }
+        return new Matriz(null, null, q, escala);
     }
 
     /** Pesos em float16 (little-endian) -> float32. */
@@ -220,7 +272,7 @@ public final class Modelo {
         for (int i = 0; i < t; i++) {
             int tok = tokens[de + i], pos = p0 + i;
             for (int j = 0; j < dim; j++) {
-                float e = compacto ? tabela[tokEmb.h[tok * dim + j] & 0xFFFF] : tokEmb.f[tok * dim + j];
+                float e = tokEmb.peso(tok, dim, j, tabela);
                 x[i * dim + j] = rope ? e : e + posEmb[pos * dim + j];
             }
         }
@@ -327,18 +379,27 @@ public final class Modelo {
 
     /** out[t][o] = x[t] · W[o] (+ bias[o]); W no formato do PyTorch: [saída][entrada]. */
     private void matmul(float[] x, int t, int in, Matriz w, float[] bias, int outDim, float[] out) {
+        if (w.q != null) {
+            matmulInt8(x, t, in, w, bias, outDim, out);
+            return;
+        }
         float[] tabela = w.h != null ? tabelaMeias() : null;
         paralelo(outDim, (long) t * in * outDim >= 65536, (ini, fim) -> {
             // Pesos em float16 com vários tokens (o prompt): converte a linha uma vez só, e não uma vez por token
             // (com 500 tokens de prompt, a conversão se repetia 500 vezes). Mesmos valores, mesma soma.
-            float[] linha = w.h != null && t > 1 ? new float[in] : null;
+            float[] linha = w.f == null && t > 1 ? new float[in] : null;
             for (int o = ini; o < fim; o++) {
                 int wo = o * in;
                 float b = bias == null ? 0f : bias[o];
-                if (linha != null) for (int j = 0; j < in; j++) linha[j] = tabela[w.h[wo + j] & 0xFFFF];
+                if (linha != null) {
+                    if (w.h != null) for (int j = 0; j < in; j++) linha[j] = tabela[w.h[wo + j] & 0xFFFF];
+                    else for (int j = 0; j < in; j++) linha[j] = w.q[wo + j] * w.escala[o];
+                }
                 for (int i = 0; i < t; i++) {
                     float d = w.f != null ? dot(x, i * in, w.f, wo, in)
-                            : linha != null ? dot(x, i * in, linha, 0, in) : dotMeia(x, i * in, w.h, wo, in, tabela);
+                            : linha != null ? dot(x, i * in, linha, 0, in)
+                            : w.h != null ? dotMeia(x, i * in, w.h, wo, in, tabela)
+                            : dotInt8(x, i * in, w.q, wo, in) * w.escala[o];
                     out[i * outDim + o] = d + b;
                 }
             }
@@ -356,6 +417,49 @@ public final class Modelo {
             s3 += a[ao + j + 3] * tab[b[bo + j + 3] & 0xFFFF];
         }
         for (; j < n; j++) s0 += a[ao + j] * tab[b[bo + j] & 0xFFFF];
+        return (s0 + s1) + (s2 + s3);
+    }
+
+    /**
+     * Pesos em int8: a entrada de cada token também vira int8 (escala por token) e a conta é feita só com inteiros
+     * (soma exata em int), o que o processador faz bem mais rápido que converter cada peso para float.
+     */
+    private void matmulInt8(float[] x, int t, int in, Matriz w, float[] bias, int outDim, float[] out) {
+        byte[] xq = new byte[t * in];
+        float[] xs = new float[t];
+        for (int i = 0; i < t; i++) {
+            float max = 0;
+            for (int j = 0; j < in; j++) max = Math.max(max, Math.abs(x[i * in + j]));
+            float esc = max > 0 ? max / 127f : 1f, inv = 1f / esc;
+            xs[i] = esc;
+            for (int j = 0; j < in; j++) xq[i * in + j] = (byte) Math.round(x[i * in + j] * inv);
+        }
+        paralelo(outDim, (long) t * in * outDim >= 65536, (ini, fim) -> {
+            for (int o = ini; o < fim; o++) {
+                int wo = o * in;
+                float b = bias == null ? 0f : bias[o], eo = w.escala[o];
+                for (int i = 0; i < t; i++) out[i * outDim + o] = dotBytes(xq, i * in, w.q, wo, in) * (xs[i] * eo) + b;
+            }
+        });
+    }
+
+    private static int dotBytes(byte[] a, int ao, byte[] b, int bo, int n) {
+        int s = 0;
+        for (int j = 0; j < n; j++) s += a[ao + j] * b[bo + j];
+        return s;
+    }
+
+    /** Igual ao dot, com os pesos em int8 (a escala da linha é aplicada uma vez, no fim). */
+    private static float dotInt8(float[] a, int ao, byte[] b, int bo, int n) {
+        float s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+        int j = 0;
+        for (; j + 3 < n; j += 4) {
+            s0 += a[ao + j] * b[bo + j];
+            s1 += a[ao + j + 1] * b[bo + j + 1];
+            s2 += a[ao + j + 2] * b[bo + j + 2];
+            s3 += a[ao + j + 3] * b[bo + j + 3];
+        }
+        for (; j < n; j++) s0 += a[ao + j] * b[bo + j];
         return (s0 + s1) + (s2 + s3);
     }
 
