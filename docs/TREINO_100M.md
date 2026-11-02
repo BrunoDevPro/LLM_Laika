@@ -105,6 +105,7 @@ Custo: ~2–2,5 h de A100 por bilhão de tokens (~11–35 unidades por bilhão, 
 | `RAG_FRACAO` | **0,7** (70% das perguntas que pedem informação treinam com o Contexto do RAG) |
 | `CONHECIMENTO` | automático = **20 mil artigos** no 100M: perguntas sem contexto, cada fato de 4 jeitos, 2× por época (Madeira e Areia ficam de fora) |
 | `USAR_SFT` | ligado (as conversas do GigaVerbo-v2-SFT da célula 2) |
+| `SFT_MAXIMO` | 300 mil (até 1 milhão, se a célula 2 baixou tanto; o tempo do fine-tuning cresce quase na mesma proporção) |
 | Taxa de aprendizado | automática: **1e-4** (acima de 20M de parâmetros) |
 | Precisão | bf16 na A100 |
 | Dados | ~16 mil exemplos escritos (inclui as 627 respostas longas, 438 "por quê", 975 de sim ou não, 5.313 de pessoas, datas, séculos, conceitos e gatilho de resposta longa e 1.048 de acontecimentos e nomes; identidade com 274) + 2.299 conversas + 10 mil sintéticos + 40 mil perguntas de leitura da Wikipédia + ~300 mil perguntas de conhecimento (sem contexto) + até 300 mil conversas do SFT; ~30% com mensagens anteriores (memória de IA); até 6 trechos do RAG por pergunta |
