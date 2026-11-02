@@ -30,6 +30,9 @@ parser.add_argument("--modern-repeat", type=int, default=3,
 parser.add_argument("--qa", default="data/qa")
 parser.add_argument("--out", default="checkpoints")
 parser.add_argument("--max-steps", type=int, default=None)
+parser.add_argument("--lr", type=float, default=None,
+                    help="taxa de aprendizado máxima (padrão: a do preset; ao estender um pré-treino que já "
+                         "terminou, 60%% dela)")
 parser.add_argument("--batch-size", type=int, default=None, help="troca o lote do preset (testes rápidos)")
 parser.add_argument("--accum", type=int, default=None,
                     help="troca a acumulação de gradiente (ex.: faltou memória na GPU: --batch-size 8 --accum 16)")
@@ -52,7 +55,7 @@ cfg = dict(PRESETS[args.preset])
 cfg.setdefault("accum", 1)
 cfg["preset"] = args.preset
 for chave, valor in [("max_steps", args.max_steps), ("batch_size", args.batch_size), ("eval_iters", args.eval_iters),
-                     ("eval_every", args.eval_every), ("accum", args.accum)]:
+                     ("eval_every", args.eval_every), ("accum", args.accum), ("learning_rate", args.lr)]:
     if valor:
         cfg[chave] = valor
 ARQUITETURA = ("vocab_size", "block_size", "embed_size", "heads", "layers", "rope")
@@ -311,6 +314,17 @@ if args.resume and last_path.exists():
     if not mesma_arquitetura(last["config"]):
         raise SystemExit(f"O treino interrompido no Drive é do {descrever(last['config'])}. Para trocar de "
                          f"preset ({args.preset}), use MODO = \"do_zero\".")
+    # O agendamento é sempre o do treino interrompido (passos, taxa, aquecimento, paciência, passos anteriores):
+    # com outro PASSOS, a taxa de aprendizado saltaria no meio e, pior, se o passo salvo passasse do novo
+    # número, o treino recomeçaria do zero e as horas já pagas seriam perdidas.
+    salvo = last["config"]
+    if args.max_steps and args.max_steps != salvo.get("max_steps"):
+        print(f"Aviso: PASSOS = {args.max_steps} ignorado; o treino interrompido continua com os "
+              f"{salvo.get('max_steps')} passos com que começou.")
+    for k in ("max_steps", "learning_rate", "warmup_steps", "patience", "paciencia_desde",
+              "passos_antes", "tokens_antes"):
+        if k in salvo:
+            cfg[k] = salvo[k]
     if last["step"] < cfg["max_steps"]:
         model.load_state_dict(last["model"])
         optimizer.load_state_dict(last["optimizer"])
@@ -322,7 +336,8 @@ if args.resume and last_path.exists():
         if use_cuda and last.get("rng_cuda") is not None:
             torch.cuda.set_rng_state(last["rng_cuda"].cpu())
         retomado = True
-        print(f"Retomando o treino interrompido no passo {start_step} (melhor val loss até aqui {best_val:.4f}).")
+        print(f"Retomando o treino interrompido no passo {start_step} de {cfg['max_steps']:,} "
+              f"(melhor val loss até aqui {best_val:.4f}).")
     del last
 if not retomado and args.resume and best_path.exists():
     ckpt = torch.load(best_path, map_location=device, weights_only=False)
@@ -330,7 +345,20 @@ if not retomado and args.resume and best_path.exists():
         raise SystemExit(f"O pré-treino do Drive é do {descrever(ckpt['config'])}. Para trocar de preset "
                          f"({args.preset}), use MODO = \"do_zero\".")
     model.load_state_dict(ckpt["model"])
-    print(f"Pesos carregados de {best_path} (val loss {ckpt['val_loss']:.4f}); agendamento novo.")
+    # Estender um pré-treino que já terminou (ex.: com mais GigaVerbo): taxa menor (60%), senão o modelo
+    # "desaprende" um pouco no começo; e a parada antecipada só conta depois de 1/4 dos passos, porque a perda
+    # sobe um pouco com o novo aquecimento antes de voltar a cair (com a paciência normal, o treino pararia no
+    # começo e as unidades gastas não dariam em nada). Os passos e tokens anteriores ficam somados no checkpoint.
+    antes = ckpt["config"]
+    cfg["learning_rate"] = args.lr or cfg["learning_rate"] * 0.6
+    cfg["paciencia_desde"] = max(cfg["warmup_steps"] * 2, cfg["max_steps"] // 4)
+    cfg["passos_antes"] = antes.get("passos_antes", 0) + ckpt.get("step", 0)
+    cfg["tokens_antes"] = antes.get("tokens_antes", 0) + ckpt.get("step", 0) * antes.get("batch_size", 0) * \
+        antes.get("accum", 1) * antes.get("block_size", 0)
+    print(f"Pesos carregados de {best_path} (val loss {ckpt['val_loss']:.4f}); estendendo com agendamento novo: "
+          f"{cfg['max_steps']:,} passos, taxa máxima {cfg['learning_rate']:g}, parada antecipada só depois do "
+          f"passo {cfg['paciencia_desde']:,} (já foram {cfg['passos_antes']:,} passos, "
+          f"~{cfg['tokens_antes'] / 1e9:.2f} bilhão de tokens).")
     del ckpt
 
 
@@ -361,7 +389,7 @@ for step in range(start_step, cfg["max_steps"] + 1):
             best_val, evals_without_gain, marker = val_loss, 0, "  <- melhor, salvo"
             torch.save({"model": model.state_dict(), "config": cfg, "step": step,
                         "val_loss": val_loss}, best_path)
-        else:
+        elif step >= cfg.get("paciencia_desde", 0):
             evals_without_gain += 1
         print(f"step {step:>6} | val loss {val_loss:.4f} (ppl {math.exp(val_loss):.0f}) | "
               f"{time.time() - start:.0f}s{marker}", flush=True)
