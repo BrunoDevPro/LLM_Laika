@@ -403,6 +403,13 @@ app (tela Colab) --API do GitHub--> workflow colab.yml (runner Linux) --Colab CL
     antes do `colab stop` (só com o kernel livre; no limite de tempo a célula ainda está rodando). E os downloads
     (GigaVerbo, SFT, Carolina) contam como baixados os arquivos que já estão na pasta sem registro no `.pronto`.
 
+41. **int8 no app** (0.15.0, `Modelo`): com `int8` (pref `int8`, padrão ligado, `Motor.pesosInt8`/`mudarInt8`) e o
+    modelo com pelo menos `LIMITE_INT8 = 20M` parâmetros, as matrizes do float16 do arquivo viram int8 por linha ao
+    carregar, e `matmulInt8` quantiza também a entrada de cada token (escala por token) e soma em int. Só os pesos em int8
+    (convertendo cada peso para float na hora) quase não ganhava velocidade no PC (50 → 48 ms/token); com a conta em
+    inteiros, 54,6 → 34,8 ms/token num modelo sorteado do tamanho do de 100M (`Int8Test`, `LAIKA_BENCH=1`). O formato
+    do arquivo e o `exportar_modelo.py` não mudam. Não foi conferido com o 100M de verdade (sem checkpoint aqui).
+
 ## 8. Limitações conhecidas
 
 - O de 100M nunca foi treinado de verdade (só o `tiny_rope` em CPU); tempo e unidades do `docs/TREINO_100M.md` são estimativas.
