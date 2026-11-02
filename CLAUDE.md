@@ -386,6 +386,13 @@ app (tela Colab) --API do GitHub--> workflow colab.yml (runner Linux) --Colab CL
     entre até 8 núcleos (antes 4, em partes iguais: os núcleos lentos atrasavam). "Respostas rápidas" (menu Opções)
     usa no máximo 2 trechos do RAG: o tempo vai quase todo em ler o prompt (~540 tokens com 6 trechos).
 
+39. **Estender o pré-treino sem perder unidades** (02/11): o `--resume` de um treino interrompido usava o PASSOS do
+    campo; se ele mudasse (ou ficasse 0 = preset) e o passo salvo passasse do novo número, o treino recomeçava do
+    `pretrain_best.pt` com agendamento novo, jogando fora as horas da execução. Agora o agendamento (passos, taxa,
+    aquecimento, paciência) vem sempre do `pretrain_last.pt`. Estender um treino terminado usa 60% da taxa e só
+    conta a paciência depois de 1/4 dos passos (no teste com o tiny a perda subiu nas duas primeiras validações e
+    a paciência normal teria parado tudo); `passos_antes`/`tokens_antes` somam as rodadas para o `laika_info.json`.
+
 ## 8. Limitações conhecidas
 
 - O de 100M nunca foi treinado de verdade (só o `tiny_rope` em CPU); tempo e unidades do `docs/TREINO_100M.md` são estimativas.

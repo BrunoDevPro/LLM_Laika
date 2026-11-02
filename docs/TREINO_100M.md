@@ -76,6 +76,25 @@ exato em que parou.
 Referência de `val loss` (vocabulário de 24 mil): abaixo de ~3,0 as frases já são boas; o de 7M parou em
 3,62, com um vocabulário de 8 mil (os números não são diretamente comparáveis).
 
+### Estender o pré-treino com mais dados
+
+Para o 100M que já terminou ver mais tokens (o arquivo continua do mesmo tamanho; o modelo melhora):
+
+1. Célula 2 sem GPU: `GIGAVERBO` com o total desejado (ex.: 8 bilhões). Só o que falta é baixado (~4 GB no Drive por bilhão).
+2. Célula 3 com A100: `MODO = "continuar"`, `PRESET = "colab_100m"`, `PASSOS` = tokens novos ÷ 262 mil
+   (ex.: +6 bilhões ≈ 23.000 passos), `COMPILAR` ligado.
+   - Parte do `pretrain_best.pt` com a taxa de aprendizado 60% menor (3e-4; `--lr` troca), aquecimento de novo e
+     parada antecipada só depois de 1/4 dos passos (a perda sobe um pouco no começo e voltaria a cair depois).
+   - Na primeira execução, todos os tokens são calculados de novo (a lista de arquivos mudou): ~1 h a mais.
+   - Parou no limite de ~6 h: rode de novo com `"continuar"`. O treino segue do último passo salvo (a cada 250
+     passos, ~8 min de A100), com os PASSOS, a taxa e o aquecimento de quando começou, mesmo que o campo mude.
+     Cada nova execução gasta ~10–15 min fora do treino (ligar a máquina, Drive, copiar os tokens, compilar).
+   - Os passos e tokens anteriores ficam somados no checkpoint (`passos_antes`, `tokens_antes`) e aparecem na
+     descrição do release.
+3. Células 4, 6 e 7: fine-tuning de novo, exportar e avaliar.
+
+Custo: ~2–2,5 h de A100 por bilhão de tokens (~11–35 unidades por bilhão, conforme a taxa da A100 na hora).
+
 ## 4. Fine-tuning (célula 4, A100)
 
 | Parâmetro | Valor |
