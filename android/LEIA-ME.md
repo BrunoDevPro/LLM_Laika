@@ -127,6 +127,10 @@ de mentira (`colab/teste_laika_colab.py`); na primeira vez, acompanhe pela tela 
 - Na alpha 0.14.1: em Testar respostas, o modelo em uso aparece no topo com **Trocar**, há a opção **Respostas
   rápidas**, os botões não aparecem mais cortados e o relatório começa reduzido (toque para estender; lá ficam
   Exportar, Renomear e Excluir).
+- Na alpha 0.14.2: atalho **Estender o 100M** em Treinar: escolha o total de GigaVerbo (4 a 10 bilhões de tokens),
+  veja a conta (passos, horas de A100, unidades e quantas execuções) e prepare o passo 1 (baixar os dados, sem GPU)
+  ou o passo 2 (célula 3 com MODO "continuar", PASSOS calculado, COMPILAR e A100). Se uma execução parar no limite de
+  ~6 h, o passo 2 de novo continua do último passo salvo.
 - **Memória de IA:** as últimas 5 trocas da conversa entram no prompt (as que couberem na janela), então
   dá para perguntar "E da Itália?" depois de "Qual é a capital da França?". Só nas mensagens que dependem
   da conversa ("E...", "Por quê?", "isso", "ele"...): numa pergunta nova, o histórico fica de fora para o

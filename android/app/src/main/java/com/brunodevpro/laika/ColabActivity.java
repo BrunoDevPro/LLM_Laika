@@ -464,7 +464,8 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         }
         LinearLayout atalhos = cartao(caixaCelulas);
         atalhos.addView(texto("Atalhos", 13, R.color.topo_sub, true));
-        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos), a4 = linha(atalhos);
+        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos), a4 = linha(atalhos),
+                a5 = linha(atalhos);
         botao(a1, "Só fine-tuning", false, v -> marcar(4, 6));
         botao(a1, "Tudo do zero", false, v -> {
             valores.put("3.MODO", "do_zero");
@@ -503,6 +504,8 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             gpu = "A100";
             marcar(3, 4, 6, 7);
         });
+        // Mais tokens no 100M já treinado: mais GigaVerbo (sem GPU) e o pré-treino continuado (A100).
+        botao(a5, "Estender o 100M", false, v -> estenderCem());
         TextView g = texto("GPU: " + nomeGpu(gpu) + "  ▾", 15, R.color.topo_texto, true);
         g.setPadding(0, dp(12), 0, dp(4));
         g.setOnClickListener(v -> escolherGpu());
@@ -513,6 +516,66 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         LinearLayout fim = linha(caixaCelulas);
         TextView rodar = botao(fim, "Rodar no Colab", true, v -> confirmarRodar());
         rodar.setPadding(dp(22), dp(11), dp(22), dp(11));
+    }
+
+    /** Tokens do GigaVerbo que o "Dados para 100M" baixa; a extensão treina com o que passar disso. */
+    private static final double GIGAVERBO_BASE = 1.5e9, TOKENS_POR_PASSO = 16 * 8 * 2048;
+    private static final String[] GIGAVERBO_TOTAL = {"4 bilhões de tokens", "6 bilhões de tokens",
+            "8 bilhões de tokens", "10 bilhões de tokens"};
+
+    /**
+     * Estender o pré-treino do 100M com mais GigaVerbo: escolhe o total, mostra a conta (passos, horas, unidades)
+     * e prepara os dois passos: baixar os dados sem GPU (célula 2) e treinar na A100 (célula 3, "continuar").
+     */
+    private void estenderCem() {
+        String[] rotulos = new String[GIGAVERBO_TOTAL.length];
+        for (int i = 0; i < rotulos.length; i++) {
+            double bi = Double.parseDouble(GIGAVERBO_TOTAL[i].split(" ")[0]);
+            rotulos[i] = String.format(Locale.getDefault(), "GigaVerbo com %.0f bilhões (+%.1f bilhões novos)", bi,
+                    bi - GIGAVERBO_BASE / 1e9);
+        }
+        new AlertDialog.Builder(this).setTitle("Estender o 100M")
+                .setItems(rotulos, (d, i) -> confirmarExtensao(GIGAVERBO_TOTAL[i])).show();
+    }
+
+    private void confirmarExtensao(String total) {
+        double novos = Double.parseDouble(total.split(" ")[0]) * 1e9 - GIGAVERBO_BASE;
+        long passos = Math.round(novos / TOKENS_POR_PASSO / 100) * 100;
+        // ~2–2,5 h de A100 por bilhão de tokens (estimativa do docs/TREINO_100M.md); a A100 gasta ~5,4–7,5 unidades
+        // por hora; mais ~1 h na primeira execução para calcular os tokens de novo.
+        double horasMin = novos / 1e9 * 2 + 1, horasMax = novos / 1e9 * 2.5 + 1;
+        float saldo = Colab.prefs(this).getFloat("unidades_saldo", Float.NaN);
+        String msg = String.format(Locale.getDefault(),
+                "Passo 1, sem GPU: baixa o que falta do GigaVerbo (%s no total; ~%.0f GB a mais no Drive).\n\n"
+                        + "Passo 2, na A100: continua o pré-treino do 100M que já terminou, com %,d passos (~%.1f "
+                        + "bilhões de tokens), taxa de aprendizado menor e os passos guardados no Drive.\n\n"
+                        + "Estimativa: %.0f–%.0f h de A100 (%.0f–%.0f unidades), em %d a %d execuções de ~5,5 h. "
+                        + "Quando uma parar no limite, toque em Estender → passo 2 de novo: continua do último "
+                        + "passo salvo. No fim, rode \"Só fine-tuning\" e a célula 7 (avaliar).%s",
+                total, novos / 1e9 * 4, passos, passos * TOKENS_POR_PASSO / 1e9, horasMin, horasMax,
+                horasMin * 5.4, horasMax * 7.5, (int) Math.ceil(horasMin / 5.5), (int) Math.ceil(horasMax / 5.5),
+                Float.isNaN(saldo) ? "" : String.format(Locale.getDefault(), "\n\nSaldo atual: %.1f unidades.", saldo));
+        new AlertDialog.Builder(this).setTitle("Estender o 100M")
+                .setMessage(msg)
+                .setPositiveButton("Passo 2: treinar", (d, w) -> {
+                    valores.put("2.GIGAVERBO", total);
+                    valores.put("3.MODO", "continuar");
+                    valores.put("3.PRESET", "colab_100m");
+                    valores.put("3.PASSOS", String.valueOf(passos));
+                    valores.put("3.COMPILAR", "true");
+                    gpu = "A100";
+                    marcar(3);
+                    Toast.makeText(this, "Célula 3 pronta (A100). Confira e toque em Rodar no Colab.",
+                            Toast.LENGTH_LONG).show();
+                })
+                .setNeutralButton("Passo 1: dados", (d, w) -> {
+                    valores.put("2.GIGAVERBO", total);
+                    gpu = "nenhuma";
+                    marcar(2);
+                    Toast.makeText(this, "Célula 2 pronta, sem GPU. Confira e toque em Rodar no Colab.",
+                            Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancelar", null).show();
     }
 
     private void marcar(Integer... ns) {

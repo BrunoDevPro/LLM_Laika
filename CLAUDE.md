@@ -392,6 +392,10 @@ app (tela Colab) --API do GitHub--> workflow colab.yml (runner Linux) --Colab CL
     aquecimento, paciência) vem sempre do `pretrain_last.pt`. Estender um treino terminado usa 60% da taxa e só
     conta a paciência depois de 1/4 dos passos (no teste com o tiny a perda subiu nas duas primeiras validações e
     a paciência normal teria parado tudo); `passos_antes`/`tokens_antes` somam as rodadas para o `laika_info.json`.
+    O `edu_high` do GigaVerbo-v2 tem ~16,2 milhões de documentos (76 GB em parquet) e, por amostra de 4 grupos,
+    ~65 bilhões de tokens (contagem do tokenizer do Tucano; toxicidade ≤ 2 tira <1%): os 10 bilhões da célula 2
+    são ~15% dele. No app (0.14.2), Treinar → **Estender o 100M** prepara as células 2 (sem GPU) e 3 (A100, "continuar",
+    PASSOS = tokens novos ÷ 262.144) e mostra horas e unidades estimadas (`ColabActivity.confirmarExtensao`).
 
 ## 8. Limitações conhecidas
 
