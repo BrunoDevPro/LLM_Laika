@@ -457,6 +457,10 @@ class TesteDePontaAPonta(unittest.TestCase):
         self.assertEqual(sorted(os.listdir(pacote)), ["books", "finetuned.pt", "tokenizer.json"])
         self.assertEqual(self.eventos()[:2], ["new T4", "drivemount"])
         self.assertIn("stop", self.eventos())
+        # Antes de desligar, espera o Drive gravar (no Colab falso não há google.colab: avisa e segue).
+        self.assertIn("Terminando de gravar no Google Drive", saida)
+        self.assertNotIn("não deu para confirmar", saida)  # a marca chegou (o registro esconde as linhas @@)
+        self.assertLess(saida.index("Terminando de gravar"), saida.rindex("Session terminated"))
         self.assertIn("| 3) PRÉ-TREINO | ✅ pronta |", ler(os.path.join(self.dir, "resumo.md")))
 
     def test_celula_com_erro(self):
