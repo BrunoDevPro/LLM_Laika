@@ -214,3 +214,7 @@ cd android && LAIKA_CHECKPOINTS=../checkpoints LAIKA_LIVROS=<pasta com um livro 
 Os arquivos gerados no passo 1 (`app/src/main/assets/`) não vão para o Git, como os checkpoints.
 O APK é assinado com a chave de depuração da máquina que o montou: para atualizar o app por cima,
 monte sempre na mesma máquina (ou desinstale antes; a memória e o índice importado se perdem).
+- Na alpha 0.15.1: em **Treinar**, os botões **Laika** e **HP 50g** escolhem o notebook. Com HP 50g, a tela mostra as
+  células do `hp50g/hp50g.ipynb` (dados, varreduras, professor, treino final, exportar) e atalhos com a GPU de cada
+  etapa (dados e exportar sem GPU; varredura e treino final na L4). Roda do mesmo jeito que a Laika (GitHub Actions,
+  Colab CLI, autorização do Drive pelo app); os resultados ficam no Drive em `LLM_Laika/hp50g`.

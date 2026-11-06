@@ -120,6 +120,12 @@ Cada matriz tem `E`, linhas, colunas e grupo (int32), as mantissas (uint8, uma p
 
 O `relatorio` junta várias exportações numa tabela.
 
+## Pelo app
+
+Em **Treinar**, toque em **HP 50g**. As células são as do `hp50g.ipynb` e rodam como as da Laika (o workflow
+`colab.yml` recebe `caderno = hp50g/hp50g.ipynb`). Atalhos: 1. Dados (sem GPU), 2. Varredura (L4), 3. Treino final
+(L4), 4. Exportar (sem GPU). Os resultados ficam no Drive em `LLM_Laika/hp50g`.
+
 ## Comandos
 
 ```bash

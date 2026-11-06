@@ -3,7 +3,7 @@
 # "Laika no Colab"; o zip da célula 6 vira o artefato "laika_pacote" (o app baixa em "Modelos prontos").
 # Antes da primeira vez: rode a célula 0 do colab.ipynb no navegador (grava o segredo COLAB_ADC).
 name: Laika no Colab
-run-name: "Colab: células ${{ inputs.celulas }} (${{ inputs.gpu }}) ${{ inputs.pedido }}"
+run-name: "Colab: ${{ inputs.caderno == 'hp50g/hp50g.ipynb' && 'HP 50g, ' || '' }}células ${{ inputs.celulas }} (${{ inputs.gpu }}) ${{ inputs.pedido }}"
 
 on:
   workflow_dispatch:
@@ -25,6 +25,10 @@ on:
         description: "Identificação do pedido (o app usa para achar esta execução)"
         required: false
         default: ""
+      caderno:
+        description: "Notebook: colab.ipynb (a Laika) ou hp50g/hp50g.ipynb (a mini-LLM da HP 50g)"
+        required: false
+        default: "colab.ipynb"
 
 # Uma máquina do Colab por vez: um pedido novo espera o anterior terminar.
 concurrency:
@@ -70,9 +74,11 @@ jobs:
           CELULAS: ${{ inputs.celulas }}
           GPU: ${{ inputs.gpu }}
           PARAMETROS: ${{ inputs.parametros }}
+          CADERNO: ${{ inputs.caderno }}
           GITHUB_TOKEN: ${{ github.token }}
         run: >
-          python3 colab/laika_colab.py rodar --celulas "$CELULAS" --gpu "$GPU" --parametros "$PARAMETROS"
+          case "$CADERNO" in colab.ipynb|hp50g/hp50g.ipynb) ;; *) echo "notebook não permitido: $CADERNO"; exit 1;; esac &&
+          python3 colab/laika_colab.py rodar --caderno "$CADERNO" --celulas "$CELULAS" --gpu "$GPU" --parametros "$PARAMETROS"
           --sessao "$SESSAO" --ramo "$GITHUB_REF_NAME" --saida "$RUNNER_TEMP/saida" --prazo-min 340
 
       - name: Guardar o zip para o app

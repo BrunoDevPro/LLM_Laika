@@ -708,7 +708,7 @@ class Execucao:
             self.montar_drive()
             for celula, codigo in self.escolhidas:
                 self.rodar_celula(celula, codigo)
-            if any(c.numero == 6 for c, _ in self.escolhidas):
+            if os.path.basename(self.args.caderno) != "hp50g.ipynb" and any(c.numero == 6 for c, _ in self.escolhidas):
                 self.baixar_pacote()
             conclusao = "success"
             self.estado.mensagem = "Pronto: todas as células rodaram." + (

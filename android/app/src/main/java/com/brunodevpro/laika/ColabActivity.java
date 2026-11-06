@@ -72,6 +72,8 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
     private final Set<Integer> marcadas = new TreeSet<>();
     private final Map<String, String> valores = new HashMap<>();
     private String gpu;
+    /** O notebook da tela: o da Laika ou o da mini-LLM da HP 50g (cada um com as suas escolhas guardadas). */
+    private String notebook = GitHub.CADERNO_LAIKA;
     private List<GitHub.Execucao> execucoes = new ArrayList<>();
     private Map<Long, GitHub.Verificacao> verificacoes = new HashMap<>();
     private List<GitHub.Artefato> artefatos = new ArrayList<>();
@@ -128,20 +130,37 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             return WindowInsetsCompat.CONSUMED;
         });
 
-        // Escolhas guardadas da última vez
+        notebook = Colab.prefs(this).getString("notebook", GitHub.CADERNO_LAIKA);
+        carregarEscolhas();
+    }
+
+    private boolean hp50g() {
+        return GitHub.CADERNO_HP50G.equals(notebook);
+    }
+
+    /** As chaves das escolhas guardadas: as da Laika sem sufixo (como antes), as da HP 50g com "_hp50g". */
+    private String chave(String k) {
+        return hp50g() ? k + "_hp50g" : k;
+    }
+
+    /** Escolhas guardadas da última vez (do notebook atual). */
+    private void carregarEscolhas() {
         android.content.SharedPreferences p = Colab.prefs(this);
-        gpu = p.getString("gpu", "T4");
-        for (String s : p.getString("marcadas", "4,6").split(",")) {
+        marcadas.clear();
+        valores.clear();
+        gpu = p.getString(chave("gpu"), hp50g() ? "L4" : "T4");
+        for (String s : p.getString(chave("marcadas"), hp50g() ? "2" : "4,6").split(",")) {
             if (!s.isEmpty()) marcadas.add(Integer.parseInt(s));
         }
         try {
             @SuppressWarnings("unchecked")
-            Map<String, Object> v = (Map<String, Object>) Json.ler(p.getString("valores", "{}"));
+            Map<String, Object> v = (Map<String, Object>) Json.ler(p.getString(chave("valores"), "{}"));
             for (Map.Entry<String, Object> e : v.entrySet()) valores.put(e.getKey(), String.valueOf(e.getValue()));
         } catch (RuntimeException ignorado) {
             // sem valores guardados
         }
-        String cache = p.getString("caderno", null);
+        celulas = null;
+        String cache = p.getString(chave("caderno"), null);
         if (cache != null) {
             try {
                 celulas = Caderno.ler(cache);
@@ -149,6 +168,17 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                 celulas = null;
             }
         }
+    }
+
+    /** Troca entre o notebook da Laika e o da HP 50g. */
+    private void trocarNotebook(String nb) {
+        if (nb.equals(notebook)) return;
+        guardarEscolhas();
+        notebook = nb;
+        Colab.prefs(this).edit().putString("notebook", nb).apply();
+        carregarEscolhas();
+        montarCelulas();
+        atualizar(true);
     }
 
     private LinearLayout caixa(LinearLayout pai) {
@@ -196,8 +226,8 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
     private void guardarEscolhas() {
         StringBuilder m = new StringBuilder();
         for (int n : marcadas) m.append(m.length() > 0 ? "," : "").append(n);
-        Colab.prefs(this).edit().putString("gpu", gpu).putString("marcadas", m.toString())
-                .putString("valores", Json.escrever(new LinkedHashMap<String, Object>(valores))).apply();
+        Colab.prefs(this).edit().putString(chave("gpu"), gpu).putString(chave("marcadas"), m.toString())
+                .putString(chave("valores"), Json.escrever(new LinkedHashMap<String, Object>(valores))).apply();
     }
 
     @Override
@@ -225,6 +255,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         ui.removeCallbacks(periodico);
         boolean comArtefatos = tudo || rodadas++ % 4 == 0;
         long abertaAgora = aberta;
+        String nb = notebook;
         rede.execute(() -> {
             GitHub g = Colab.github(this);
             String erro = null, caderno = null, ramo = null;
@@ -236,7 +267,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                 if (tudo || celulas == null) {
                     ramo = g.ramoPrincipal();
                     wf = g.temWorkflow();
-                    caderno = g.caderno(ramo);
+                    caderno = g.caderno(ramo, nb);
                 }
                 ex = g.execucoes(8);
                 for (GitHub.Execucao e : ex) {
@@ -263,10 +294,10 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                 erroRede = fErro;
                 if (fRamo != null) Colab.prefs(this).edit().putString("ramo", fRamo).apply();
                 if (fWf != null) temWorkflow = fWf;
-                if (fCaderno != null) {
+                if (fCaderno != null && nb.equals(notebook)) {  // ignora a resposta de um notebook já trocado
                     try {
                         celulas = Caderno.ler(fCaderno);
-                        Colab.prefs(this).edit().putString("caderno", fCaderno).apply();
+                        Colab.prefs(this).edit().putString(chave("caderno"), fCaderno).apply();
                     } catch (RuntimeException e) {
                         erroRede = "o colab.ipynb do repositório não abriu: " + e.getMessage();
                     }
@@ -406,7 +437,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
     }
 
     private String urlColab() {
-        return "https://colab.research.google.com/github/" + Colab.repo(this) + "/blob/" + Colab.ramo(this) + "/colab.ipynb";
+        return "https://colab.research.google.com/github/" + Colab.repo(this) + "/blob/" + Colab.ramo(this) + "/" + notebook;
     }
 
     private EditText campo(LinearLayout pai, String dica, String valor, boolean senha) {
@@ -455,15 +486,28 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         caixaCelulas.removeAllViews();
         if (!Colab.configurado(this)) return;
         secao(caixaCelulas, "RODAR CÉLULAS NO COLAB");
+        // Qual notebook: o da Laika (colab.ipynb) ou o da mini-LLM da HP 50g (hp50g/hp50g.ipynb).
+        LinearLayout proj = linha(caixaCelulas);
+        proj.setPadding(dp(2), 0, 0, dp(8));
+        botao(proj, "Laika", !hp50g(), v -> trocarNotebook(GitHub.CADERNO_LAIKA));
+        botao(proj, "HP 50g", hp50g(), v -> trocarNotebook(GitHub.CADERNO_HP50G));
         if (celulas == null) {
-            TextView t = texto(erroRede == null ? "Lendo as células do colab.ipynb…" : "As células aparecem quando o "
-                    + "app conseguir ler o colab.ipynb do repositório.", 14, R.color.aviso, false);
+            TextView t = texto(erroRede == null ? "Lendo as células do " + notebook + "…" : "As células aparecem quando o "
+                    + "app conseguir ler o " + notebook + " do repositório.", 14, R.color.aviso, false);
             t.setPadding(dp(4), 0, dp(4), 0);
             caixaCelulas.addView(t);
             return;
         }
         LinearLayout atalhos = cartao(caixaCelulas);
         atalhos.addView(texto("Atalhos", 13, R.color.topo_sub, true));
+        if (hp50g()) {
+            montarAtalhosHp(atalhos);
+            for (Caderno.Celula c : celulas) montarCelula(c);
+            LinearLayout fim = linha(caixaCelulas);
+            TextView rodar = botao(fim, "Rodar no Colab", true, v -> confirmarRodar());
+            rodar.setPadding(dp(22), dp(11), dp(22), dp(11));
+            return;
+        }
         LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos), a4 = linha(atalhos),
                 a5 = linha(atalhos);
         botao(a1, "Só fine-tuning", false, v -> marcar(4, 6));
@@ -576,6 +620,35 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                             Toast.LENGTH_LONG).show();
                 })
                 .setNegativeButton("Cancelar", null).show();
+    }
+
+    /** Atalhos da mini-LLM da HP 50g: cada etapa com a GPU que basta (um modelo de ~1M não precisa da A100). */
+    private void montarAtalhosHp(LinearLayout atalhos) {
+        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos);
+        botao(a1, "1. Dados (sem GPU)", false, v -> {
+            gpu = "nenhuma";
+            marcar(2);
+        });
+        botao(a1, "2. Varredura (L4)", false, v -> {
+            gpu = "L4";
+            marcar(3);
+        });
+        botao(a2, "3. Treino final (L4)", false, v -> {
+            gpu = "L4";
+            marcar(6);
+        });
+        botao(a2, "4. Exportar (sem GPU)", false, v -> {
+            gpu = "nenhuma";
+            marcar(7);
+        });
+        TextView dica = texto("Os resultados ficam no Drive, em LLM_Laika/hp50g. A célula 1 sempre roda antes.", 12,
+                R.color.aviso, false);
+        dica.setPadding(0, dp(6), 0, 0);
+        atalhos.addView(dica);
+        TextView g = texto("GPU: " + nomeGpu(gpu) + "  ▾", 15, R.color.topo_texto, true);
+        g.setPadding(0, dp(12), 0, dp(4));
+        g.setOnClickListener(v -> escolherGpu());
+        atalhos.addView(g);
     }
 
     private void marcar(Integer... ns) {
@@ -742,7 +815,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             return;
         }
         String celulasPedidas = lista.toString(), json = Json.escrever(params);
-        new AlertDialog.Builder(this).setTitle("Rodar no Colab?")
+        new AlertDialog.Builder(this).setTitle(hp50g() ? "Rodar no Colab (HP 50g)?" : "Rodar no Colab?")
                 .setMessage(String.join("\n", nomes) + "\n\nGPU: " + nomeGpu(gpu)
                         + (mudados.isEmpty() ? "" : "\nParâmetros: " + String.join(", ", mudados))
                         + "\n\nO Colab gasta unidades de computação enquanto a máquina estiver ligada (ela desliga "
@@ -756,13 +829,13 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             pedirNotificacoes.launch(Manifest.permission.POST_NOTIFICATIONS);
         }
-        String ramo = Colab.ramo(this), g = gpu;
+        String ramo = Colab.ramo(this), g = gpu, nb = notebook;
         Toast.makeText(this, "Enviando o pedido…", Toast.LENGTH_SHORT).show();
         rede.execute(() -> {
             String msg;
             try {
                 String pedido = Colab.novoPedido();
-                long id = Colab.github(this).disparar(ramo, celulasPedidas, g, parametros, pedido);
+                long id = Colab.github(this).disparar(ramo, celulasPedidas, g, parametros, pedido, nb);
                 Colab.vigiar(this, id, pedido, celulasPedidas);
                 msg = "Pedido enviado. A máquina do Colab liga em um ou dois minutos.";
             } catch (IOException e) {
