@@ -281,7 +281,15 @@ public final class GitHub {
 
     /** O colab.ipynb do ramo (as células que a tela mostra). */
     public String caderno(String ramo) throws IOException {
-        HttpURLConnection c = seguir(api + repoPath() + "/contents/colab.ipynb?ref=" + q(ramo),
+        return caderno(ramo, CADERNO_LAIKA);
+    }
+
+    /** Os notebooks que o workflow aceita: o da Laika e o da mini-LLM da HP 50g. */
+    public static final String CADERNO_LAIKA = "colab.ipynb", CADERNO_HP50G = "hp50g/hp50g.ipynb";
+
+    /** Um notebook do ramo (caminho no repositório). */
+    public String caderno(String ramo, String caminho) throws IOException {
+        HttpURLConnection c = seguir(api + repoPath() + "/contents/" + caminho + "?ref=" + q(ramo),
                 "application/vnd.github.raw+json");
         try {
             return new String(ler(c.getInputStream()), StandardCharsets.UTF_8);
@@ -296,7 +304,14 @@ public final class GitHub {
      */
     @SuppressWarnings("unchecked")
     public long disparar(String ramo, String celulas, String gpu, String parametrosJson, String pedido) throws IOException {
+        return disparar(ramo, celulas, gpu, parametrosJson, pedido, CADERNO_LAIKA);
+    }
+
+    @SuppressWarnings("unchecked")
+    public long disparar(String ramo, String celulas, String gpu, String parametrosJson, String pedido, String caderno)
+            throws IOException {
         Map<String, Object> inputs = new LinkedHashMap<>();
+        if (!CADERNO_LAIKA.equals(caderno)) inputs.put("caderno", caderno);
         inputs.put("celulas", celulas);
         inputs.put("gpu", gpu);
         inputs.put("parametros", parametrosJson);
