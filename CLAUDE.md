@@ -495,6 +495,13 @@ assuntos ≈ 300 mil (~18 milhões de tokens por época, ~10–15 min na A100). 
 formato já está coberto pelos ~15 mil escritos + sintéticos + leitura; falta variedade (SFT) e repetição de fatos.
 - [ ] Manter os exemplos escritos em `tools/` e a identidade da Laika.
 
+### Fase 3c — Conversa coerente, para ≥ 200M (anotado em 16/11/2026; ainda não implementado)
+Plano detalhado em `docs/MELHORIAS_CONVERSA.md`: (1) perda em todas as respostas da conversa, não só na última;
+(2) histórico sempre no prompt com janela ≥ 1024 (o `follows_up` fica só para as janelas pequenas); (3) 50–100 mil
+conversas de 4–12 trocas, com a "ficha da Laika" (fatos inventados, mas fixos); (4) mistura por percentual e menos molde.
+Preset proposto `colab_200m`: d 1024, 14 camadas, 16 cabeças, RoPE, contexto 2048 (~200,7M); o pré-treino de ~4 bilhões
+de tokens custa ~4× o do 100M.
+
 ### Fase 4 — RAG
 - [ ] Índice com a Wikipédia inteira + Wikisource + livros (~4–5 GB). **Não** indexar o GigaVerbo.
 - [ ] Vários trechos por pergunta quando a janela permitir; manter o limite de confiança.
