@@ -46,6 +46,14 @@ PRESETS = {
         vocab_size=24000, batch_size=16, accum=8, learning_rate=5e-4, tokenizer_mb=1500,
         max_steps=8000, warmup_steps=400, eval_every=250, eval_iters=40, patience=8,
     ),
+    # ~200M: 1024 dim, 14 camadas, 16 cabeças, RoPE, contexto 2048 (docs/MELHORIAS_CONVERSA.md, seção 5). Pede ~4 bilhões
+    # de tokens (20 por parâmetro) e A100: ~4x o tempo do 100M. Lote 8 x 2048 x acumulação 16 = 262 mil tokens por passo
+    # (o mesmo do 100M); a taxa é menor porque o modelo é maior. 16 mil passos = ~4,2 bilhões de tokens.
+    "colab_200m": dict(
+        block_size=2048, embed_size=1024, heads=16, layers=14, dropout=0.0, rope=True,
+        vocab_size=24000, batch_size=8, accum=16, learning_rate=3e-4, tokenizer_mb=1500,
+        max_steps=16000, warmup_steps=600, eval_every=500, eval_iters=40, patience=8,
+    ),
     # Modelo maior (~14M): use se o train.py mostrar 30M+ tokens.
     "colab_big": dict(
         block_size=256, embed_size=384, heads=6, layers=6, dropout=0.15,
