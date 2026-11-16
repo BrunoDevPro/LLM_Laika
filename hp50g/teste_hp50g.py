@@ -111,5 +111,74 @@ class TesteHP50g(unittest.TestCase):
         self.assertAlmostEqual(float(q[0]) * 2 ** (sh - 12), 3.0, delta=0.05)
 
 
+class TesteMoE(unittest.TestCase):
+    """O MoE (variante teste_moe): dados normalizados com o tokenizador reaproveitado, perda só nas respostas na queda,
+    hplm.bin versão 2, simulador perto do QAT e os vetores de teste para o C."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.dir = Path(tempfile.mkdtemp(prefix="hp50g_moe_"))
+        base, cls.dados = cls.dir / "base", cls.dir / "dados_moe"
+        rodar(AQUI / "preparar.py", "--saida", base, "--sft", "", "--texto", RAIZ / "data/modern", "--amostra-mb", "10")
+        (cls.dir / "fatos.txt").write_text("Qual é a cor do céu?|O céu é azul.\n", encoding="utf-8")
+        rodar(AQUI / "preparar.py", "--saida", cls.dados, "--sft", "", "--texto-de", base, "--usar-tokenizador",
+              base / "tokenizador.json", "--normalizar", "0.7", "--resposta-curta", "60", "--max-trocas", "1",
+              "--decorar", cls.dir / "fatos.txt")
+        cls.base = base
+        cls.treino = rodar(AQUI / "treino.py", "--variante", "teste_moe", "--dados", cls.dados, "--saida", cls.dir / "r",
+                           "--tokens", "6e5", "--lote-tokens", "4096", "--avaliar-cada", "0.25", "--val-tokens", "8000")
+        rodar(AQUI / "simulador.py", "exportar", "--ckpt", cls.dir / "r/melhor.pt", "--dados", cls.dados, "--saida",
+              cls.dir / "export", "--janelas", "6", "--vetores", "12")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.dir, ignore_errors=True)
+
+    def test_dados(self):
+        from preparar import como_na_calculadora
+        self.assertEqual(como_na_calculadora("Qual é a capital do Brasil? Ação!"), "Qual e a capital do brasil? acao!")
+        self.assertEqual((self.base / "vocab.bin").read_bytes(), (self.dados / "vocab.bin").read_bytes())
+        ids = np.fromfile(self.dados / "dialogos_val.bin", np.uint16)
+        m = np.fromfile(self.dados / "dialogos_val.mask", np.uint8)
+        self.assertEqual(len(ids), len(m))
+        self.assertTrue(0 < m.sum() < len(m))
+        self.assertIn("Qual e a cor do ceu?", (self.dados / "dialogos_treino.txt").read_text(encoding="utf-8"))
+
+    def test_treino(self):
+        self.assertIn("especialistas (%) por camada", self.treino)
+        log = [json.loads(l) for l in (self.dir / "r/log.jsonl").read_text().splitlines()]
+        self.assertEqual(len(log[-1]["especialistas"]), 2)
+
+    def test_binario_v2(self):
+        pasta = self.dir / "export"
+        b = (pasta / "hplm.bin").read_bytes()
+        self.assertEqual(b[:4], b"HPLM")
+        self.assertEqual(int.from_bytes(b[4:8], "little"), 2)
+        pac = S.ler(pasta / "hplm.bin")
+        self.assertEqual(pac["camadas"][0]["router"]["bits"], 8)
+        self.assertEqual(pac["camadas"][0]["router"]["grupo"], pac["config"]["d"])
+        nomes = [t["nome"] for t in json.loads((pasta / "quant.json").read_text())["tensores"]]
+        self.assertLess(nomes.index("nf"), nomes.index("0.e0.w1"))  # sempre ativos primeiro, especialistas no fim
+        self.assertIn("1.router", nomes)
+
+    def test_simulador_e_vetores(self):
+        pasta = self.dir / "export"
+        rel = json.loads((pasta / "relatorio.json").read_text())
+        d = rel["perdas"]["dialogos"]
+        self.assertLess(abs(d["simulador"] - d["quant"]), 0.05, d)
+        self.assertEqual(len(rel["uso_especialistas_simulador"]), 2)
+        vet = json.loads((pasta / "vetores_teste.json").read_text())["casos"]
+        self.assertEqual(len(vet), 12)
+        sim, tok = S.Simulador(S.ler(pasta / "hplm.bin")), S.Tokenizador(pasta / "vocab.bin")
+        caso = vet[3]
+        self.assertEqual(caso["prompt"], tok.prompt(caso["pergunta"]))
+        cache = sim.novo_cache()
+        for t in caso["prompt"]:
+            lg = sim.passo(t, cache)
+        self.assertEqual([int(v) for v in lg], caso["logits"])  # determinístico, bit a bit
+        self.assertEqual(len(caso["rotas"]), len(caso["prompt"]))
+        self.assertEqual(len(caso["rotas"][0]), 2)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -11,6 +11,10 @@ Campos:
                         (canal de saída)
   mbits                 bits da mantissa de cada escala (escala = mantissa × 2^-E, E por tensor)
   pot2                  escalas dos pesos em potências de 2 (viram deslocamentos no ARM)
+  n_esp, top_k          mistura de especialistas (MoE): n_esp especialistas roteados por camada, top_k = 1
+                        (0 = modelo denso, com o feed-forward ff/ff_dim)
+  ff_comp, ff_esp       no MoE: oculto do especialista compartilhado (sempre ativo) e de cada roteado (SwiGLU)
+  treino                padrões do treino.py para a variante (o que for passado na linha de comando vale mais)
 """
 
 VARIANTES = {
@@ -27,7 +31,25 @@ VARIANTES = {
     # Professor para a destilação (~23M): mesmo tokenizador; nunca vai para a calculadora.
     "professor": dict(d=512, camadas=8, cabecas_q=8, cabecas_kv=2, dim_cabeca=64, ff="swiglu", ff_dim=1408, vocab=1024,
                       contexto=256, contexto_calc=256, bits=8, grupo=0, mbits=8, pot2=False),
+    # Mistura de especialistas (MoE, especificação "Laika MoE para a HP 50g"): ~9,7M de parâmetros no total e ~2,5M
+    # ativos por token. Por camada: atenção multi-query, roteador d → 8 (int8, uma escala por linha), um especialista
+    # compartilhado (SwiGLU 128) e 8 roteados (SwiGLU 224), top-1. ~5 MB em int4; ~1,3 MB lidos por token.
+    "MoE": dict(d=192, camadas=8, cabecas_q=6, cabecas_kv=1, dim_cabeca=32, ff="swiglu", ff_dim=224, vocab=1024,
+                contexto=256, contexto_calc=128, bits=4, grupo=32, mbits=8, pot2=False,
+                n_esp=8, top_k=1, ff_comp=128, ff_esp=224,
+                treino=dict(lr=2e-3, lote_tokens=262144, queda=0.15, mistura="texto:0.95,dialogos:0.05",
+                            mistura_final="dialogos:0.5,texto:0.5", so_assistente_na_queda=True)),
+    # Denso com o mesmo custo por token do MoE (~2,5M): a base de comparação.
+    "denso_2.5M": dict(d=192, camadas=8, cabecas_q=6, cabecas_kv=1, dim_cabeca=32, ff="swiglu", ff_dim=352, vocab=1024,
+                       contexto=256, contexto_calc=128, bits=4, grupo=32, mbits=8, pot2=False,
+                       treino=dict(lr=3e-3, lote_tokens=262144, queda=0.15, mistura="texto:0.95,dialogos:0.05",
+                                   mistura_final="dialogos:0.5,texto:0.5", so_assistente_na_queda=True)),
     # Só para testar o código em CPU.
+    "teste_moe": dict(d=64, camadas=2, cabecas_q=2, cabecas_kv=1, dim_cabeca=32, ff="swiglu", ff_dim=64, vocab=1024,
+                      contexto=64, contexto_calc=64, bits=4, grupo=32, mbits=8, pot2=False,
+                      n_esp=4, top_k=1, ff_comp=32, ff_esp=64,
+                      treino=dict(queda=0.15, mistura="texto:0.5,dialogos:0.5", mistura_final="dialogos:0.5,texto:0.5",
+                                  so_assistente_na_queda=True)),
     "teste": dict(d=64, camadas=2, cabecas_q=2, cabecas_kv=1, dim_cabeca=32, ff="swiglu", ff_dim=128, vocab=1024,
                   contexto=64, contexto_calc=64, bits=4, grupo=32, mbits=8, pot2=False),
 }
@@ -49,24 +71,54 @@ PONTO_FIXO = dict(
 def config(nome, **trocas):
     """A variante com campos trocados (ex.: config("A", ff="relu2", ff_dim=512))."""
     c = dict(VARIANTES[nome])
+    c.pop("treino", None)
+    c.setdefault("n_esp", 0)
     c.update({k: v for k, v in trocas.items() if v is not None})
     assert c["cabecas_q"] * c["dim_cabeca"] == c["d"], "cabecas_q × dim_cabeca precisa ser d"
     assert c["cabecas_q"] % c["cabecas_kv"] == 0
-    assert c["grupo"] == 0 or c["d"] % c["grupo"] == 0 and c["ff_dim"] % c["grupo"] == 0, "o grupo precisa dividir d e ff_dim"
+    ocultos = [c["ff_comp"], c["ff_esp"]] if moe(c) else [c["ff_dim"]]
+    assert c["grupo"] == 0 or all(x % c["grupo"] == 0 for x in [c["d"]] + ocultos), "o grupo precisa dividir d e os ocultos"
     return c
 
 
-def parametros(c):
+def padroes_treino(nome):
+    """Os padrões de treino da variante (taxa, lote, mistura...)."""
+    return dict(VARIANTES[nome].get("treino", {}))
+
+
+def moe(c):
+    return c.get("n_esp", 0) > 0
+
+
+def _att(c):
     d, hd = c["d"], c["dim_cabeca"]
-    att = d * c["cabecas_q"] * hd * 2 + d * c["cabecas_kv"] * hd * 2
-    ff = d * c["ff_dim"] * (3 if c["ff"] == "swiglu" else 2)
-    return c["camadas"] * (att + ff + 2 * d) + c["vocab"] * d + d
+    return d * c["cabecas_q"] * hd * 2 + d * c["cabecas_kv"] * hd * 2
+
+
+def parametros(c):
+    """Todos os parâmetros (com as normas)."""
+    d = c["d"]
+    if moe(c):
+        ff = d * c["n_esp"] + 3 * d * c["ff_comp"] + c["n_esp"] * 3 * d * c["ff_esp"]
+    else:
+        ff = d * c["ff_dim"] * (3 if c["ff"] == "swiglu" else 2)
+    return c["camadas"] * (_att(c) + ff + 2 * d) + c["vocab"] * d + d
+
+
+def ativos(c):
+    """Parâmetros usados por token, sem as normas (no MoE: um especialista roteado por camada)."""
+    d = c["d"]
+    if moe(c):
+        ff = d * c["n_esp"] + 3 * d * c["ff_comp"] + c["top_k"] * 3 * d * c["ff_esp"]
+    else:
+        ff = d * c["ff_dim"] * (3 if c["ff"] == "swiglu" else 2)
+    return c["camadas"] * (_att(c) + ff) + c["vocab"] * d
 
 
 def macs_por_token(c, posicoes=None):
     """Multiplicações-e-somas para gerar um token com `posicoes` no cache (padrão: a janela da calculadora)."""
     n = posicoes or c["contexto_calc"]
-    lin = parametros(c) - c["camadas"] * 2 * c["d"] - c["d"]
+    lin = ativos(c)
     att = c["camadas"] * c["cabecas_q"] * c["dim_cabeca"] * n * 2
     return lin + att
 

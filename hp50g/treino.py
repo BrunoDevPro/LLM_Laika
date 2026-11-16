@@ -28,7 +28,7 @@ import torch
 import torch.nn.functional as F
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from configs import config, parametros, macs_por_token, cache_bytes  # noqa: E402
+from configs import config, parametros, macs_por_token, cache_bytes, padroes_treino, moe, ativos  # noqa: E402
 from modelo import MiniLLM  # noqa: E402
 
 
@@ -41,15 +41,17 @@ def argumentos(argv=None):
     ap.add_argument("--dados", default="data/hp50g")
     ap.add_argument("--saida", required=True)
     ap.add_argument("--tokens", type=float, default=1e9, help="tokens de treino (uma passada só, se houver)")
-    ap.add_argument("--lr", type=float, default=3e-3)
-    ap.add_argument("--lote-tokens", type=int, default=131072, help="tokens por passo (~128 mil)")
+    ap.add_argument("--lr", type=float, default=None, help="taxa máxima (padrão: a da variante, ou 3e-3)")
+    ap.add_argument("--lote-tokens", type=int, default=None, help="tokens por passo (padrão: a variante, ou ~128 mil)")
     ap.add_argument("--micro", type=int, default=0, help="sequências por micro-lote (0 = o lote todo de uma vez)")
     ap.add_argument("--aquecimento", type=float, default=0.01)
-    ap.add_argument("--queda", type=float, default=0.2, help="fração final com a taxa caindo até ~0 (e QAT)")
+    ap.add_argument("--queda", type=float, default=None, help="fração final com a taxa caindo até ~0 e QAT (padrão 0,2)")
     ap.add_argument("--sem-qat", action="store_true", help="não simula a quantização (comparação)")
     ap.add_argument("--qat-desde", type=float, default=None, help="fração em que o QAT liga (padrão: início da queda)")
-    ap.add_argument("--mistura", default="dialogos:0.5,texto:0.5")
-    ap.add_argument("--mistura-final", default="dialogos:0.8,texto:0.2")
+    ap.add_argument("--mistura", default=None, help='padrão: a da variante, ou "dialogos:0.5,texto:0.5"')
+    ap.add_argument("--mistura-final", default=None, help='padrão: a da variante, ou "dialogos:0.8,texto:0.2"')
+    ap.add_argument("--so-assistente", choices=["queda", "sempre", "nunca"], default=None,
+                    help="perda só nas respostas dos diálogos (máscara do preparar.py): na queda, sempre ou nunca")
     ap.add_argument("--professor", default=None, help="checkpoint do professor para a destilação")
     ap.add_argument("--alfa", type=float, default=0.5, help="peso da destilação (KL) na perda")
     ap.add_argument("--temp-dest", type=float, default=1.5)
@@ -60,7 +62,16 @@ def argumentos(argv=None):
     ap.add_argument("--do-zero", action="store_true")
     ap.add_argument("--semente", type=int, default=1234)
     ap.add_argument("--parar-em", type=int, default=0, help="para no passo N deixando o ultimo.pt (testes da retomada)")
-    return ap.parse_args(argv)
+    a = ap.parse_args(argv)
+    # Padrões da variante (configs.VARIANTES[...]["treino"]); o que veio na linha de comando vale mais.
+    pad = padroes_treino(a.variante)
+    gerais = {"lr": 3e-3, "lote_tokens": 131072, "queda": 0.2, "mistura": "dialogos:0.5,texto:0.5",
+              "mistura_final": "dialogos:0.8,texto:0.2",
+              "so_assistente": "queda" if pad.get("so_assistente_na_queda") else "nunca"}
+    for k, v in gerais.items():
+        if getattr(a, k) is None:
+            setattr(a, k, pad.get(k, v))
+    return a
 
 
 # ---------- dados ----------
@@ -71,6 +82,8 @@ class Fonte:
 
     def __init__(self, caminho, contexto, semente):
         self.dados = np.memmap(caminho, dtype=np.uint16, mode="r")
+        mascara = Path(caminho).with_suffix(".mask")  # 1 nas respostas (só nos diálogos)
+        self.mascara = np.memmap(mascara, dtype=np.uint8, mode="r") if mascara.exists() else None
         self.L = contexto + 1
         self.n = max(1, (len(self.dados) - 1) // contexto)
         self.semente = semente
@@ -89,9 +102,16 @@ class Fonte:
         self.contador += 1
         ini = ((a * i + b) % self.n) * (self.L - 1)
         x = np.asarray(self.dados[ini:ini + self.L], dtype=np.int64)
+        if self.mascara is not None:
+            m = np.asarray(self.mascara[ini:ini + self.L], dtype=np.int64)
+        else:
+            m = np.ones(len(x), dtype=np.int64)
         if len(x) < self.L:
-            x = np.concatenate([x, np.asarray(self.dados[:self.L - len(x)], dtype=np.int64)])
-        return x
+            falta = self.L - len(x)
+            x = np.concatenate([x, np.asarray(self.dados[:falta], dtype=np.int64)])
+            m = np.concatenate([m, np.asarray(self.mascara[:falta], dtype=np.int64) if self.mascara is not None
+                                else np.ones(falta, dtype=np.int64)])
+        return x, m
 
     @property
     def epocas(self):
@@ -220,7 +240,8 @@ def main(argv=None):
         print(f"Continuando do passo {estado['passo']:,} de {total:,}.")
 
     n = modelo.num_params()
-    print(f"Variante {a.variante}: {n:,} parâmetros (conta: {parametros(c):,}), {macs_por_token(c):,} "
+    print(f"Variante {a.variante}: {n:,} parâmetros (conta: {parametros(c):,}; ativos por token {ativos(c):,}), "
+          f"{macs_por_token(c):,} "
           f"multiplicações-e-somas por token, cache {cache_bytes(c) / 1024:.0f} KB | {total:,} passos de "
           f"{seqs} × {ctx} tokens | QAT {'desligado' if a.sem_qat else f'a partir do passo {qat_desde:,}'} | "
           f"{dispositivo}{' bf16' if bf16 else ''}", flush=True)
@@ -251,10 +272,14 @@ def main(argv=None):
             modelo.qat = False
             rf = avaliar(modelo, vals, meta, dispositivo, amp=amp)
             modelo.qat = True
+            modelo.estatisticas = {} if moe(c) else None
             rq = avaliar(modelo, vals, meta, dispositivo, amp=amp)
+            uso = modelo.uso_especialistas() if moe(c) else []
+            modelo.estatisticas = None
             mf, mq = media(rf, mistura_final), media(rq, mistura_final)
             reg = {"passo": p, "tokens": p * seqs * ctx, "float": rf, "quant": rq, "perda_f": mf, "perda_q": mq,
-                   "epocas": {k: round(f.epocas, 3) for k, f in fontes.items()}, "seg": round(time.time() - t0)}
+                   "epocas": {k: round(f.epocas, 3) for k, f in fontes.items()}, "seg": round(time.time() - t0),
+                   "especialistas": [{"uso": u, "entropia": e} for u, e in uso]}
             estado["historico"].append(reg)
             log.write(json.dumps(reg) + "\n")
             log.flush()
@@ -269,6 +294,9 @@ def main(argv=None):
                 marcas += " [melhor quantizado]"
             detalhe = " | ".join(f"{k} {rf[k]['perda']:.3f}/{rq[k]['perda']:.3f} ({rq[k]['bpc']:.2f} bpc)" for k in rf)
             print(f"passo {p:>6,}/{total:,} | perda float/quant {mf:.4f}/{mq:.4f} | {detalhe}{marcas}", flush=True)
+            if uso:  # uso de cada especialista (%) por camada; meta: nenhum abaixo de ~5% nem acima de ~25%
+                print("  especialistas (%) por camada: " + " | ".join(
+                    f"{l}: " + "/".join(f"{x:.0f}" for x in u) + f" H={e:.2f}" for l, (u, e) in enumerate(uso)), flush=True)
             if p == total:
                 break
         modelo.qat = not a.sem_qat and p >= qat_desde
@@ -278,17 +306,29 @@ def main(argv=None):
         m = mistura_final if p >= queda else mistura
         nomes = list(m)
         escolha = sorteio.choice(len(nomes), size=seqs, p=[m[k] for k in nomes])
-        lote = torch.from_numpy(np.stack([fontes[nomes[i]].proximo() for i in escolha]))
+        pares = [fontes[nomes[i]].proximo() for i in escolha]
+        lote = torch.from_numpy(np.stack([x for x, _ in pares]))
+        so_resp = a.so_assistente == "sempre" or (a.so_assistente == "queda" and p >= queda)
+        masc = torch.from_numpy(np.stack([mk for _, mk in pares])).float() if so_resp else None
         if dispositivo == "cuda":
             lote = lote.pin_memory().to(dispositivo, non_blocking=True)
+            if masc is not None:
+                masc = masc.pin_memory().to(dispositivo, non_blocking=True)
         opt.zero_grad(set_to_none=True)
         perda_passo = 0.0
         for i in range(0, seqs, micro):
             b = lote[i:i + micro]
             x, y = b[:, :-1], b[:, 1:]
+            modelo.perda_aux = 0.0
             with torch.autocast(dispositivo.split(":")[0], dtype=torch.bfloat16, enabled=bf16):
                 logits = rodar(x)
-                perda = F.cross_entropy(logits.float().reshape(-1, logits.shape[-1]), y.reshape(-1))
+                if masc is None:
+                    perda = F.cross_entropy(logits.float().reshape(-1, logits.shape[-1]), y.reshape(-1))
+                else:
+                    # Diálogos: só os tokens das respostas; texto: todos (a máscara do texto é toda 1).
+                    mk = masc[i:i + micro, 1:].reshape(-1)
+                    pt = F.cross_entropy(logits.float().reshape(-1, logits.shape[-1]), y.reshape(-1), reduction="none")
+                    perda = (pt * mk).sum() / mk.sum().clamp_min(1.0)
                 if professor is not None:
                     with torch.no_grad():
                         lp = professor(x).float()
@@ -296,6 +336,8 @@ def main(argv=None):
                     kl = F.kl_div(F.log_softmax(logits.float() / T, -1), F.log_softmax(lp / T, -1),
                                   log_target=True, reduction="batchmean") * T * T / x.shape[1]
                     perda = (1 - a.alfa) * perda + a.alfa * kl
+            if moe(c):  # balanceamento dos especialistas e z-loss do roteador
+                perda = perda + modelo.perda_aux
             (perda * len(b) / seqs).backward()
             perda_passo += perda.item() * len(b) / seqs
         torch.nn.utils.clip_grad_norm_(modelo.parameters(), 1.0)

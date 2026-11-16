@@ -32,12 +32,13 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from configs import PONTO_FIXO, cache_bytes, macs_por_token, parametros  # noqa: E402
+from configs import PONTO_FIXO, ativos, cache_bytes, macs_por_token, moe, parametros  # noqa: E402
 
-VERSAO = 1
+VERSAO = 1  # modelo denso; o MoE usa a versão 2 (campos a mais e o nº de bits em cada matriz)
 CAMPOS = ["d", "camadas", "cabecas_q", "cabecas_kv", "dim_cabeca", "ff_dim", "ff_tipo", "vocab", "contexto_calc",
           "bits", "grupo", "mbits", "frac", "frac_rope", "frac_prob", "exp_passo", "exp_n", "silu_passo", "silu_lim",
           "guarda", "eps_q24", "c_inv"]
+CAMPOS_V2 = CAMPOS + ["n_esp", "top_k", "ff_comp", "ff_esp"]
 
 
 # ---------- aritmética inteira ----------
@@ -87,7 +88,7 @@ def escalas_np(w, bits, grupo, mbits, pot2):
         m = np.minimum(np.exp2(np.round(np.log2(m))), 2 ** (mbits - 1)).astype(np.float32)
     s = (m * np.float32(2.0 ** -E))[..., None]
     q = np.clip(np.round(wg / s), -qmax, qmax).astype(np.int8)
-    return {"q": q.reshape(linhas, colunas), "m": m.astype(np.int64), "E": E, "grupo": g}
+    return {"q": q.reshape(linhas, colunas), "m": m.astype(np.int64), "E": E, "grupo": g, "bits": bits}
 
 
 def tabelas(c, pf):
@@ -120,10 +121,17 @@ def quantizar(estado, c, pf=PONTO_FIXO):
     for l in range(c["camadas"]):
         p = f"blocos.{l}."
         cam = {"n1": norma(p + "n1.weight"), "wq": peso(p + "wq.weight"), "wk": peso(p + "wk.weight"),
-               "wv": peso(p + "wv.weight"), "wo": peso(p + "wo.weight"), "n2": norma(p + "n2.weight"),
-               "w1": peso(p + "w1.weight"), "w2": peso(p + "w2.weight")}
-        if c["ff"] == "swiglu":
-            cam["w3"] = peso(p + "w3.weight")
+               "wv": peso(p + "wv.weight"), "wo": peso(p + "wo.weight"), "n2": norma(p + "n2.weight")}
+        if moe(c):
+            # Roteador em int8 com uma escala por linha (grupo = colunas); especialistas como as outras matrizes.
+            cam["router"] = escalas_np(np_(estado[p + "router.weight"]), 8, 0, c["mbits"], c["pot2"])
+            for k in ("s_w1", "s_w3", "s_w2"):
+                cam[k] = peso(p + k + ".weight")
+            cam["esp"] = [{k: peso(f"{p}esp.{e}.{k}.weight") for k in ("w1", "w3", "w2")} for e in range(c["n_esp"])]
+        else:
+            cam["w1"], cam["w2"] = peso(p + "w1.weight"), peso(p + "w2.weight")
+            if c["ff"] == "swiglu":
+                cam["w3"] = peso(p + "w3.weight")
         camadas.append(cam)
     return {"config": dict(c), "pf": dict(pf), "emb": peso("emb"), "camadas": camadas, "nf": norma("nf.weight"),
             "tabelas": tabelas(c, pf)}
@@ -138,7 +146,25 @@ def _campos(pac):
     v["ff_tipo"] = 0 if c["ff"] == "swiglu" else 1
     v["eps_q24"] = round(pf["eps"] * 2 ** (2 * pf["frac"]))
     v["c_inv"] = round(2 ** pf["frac"] / math.sqrt(c["dim_cabeca"]))
-    return [int(v[k]) for k in CAMPOS]
+    return [int(v[k]) for k in (CAMPOS_V2 if moe(c) else CAMPOS)]
+
+
+def _tensores(pac):
+    """(nome, tipo, valor) na ordem do arquivo. No MoE (versão 2), primeiro tudo o que é sempre ativo (o app da 50g
+    guarda o começo do arquivo na RAM) e os especialistas roteados no fim."""
+    c, r = pac["config"], [("emb", "m", pac["emb"])]
+    for l, cam in enumerate(pac["camadas"]):
+        nomes = ("n1", "wq", "wk", "wv", "wo", "n2") + (("router", "s_w1", "s_w3", "s_w2") if moe(c) else ("w1", "w3", "w2"))
+        for k in nomes:
+            if k in cam:
+                r.append((f"{l}.{k}", "n" if k in ("n1", "n2") else "m", cam[k]))
+    r.append(("nf", "n", pac["nf"]))
+    if moe(c):
+        for l, cam in enumerate(pac["camadas"]):
+            for e, esp in enumerate(cam["esp"]):
+                for k in ("w1", "w3", "w2"):
+                    r.append((f"{l}.e{e}.{k}", "m", esp[k]))
+    return r
 
 
 def _alinhar(f):
@@ -146,10 +172,13 @@ def _alinhar(f):
         f.write(b"\0")
 
 
-def _gravar_matriz(f, t, bits, mbits, mapa, nome):
+def _gravar_matriz(f, t, bits, mbits, mapa, nome, versao=1):
     ini = f.tell()
     linhas, colunas = t["q"].shape
+    bits = t.get("bits", bits)
     f.write(struct.pack("<iiii", t["E"], linhas, colunas, t["grupo"]))
+    if versao >= 2:
+        f.write(struct.pack("<i", bits))
     f.write(t["m"].astype("<u1" if mbits <= 8 else "<u2").tobytes())
     _alinhar(f)
     q = t["q"].astype(np.int8).reshape(-1)
@@ -162,7 +191,7 @@ def _gravar_matriz(f, t, bits, mbits, mapa, nome):
         f.write(q.tobytes())
     _alinhar(f)
     mapa.append({"nome": nome, "offset": ini, "bytes": f.tell() - ini, "E": t["E"], "linhas": linhas,
-                 "colunas": colunas, "grupo": t["grupo"]})
+                 "colunas": colunas, "grupo": t["grupo"], "bits": bits})
 
 
 def _gravar_norma(f, v, mapa, nome):
@@ -175,27 +204,25 @@ def gravar(pac, caminho):
     """hplm.bin: 'HPLM', versão, nº de campos, os campos (int32, ordem de CAMPOS); tabelas exp (uint16), SiLU (int32),
     cos e sin (int16); embedding; por camada n1, wq, wk, wv, wo, n2, w1, (w3), w2; nf. Matriz: E, linhas, colunas,
     grupo (int32), mantissas (uint8, ou uint16 com mbits > 8), pesos (int8, ou int4 dois por byte); tudo alinhado a 4.
-    Norma: n (int32) e os ganhos em Q12 (int32)."""
+    Norma: n (int32) e os ganhos em Q12 (int32).
+    Versão 2 (MoE): os campos de CAMPOS_V2; cada matriz com um quinto int32, os bits (4, ou 8 no roteador); a ordem de
+    _tensores (por camada n1, wq, wk, wv, wo, n2, router, s_w1, s_w3, s_w2; nf; depois cada especialista w1, w3, w2)."""
     c, mapa = pac["config"], []
+    versao = 2 if moe(c) else VERSAO
     with open(caminho, "wb") as f:
         campos = _campos(pac)
-        f.write(b"HPLM" + struct.pack("<ii", VERSAO, len(campos)) + struct.pack(f"<{len(campos)}i", *campos))
+        f.write(b"HPLM" + struct.pack("<ii", versao, len(campos)) + struct.pack(f"<{len(campos)}i", *campos))
         t = pac["tabelas"]
         for nome, dt in (("exp", "<u2"), ("silu", "<i4"), ("cos", "<i2"), ("sin", "<i2")):
             ini = f.tell()
             f.write(t[nome].astype(dt).tobytes())
             _alinhar(f)
             mapa.append({"nome": "tabela_" + nome, "offset": ini, "bytes": f.tell() - ini})
-        _gravar_matriz(f, pac["emb"], c["bits"], c["mbits"], mapa, "emb")
-        for l, cam in enumerate(pac["camadas"]):
-            for k in ("n1", "wq", "wk", "wv", "wo", "n2", "w1", "w3", "w2"):
-                if k not in cam:
-                    continue
-                if k in ("n1", "n2"):
-                    _gravar_norma(f, cam[k], mapa, f"{l}.{k}")
-                else:
-                    _gravar_matriz(f, cam[k], c["bits"], c["mbits"], mapa, f"{l}.{k}")
-        _gravar_norma(f, pac["nf"], mapa, "nf")
+        for nome, tipo, t in _tensores(pac):
+            if tipo == "n":
+                _gravar_norma(f, t, mapa, nome)
+            else:
+                _gravar_matriz(f, t, c["bits"], c["mbits"], mapa, nome, versao)
         total = f.tell()
     return mapa, total
 
@@ -205,13 +232,16 @@ def ler(caminho):
     b = Path(caminho).read_bytes()
     assert b[:4] == b"HPLM", "não é um arquivo HPLM"
     versao, n = struct.unpack_from("<ii", b, 4)
-    assert versao == VERSAO
-    v = dict(zip(CAMPOS, struct.unpack_from(f"<{n}i", b, 12)))
+    assert versao in (1, 2), f"versão {versao} do HPLM desconhecida"
+    v = dict(zip(CAMPOS_V2 if versao == 2 else CAMPOS, struct.unpack_from(f"<{n}i", b, 12)))
     pos = 12 + 4 * n
     c = {k: v[k] for k in ("d", "camadas", "cabecas_q", "cabecas_kv", "dim_cabeca", "ff_dim", "vocab",
                            "contexto_calc", "bits", "grupo", "mbits")}
     c["ff"] = "swiglu" if v["ff_tipo"] == 0 else "relu2"
     c["pot2"] = False
+    c["n_esp"] = v.get("n_esp", 0)
+    if versao == 2:
+        c.update(top_k=v["top_k"], ff_comp=v["ff_comp"], ff_esp=v["ff_esp"])
     c["contexto"] = c["contexto_calc"]
     pf = {k: v[k] for k in ("frac", "frac_rope", "frac_prob", "exp_passo", "exp_n", "silu_passo", "silu_lim", "guarda")}
     pf["eps"] = v["eps_q24"] / 2 ** (2 * pf["frac"])
@@ -233,8 +263,12 @@ def ler(caminho):
         nonlocal pos
         E, linhas, colunas, g = struct.unpack_from("<iiii", b, pos)
         pos += 16
+        bits = c["bits"]
+        if versao == 2:
+            (bits,) = struct.unpack_from("<i", b, pos)
+            pos += 4
         m = tirar("<u1" if c["mbits"] <= 8 else "<u2", linhas * (colunas // g))
-        if c["bits"] == 4:
+        if bits == 4:
             nb = (linhas * colunas + 1) // 2
             raw = np.frombuffer(b, dtype=np.uint8, count=nb, offset=pos)
             pos += nb
@@ -244,7 +278,8 @@ def ler(caminho):
             q = np.where(nib >= 8, nib - 16, nib)[:linhas * colunas]
         else:
             q = tirar("<i1", linhas * colunas)
-        return {"q": q.reshape(linhas, colunas).astype(np.int8), "m": m.reshape(linhas, colunas // g), "E": E, "grupo": g}
+        return {"q": q.reshape(linhas, colunas).astype(np.int8), "m": m.reshape(linhas, colunas // g), "E": E, "grupo": g,
+                "bits": bits}
 
     def norma():
         nonlocal pos
@@ -255,13 +290,21 @@ def ler(caminho):
     emb = matriz()
     camadas = []
     for _ in range(c["camadas"]):
-        cam = {"n1": norma(), "wq": matriz(), "wk": matriz(), "wv": matriz(), "wo": matriz(), "n2": norma(),
-               "w1": matriz()}
-        if c["ff"] == "swiglu":
-            cam["w3"] = matriz()
-        cam["w2"] = matriz()
+        cam = {"n1": norma(), "wq": matriz(), "wk": matriz(), "wv": matriz(), "wo": matriz(), "n2": norma()}
+        if versao == 2:
+            cam.update(router=matriz(), s_w1=matriz(), s_w3=matriz(), s_w2=matriz())
+        else:
+            cam["w1"] = matriz()
+            if c["ff"] == "swiglu":
+                cam["w3"] = matriz()
+            cam["w2"] = matriz()
         camadas.append(cam)
-    return {"config": c, "pf": pf, "emb": emb, "camadas": camadas, "nf": norma(), "tabelas": tab}
+    nf = norma()
+    if versao == 2:
+        for cam in camadas:
+            cam["esp"] = [{k: matriz() for k in ("w1", "w3", "w2")} for _ in range(c["n_esp"])]
+    assert pos == len(b), f"sobraram {len(b) - pos} bytes no hplm.bin"
+    return {"config": c, "pf": pf, "emb": emb, "camadas": camadas, "nf": nf, "tabelas": tab}
 
 
 # ---------- inferência só com inteiros ----------
@@ -275,7 +318,9 @@ class Simulador:
         self.c_inv = round(2 ** self.F / math.sqrt(c["dim_cabeca"]))
         self.eps = round(self.pf["eps"] * 2 ** (2 * self.F))
         # Pesos em int64 já no formato [linhas][grupos][tamanho do grupo] (só para a conta ser rápida no numpy).
-        for t in [pac["emb"]] + [cam[k] for cam in pac["camadas"] for k in cam if k not in ("n1", "n2")]:
+        mats = [pac["emb"]] + [cam[k] for cam in pac["camadas"] for k in cam if k not in ("n1", "n2", "esp")]
+        mats += [esp[k] for cam in pac["camadas"] for esp in cam.get("esp", []) for k in esp]
+        for t in mats:
             linhas, colunas = t["q"].shape
             t["_q"] = t["q"].astype(np.int64).reshape(linhas, colunas // t["grupo"], t["grupo"])
 
@@ -323,6 +368,7 @@ class Simulador:
         e = p["emb"]
         x = desloca(e["q"][token].astype(np.int64) * np.repeat(e["m"][token], e["grupo"]), F - e["E"])
         G, tab_exp = pf["guarda"], p["tabelas"]["exp"]
+        rotas = []  # MoE: (especialista, probabilidade Q15) de cada camada
         for l, cam in enumerate(p["camadas"]):
             h = self.rmsnorm(x, cam["n1"])
             h8, shh = quant_vetor(h, F)
@@ -348,6 +394,26 @@ class Simulador:
             x = x + self.linear(cam["wo"], np.concatenate(saida))
             h = self.rmsnorm(x, cam["n2"])
             h8, shh = quant_vetor(h, F)
+            if "router" in cam:
+                # MoE (top-1): roteador int8, especialista compartilhado e o escolhido, vezes a probabilidade dele.
+                r = self.matvec(cam["router"], h8, shh)
+                e = int(np.argmax(r))  # o primeiro máximo
+                d = r.max() - r
+                idx = d >> (F - pf["exp_passo"])
+                ex = np.where(idx < pf["exp_n"], tab_exp[np.minimum(idx, pf["exp_n"] - 1)], 0)
+                prob = (int(ex[e]) << pf["frac_prob"]) // int(ex.sum())
+                a = self.matvec(cam["s_w1"], h8, shh)
+                b = self.matvec(cam["s_w3"], h8, shh)
+                ys = self.linear(cam["s_w2"], desloca(self.silu(a) * b, -F))
+                esp = cam["esp"][e]
+                a = self.matvec(esp["w1"], h8, shh)
+                b = self.matvec(esp["w3"], h8, shh)
+                ye = self.linear(esp["w2"], desloca(self.silu(a) * b, -F))
+                ye = desloca(ye * prob, -pf["frac_prob"])
+                x = x + ys
+                x = x + ye
+                rotas.append((e, prob))
+                continue
             a = self.matvec(cam["w1"], h8, shh)
             if c["ff"] == "swiglu":
                 f = desloca(self.silu(a) * self.matvec(cam["w3"], h8, shh), -F)
@@ -356,6 +422,8 @@ class Simulador:
                 f = desloca(r * r, -F)
             x = x + self.linear(cam["w2"], f)
         cache["pos"] = pos + 1
+        if rotas:
+            cache.setdefault("rotas", []).append(rotas)
         return self.linear(p["emb"], self.rmsnorm(x, p["nf"]))
 
 
@@ -443,8 +511,13 @@ def responder(sim, tok, pergunta, max_tokens=80, temperatura=0.0, semente=1, top
     return tok.decodificar(saida)
 
 
-def perda_simulador(sim, janelas):
-    """Perda média (nats/token) dos logits inteiros, convertidos para float só para medir."""
+_SIM = None  # o simulador dos processos filhos (herdado pelo fork)
+
+
+def _perda_janelas(janelas):
+    sim = _SIM
+    c = sim.c
+    uso = np.zeros((c["camadas"], max(1, c.get("n_esp", 0))), dtype=np.int64)
     total, n = 0.0, 0
     for jan in janelas:
         cache = sim.novo_cache()
@@ -453,7 +526,32 @@ def perda_simulador(sim, janelas):
             m = l.max()
             total += m + math.log(np.exp(l - m).sum()) - l[int(jan[i + 1])]
             n += 1
-    return total / max(1, n)
+        for rotas in cache.get("rotas", []):
+            for camada, (e, _) in enumerate(rotas):
+                uso[camada, e] += 1
+    return total, n, uso
+
+
+def perda_simulador(sim, janelas, processos=None, com_uso=False):
+    """Perda média (nats/token) dos logits inteiros (convertidos para float só para medir), com as janelas divididas
+    entre os núcleos. com_uso: também quantos tokens cada especialista recebeu, por camada (MoE)."""
+    global _SIM
+    import multiprocessing as mp
+    import os
+    _SIM = sim
+    janelas = list(janelas)
+    k = max(1, min(processos or os.cpu_count() or 1, len(janelas)))
+    partes = [janelas[i::k] for i in range(k)]
+    if k == 1:
+        res = [_perda_janelas(partes[0])]
+    else:
+        with mp.get_context("fork").Pool(k) as pool:
+            res = pool.map(_perda_janelas, partes)
+    total = sum(r[0] for r in res)
+    n = sum(r[1] for r in res)
+    uso = sum(r[2] for r in res)
+    perda = total / max(1, n)
+    return (perda, uso) if com_uso else perda
 
 
 # ---------- comandos ----------
@@ -473,11 +571,14 @@ def exportar(a):
     pac = quantizar(ck["modelo"], c)
     mapa, total = gravar(pac, saida / "hplm.bin")
     pac2 = ler(saida / "hplm.bin")
-    pares = [(pac["emb"], pac2["emb"])] + [(c1[k], c2[k]) for c1, c2 in zip(pac["camadas"], pac2["camadas"])
-                                           for k in c1 if k[0] == "w"]
-    iguais = all(np.array_equal(t1["q"], t2["q"]) and np.array_equal(t1["m"], t2["m"]) and t1["E"] == t2["E"]
-                 for t1, t2 in pares)
-    iguais &= all(np.array_equal(c1[k], c2[k]) for c1, c2 in zip(pac["camadas"], pac2["camadas"]) for k in ("n1", "n2"))
+    t1s, t2s = _tensores(pac), _tensores(pac2)
+    iguais = [n for n, _, _ in t1s] == [n for n, _, _ in t2s]
+    for (_, tipo, t1), (_, _, t2) in zip(t1s, t2s):
+        if tipo == "n":
+            iguais &= np.array_equal(t1, t2)
+        else:
+            iguais &= (np.array_equal(t1["q"], t2["q"]) and np.array_equal(t1["m"], t2["m"]) and t1["E"] == t2["E"]
+                       and t1["bits"] == t2["bits"])
     iguais &= all(np.array_equal(pac["tabelas"][k], pac2["tabelas"][k]) for k in pac["tabelas"])
     assert iguais, "o hplm.bin lido não bate com o que foi gravado"
     dados = Path(a.dados)
@@ -496,9 +597,15 @@ def exportar(a):
 
     # Perdas na mesma validação (janelas do contexto da calculadora): float, QAT (PyTorch) e simulador (inteiros).
     n = c["contexto_calc"]
-    rel = {"variante": a.nome or Path(a.ckpt).parent.name, "parametros": parametros(c), "bytes": total,
-           "macs_por_token": macs_por_token(c), "cache_bytes": cache_bytes(c), "tokenizador_igual": f"{tok_ok}/{len(amostras)}",
-           "perdas": {}, "amostras": []}
+    rel = {"variante": a.nome or Path(a.ckpt).parent.name, "parametros": parametros(c), "ativos": ativos(c),
+           "bytes": total, "macs_por_token": macs_por_token(c), "cache_bytes": cache_bytes(c),
+           "tokenizador_igual": f"{tok_ok}/{len(amostras)}", "perdas": {}, "amostras": []}
+    if moe(c):
+        n_esp = sum(1 for nome, _, _ in _tensores(pac) if ".e" in nome)
+        rel["bytes_sempre_ativos"] = next(m["offset"] for m in mapa if ".e0." in m["nome"])
+        rel["bytes_por_token"] = rel["bytes_sempre_ativos"] + sum(
+            m["bytes"] for m in mapa if m["nome"].startswith("0.e0.")) * c["camadas"]
+    uso_total = None
     modelo = MiniLLM(c)
     modelo.load_state_dict(ck["modelo"])
     modelo.eval()
@@ -519,22 +626,44 @@ def exportar(a):
                 lg = modelo(x[:, :-1])
                 r["quant" if qat else "float"] = float(torch.nn.functional.cross_entropy(
                     lg.reshape(-1, lg.shape[-1]), x[:, 1:].reshape(-1)))
-        r["simulador"] = perda_simulador(sim, jan)
+        r["simulador"], uso = perda_simulador(sim, jan, com_uso=True)
+        uso_total = uso if uso_total is None else uso_total + uso
         cpt = meta["fontes"][fonte]["caracteres_por_token"]
         r["bpc_simulador"] = r["simulador"] / math.log(2) / cpt
         rel["perdas"][fonte] = r
         print(f"{fonte}: perda float {r['float']:.4f} | QAT {r['quant']:.4f} | simulador {r['simulador']:.4f} "
               f"({r['bpc_simulador']:.2f} bits/caractere) em {k} janelas de {n}", flush=True)
 
-    # Amostras lado a lado: PyTorch float (guloso) e simulador (guloso e com semente).
-    for pergunta in PERGUNTAS:
+    if moe(c) and uso_total is not None:
+        tot = uso_total.sum(1, keepdims=True).clip(min=1)
+        rel["uso_especialistas_simulador"] = [[round(float(x), 1) for x in linha] for linha in uso_total * 100 / tot]
+        print("Uso dos especialistas no simulador (%), por camada:")
+        for l, linha in enumerate(rel["uso_especialistas_simulador"]):
+            print(f"  camada {l}: " + " / ".join(f"{x:.0f}" for x in linha))
+
+    # Amostras lado a lado: PyTorch float (guloso) e simulador (guloso e com semente), também com a pergunta como
+    # chega do teclado da 50g (sem acentos).
+    from preparar import como_na_calculadora
+    perguntas = PERGUNTAS + [como_na_calculadora(q) for q in PERGUNTAS]
+    for pergunta in perguntas:
         ids = tok.prompt(pergunta)
         modelo.qat = False
         g = modelo.gerar(ids, 60, fim=tok.end)[len(ids):]
         flt = tok.decodificar([t for t in g if t != tok.end])
         rel["amostras"].append({"pergunta": pergunta, "float": flt, "simulador": responder(sim, tok, pergunta, 60),
                                 "simulador_t0.8": responder(sim, tok, pergunta, 60, 0.8, semente=7)})
-    quant = {"formato": "ver simulador.gravar", "config": c, "ponto_fixo": pac["pf"], "campos": dict(zip(CAMPOS, _campos(pac))),
+    if a.comparar and (Path(a.comparar) / "relatorio.json").exists():
+        den = json.loads((Path(a.comparar) / "relatorio.json").read_text(encoding="utf-8"))
+        rel["comparacao"] = {"variante": den["variante"], "parametros": den["parametros"], "perdas": den["perdas"]}
+        for fonte, r in rel["perdas"].items():
+            if fonte in den["perdas"]:
+                dq = r["quant"] - den["perdas"][fonte]["quant"]
+                print(f"{fonte}: perda quantizada {r['quant']:.4f} contra {den['perdas'][fonte]['quant']:.4f} do "
+                      f"{den['variante']} ({'melhor' if dq < 0 else 'PIOR'}: {dq:+.4f})")
+    if a.vetores:
+        vetores_teste(sim, tok, dados, saida / "vetores_teste.json", a.vetores)
+    quant = {"formato": "ver simulador.gravar", "versao": 2 if moe(c) else VERSAO, "config": c, "ponto_fixo": pac["pf"],
+             "campos": dict(zip(CAMPOS_V2 if moe(c) else CAMPOS, _campos(pac))),
              "tensores": mapa, "bytes_total": total, "especiais": {"eot": tok.eot, "user": tok.user,
                                                                   "assistant": tok.assistant, "end": tok.end}}
     (saida / "quant.json").write_text(json.dumps(quant, indent=1, ensure_ascii=False), encoding="utf-8")
@@ -544,6 +673,45 @@ def exportar(a):
           f"tokenizador igual ao do treino em {rel['tokenizador_igual']} amostras")
     for s in rel["amostras"]:
         print(f"  {s['pergunta']}\n    float: {s['float']}\n    simulador: {s['simulador']}\n    t=0,8: {s['simulador_t0.8']}")
+
+
+def vetores_teste(sim, tok, dados, caminho, n=50):
+    """Para conferir o C: as 8 perguntas de sempre (sem acentos, como no teclado da 50g) e outras do dialogos_val,
+    também normalizadas. Para cada uma: os ids do prompt, os logits inteiros depois do último token do prompt, as rotas
+    (especialista e probabilidade Q15, por camada, para cada token do prompt) e a resposta gulosa (até <|end|>,
+    80 tokens ou o contexto de 128)."""
+    from preparar import como_na_calculadora
+    perguntas = [como_na_calculadora(q) for q in PERGUNTAS]
+    for linha in (dados / "dialogos_val.txt").read_text(encoding="utf-8").splitlines():
+        if len(perguntas) >= n:
+            break
+        if "<|user|>" in linha and "<|assistant|>" in linha:
+            q = como_na_calculadora(linha.split("<|user|>", 1)[1].split("<|assistant|>", 1)[0].strip())
+            if q and q not in perguntas:
+                perguntas.append(q)
+    casos = []
+    for q in perguntas:
+        ids = tok.prompt(q)
+        cache = sim.novo_cache()
+        logits = None
+        for t in ids:
+            logits = sim.passo(t, cache)
+        caso = {"pergunta": q, "prompt": ids, "logits": [int(v) for v in logits],
+                "rotas": [[[int(e), int(p)] for e, p in r] for r in cache.get("rotas", [])]}
+        resposta = []
+        while len(resposta) < 80 and cache["pos"] < sim.c["contexto_calc"]:
+            t = int(np.argmax(logits))
+            if t in (tok.end, tok.eot):
+                resposta.append(t)
+                break
+            resposta.append(t)
+            logits = sim.passo(t, cache)
+        caso["resposta"] = resposta
+        caso["texto"] = tok.decodificar([t for t in resposta if t not in (tok.end, tok.eot)])
+        casos.append(caso)
+    Path(caminho).write_text(json.dumps({"formato": "logits em Q12 (int); rotas[token][camada] = [especialista, p Q15]",
+                                         "casos": casos}, ensure_ascii=False), encoding="utf-8")
+    print(f"vetores_teste.json: {len(casos)} perguntas")
 
 
 def gerar(a):
@@ -576,6 +744,8 @@ def main(argv=None):
     e.add_argument("--saida", required=True)
     e.add_argument("--nome", default=None)
     e.add_argument("--janelas", type=int, default=40, help="janelas de validação de cada fonte no simulador")
+    e.add_argument("--vetores", type=int, default=50, help="perguntas no vetores_teste.json (0 = não gera)")
+    e.add_argument("--comparar", default=None, help="pasta de outra exportação (ex.: o denso de 2,5M) para comparar")
     g = sub.add_parser("gerar")
     g.add_argument("--pacote", required=True)
     g.add_argument("--pergunta", required=True)

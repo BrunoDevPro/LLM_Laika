@@ -19,9 +19,11 @@ import argparse
 import json
 import random
 import re
+import shutil
 import struct
 import sys
 import time
+import unicodedata
 import zlib
 from pathlib import Path
 
@@ -45,6 +47,29 @@ def limpo(texto):
     return bool(_PERMITIDOS.match(texto)) and not _SO_LATIN.search(texto)
 
 
+def como_na_calculadora(t):
+    """A pergunta exatamente como chega do teclado da 50g: sem acentos (ç -> c), minúsculas, só a-z 0-9 espaço . ? ! ,
+    e a primeira letra maiúscula."""
+    t = unicodedata.normalize("NFD", t)
+    t = "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
+    t = t.lower()
+    t = "".join(ch if ch in "abcdefghijklmnopqrstuvwxyz0123456789 .?!," else " " for ch in t)
+    t = " ".join(t.split())
+    return t[:1].upper() + t[1:]
+
+
+def encurtar(r, limite):
+    """Resposta de até `limite` caracteres: inteira, ou as primeiras frases que couberem; None se nem a primeira couber."""
+    if limite <= 0 or len(r) <= limite:
+        return r
+    saida = ""
+    for f in re.split(r"(?<=[.!?])\s+", r):
+        if len(saida) + len(f) + 1 > limite:
+            break
+        saida = (saida + " " + f).strip()
+    return saida or None
+
+
 def val(doc, por_mil):
     return zlib.crc32(doc.encode("utf-8")) % 1000 < por_mil
 
@@ -59,6 +84,18 @@ def ler_qa_txt(caminho):
             continue
         p, _, r = bloco.split(USER, 1)[1].partition(ASSISTANT)
         yield [[p.strip(), r.strip()]]
+
+
+def ler_decorar(caminho):
+    """Pares do usuário para decorar: "pergunta|resposta" por linha, ou o formato <|user|>/<|assistant|> da Laika."""
+    texto = caminho.read_text(encoding="utf-8")
+    if USER in texto:
+        yield from ler_qa_txt(caminho)
+        return
+    for l in texto.splitlines():
+        if "|" in l and not l.lstrip().startswith("#"):
+            p, r = l.split("|", 1)
+            yield [[p.strip(), r.strip()]]
 
 
 def ler_conversas(caminho):
@@ -77,8 +114,10 @@ def ler_sft(pasta):
                     yield json.loads(l)
 
 
-def dialogo(conversa, max_p, max_r, max_total, max_trocas):
-    """O documento da conversa (só as primeiras trocas que couberem), ou None se nem a primeira couber."""
+def dialogo(conversa, max_p, max_r, max_total, max_trocas, curta=0, normalizar=0.0):
+    """O documento da conversa (só as primeiras trocas que couberem), ou None se nem a primeira couber.
+    curta: encurta as respostas para até tantos caracteres (frases inteiras). normalizar: fração das perguntas
+    escritas como no teclado da calculadora (sem acentos; sorteio fixo pelo texto)."""
     partes, total = [], 0
     for p, r in conversa[:max_trocas]:
         p = " ".join(str(p).split())
@@ -86,6 +125,13 @@ def dialogo(conversa, max_p, max_r, max_total, max_trocas):
         if (not p or not r or "Contexto:" in p or len(p) > max_p or len(r) > max_r
                 or not limpo(p) or not limpo(r)):
             break
+        r = encurtar(r, curta)
+        if r is None:
+            break
+        if normalizar and zlib.crc32(p.encode("utf-8")) % 1000 < normalizar * 1000:
+            p = como_na_calculadora(p)
+            if not p:
+                break
         trecho = f"{USER} {p} {ASSISTANT} {r} {END}"
         if total + len(trecho) > max_total:
             break
@@ -97,6 +143,8 @@ def dialogo(conversa, max_p, max_r, max_total, max_trocas):
 def montar_dialogos(a, saida):
     qa, docs = Path(a.qa), []
     fontes = []
+    if a.decorar and Path(a.decorar).exists():
+        fontes.append(("decorar", ler_decorar(Path(a.decorar))))
     for f in sorted(qa.glob("*.txt")):
         fontes.append(("laika", ler_qa_txt(f)))
     if (qa / "conversas.jsonl").exists():
@@ -110,7 +158,7 @@ def montar_dialogos(a, saida):
         for conv in it:
             if nome == "sft" and a.sft_max and n_sft >= a.sft_max:
                 break
-            d = dialogo(conv, a.max_pergunta, a.max_resposta, a.max_dialogo, a.max_trocas)
+            d = dialogo(conv, a.max_pergunta, a.max_resposta, a.max_dialogo, a.max_trocas, a.resposta_curta, a.normalizar)
             if d is None:
                 continue
             n_sft += nome == "sft"
@@ -118,8 +166,10 @@ def montar_dialogos(a, saida):
             if val(d, a.val_por_mil):
                 va.write(d + "\n" + EOT + "\n")
             else:
-                # Os exemplos escritos à mão são poucos e são o estilo que queremos: entram repetidos.
-                for _ in range(a.repetir_laika if nome == "laika" else 1):
+                # Os exemplos escritos à mão são poucos e são o estilo que queremos: entram repetidos (e os pares para
+                # decorar, mais ainda).
+                rep_ = {"laika": a.repetir_laika, "decorar": a.decorar_rep}.get(nome, 1)
+                for _ in range(rep_):
                     tr.write(d + "\n" + EOT + "\n")
     tr.close()
     va.close()
@@ -281,14 +331,30 @@ def exportar_vocab(saida):
             f.write(struct.pack("<H", i))
 
 
+def mascara_assistente(ids, asst, fim):
+    """1 nos tokens das respostas (depois de <|assistant|> até o <|end|>, inclusive): a perda só nas respostas."""
+    m = np.zeros(len(ids), dtype=np.uint8)
+    dentro = False
+    for i, t in enumerate(ids):
+        if dentro:
+            m[i] = 1
+            if t == fim:
+                dentro = False
+        elif t == asst:
+            dentro = True
+    return m
+
+
 def tokenizar(saida, tok):
     eot = tok.token_to_id(EOT)
+    asst, fim = tok.token_to_id(ASSISTANT), tok.token_to_id(END)
     meta = {"vocab": tok.get_vocab_size(), "especiais": {e: tok.token_to_id(e) for e in ESPECIAIS}, "fontes": {}}
     for fonte in ("dialogos", "texto"):
         info = {}
         for parte in ("treino", "val"):
             txt = saida / f"{fonte}_{parte}.txt"
             n_tok = n_chars = n_docs = 0
+            mascara = open(saida / f"{fonte}_{parte}.mask", "wb") if fonte == "dialogos" else None
             with open(saida / f"{fonte}_{parte}.bin", "wb") as out:
                 lote = []
 
@@ -297,6 +363,8 @@ def tokenizar(saida, tok):
                     for enc in tok.encode_batch(lote):
                         ids = np.asarray(enc.ids + [eot], dtype=np.uint16)
                         out.write(ids.tobytes())
+                        if mascara is not None:
+                            mascara.write(mascara_assistente(ids, asst, fim).tobytes())
                         n_tok += len(ids)
 
                 for doc in documentos(txt):
@@ -308,6 +376,8 @@ def tokenizar(saida, tok):
                         lote = []
                 if lote:
                     gravar()
+            if mascara is not None:
+                mascara.close()
             info[parte] = {"tokens": n_tok, "docs": n_docs, "caracteres": n_chars}
             print(f"  {fonte} {parte}: {n_docs:,} documentos, {n_tok:,} tokens", flush=True)
         info["caracteres_por_token"] = info["val"]["caracteres"] / max(1, info["val"]["tokens"])
@@ -337,14 +407,41 @@ def main(argv=None):
     ap.add_argument("--vocab", type=int, default=1024)
     ap.add_argument("--amostra-mb", type=float, default=100, help="MB para treinar o tokenizador")
     ap.add_argument("--so-tokenizar", action="store_true", help="refaz só o tokenizador e os .bin")
+    ap.add_argument("--usar-tokenizador", default=None,
+                    help="usa este tokenizador.json (não treina outro; o vocab.bin da calculadora fica igual)")
+    ap.add_argument("--texto-de", default=None,
+                    help="reaproveita o texto_treino.txt e o texto_val.txt desta pasta (não refaz o texto simples)")
+    ap.add_argument("--normalizar", type=float, default=0.0,
+                    help="fração das perguntas escritas como no teclado da 50g (sem acentos); o MoE usa 0,7")
+    ap.add_argument("--resposta-curta", type=int, default=0,
+                    help="encurta as respostas para até N caracteres, em frases inteiras (0 = não encurta)")
+    ap.add_argument("--decorar", default=None, help="pares próprios para decorar (pergunta|resposta por linha)")
+    ap.add_argument("--decorar-rep", type=int, default=8)
     a = ap.parse_args(argv)
     random.seed(0)
     saida = Path(a.saida)
     saida.mkdir(parents=True, exist_ok=True)
     if not a.so_tokenizar:
         montar_dialogos(a, saida)
-        montar_texto(a, saida)
-    tok = treinar_tokenizador(saida, a.vocab, a.amostra_mb)
+        if a.texto_de:
+            for parte in ("treino", "val"):
+                origem = Path(a.texto_de) / f"texto_{parte}.txt"
+                if not origem.exists():
+                    raise SystemExit(f"Não achei {origem}: rode sem --texto-de para montar o texto simples de novo.")
+                if origem.resolve() != (saida / origem.name).resolve():
+                    print(f"Copiando {origem}...", flush=True)
+                    shutil.copy(origem, saida / origem.name)
+        else:
+            montar_texto(a, saida)
+    if a.usar_tokenizador:
+        from tokenizers import Tokenizer
+        if Path(a.usar_tokenizador).resolve() != (saida / "tokenizador.json").resolve():
+            shutil.copy(a.usar_tokenizador, saida / "tokenizador.json")
+        exportar_vocab(saida)
+        tok = Tokenizer.from_file(str(saida / "tokenizador.json"))
+        print(f"Tokenizador reaproveitado: {a.usar_tokenizador} ({tok.get_vocab_size()} tokens)")
+    else:
+        tok = treinar_tokenizador(saida, a.vocab, a.amostra_mb)
     meta = tokenizar(saida, tok)
     for fonte, info in meta["fontes"].items():
         print(f"{fonte}: {info['treino']['tokens']:,} tokens de treino, {info['val']['tokens']:,} de validação, "

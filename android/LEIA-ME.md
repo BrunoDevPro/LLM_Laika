@@ -218,3 +218,11 @@ monte sempre na mesma máquina (ou desinstale antes; a memória e o índice impo
   células do `hp50g/hp50g.ipynb` (dados, varreduras, professor, treino final, exportar) e atalhos com a GPU de cada
   etapa (dados e exportar sem GPU; varredura e treino final na L4). Roda do mesmo jeito que a Laika (GitHub Actions,
   Colab CLI, autorização do Drive pelo app); os resultados ficam no Drive em `LLM_Laika/hp50g`.
+- Na alpha 0.16.0: em Treinar → **HP 50g**, os atalhos seguem a Laika MoE para a HP 50g:
+  1. Dados do MoE (sem GPU);
+  2. Varredura (A100);
+  3. Denso de comparação (A100);
+  4. Treino do MoE (A100);
+  5. Exportar (sem GPU), com `hplm.bin` v2, `vetores_teste.json` e a comparação com o denso.
+
+  O treino e a exportação estão em `hp50g/` (ver `hp50g/LEIA-ME.md`).
