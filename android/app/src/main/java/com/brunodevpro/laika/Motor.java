@@ -142,6 +142,9 @@ final class Motor {
     static final int TAMANHO_MIN = 16, TAMANHO_MAX = 120;
     /** Janela do modelo de conversa em uso (para o limite da barrinha de tamanho). */
     volatile int janela = 256;
+    /** Quanto da janela a conversa ocupa (tokens): o prompt da última resposta (pergunta, Contexto do RAG e histórico)
+     * mais os tokens gerados; depois de trocar de chat ou limpar, a estimativa só com o histórico. -1 = sem medida. */
+    volatile int contextoUsado = -1;
 
     private final Context ctx;
     private final SharedPreferences prefs;
@@ -502,6 +505,7 @@ final class Motor {
         refChat = arqChat.ref;
         chat = carregar(refChat);
         janela = chat.modelo.block;
+        naTela(this::estimarContexto);
         Armazem.Arquivo b = v.arquivos.get(Armazem.BASE);
         refBase = b == null ? null : b.ref;
         temBase = b != null;
@@ -1078,7 +1082,26 @@ final class Motor {
                     || (a.detalhe != null && a.detalhe.contains("interrompida"))) continue;
             r.add(new String[]{p.texto, a.texto});
         }
-        return r.size() > Texto.MAX_HISTORY ? new ArrayList<>(r.subList(r.size() - Texto.MAX_HISTORY, r.size())) : r;
+        int max = Texto.maxHistorico(janela);
+        return r.size() > max ? new ArrayList<>(r.subList(r.size() - max, r.size())) : r;
+    }
+
+    /** Estima o contexto que a conversa já ocupa (as trocas que entrariam no próximo prompt), sem gerar nada.
+     * Chamar na thread principal (a conversa muda nela); a conta roda na thread do modelo (o tokenizador não é
+     * para várias threads). */
+    void estimarContexto() {
+        final List<String[]> h = historicoAte(conversa.size());
+        fundo.execute(() -> {
+            Tokenizador t = tok;
+            if (t == null || !pronto) {
+                contextoUsado = -1;
+            } else {
+                StringBuilder sb = new StringBuilder();
+                for (String[] troca : h) sb.append(Texto.turno(troca[0], troca[1])).append(' ');
+                contextoUsado = h.isEmpty() ? 0 : Math.min(janela, t.codificar(sb.toString().trim()).length);
+            }
+            avisarEstado();
+        });
     }
 
     private void responder(Mensagem pergunta, Mensagem existente, List<String[]> historico) {
@@ -1153,6 +1176,7 @@ final class Motor {
                     String paraModelo = longas && !Texto.querLonga(texto) ? texto + " " + Texto.GATILHO_LONGO : texto;
                     op.maxNovos = Texto.querLonga(paraModelo) ? tamanhoMaximo() : tamanho;
                     op.evitarCopia = Texto.querResumo(paraModelo);
+                    op.longa = Texto.querLonga(paraModelo);
                     chat.maxTrechos = respostasRapidas ? 2 : 0;
                     Laika.Prompt p = chat.montarPrompt(paraModelo, comRag ? rag : null, comMemoria ? memoria : null,
                             op.maxNovos, historico);
@@ -1165,6 +1189,7 @@ final class Motor {
                     resp.modeloNome = nomeExibido;
                     if (fontes) resp.fonte = p.fonte;
                     resp.trecho = p.trecho;
+                    contextoUsado = Math.min(janela, op.tokensPrompt + op.gerados);
                 }
             }
             double seg = (System.nanoTime() - t0) / 1e9;

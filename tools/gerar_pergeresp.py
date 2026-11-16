@@ -22,6 +22,7 @@ import dados_extra as D1  # noqa: E402
 import dados_extra2 as D2  # noqa: E402
 import leitura as L  # noqa: E402
 import dados_extra3 as D3  # noqa: E402
+import conversas_coerentes as CC  # noqa: E402
 from textos_simples import TEXTOS_1  # noqa: E402
 from textos_simples2 import TEXTOS_2  # noqa: E402
 import genericas_temas1 as TG1  # noqa: E402
@@ -2321,6 +2322,13 @@ def build():
         for c in convs:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")
     print(f"conversas.jsonl: {len(convs)} conversas de várias trocas (memória de IA)")
+    # Conversas coerentes (tools/conversas_coerentes.py): fatos ditos várias mensagens antes, ficha da Laika,
+    # correções, bate-papo, seguimento com Contexto. Todas as respostas delas são treinadas.
+    coerentes = CC.gerar(TEMAS + TEMAS_PASSADO, CAPITAIS + D3.CAPITAIS_2, ESTADOS, D1.REGIOES, D1.CIDADES)
+    with open(QA_DIR / "conversas_coerentes.jsonl", "w", encoding="utf-8") as f:
+        for c in coerentes:
+            f.write(json.dumps(c, ensure_ascii=False) + "\n")
+    print(f"conversas_coerentes.jsonl: {len(coerentes)} conversas de 2 a 12 trocas")
     leitura, _ = leitura_examples()
     leitura += leitura_simples() + leitura_genericas
     with open(QA_DIR / "leitura.txt", "w", encoding="utf-8") as f:

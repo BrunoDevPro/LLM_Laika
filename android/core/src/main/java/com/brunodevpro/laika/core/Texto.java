@@ -23,8 +23,25 @@ public final class Texto {
     public static final String EOT = "<|endoftext|>";
     public static final String PAD = "[PAD]";
     public static final int MAX_CONTEXT_WORDS = 80;
-    /** Trocas anteriores que podem entrar no prompt ("memória de IA"), como o MAX_HISTORY do Python. */
+    /** Trocas anteriores que podem entrar no prompt ("memória de IA"), como o MAX_HISTORY do Python (janela < 1024). */
     public static final int MAX_HISTORY = 5;
+    /** Janela >= 1024: o histórico entra em toda mensagem, até 8 trocas, com uma reserva de tokens que o Contexto do
+     * RAG não toma (history_always, max_history e history_reserve do data_utils.py). */
+    public static final int MAX_HISTORY_GRANDE = 8;
+    public static final int JANELA_HISTORICO_SEMPRE = 1024;
+    public static final int RESERVA_HISTORICO = 500;
+
+    public static boolean historicoSempre(int bloco) {
+        return bloco >= JANELA_HISTORICO_SEMPRE;
+    }
+
+    public static int maxHistorico(int bloco) {
+        return historicoSempre(bloco) ? MAX_HISTORY_GRANDE : MAX_HISTORY;
+    }
+
+    public static int reservaHistorico(int bloco) {
+        return historicoSempre(bloco) ? Math.min(RESERVA_HISTORICO, bloco / 4) : 0;
+    }
 
     private static Set<String> conjunto(String palavras) {
         return new HashSet<>(Arrays.asList(palavras.trim().split("\\s+")));

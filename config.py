@@ -7,6 +7,12 @@ PRESETS = {
         vocab_size=4000, batch_size=32, learning_rate=1e-3,
         max_steps=3000, warmup_steps=100, eval_every=250, eval_iters=20, patience=8,
     ),
+    # O tiny com RoPE e janela de 1024, para testar em CPU o histórico em toda mensagem (history_always).
+    "tiny_1024": dict(
+        block_size=1024, embed_size=128, heads=4, layers=4, dropout=0.1, rope=True,
+        vocab_size=4000, batch_size=8, learning_rate=1e-3,
+        max_steps=3000, warmup_steps=100, eval_every=250, eval_iters=10, patience=8,
+    ),
     # O tiny com RoPE (como o de 100M), para testar em CPU o caminho sem tabela de posições.
     "tiny_rope": dict(
         block_size=256, embed_size=128, heads=4, layers=4, dropout=0.1, rope=True,
