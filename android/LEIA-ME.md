@@ -232,3 +232,5 @@ monte sempre na mesma máquina (ou desinstale antes; a memória e o índice impo
   janela de 1024 ou mais (modelos de 100M), as últimas 8 trocas entram em toda mensagem, com 500 tokens guardados
   para elas antes dos trechos do RAG; com janela menor, só nas mensagens de seguimento, como antes. A penalidade do
   fim da resposta só vale com "Respostas longas" ou o gatilho ("Resposta longa.", "Explique melhor.").
+- Na alpha 0.17.1: em Treinar, a célula 3 aceita o `PRESET` **colab_200m** (~201M, contexto 2048; pede ~4 bilhões de
+  tokens: `GIGAVERBO` de 4 bilhões na célula 2, `PROJETO` novo na célula 1 e `MODO = "do_zero"` com A100).
