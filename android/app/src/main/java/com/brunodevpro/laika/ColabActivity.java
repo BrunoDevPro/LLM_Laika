@@ -622,26 +622,34 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                 .setNegativeButton("Cancelar", null).show();
     }
 
-    /** Atalhos da mini-LLM da HP 50g: cada etapa com a GPU que basta (um modelo de ~1M não precisa da A100). */
+    /**
+     * Atalhos da Laika MoE para a HP 50g (hp50g/hp50g.ipynb), na ordem: dados sem GPU, varredura da taxa, denso de
+     * comparação e treino final na A100, exportar sem GPU (hplm.bin v2, vetores de teste e a comparação).
+     */
     private void montarAtalhosHp(LinearLayout atalhos) {
-        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos);
-        botao(a1, "1. Dados (sem GPU)", false, v -> {
+        LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos);
+        botao(a1, "1. Dados do MoE (sem GPU)", false, v -> {
             gpu = "nenhuma";
             marcar(2);
         });
-        botao(a1, "2. Varredura (L4)", false, v -> {
-            gpu = "L4";
+        botao(a1, "2. Varredura (A100)", false, v -> {
+            gpu = "A100";
             marcar(3);
         });
-        botao(a2, "3. Treino final (L4)", false, v -> {
-            gpu = "L4";
+        botao(a2, "3. Denso de comparação (A100)", false, v -> {
+            gpu = "A100";
+            marcar(4);
+        });
+        botao(a2, "4. Treino do MoE (A100)", false, v -> {
+            gpu = "A100";
             marcar(6);
         });
-        botao(a2, "4. Exportar (sem GPU)", false, v -> {
+        botao(a3, "5. Exportar (sem GPU)", false, v -> {
             gpu = "nenhuma";
             marcar(7);
         });
-        TextView dica = texto("Os resultados ficam no Drive, em LLM_Laika/hp50g. A célula 1 sempre roda antes.", 12,
+        TextView dica = texto("Os resultados ficam no Drive, em LLM_Laika/hp50g (export/MoE_final). Se um treino parar no "
+                + "limite de ~6 h, rode o mesmo atalho de novo: continua de onde parou. A célula 1 sempre roda antes.", 12,
                 R.color.aviso, false);
         dica.setPadding(0, dp(6), 0, 0);
         atalhos.addView(dica);

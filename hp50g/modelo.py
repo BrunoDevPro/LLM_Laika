@@ -13,7 +13,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from configs import PONTO_FIXO
+from configs import PONTO_FIXO, moe
 
 
 def escalas_pesos(w, bits, grupo, mbits, pot2):
@@ -60,7 +60,7 @@ class RMSNorm(nn.Module):
 
 
 class Linear(nn.Module):
-    """Linear sem bias; com qat, pesos e entrada quantizados."""
+    """Linear sem bias; com qat, pesos e entrada quantizados (cfg: bits, grupo, mbits, pot2)."""
 
     def __init__(self, entrada, saida, cfg, dono):
         super().__init__()
@@ -97,9 +97,18 @@ class Bloco(nn.Module):
         self.wv = Linear(d, c["cabecas_kv"] * hd, c, dono)
         self.wo = Linear(c["cabecas_q"] * hd, d, c, dono)
         self.n2 = RMSNorm(d)
-        self.w1 = Linear(d, c["ff_dim"], c, dono)
-        self.w3 = Linear(d, c["ff_dim"], c, dono) if c["ff"] == "swiglu" else None
-        self.w2 = Linear(c["ff_dim"], d, c, dono)
+        if moe(c):
+            # Roteador em int8 com uma escala por linha (a escolha do especialista muda com a quantização, então ele
+            # também entra no QAT); um especialista compartilhado e n_esp roteados, todos SwiGLU.
+            self.router = Linear(d, c["n_esp"], dict(c, bits=8, grupo=0), dono)
+            self.s_w1 = Linear(d, c["ff_comp"], c, dono)
+            self.s_w3 = Linear(d, c["ff_comp"], c, dono)
+            self.s_w2 = Linear(c["ff_comp"], d, c, dono)
+            self.esp = nn.ModuleList([Especialista(d, c["ff_esp"], c, dono) for _ in range(c["n_esp"])])
+        else:
+            self.w1 = Linear(d, c["ff_dim"], c, dono)
+            self.w3 = Linear(d, c["ff_dim"], c, dono) if c["ff"] == "swiglu" else None
+            self.w2 = Linear(c["ff_dim"], d, c, dono)
         self.dono = [dono]
 
     def forward(self, x, cos, sin):
@@ -117,6 +126,8 @@ class Bloco(nn.Module):
         a = F.scaled_dot_product_attention(q, k, v, is_causal=True)
         x = x + self.wo(a.transpose(1, 2).reshape(B, T, hq * hd))
         h = self.n2(x)
+        if moe(c):
+            return x + self.ff_moe(h)
         if c["ff"] == "swiglu":
             f = F.silu(self.w1(h)) * self.w3(h)
         else:
@@ -124,11 +135,57 @@ class Bloco(nn.Module):
         return x + self.w2(f)
 
 
+    def ff_moe(self, h):
+        """y = compartilhado(h) + p[e] · especialista[e](h), com e = argmax do roteador (top-1, sem descartar tokens).
+        Guarda no dono as perdas auxiliares (balanceamento estilo Switch e z-loss) e, se pedido, o uso de cada
+        especialista e a entropia do roteador."""
+        c, dono = self.c, self.dono[0]
+        forma = h.shape
+        hf = h.reshape(-1, forma[-1])
+        r = self.router(hf).float()
+        p = torch.softmax(r, -1)
+        e = r.argmax(-1)  # empate: o menor índice
+        y = self.s_w2(F.silu(self.s_w1(hf)) * self.s_w3(hf)).float()
+        ye = torch.zeros_like(y)
+        for i, esp in enumerate(self.esp):
+            idx = (e == i).nonzero(as_tuple=True)[0]
+            if idx.numel():
+                hi = hf.index_select(0, idx)
+                ye.index_copy_(0, idx, esp(hi).float() * p.index_select(0, idx)[:, i:i + 1])
+        y = (y + ye).to(h.dtype)
+        n = c["n_esp"]
+        if self.training:
+            f = torch.bincount(e, minlength=n).float() / e.numel()
+            dono.perda_aux = dono.perda_aux + 0.01 * n * (f.detach() * p.mean(0)).sum() \
+                + 1e-3 * torch.logsumexp(r, -1).pow(2).mean()
+        if dono.estatisticas is not None:
+            est = dono.estatisticas.setdefault(id(self), {"uso": torch.zeros(n), "entropia": 0.0, "n": 0})
+            est["uso"] += torch.bincount(e, minlength=n).float().cpu()
+            est["entropia"] += float(-(p * torch.log(p.clamp_min(1e-9))).sum(-1).sum().detach())
+            est["n"] += e.numel()
+        return y.reshape(forma)
+
+
+class Especialista(nn.Module):
+    """SwiGLU: w2(silu(w1 h) · w3 h)."""
+
+    def __init__(self, d, oculto, c, dono):
+        super().__init__()
+        self.w1 = Linear(d, oculto, c, dono)
+        self.w3 = Linear(d, oculto, c, dono)
+        self.w2 = Linear(oculto, d, c, dono)
+
+    def forward(self, h):
+        return self.w2(F.silu(self.w1(h)) * self.w3(h))
+
+
 class MiniLLM(nn.Module):
     def __init__(self, c):
         super().__init__()
         self.c = c
         self.qat = False
+        self.perda_aux = 0.0      # MoE: balanceamento + z-loss do último forward de treino (o treino zera e soma)
+        self.estatisticas = None  # MoE: {} para contar o uso dos especialistas (validação)
         self.emb = nn.Parameter(torch.empty(c["vocab"], c["d"]))
         self.blocos = nn.ModuleList([Bloco(c, self) for _ in range(c["camadas"])])
         self.nf = RMSNorm(c["d"])
@@ -139,6 +196,8 @@ class MiniLLM(nn.Module):
         for n, p in self.named_parameters():
             if p.dim() == 2:
                 std = 0.02 / math.sqrt(2 * c["camadas"]) if n.endswith(("wo.weight", "w2.weight")) else 0.02
+                if n.endswith("router.weight"):
+                    std = 0.006
                 nn.init.normal_(p, 0.0, std)
 
     def pesos_emb(self):
@@ -155,6 +214,15 @@ class MiniLLM(nn.Module):
         if self.qat:
             x = quant_ativacao(x)
         return F.linear(x, emb)
+
+    def uso_especialistas(self):
+        """[(uso de cada especialista em %, entropia média do roteador)] por camada, desde estatisticas = {}."""
+        r = []
+        for b in self.blocos:
+            est = (self.estatisticas or {}).get(id(b))
+            if est and est["n"]:
+                r.append(([round(float(u) * 100 / est["n"], 1) for u in est["uso"]], round(est["entropia"] / est["n"], 3)))
+        return r
 
     def num_params(self):
         return sum(p.numel() for p in self.parameters())

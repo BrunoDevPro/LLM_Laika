@@ -120,6 +120,76 @@ Cada matriz tem `E`, linhas, colunas e grupo (int32), as mantissas (uint8, uma p
 
 O `relatorio` junta várias exportações numa tabela.
 
+## Laika MoE (versão 2 do hplm.bin)
+
+Especificação "Laika MoE para a HP 50g": uma mistura de especialistas no lugar do modelo denso de 1,19M.
+
+**Arquitetura** (variante `MoE` em `configs.py`):
+- d = 192, 8 camadas, atenção multi-query (6 × 32 / 1 × 32), RoPE, RMSNorm, sem bias.
+- Roteador d → 8 em int8, com uma escala por linha. Um especialista compartilhado (SwiGLU 128) e 8 roteados (SwiGLU 224), top-1.
+- A saída do especialista roteado vai multiplicada pela probabilidade softmax dele. Nenhum token é descartado.
+- Perdas auxiliares: balanceamento estilo Switch (0,01 × 8 × Σ f·P) e z-loss (1e-3).
+- O treino mostra o uso de cada especialista e a entropia do roteador em cada validação. A meta é que nenhum fique abaixo de ~5% nem acima de ~25%.
+
+**Números medidos no arquivo exportado:**
+
+| Item | Valor |
+|---|---|
+| Parâmetros no total | 9.744.384 (sem as normas) |
+| Ativos por token | 2.519.040 |
+| `hplm.bin` | 4,97 MB |
+| Sempre ativos (começo do arquivo) | 802 KB |
+| Lidos por token | 1,31 MB |
+| Cache de atenção | 67,6 KB |
+
+**Dados** (`preparar.py`, célula 2):
+- Tokenizador reaproveitado (`--usar-tokenizador`): o `vocab.bin` da calculadora não muda.
+- Texto simples reaproveitado de `hp50g/dados` (`--texto-de`).
+- 70% das perguntas escritas como no teclado da 50g (`--normalizar 0.7`, `como_na_calculadora`: sem acentos, minúsculas, só a–z 0–9 espaço . ? ! , e a primeira letra maiúscula). As respostas continuam acentuadas.
+- Respostas encurtadas para até 60 caracteres, em frases inteiras (`--resposta-curta`).
+- Uma troca por diálogo (`--max-trocas 1`), porque cada pergunta é uma conversa nova na calculadora.
+- Pares próprios para decorar (`--decorar`, `pergunta|resposta` por linha, `--decorar-rep 8`).
+- `dialogos_*.mask` marca os tokens das respostas.
+- Tudo vai para `hp50g/dados_moe`.
+
+**Treino** (padrões da variante):
+- Lote de 262 mil tokens, taxa de 2e-3, queda nos últimos 15%.
+- Mistura de 95% texto e 5% diálogos; na queda, 50/50.
+- Na queda, a perda só nas respostas dos diálogos (`--so-assistente queda`) e QAT com o roteador quantizado no forward.
+- Base de comparação: a variante `denso_2.5M` (d = 192, 8 camadas, SwiGLU 352), com o mesmo custo por token.
+
+**Simulador:** o bloco MoE exatamente como na especificação:
+- roteador `matvec` em int8;
+- `e = argmax` (o primeiro máximo);
+- `p = (EXP[d_e] << 15) / Σ EXP[d]`, com `d = max - r`;
+- `ys` do especialista compartilhado, `ye` do escolhido, `ye = desloca(ye · p, -15)`;
+- `x += ys` e depois `x += ye`.
+
+O cache guarda as rotas (especialista, p) de cada token.
+
+**`hplm.bin` versão 2:**
+- campos: os 22 de antes, mais `n_esp`, `top_k`, `ff_comp` e `ff_esp`;
+- cada matriz com 5 int32: E, linhas, colunas, grupo e **bits** (4, ou 8 no roteador, com grupo = colunas);
+- ordem: tabelas, emb; por camada n1, wq, wk, wv, wo, n2, router, s_w1, s_w3, s_w2; nf; depois, para cada camada e especialista, w1, w3, w2.
+
+O `quant.json` lista o offset de cada tensor (`3.router`, `3.s_w1`, `3.e5.w2`…). Os modelos densos continuam na versão 1.
+
+**`vetores_teste.json`** (`simulador.py exportar --vetores 50`): as 8 perguntas de sempre sem acentos e outras do `dialogos_val` normalizadas. Para cada uma:
+- os ids do prompt;
+- os 1024 logits inteiros depois do último token do prompt;
+- as rotas (especialista e p Q15, por camada, de cada token do prompt);
+- a resposta gulosa (até `<|end|>`, 80 tokens ou o contexto de 128).
+
+**`relatorio.json`:** além do que já tinha:
+- o uso de cada especialista no simulador;
+- os bytes sempre ativos e lidos por token;
+- as amostras com as perguntas normalizadas;
+- com `--comparar export/denso_2.5M`, as perdas do denso, com um aviso se o MoE ficar pior.
+
+A perda do simulador é calculada em paralelo, nos núcleos da máquina.
+
+**Ordem no Colab:** 1 → 2 (sem GPU) → 3 (varredura de 1e-3, 2e-3 e 3e-3 com 150M tokens, A100) → 4 (denso de comparação, A100) → 6 (treino final do MoE, ~2,5 bilhões de tokens, A100) → 7 (exporta o denso e depois o MoE com a comparação, sem GPU).
+
 ## Pelo app
 
 Em **Treinar**, toque em **HP 50g**. As células são as do `hp50g.ipynb` e rodam como as da Laika (o workflow
