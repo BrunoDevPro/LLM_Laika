@@ -236,6 +236,8 @@ class ComparaComPythonTest {
             op.topK = 1;
             op.maxNovos = ((Double) c.get("max_novos")).intValue();
             op.evitarCopia = (Boolean) c.get("evitar_copia");
+            Object longa = c.get("longa");  // referências antigas: a penalidade valia sempre
+            op.longa = longa == null || (Boolean) longa;
             String r = laika.gerar((String) c.get("prompt"), op, true, new Random(0), null, null);
             assertEquals(c.get("resposta"), r, "geração: " + c.get("prompt") + " evitarCopia=" + op.evitarCopia);
         }

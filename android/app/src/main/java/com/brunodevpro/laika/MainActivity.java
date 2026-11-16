@@ -62,6 +62,9 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
     private TextView estado, versaoNome, titulo;
     private EditText entrada;
     private ImageButton enviar, botaoMais;
+    private View contexto;
+    private android.widget.ProgressBar contextoBarra;
+    private TextView contextoTexto;
     private final Map<Motor.Mensagem, TextView> bolhas = new HashMap<>();
     /** As setas ‹ 2/3 › embaixo das respostas geradas de novo. */
     private final Map<Motor.Mensagem, LinearLayout> setas = new HashMap<>();
@@ -139,6 +142,10 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         versaoNome = findViewById(R.id.versao_nome);
         titulo = findViewById(R.id.titulo);
         botaoMais = findViewById(R.id.mais);
+        contexto = findViewById(R.id.contexto);
+        contextoBarra = findViewById(R.id.contexto_barra);
+        contextoTexto = findViewById(R.id.contexto_texto);
+        contexto.setOnClickListener(v -> explicarContexto());
         mais = new MaisOpcoes(this, motor, this::estadoMudou);
         listaChats = new ListaChats(this, motor);
         botaoMais.setOnClickListener(v -> mais.mostrar(v));
@@ -439,12 +446,48 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
 
     @Override
     public void conversaTrocada() {
+        motor.estimarContexto();
         mensagens.removeAllViews();
         bolhas.clear();
         setas.clear();
         for (Motor.Mensagem m : new ArrayList<>(motor.conversa)) mensagemNova(m);
         atualizarVazio();
         rolarParaFim(true);
+    }
+
+    /** A barrinha de contexto: quanto da janela do modelo a conversa já ocupa (verde, amarela, vermelha). */
+    private void atualizarContexto() {
+        int usado = motor.contextoUsado, janela = Math.max(1, motor.janela);
+        if (usado < 0 || motor.modoCompletar) {
+            contexto.setVisibility(View.GONE);
+            return;
+        }
+        contexto.setVisibility(View.VISIBLE);
+        int pct = Math.round(100f * usado / janela);
+        contextoBarra.setMax(janela);
+        contextoBarra.setProgress(usado);
+        int cor = pct < 60 ? 0xFF2E9E5B : pct < 85 ? 0xFFE0A100 : getColor(R.color.perigo);
+        contextoBarra.setProgressTintList(android.content.res.ColorStateList.valueOf(cor));
+        contextoTexto.setText(String.format(java.util.Locale.getDefault(), "Contexto: %d de %d tokens (%d%%)",
+                usado, janela, pct));
+    }
+
+    private void explicarContexto() {
+        int usado = Math.max(0, motor.contextoUsado), janela = motor.janela;
+        new AlertDialog.Builder(this).setTitle("Contexto usado")
+                .setMessage(String.format(java.util.Locale.getDefault(),
+                        "A janela de contexto é quanto texto a Laika consegue ler de uma vez: %d tokens neste modelo "
+                                + "(um token é mais ou menos uma sílaba ou uma palavra curta).\n\n"
+                                + "Cada resposta usa a sua pergunta, os trechos encontrados no RAG, as mensagens "
+                                + "anteriores (memória de IA) e a própria resposta. A última usou %d tokens (%d%%).\n\n"
+                                + "Quando a conversa não cabe mais, as mensagens mais antigas deixam de entrar: a Laika "
+                                + "esquece o começo da conversa. Com janela de 1024 ou mais, as últimas mensagens "
+                                + "sempre entram (até %d trocas); com janela menor, só quando a pergunta depende da "
+                                + "anterior (\"E da Itália?\").\n\n"
+                                + "Para recomeçar do zero, use Novo chat ou Limpar conversa.",
+                        janela, usado, Math.round(100f * usado / Math.max(1, janela)),
+                        com.brunodevpro.laika.core.Texto.maxHistorico(janela)))
+                .setPositiveButton("OK", null).show();
     }
 
     /** Sem mensagens do usuário: mostra as boas-vindas com sugestões. */
@@ -540,6 +583,7 @@ public class MainActivity extends ComponentActivity implements Motor.Ouvinte {
         botaoMais.setImageTintList(mais.algoLigado()
                 ? android.content.res.ColorStateList.valueOf(getColor(R.color.azul)) : null);
         painel.atualizar();
+        atualizarContexto();
         enviar.setImageResource(motor.gerando ? R.drawable.ic_parar : R.drawable.ic_enviar);
         enviar.setContentDescription(getString(motor.gerando ? R.string.parar : R.string.enviar));
         atualizarBotaoEnviar();

@@ -253,6 +253,39 @@
             android:visibility="gone" />
     </FrameLayout>
 
+    <!-- Quanto da janela de contexto a conversa já usa (tocar explica) -->
+    <LinearLayout
+        android:id="@+id/contexto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/barra"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/contexto_barra"
+            style="@android:style/Widget.Material.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_weight="1"
+            android:maxHeight="4dp"
+            android:minHeight="4dp" />
+
+        <TextView
+            android:id="@+id/contexto_texto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textColor="@color/aviso"
+            android:textSize="12sp" />
+    </LinearLayout>
+
     <!-- Campo de texto (sempre ativo) e botão enviar/parar -->
     <LinearLayout
         android:id="@+id/barra"

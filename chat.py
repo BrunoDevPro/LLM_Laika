@@ -20,8 +20,9 @@ from pathlib import Path
 import torch
 
 from data_utils import (USER_TOKEN, ASSISTANT_TOKEN, END_TOKEN, EOT_TOKEN, PAD_TOKEN, MAX_CONTEXT_WORDS,
-                        LONG_TRIGGER, MAX_HISTORY, chat_turn, direct_math, fit_context, follows_up, rag_chunks,
-                        wants_rag, wants_long, wants_summary, without_trigger)
+                        LONG_TRIGGER, MAX_HISTORY_GRANDE, chat_turn, direct_math, fit_context, follows_up,
+                        history_always, history_reserve, max_history, rag_chunks, wants_rag, wants_long,
+                        wants_summary, without_trigger)
 from model import build_model
 
 
@@ -47,8 +48,9 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
     janela do modelo), ou se há anotações da memória ligadas à pergunta, a pergunta ganha um
     "Contexto:", no mesmo formato usado no fine-tuning, cortado para caber na janela.
     history: as trocas anteriores [(pergunta, resposta), ...], da mais antiga para a mais nova
-    ("memória de IA"). Entram as mais recentes (até MAX_HISTORY) que couberem depois da pergunta,
-    e só se a pergunta depender da conversa (follows_up).
+    ("memória de IA"). Entram as mais recentes (até max_history) que couberem depois da pergunta.
+    Com janela < 1024, só se a pergunta depender da conversa (follows_up); com janela >= 1024, sempre, e as
+    mais recentes têm uma reserva (history_reserve) que o Contexto do RAG não pode tomar.
     O gatilho de resposta longa ("Explique melhor.", "Resposta longa.") fica na pergunta, mas não entra na
     busca do RAG nem na memória.
     """
@@ -57,6 +59,19 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
 
     def count(text):
         return len(tokenizer.encode(text).ids)
+
+    recent = list(history or [])[-max_history(block_size):] \
+        if history and (history_always(block_size) or follows_up(busca)) else []
+    # Reserva do histórico: as trocas mais recentes que cabem em history_reserve tokens.
+    reserved = 0
+    if recent and history_reserve(block_size):
+        kept = []
+        for q, a in reversed(recent):
+            candidate = [chat_turn(q, a)] + kept
+            n = count(" ".join(candidate)) + 1
+            if n > history_reserve(block_size):
+                break
+            kept, reserved = candidate, n
 
     context_parts, source = [], None
     if memory is not None:
@@ -70,14 +85,15 @@ def build_prompt(question, tokenizer, block_size, rag=None, memory=None, max_new
     current = f"{USER_TOKEN} {question} {ASSISTANT_TOKEN}"
     if context_parts:
         user_text = fit_context(lambda t: count(f"{USER_TOKEN} {t} {ASSISTANT_TOKEN}"), question,
-                                " ".join(context_parts), budget, max_words=MAX_CONTEXT_WORDS * max(1, len(hits)))
+                                " ".join(context_parts), budget - reserved,
+                                max_words=MAX_CONTEXT_WORDS * max(1, len(hits)))
         if user_text is None:
             source = None
         else:
             current = f"{USER_TOKEN} {user_text} {ASSISTANT_TOKEN}"
 
     turns = []
-    for q, a in reversed(list(history or [])[-MAX_HISTORY:] if follows_up(busca) else []):
+    for q, a in reversed(recent):
         candidate = [chat_turn(q, a)] + turns
         if count(" ".join(candidate + [current])) > budget:
             break
@@ -91,8 +107,9 @@ def with_citation(answer, source):
 
 
 def min_answer_tokens(max_new_tokens):
-    """Com um tamanho máximo grande, a resposta tende a ser mais longa: até este número de tokens,
-    o <|end|> perde força (sem ser proibido). 80 -> 10, 120 -> 30, 60 ou menos -> 0."""
+    """Pedido de resposta longa (gatilho) com um tamanho máximo grande: até este número de tokens, o <|end|> perde
+    força (sem ser proibido). 80 -> 10, 120 -> 30, 60 ou menos -> 0. Só com o gatilho: antes valia para toda
+    pergunta com a barrinha acima de 60, e uma pergunta simples virava um texto longo e contraditório."""
     return max(0, (max_new_tokens - 60) // 2)
 
 
@@ -110,7 +127,7 @@ NO_REPEAT_N = 6
 
 @torch.no_grad()
 def generate(model, tokenizer, prompt, device, max_new_tokens=80, temperature=0.7,
-             top_k=40, top_p=0.9, repetition_penalty=1.15, stop_at_end=True, avoid_copy=False):
+             top_k=40, top_p=0.9, repetition_penalty=1.15, stop_at_end=True, avoid_copy=False, long_answer=False):
     ids = tokenizer.encode(prompt).ids
     prompt_len = len(ids)
     copy_next = {}
@@ -121,7 +138,7 @@ def generate(model, tokenizer, prompt, device, max_new_tokens=80, temperature=0.
     banned = [tokenizer.token_to_id(t) for t in (USER_TOKEN, ASSISTANT_TOKEN, PAD_TOKEN, EOT_TOKEN)]
     if not stop_at_end:
         banned.append(end_id)
-    min_tokens = min_answer_tokens(max_new_tokens) if stop_at_end else 0
+    min_tokens = min_answer_tokens(max_new_tokens) if stop_at_end and long_answer else 0
 
     past, cached = None, 0
     for _ in range(max_new_tokens):
@@ -254,12 +271,13 @@ def main():
             max_new = max(args.max_new_tokens, model.block_size // 4) if wants_long(pergunta) else args.max_new_tokens
             prompt, source = build_prompt(pergunta, tokenizer, model.block_size, rag, memory, max_new, history)
             answer = generate(model, tokenizer, prompt, device, max_new, args.temperature,
-                              avoid_copy=wants_summary(pergunta))
+                              avoid_copy=wants_summary(pergunta), long_answer=wants_long(pergunta))
             n_prompt, n_resp = len(tokenizer.encode(prompt).ids), len(tokenizer.encode(answer).ids)
             print("LLM:", with_citation(answer, source) if show_sources else answer)
-            print(f"     ({n_resp} tokens na resposta, {n_prompt + n_resp} no total)")
+            print(f"     ({n_resp} tokens na resposta, {n_prompt + n_resp} no total; contexto usado: "
+                  f"{n_prompt + n_resp} de {model.block_size}, {100 * (n_prompt + n_resp) / model.block_size:.0f}%)")
         if history is not None and answer:
-            history = (history + [(text, answer)])[-MAX_HISTORY:]
+            history = (history + [(text, answer)])[-MAX_HISTORY_GRANDE:]
 
 
 if __name__ == "__main__":

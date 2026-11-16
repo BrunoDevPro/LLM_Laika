@@ -1,6 +1,16 @@
 # Como fazer a Laika conversar de verdade (e o plano para ≥ 200M)
 
-Anotado em 16/11/2026, a pedido do usuário. **Nada disto está implementado ainda.** É o plano dos itens 1 a 4
+> **Estado (16/11/2026, app 0.17.0-alpha): itens 1 a 4 implementados**, menos as conversas geradas por um modelo
+> aberto (o item 3 foi feito com geradores em `tools/conversas_coerentes.py`, ~26 mil conversas). O que entrou:
+> perda em todas as respostas das conversas de `data/qa/*.jsonl` e `val conversa` (item 1); histórico em toda
+> mensagem com janela ≥ 1024, até 8 trocas e reserva de 500 tokens, em Python e no app (item 2); 8 famílias de
+> conversas, inclusive a "ficha da Laika" e o seguimento com Contexto ("Onde fica Brasília?" → "E Curitiba?") (item 3);
+> conhecimento automático em 5 mil artigos, conversas como ~20% da mistura e a mistura impressa em % (item 4). Também:
+> a penalidade do `<|end|>` só vale com o pedido de resposta longa, e o `avaliar.py` ganhou memória, distrator, volta
+> ao assunto e as 4 conversas da Laika 1.4 como regressão. **Precisa refazer o fine-tuning (célula 4) para valer.**
+> Ainda não feito: conversas de um modelo aberto, filtro de molde por família no SFT e a métrica distinct-2.
+
+Anotado em 16/11/2026, a pedido do usuário. É o plano dos itens 1 a 4
 (os que mais ajudam) para uma Laika de **200M de parâmetros ou mais** que mantenha conversas simples, com memória
 que funciona e respostas coerentes, mesmo quando não são verdadeiras ("minha cor favorita é azul" só precisa ser
 a mesma resposta da próxima vez e valer para o resto da conversa).

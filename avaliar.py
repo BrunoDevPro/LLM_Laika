@@ -8,8 +8,9 @@
 Mede três coisas:
   1) perplexidade num texto fixo que nunca entra no treino (data/avaliacao/textos.txt): quanto o modelo
      "se surpreende" com português comum (menor é melhor);
-  2) ~100 perguntas fixas (data/avaliacao/perguntas.jsonl), por categoria (identidade, fatos sem e com
-     RAG, leitura, seguimento, resposta longa, contas, sim ou não, datas, generalização, "não sei", resumo...).
+  2) ~150 perguntas fixas (data/avaliacao/perguntas.jsonl), por categoria (identidade, fatos sem e com
+     RAG, leitura, seguimento, resposta longa, contas, sim ou não, datas, generalização, "não sei", resumo,
+     memória, distrator, volta ao assunto e "regressão": as conversas da Laika 1.4 de 100M que deram errado).
      Cada uma tem as palavras esperadas na resposta; as respostas são geradas sem sorteio (sempre o token
      mais provável), então a mesma versão dá sempre o mesmo resultado. Nos resumos, a resposta também
      não pode ser longa demais (max_palavras) nem copiada do texto (max_copia: fração de sequências de
@@ -98,7 +99,7 @@ def nota(item, resposta):
     if item.get("max_palavras") and len(resposta.split()) > item["max_palavras"]:
         ok = False
     # Resumos: reprovado se a resposta for quase toda copiada da pergunta (o texto a resumir está nela).
-    if "max_copia" in item and copia(resposta, item["pergunta"]) > item["max_copia"]:
+    if "max_copia" in item and copia(resposta, item["pergunta"] + " " + item.get("contexto", "")) > item["max_copia"]:
         ok = False
     return ok, parcial
 
@@ -118,7 +119,7 @@ def responder(model, tokenizer, item, rag, device, max_padrao):
     prompt, fonte = build_prompt(pergunta, tokenizer, model.block_size, usar_rag, None, max_novos, historico)
     # Sem sorteio: top_k=1 escolhe sempre o token mais provável (mesmo resultado em toda execução).
     resposta = generate(model, tokenizer, prompt, device, max_novos, temperature=1.0, top_k=1,
-                        avoid_copy=wants_summary(pergunta))
+                        avoid_copy=wants_summary(pergunta), long_answer=wants_long(pergunta))
     return resposta, fonte
 
 

@@ -104,7 +104,27 @@ def chat_turn(question, answer):
     return f"{USER_TOKEN} {question} {ASSISTANT_TOKEN} {answer} {END_TOKEN}"
 
 
-MAX_HISTORY = 5  # trocas anteriores que o chat pode pôr no prompt ("memória de IA")
+MAX_HISTORY = 5  # trocas anteriores que o chat pode pôr no prompt ("memória de IA"), com janela < 1024
+# Com janela >= 1024 (os modelos de 100M+), o histórico entra em TODA mensagem, não só nas de seguimento
+# (follows_up): "Qual é o nome do meu cachorro?" não parece seguimento, mas depende de algo dito antes. O histórico
+# tem uma reserva de tokens que o Contexto do RAG não pode tomar.
+MAX_HISTORY_GRANDE = 8
+JANELA_HISTORICO_SEMPRE = 1024
+RESERVA_HISTORICO = 500
+
+
+def history_always(block_size):
+    """Com janela grande, o histórico vai em toda mensagem (o modelo aprende a ignorá-lo quando não importa)."""
+    return block_size >= JANELA_HISTORICO_SEMPRE
+
+
+def max_history(block_size):
+    return MAX_HISTORY_GRANDE if history_always(block_size) else MAX_HISTORY
+
+
+def history_reserve(block_size):
+    """Tokens da janela guardados para as trocas mais recentes antes de encaixar o Contexto do RAG."""
+    return min(RESERVA_HISTORICO, block_size // 4) if history_always(block_size) else 0
 
 
 SUMMARY_REQUESTS = ["Resuma o texto: {}", "Resuma: {}", "Faça um resumo do texto: {}",

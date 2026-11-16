@@ -226,3 +226,9 @@ monte sempre na mesma máquina (ou desinstale antes; a memória e o índice impo
   5. Exportar (sem GPU), com `hplm.bin` v2, `vetores_teste.json` e a comparação com o denso.
 
   O treino e a exportação estão em `hp50g/` (ver `hp50g/LEIA-ME.md`).
+- Na alpha 0.17.0: acima do campo de mensagem, a barrinha **Contexto: N de J tokens (%)** mostra quanto da janela do
+  modelo a conversa ocupa (o prompt da última resposta, com Contexto do RAG e histórico, mais a resposta); verde até
+  60%, amarela até 85%, vermelha acima. Tocar explica que as mensagens mais antigas saem quando não cabem mais. Com
+  janela de 1024 ou mais (modelos de 100M), as últimas 8 trocas entram em toda mensagem, com 500 tokens guardados
+  para elas antes dos trechos do RAG; com janela menor, só nas mensagens de seguimento, como antes. A penalidade do
+  fim da resposta só vale com "Respostas longas" ou o gatilho ("Resposta longa.", "Explique melhor.").

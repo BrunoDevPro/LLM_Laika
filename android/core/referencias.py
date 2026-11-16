@@ -24,6 +24,7 @@ sys.path.insert(0, str(ROOT))
 from tokenizers import Tokenizer  # noqa: E402
 
 from chat import build_prompt, end_penalty, generate, min_answer_tokens  # noqa: E402
+from data_utils import wants_long  # noqa: E402
 from data_utils import (content_words, direct_math, follows_up, question_name, rag_queries,  # noqa: E402
                         social_message, wants_long, wants_rag, wants_summary, without_trigger)
 from memory import Memory  # noqa: E402
@@ -242,7 +243,8 @@ def main():
         # Com histórico, janelas e tamanhos de resposta diferentes.
         rng = random.Random(2)
         for i, p in enumerate(PERGUNTAS):
-            for bloco, max_novos in ((256, 80), (256, 120), (512, 80), (512, 120)):
+            # 1024 e 2048: o histórico entra sempre, com a reserva (history_always, history_reserve).
+            for bloco, max_novos in ((256, 80), (256, 120), (512, 80), (512, 120), (1024, 120), (2048, 200)):
                 n = rng.randint(0, len(HISTORICO))
                 hist = HISTORICO[:n] if i % 2 else HISTORICO[len(HISTORICO) - n:]
                 prompt, fonte = build_prompt(p, tok, bloco, rag, mem if i % 3 == 0 else None, max_novos, hist)
@@ -257,8 +259,10 @@ def main():
                         ("Conte uma história curta.", False, 120)):
         prompt = f"<|user|> {p} <|assistant|>"
         torch.manual_seed(0)
-        resposta = generate(model, tok, prompt, "cpu", n, temperature=1.0, top_k=1, avoid_copy=copia)
-        linhas.append({"prompt": prompt, "evitar_copia": copia, "max_novos": n, "resposta": resposta})
+        longa = wants_long(p)  # a penalidade do <|end|> só vale com o pedido de resposta longa
+        resposta = generate(model, tok, prompt, "cpu", n, temperature=1.0, top_k=1, avoid_copy=copia,
+                            long_answer=longa)
+        linhas.append({"prompt": prompt, "evitar_copia": copia, "max_novos": n, "longa": longa, "resposta": resposta})
     gravar("geracao.jsonl", linhas)
 
     gravar("penalidade.jsonl", [{"max_novos": m, "minimo": min_answer_tokens(m),

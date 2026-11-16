@@ -30,6 +30,8 @@ public final class Laika {
         public int maxNovos = 80;
         /** Pedido de resumo (Texto.querResumo): penaliza copiar sequências do prompt (avoid_copy do chat.py). */
         public boolean evitarCopia;
+        /** Pedido de resposta longa (Texto.querLonga): só então o <|end|> é penalizado no começo (long_answer). */
+        public boolean longa;
         /** Saída: quantos tokens a última chamada de gerar() produziu e quantos tinha o prompt. */
         public int gerados, tokensPrompt;
     }
@@ -71,14 +73,34 @@ public final class Laika {
 
     /**
      * Como o build_prompt do chat.py. historico: trocas anteriores {pergunta, resposta}, da mais antiga
-     * para a mais nova ("memória de IA"); entram as mais recentes (até MAX_HISTORY) que couberem, e só se a
-     * pergunta depender da conversa (Texto.segueConversa).
+     * para a mais nova ("memória de IA"); entram as mais recentes (até Texto.maxHistorico) que couberem. Com janela
+     * menor que 1024, só se a pergunta depender da conversa (Texto.segueConversa); com 1024 ou mais, sempre, e as
+     * mais recentes têm uma reserva (Texto.reservaHistorico) que o Contexto do RAG não pode tomar.
      * bloco: a janela do modelo (parâmetro só para os testes compararem janelas diferentes).
      */
     public Prompt montarPrompt(String pergunta, IndiceRag rag, Memoria memoria, int maxNovos,
                                List<String[]> historico, int bloco) {
         int orcamento = bloco - maxNovos;
         String busca = Texto.semGatilho(pergunta);  // o gatilho de resposta longa não entra na busca nem na memória
+        List<String[]> recentes = new ArrayList<>();
+        if (historico != null && !historico.isEmpty()
+                && (Texto.historicoSempre(bloco) || Texto.segueConversa(busca))) {
+            recentes = historico.subList(Math.max(0, historico.size() - Texto.maxHistorico(bloco)), historico.size());
+        }
+        int reservado = 0;
+        int reserva = Texto.reservaHistorico(bloco);
+        if (!recentes.isEmpty() && reserva > 0) {
+            List<String> guardados = new ArrayList<>();
+            for (int i = recentes.size() - 1; i >= 0; i--) {
+                List<String> candidato = new ArrayList<>();
+                candidato.add(Texto.turno(recentes.get(i)[0], recentes.get(i)[1]));
+                candidato.addAll(guardados);
+                int n = tok.codificar(String.join(" ", candidato)).length + 1;
+                if (n > reserva) break;
+                guardados = candidato;
+                reservado = n;
+            }
+        }
         List<String> partes = new ArrayList<>();
         String fonte = null, trecho = null;
         if (memoria != null) {
@@ -101,7 +123,7 @@ public final class Laika {
         if (!partes.isEmpty()) {
             String comContexto = Texto.ajustarContexto(
                     t -> tok.codificar(Texto.USER + " " + t + " " + Texto.ASSISTANT).length,
-                    pergunta, String.join(" ", partes), orcamento,
+                    pergunta, String.join(" ", partes), orcamento - reservado,
                     Texto.MAX_CONTEXT_WORDS * Math.max(1, achados.size()));
             if (comContexto == null) {
                 fonte = null;
@@ -111,17 +133,14 @@ public final class Laika {
             }
         }
         List<String> turnos = new ArrayList<>();
-        if (historico != null && Texto.segueConversa(busca)) {
-            int ini = Math.max(0, historico.size() - Texto.MAX_HISTORY);
-            for (int i = historico.size() - 1; i >= ini; i--) {
-                List<String> candidato = new ArrayList<>();
-                candidato.add(Texto.turno(historico.get(i)[0], historico.get(i)[1]));
-                candidato.addAll(turnos);
-                candidato.add(atual);
-                if (tok.codificar(String.join(" ", candidato)).length > orcamento) break;
-                candidato.remove(candidato.size() - 1);
-                turnos = candidato;
-            }
+        for (int i = recentes.size() - 1; i >= 0; i--) {
+            List<String> candidato = new ArrayList<>();
+            candidato.add(Texto.turno(recentes.get(i)[0], recentes.get(i)[1]));
+            candidato.addAll(turnos);
+            candidato.add(atual);
+            if (tok.codificar(String.join(" ", candidato)).length > orcamento) break;
+            candidato.remove(candidato.size() - 1);
+            turnos = candidato;
         }
         turnos.add(atual);
         return new Prompt(String.join(" ", turnos), fonte, trecho);
@@ -133,7 +152,8 @@ public final class Laika {
     /** Nenhuma sequência de SEM_REPETIR_N tokens se repete dentro da resposta (NO_REPEAT_N do chat.py). */
     public static final int SEM_REPETIR_N = 6;
 
-    /** Com um tamanho máximo grande, a resposta tende a ser mais longa (min_answer_tokens do chat.py). */
+    /** Pedido de resposta longa com um tamanho máximo grande: o <|end|> perde força no começo (min_answer_tokens do
+     * chat.py). Só vale com Opcoes.longa: antes valia em toda pergunta com a barrinha acima de 60. */
     public static int minimoResposta(int maxNovos) {
         return Math.max(0, (maxNovos - 60) / 2);
     }
@@ -158,7 +178,7 @@ public final class Laika {
         int n = promptIds.length, promptLen = n;
         Modelo.Cache cache = modelo.novoCache();
         int bloco = modelo.block;
-        int minimo = pararNoFim ? minimoResposta(op.maxNovos) : 0;
+        int minimo = pararNoFim && op.longa ? minimoResposta(op.maxNovos) : 0;
         Map<List<Integer>, Set<Integer>> copia = new HashMap<>();
         if (op.evitarCopia) {
             for (int i = 0; i + COPIA_N <= promptLen; i++) {
