@@ -509,7 +509,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             return;
         }
         LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos), a4 = linha(atalhos),
-                a5 = linha(atalhos), a6 = linha(atalhos);
+                a5 = linha(atalhos), a6 = linha(atalhos), a7 = linha(atalhos);
         botao(a1, "Só fine-tuning", false, v -> marcar(4, 6));
         botao(a1, "Tudo do zero", false, v -> {
             valores.put("3.MODO", "do_zero");
@@ -560,7 +560,8 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
                     Toast.LENGTH_LONG).show();
         });
         botao(a6, "Modelo de 30M", false, v -> modeloTrinta(false));
-        botao(a6, "Continuar o 30M", false, v -> modeloTrinta(true));
+        // Linha própria: com três botões, o terceiro não cabia e era espremido numa coluna fina (0.18.0).
+        botao(a7, "Continuar o 30M", false, v -> modeloTrinta(true));
         TextView g = texto("GPU: " + nomeGpu(gpu) + "  ▾", 15, R.color.topo_texto, true);
         g.setPadding(0, dp(12), 0, dp(4));
         g.setOnClickListener(v -> escolherGpu());
@@ -582,21 +583,30 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
      * exportar e avaliar, tudo na A100 e no PROJETO laika30m.
      */
     private void modeloTrinta(boolean continuar) {
+        // Um PROJETO que o usuário já escolheu para o 30M (com "30" no nome) fica; qualquer outro vira laika30m, para
+        // nunca treinar do zero por cima da pasta do 100M ou do 200M.
+        String atual = valores.get("1.PROJETO") == null ? "" : valores.get("1.PROJETO").trim();
+        final String projeto = atual.contains("30") ? atual : PROJETO_30M;
+        String partir = valores.get("1.PARTIR_DE") == null ? "" : valores.get("1.PARTIR_DE").trim();
         String msg = (continuar
                 ? "Continua o pré-treino do 30M do último passo salvo e, quando ele terminar, faz o fine-tuning, a "
                 + "exportação e a avaliação.\n\n"
                 : "Treina o 30M do zero (tokenizer novo de 16 mil, ~6,3 bilhões de tokens, com as conversas da célula 2 "
                 + "no pré-treino), depois o fine-tuning de conversa, a exportação e a avaliação.\n\n"
                 + "Antes, rode uma vez \"Dados para 30M\" (sem GPU).\n\n")
-                + "PROJETO: " + PROJETO_30M + " (pastas próprias no Drive; o 100M e o 200M não mudam). Na A100, a estimativa "
+                + "PROJETO: " + projeto + " (pastas próprias no Drive; o 100M e o 200M não mudam)."
+                + (partir.isEmpty() ? "" : " PARTIR_DE (\"" + partir + "\") fica vazio: o 30M não parte de outro modelo.")
+                + " Na A100, a estimativa "
                 + "é de ~4 a 9 h e ~20 a 45 unidades (não medido). Se parar no limite de ~5,5 h, toque em \"Continuar o "
                 + "30M\": ele retoma do último passo salvo.\n\nDepois, para voltar aos outros modelos, apague o PROJETO "
                 + "na célula 1.";
         new AlertDialog.Builder(this).setTitle(continuar ? "Continuar o 30M" : "Modelo de 30M (conversa)")
                 .setMessage(msg)
                 .setPositiveButton("Preparar", (d, w) -> {
-                    valores.put("1.PROJETO", PROJETO_30M);
-                    valores.put("1.NOME", "Laika 30M conversa");
+                    valores.put("1.PROJETO", projeto);
+                    String nome = valores.get("1.NOME");
+                    if (nome == null || nome.trim().isEmpty()) valores.put("1.NOME", projeto.equals(PROJETO_30M)
+                            ? "Laika 30M conversa" : projeto);
                     valores.put("1.PARTIR_DE", "");
                     valores.put("3.MODO", continuar ? "continuar" : "do_zero");
                     valores.put("3.PRESET", "colab_30m");
