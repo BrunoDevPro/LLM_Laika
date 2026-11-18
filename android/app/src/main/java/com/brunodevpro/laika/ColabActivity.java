@@ -509,7 +509,7 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
             return;
         }
         LinearLayout a1 = linha(atalhos), a2 = linha(atalhos), a3 = linha(atalhos), a4 = linha(atalhos),
-                a5 = linha(atalhos);
+                a5 = linha(atalhos), a6 = linha(atalhos);
         botao(a1, "Só fine-tuning", false, v -> marcar(4, 6));
         botao(a1, "Tudo do zero", false, v -> {
             valores.put("3.MODO", "do_zero");
@@ -550,6 +550,17 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         });
         // Mais tokens no 100M já treinado: mais GigaVerbo (sem GPU) e o pré-treino continuado (A100).
         botao(a5, "Estender o 100M", false, v -> estenderCem());
+        // 30M especialista em conversa (docs/TREINO_30M.md): as conversas para o pré-treino (sem GPU) e o treino num
+        // PROJETO próprio, para não mexer nos modelos de 100M e 200M.
+        botao(a6, "Dados para 30M", false, v -> {
+            valores.put("2.CONVERSAS_PRETREINO", "true");
+            gpu = "nenhuma";
+            marcar(2);
+            Toast.makeText(this, "Célula 2 pronta, sem GPU: junta as conversas para o pré-treino do 30M.",
+                    Toast.LENGTH_LONG).show();
+        });
+        botao(a6, "Modelo de 30M", false, v -> modeloTrinta(false));
+        botao(a6, "Continuar o 30M", false, v -> modeloTrinta(true));
         TextView g = texto("GPU: " + nomeGpu(gpu) + "  ▾", 15, R.color.topo_texto, true);
         g.setPadding(0, dp(12), 0, dp(4));
         g.setOnClickListener(v -> escolherGpu());
@@ -560,6 +571,47 @@ public class ColabActivity extends ComponentActivity implements Motor.Ouvinte {
         LinearLayout fim = linha(caixaCelulas);
         TextView rodar = botao(fim, "Rodar no Colab", true, v -> confirmarRodar());
         rodar.setPadding(dp(22), dp(11), dp(22), dp(11));
+    }
+
+    /** Projeto (pastas próprias no Drive) do modelo de 30M: não apaga nem mistura os checkpoints do 100M e do 200M. */
+    static final String PROJETO_30M = "laika30m";
+
+    /**
+     * Modelo de 30M especialista em conversa: pré-treino do zero (ou "continuar", se parou no limite de 6 h), o
+     * fine-tuning com foco em conversa (sem conhecimento sem Contexto, menos leitura da Wikipédia e 200 mil do SFT),
+     * exportar e avaliar, tudo na A100 e no PROJETO laika30m.
+     */
+    private void modeloTrinta(boolean continuar) {
+        String msg = (continuar
+                ? "Continua o pré-treino do 30M do último passo salvo e, quando ele terminar, faz o fine-tuning, a "
+                + "exportação e a avaliação.\n\n"
+                : "Treina o 30M do zero (tokenizer novo de 16 mil, ~6,3 bilhões de tokens, com as conversas da célula 2 "
+                + "no pré-treino), depois o fine-tuning de conversa, a exportação e a avaliação.\n\n"
+                + "Antes, rode uma vez \"Dados para 30M\" (sem GPU).\n\n")
+                + "PROJETO: " + PROJETO_30M + " (pastas próprias no Drive; o 100M e o 200M não mudam). Na A100, a estimativa "
+                + "é de ~4 a 9 h e ~20 a 45 unidades (não medido). Se parar no limite de ~5,5 h, toque em \"Continuar o "
+                + "30M\": ele retoma do último passo salvo.\n\nDepois, para voltar aos outros modelos, apague o PROJETO "
+                + "na célula 1.";
+        new AlertDialog.Builder(this).setTitle(continuar ? "Continuar o 30M" : "Modelo de 30M (conversa)")
+                .setMessage(msg)
+                .setPositiveButton("Preparar", (d, w) -> {
+                    valores.put("1.PROJETO", PROJETO_30M);
+                    valores.put("1.NOME", "Laika 30M conversa");
+                    valores.put("1.PARTIR_DE", "");
+                    valores.put("3.MODO", continuar ? "continuar" : "do_zero");
+                    valores.put("3.PRESET", "colab_30m");
+                    valores.put("3.PASSOS", "0");
+                    valores.put("3.COMPILAR", "true");
+                    valores.put("4.EPOCAS", "2");
+                    valores.put("4.CONHECIMENTO", "nenhum");
+                    valores.put("4.PERGUNTAS_WIKIPEDIA", "20000");
+                    valores.put("4.SFT_MAXIMO", "200 mil");
+                    gpu = "A100";
+                    marcar(3, 4, 6, 7);
+                    Toast.makeText(this, "Células 3, 4, 6 e 7 prontas (A100). Confira e toque em Rodar no Colab.",
+                            Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancelar", null).show();
     }
 
     /** Tokens do GigaVerbo que o "Dados para 100M" baixa; a extensão treina com o que passar disso. */

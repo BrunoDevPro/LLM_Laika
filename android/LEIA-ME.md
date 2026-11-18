@@ -234,3 +234,6 @@ monte sempre na mesma máquina (ou desinstale antes; a memória e o índice impo
   fim da resposta só vale com "Respostas longas" ou o gatilho ("Resposta longa.", "Explique melhor.").
 - Na alpha 0.17.1: em Treinar, a célula 3 aceita o `PRESET` **colab_200m** (~201M, contexto 2048; pede ~4 bilhões de
   tokens: `GIGAVERBO` de 4 bilhões na célula 2, `PROJETO` novo na célula 1 e `MODO = "do_zero"` com A100).
+- Na alpha 0.18.0: em Treinar, a linha da Laika de 30M (especialista em conversa, `docs/TREINO_30M.md`): **Dados para 30M**
+  (célula 2 sem GPU, junta as conversas para o pré-treino), **Modelo de 30M** (células 3, 4, 6 e 7 na A100, no PROJETO
+  `laika30m`, com o fine-tuning de conversa) e **Continuar o 30M** (se parar no limite de 6 h).
