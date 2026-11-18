@@ -237,3 +237,6 @@ monte sempre na mesma máquina (ou desinstale antes; a memória e o índice impo
 - Na alpha 0.18.0: em Treinar, a linha da Laika de 30M (especialista em conversa, `docs/TREINO_30M.md`): **Dados para 30M**
   (célula 2 sem GPU, junta as conversas para o pré-treino), **Modelo de 30M** (células 3, 4, 6 e 7 na A100, no PROJETO
   `laika30m`, com o fine-tuning de conversa) e **Continuar o 30M** (se parar no limite de 6 h).
+- Na alpha 0.18.1: "Continuar o 30M" ganhou uma linha própria (na 0.18.0, o terceiro botão da linha não cabia e era
+  espremido numa coluna fina). Os atalhos do 30M mantêm um PROJETO que já tenha "30" no nome (senão usam `laika30m`) e
+  sempre esvaziam o PARTIR_DE: o 30M não parte do pré-treino de outro modelo.
