@@ -46,6 +46,17 @@ PRESETS = {
         vocab_size=24000, batch_size=16, accum=8, learning_rate=5e-4, tokenizer_mb=1500,
         max_steps=8000, warmup_steps=400, eval_every=250, eval_iters=40, patience=8,
     ),
+    # ~31M especialista em conversa (docs/TREINO_30M.md): estreito e fundo (384 dim, 14 camadas; em modelos pequenos a
+    # profundidade rende mais que a largura), RoPE, contexto 1024 (o histórico entra em toda mensagem) e vocabulário de
+    # 16 mil (com 24 mil, mais de um quarto dos parâmetros iria para a tabela de palavras). Treinado muito além do
+    # Chinchilla: 24 mil passos de 64 x 1024 x 4 = 262 mil tokens = ~6,3 bilhões de tokens (~200 por parâmetro).
+    # conversas_repeat: data/conversas (conversas do SFT e de data/qa no formato do chat, prepare_data.py
+    # --conversas-pretreino) entra 2 vezes no pré-treino, para o modelo ver conversas desde o começo.
+    "colab_30m": dict(
+        block_size=1024, embed_size=384, heads=6, layers=14, dropout=0.0, rope=True,
+        vocab_size=16000, batch_size=64, accum=4, learning_rate=1.5e-3, tokenizer_mb=1500, conversas_repeat=2,
+        max_steps=24000, warmup_steps=1000, eval_every=500, eval_iters=40, patience=8,
+    ),
     # ~200M: 1024 dim, 14 camadas, 16 cabeças, RoPE, contexto 2048 (docs/MELHORIAS_CONVERSA.md, seção 5). Pede ~4 bilhões
     # de tokens (20 por parâmetro) e A100: ~4x o tempo do 100M. Lote 8 x 2048 x acumulação 16 = 262 mil tokens por passo
     # (o mesmo do 100M); a taxa é menor porque o modelo é maior. 16 mil passos = ~4,2 bilhões de tokens.

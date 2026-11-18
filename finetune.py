@@ -72,6 +72,10 @@ parser.add_argument("--history-share", type=float, default=None,
 parser.add_argument("--conversa-share", type=float, default=0.2,
                     help="fração (mínima) dos exemplos de chat vinda das conversas de várias trocas (data/qa/*.jsonl)")
 parser.add_argument("--conversa-max-repeat", type=int, default=3, help="máximo de vezes que cada conversa aparece por época")
+parser.add_argument("--conversas-fora", default="conversas_coerentes.jsonl",
+                    help="arquivos de data/qa/*.jsonl que ficam de fora, separados por vírgula. O padrão tira as "
+                         "conversas por molde de 16/11 (só 5%% de respostas diferentes: a Laika 200M decorou frases "
+                         "como \"Legal! Vou lembrar do seu time.\"); \"\" usa todos")
 parser.add_argument("--conversa-max-respostas", type=int, default=8,
                     help="respostas treinadas por conversa (as últimas); as anteriores ficam só como histórico")
 parser.add_argument("--resumo-boost", type=int, default=3,
@@ -185,7 +189,11 @@ qa_texts = load_qa_examples(args.qa)
 # Conversas de várias trocas (todos os data/qa/*.jsonl): "Qual é a capital da França?" ... "E da Itália?", e as
 # coerentes (tools/conversas_coerentes.py), em que a resposta depende de algo dito várias mensagens antes.
 conv_texts = []
+conversas_fora = {n.strip() for n in args.conversas_fora.split(",") if n.strip()}
 for conversas_path in sorted(Path(args.qa).glob("*.jsonl")):
+    if conversas_path.name in conversas_fora:
+        print(f"  {conversas_path.name}: fica de fora (--conversas-fora)")
+        continue
     conversas = [" ".join(chat_turn(q, a) for q, a in json.loads(line))
                  for line in conversas_path.read_text(encoding="utf-8").splitlines() if line.strip()]
     print(f"  {conversas_path.name}: {len(conversas)} conversas")

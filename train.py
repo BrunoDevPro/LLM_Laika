@@ -1,5 +1,6 @@
 """Pré-treinamento: aprende português a partir dos textos em data/books, data/wiki e data/modern
-(e, para os modelos grandes, data/carolina e data/gigaverbo, baixados pelo prepare_data.py)."""
+(e, para os modelos grandes, data/carolina e data/gigaverbo, baixados pelo prepare_data.py; e data/conversas, as
+conversas no formato do chat, para os modelos de conversa: prepare_data.py --conversas-pretreino)."""
 
 import argparse
 import hashlib
@@ -23,10 +24,15 @@ from model import build_model
 parser = argparse.ArgumentParser()
 parser.add_argument("--preset", default="tiny", choices=PRESETS.keys())
 parser.add_argument("--books", nargs="+",
-                    default=["data/books", "data/wiki", "data/modern", "data/carolina", "data/gigaverbo"],
+                    default=["data/books", "data/wiki", "data/modern", "data/carolina", "data/gigaverbo",
+                             "data/conversas"],
                     help="pastas com .txt para o pré-treino (as que não existirem são ignoradas)")
 parser.add_argument("--modern-repeat", type=int, default=3,
                     help="quantas vezes os textos de data/modern entram no treino (são poucos e modernos)")
+parser.add_argument("--conversas-repeat", type=int, default=None,
+                    help="quantas vezes data/conversas entra no treino (padrão: o do preset; 0 = fica de fora, o "
+                         "padrão dos presets sem conversas_repeat, para a pasta compartilhada no Drive não mudar os "
+                         "dados de outro modelo)")
 parser.add_argument("--qa", default="data/qa")
 parser.add_argument("--out", default="checkpoints")
 parser.add_argument("--max-steps", type=int, default=None)
@@ -58,6 +64,9 @@ for chave, valor in [("max_steps", args.max_steps), ("batch_size", args.batch_si
                      ("eval_every", args.eval_every), ("accum", args.accum), ("learning_rate", args.lr)]:
     if valor:
         cfg[chave] = valor
+# Pastas que entram mais de uma vez: data/modern (poucos textos, modernos) e data/conversas (modelos de conversa).
+REPETIR = {"modern": args.modern_repeat,
+           "conversas": args.conversas_repeat if args.conversas_repeat is not None else cfg.get("conversas_repeat", 0)}
 ARQUITETURA = ("vocab_size", "block_size", "embed_size", "heads", "layers", "rope")
 
 out_dir = Path(args.out)
@@ -78,8 +87,10 @@ print("Dispositivo:", device, "(bf16)" if bf16 else "(fp16)" if use_cuda else ""
 
 book_files = []
 for folder in args.books:
+    if Path(folder).name in REPETIR and REPETIR[Path(folder).name] == 0:
+        continue  # ex.: data/conversas num modelo que não é de conversa
     found = sorted(Path(folder).glob("*.txt"))
-    if not found and folder in ("data/carolina", "data/gigaverbo"):
+    if not found and folder in ("data/carolina", "data/gigaverbo", "data/conversas"):
         continue  # só existem se o prepare_data.py baixou
     size = sum(f.stat().st_size for f in found) / 1e6
     print(f"{folder}: {len(found)} arquivos ({size:.1f} MB)")
@@ -111,7 +122,9 @@ def amostra_tokenizer(files, mb, pasta):
                     texto = g.read(int(por_arquivo) + 1)
                 if len(texto) > por_arquivo:
                     texto = texto[:texto.rfind("\n\n") if "\n\n" in texto else len(texto)]
-                out.write(texto.replace(EOT_TOKEN, "") + "\n\n")
+                for especial in SPECIAL_TOKENS:  # as conversas têm <|user|>...; o tokenizer já os conhece
+                    texto = texto.replace(especial, " ")
+                out.write(texto + "\n\n")
         saida.append(destino)
         print(f"  amostra do tokenizer: {d} {cota / 1e6:,.0f} MB")
     return saida
@@ -154,6 +167,8 @@ eot_id = tokenizer.token_to_id(EOT_TOKEN)
 def assinatura(files):
     h = hashlib.sha1(tokenizer_path.read_bytes())
     h.update(f"repeat={args.modern_repeat}".encode())
+    if REPETIR["conversas"] not in (0, 1):
+        h.update(f"conversas={REPETIR['conversas']}".encode())
     for f in files:
         h.update(f"{f.parent.name}/{f.name}:{f.stat().st_size}\n".encode())
     return h.hexdigest()[:16]
@@ -217,7 +232,7 @@ def tokenizar_para_disco(files, pasta):
                                          + [np.array([eot_id], dtype=dtype)])
                     k += n_partes
                     cut = int(len(ids) * 0.95)
-                    repeat = args.modern_repeat if path.parent.name == "modern" else 1
+                    repeat = REPETIR.get(path.parent.name, 1)
                     for _ in range(max(1, repeat)):
                         ft.write(ids[:cut].tobytes())
                     fv.write(ids[cut:].tobytes())

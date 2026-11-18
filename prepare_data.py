@@ -1,6 +1,8 @@
 """Baixa os dados de treino: livros do Project Gutenberg (data/books/), artigos da
 Wikipédia em português moderno (data/wiki/ e data/qa_auto/) e, para os modelos grandes,
-o Corpus Carolina (data/carolina/) e parte do GigaVerbo-v2 (data/gigaverbo/).
+o Corpus Carolina (data/carolina/) e parte do GigaVerbo-v2 (data/gigaverbo/). Com --conversas-pretreino, junta as
+conversas já baixadas (SFT) e as de data/qa em data/conversas/, no formato do chat, para o pré-treino dos modelos de
+conversa (preset colab_30m).
 
 Rode no Colab (que tem internet livre). Você também pode simplesmente colocar seus
 próprios .txt em data/books/ e pular este script.
@@ -21,7 +23,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from data_utils import EOT_TOKEN, clean_gutenberg, clean_wiki, rag_question, wiki_definition
+from data_utils import EOT_TOKEN, chat_turn, clean_gutenberg, clean_wiki, parse_qa_text, rag_question, wiki_definition
 
 CATALOG = "https://www.gutenberg.org/cache/epub/feeds/pg_catalog.csv"
 MIN_CHARS = 30_000
@@ -653,6 +655,57 @@ def download_sft(pasta, total, subconjuntos=SFT_PADRAO, nota_min=4.0, tokens_max
     ler_sft(pasta)  # junta tudo num arquivo só (o fine-tuning lê bem mais rápido)
 
 
+# Conversas geradas por molde, com poucas respostas diferentes (5%): no pré-treino, só ensinariam frases decoradas.
+CONVERSAS_FORA = ("conversas_coerentes.jsonl",)
+
+
+def preparar_conversas(out, qa_dir, sft_dir, por_arquivo=64 << 20, semente=0):
+    """Junta as conversas no formato do chat ("<|user|> ... <|assistant|> ... <|end|>", uma conversa por documento,
+    separadas por <|endoftext|>) em data/conversas/conversas_NN.txt, para o pré-treino dos modelos de conversa: o
+    modelo vê conversas desde o começo, em vez de só no fine-tuning. Fontes: o GigaVerbo-v2-SFT já baixado
+    (data/sft) e os exemplos escritos de data/qa (.txt e .jsonl, menos CONVERSAS_FORA). Embaralhadas com semente
+    fixa (a validação, os últimos 5% de cada arquivo, fica sorteada) e refeitas a cada chamada: os mesmos dados dão
+    os mesmos arquivos, e o train.py reaproveita os tokens."""
+    out, qa_dir = Path(out), Path(qa_dir)
+    docs = []
+    sft = ler_sft(sft_dir) if Path(sft_dir).exists() else []
+    docs += [" ".join(chat_turn(q, a) for q, a in conv) for conv in sft]
+    n_sft = len(docs)
+    for f in sorted(qa_dir.glob("*.txt")):
+        docs += parse_qa_text(f.read_text(encoding="utf-8"))
+    for f in sorted(qa_dir.glob("*.jsonl")):
+        if f.name in CONVERSAS_FORA:
+            print(f"  {f.name}: fica de fora (conversas por molde, respostas repetidas)")
+            continue
+        docs += [" ".join(chat_turn(q, a) for q, a in json.loads(l))
+                 for l in f.read_text(encoding="utf-8").splitlines() if l.strip()]
+    if not docs:
+        print("Nenhuma conversa para o pré-treino: baixe o SFT (--sft) ou confira", qa_dir)
+        return
+    random.Random(semente).shuffle(docs)
+    out.mkdir(parents=True, exist_ok=True)
+    for velho in out.glob("conversas_*.txt"):
+        velho.unlink()
+    n_arq, atual, tam, total = 0, [], 0, 0
+
+    def gravar():
+        nonlocal n_arq, atual, tam
+        n_arq += 1
+        (out / f"conversas_{n_arq:02d}.txt").write_text(f"\n{EOT_TOKEN}\n".join(atual) + "\n", encoding="utf-8")
+        atual, tam = [], 0
+
+    for d in docs:
+        atual.append(d)
+        tam += len(d.encode("utf-8"))
+        total += len(d)
+        if tam >= por_arquivo:
+            gravar()
+    if atual:
+        gravar()
+    print(f"Conversas para o pré-treino: {len(docs):,} ({n_sft:,} do SFT, {len(docs) - n_sft:,} de {qa_dir}), "
+          f"~{total / 1e6:.0f} M caracteres (~{total / 4 / 1e6:.0f} M tokens) em {n_arq} arquivo(s) em {out}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="data/books")
@@ -677,6 +730,11 @@ def main():
     parser.add_argument("--sft-nota-min", type=float, default=4.0, help="nota de qualidade mínima (1 a 5)")
     parser.add_argument("--sft-tokens-max", type=int, default=1500,
                         help="tamanho máximo de cada exemplo (o de 100M tem janela de 2048)")
+    parser.add_argument("--conversas-pretreino", action="store_true",
+                        help="junta o SFT baixado e as conversas de data/qa em data/conversas, no formato do chat, "
+                             "para o pré-treino dos modelos de conversa (preset colab_30m)")
+    parser.add_argument("--conversas-dir", default="data/conversas")
+    parser.add_argument("--qa-dir", default="data/qa")
     args = parser.parse_args()
 
     if args.max_books > 0:
@@ -690,6 +748,8 @@ def main():
         download_gigaverbo(Path(args.gigaverbo_dir), int(args.gigaverbo), toxico_max=args.gigaverbo_toxico_max)
     if args.sft > 0:
         download_sft(Path(args.sft_dir), args.sft, args.sft_subconjuntos, args.sft_nota_min, args.sft_tokens_max)
+    if args.conversas_pretreino:
+        preparar_conversas(Path(args.conversas_dir), Path(args.qa_dir), Path(args.sft_dir))
 
 
 if __name__ == "__main__":
