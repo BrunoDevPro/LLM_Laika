@@ -34,8 +34,13 @@ estimativas a partir do 200M (90 unidades e ~16 h para pré-treino e fine-tuning
 ## Passo a passo pelo app (tela Treinar)
 
 1. **Dados para 30M** (sem GPU): célula 2 com `CONVERSAS_PRETREINO` ligado. Junta as conversas em
-   `Drive/LLM_Laika/conversas`. É rápido; não baixa nada novo se o SFT já estiver no Drive. Rode de novo quando chegarem
-   conversas novas em `data/qa` (o pré-treino que já começou não muda: os tokens ficam salvos).
+   `Drive/LLM_Laika/conversas`. É rápido; não baixa nada novo se o SFT já estiver no Drive. **Rode uma vez só, antes do
+   pré-treino, e depois deixe `CONVERSAS_PRETREINO` desligado.** Rodar de novo com conversas novas em `data/qa` troca os
+   arquivos de `conversas/`, e o `train.py` reconhece isso como dados diferentes (a assinatura dos tokens usa o nome e o
+   tamanho de cada arquivo): um "continuar" retokenizaria tudo e treinaria o resto com outros dados. As conversas novas
+   escritas (30 mil mensagens e 10 mil conversas) pesam pouco no pré-treino perto das ~300 mil do SFT, e fazem diferença
+   no fine-tuning, que lê `data/qa` direto do repositório (o branch do RAMO) na hora da célula 4: não precisam estar
+   prontas para começar o pré-treino.
 2. **Modelo de 30M** (A100): prepara as células 3, 4, 6 e 7.
    - Célula 1: `PROJETO = laika30m` e `NOME = Laika 30M conversa`. As pastas são próprias, então o 100M e o 200M não
      mudam.
@@ -70,8 +75,8 @@ grande de contas pequenas), então contei ~3 vezes mais barato por token. També
 - **Perde:** conhecimento e raciocínio caem muito; fatos dependem do RAG. Conversa livre sobre qualquer assunto não
   é realista com 30M. Uma conversa simples do dia a dia, que lembra o que você disse, é.
 - **O que mais pesa é a variedade dos dados de conversa.** As 30 mil mensagens e 10 mil conversas escritas
-  (`docs/MELHORIAS_CONVERSA.md` e a especificação dos dados) entram no `data/qa` e servem para este modelo e para o
-  200M. O ideal é rodar "Dados para 30M" e o fine-tuning depois que elas chegarem.
+  (`docs/MELHORIAS_CONVERSA.md` e a especificação dos dados) entram no `data/qa` (no repositório, no branch do RAMO) e
+  servem para este modelo e para o 200M. O pré-treino pode começar antes delas; o fine-tuning (célula 4) espera por elas.
 
 ## Pelo terminal
 
